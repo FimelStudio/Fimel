@@ -65,6 +65,8 @@ function App() {
     setTimeout(() => setCopiedQQ(false), 2000);
   };
 
+  const basePath = import.meta.env.BASE_URL;
+
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add('dark');
@@ -326,22 +328,22 @@ function App() {
                     
                     {/* Front */}
                     <div className="mc-face border-2 border-obsidian/30 dark:border-white/30" 
-                         style={{ transform: "rotateY(0deg) translateZ(var(--tz))", backgroundImage: "url('/textures/block_side.png')" }}></div>
+                         style={{ transform: "rotateY(0deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/block_side.png')` }}></div>
                     {/* Back */}
                     <div className="mc-face border-2 border-obsidian/30 dark:border-white/30" 
-                         style={{ transform: "rotateY(180deg) translateZ(var(--tz))", backgroundImage: "url('/textures/block_side.png')" }}></div>
+                         style={{ transform: "rotateY(180deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/block_side.png')` }}></div>
                     {/* Right */}
                     <div className="mc-face border-2 border-obsidian/30 dark:border-white/30" 
-                         style={{ transform: "rotateY(90deg) translateZ(var(--tz))", backgroundImage: "url('/textures/block_side.png')" }}></div>
+                         style={{ transform: "rotateY(90deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/block_side.png')` }}></div>
                     {/* Left */}
                     <div className="mc-face border-2 border-obsidian/30 dark:border-white/30" 
-                         style={{ transform: "rotateY(-90deg) translateZ(var(--tz))", backgroundImage: "url('/textures/block_side.png')" }}></div>
+                         style={{ transform: "rotateY(-90deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/block_side.png')` }}></div>
                     {/* Top */}
                     <div className="mc-face border-2 border-obsidian/30 dark:border-white/30 bg-[#7cbd6b]" 
-                         style={{ transform: "rotateX(90deg) translateZ(var(--tz))", backgroundImage: "url('/textures/block_top.png')", backgroundBlendMode: 'multiply' }}></div>
+                         style={{ transform: "rotateX(90deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/block_top.png')`, backgroundBlendMode: 'multiply' }}></div>
                     {/* Bottom */}
                     <div className="mc-face border-2 border-obsidian/30 dark:border-white/30 bg-obsidian/20 dark:bg-obsidian/10" 
-                         style={{ transform: "rotateX(-90deg) translateZ(var(--tz))", backgroundImage: "url('/textures/block_bottom.png')" }}></div>
+                         style={{ transform: "rotateX(-90deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/block_bottom.png')` }}></div>
                   
                   </div>
                 </div>
@@ -389,14 +391,14 @@ function App() {
 
             <div className="space-y-32">
               {[
-                { title: t('works.m1_t'), category: t('works.m1_c'), year: "100k+ DL", image: "/placeholder.jpg", accent: "group-hover:text-red-500 dark:group-hover:text-red-400", bg: "from-red-500/10", desc: t('works.m1_d') },
-                { title: t('works.m2_t'), category: t('works.m2_c'), year: "50k+ DL", image: "/placeholder.jpg", accent: "group-hover:text-amber-500", bg: "from-amber-500/10", desc: t('works.m2_d') },
-                { title: t('works.m3_t'), category: t('works.m3_c'), year: "1k+ DL", image: "/placeholder.jpg", accent: "group-hover:text-green-500", bg: "from-green-500/10", desc: t('works.m3_d') },
-                { title: t('works.m4_t'), category: t('works.m4_c'), year: "10k+ DL", image: "/placeholder.jpg", accent: "group-hover:text-blue-500", bg: "from-blue-500/10", desc: t('works.m4_d') },
-                { title: t('works.m5_t'), category: t('works.m5_c'), year: "10k+ DL", image: "/placeholder.jpg", accent: "group-hover:text-pink-500", bg: "from-pink-500/10", desc: t('works.m5_d') },
-                { title: t('works.m6_t'), category: t('works.m6_c'), year: "10k+ DL", image: "/placeholder.jpg", accent: "group-hover:text-cyan-500", bg: "from-cyan-500/10", desc: t('works.m6_d') },
-                { title: t('works.m7_t'), category: t('works.m7_c'), year: "10k+ DL", image: "/placeholder.jpg", accent: "group-hover:text-orange-500", bg: "from-orange-500/10", desc: t('works.m7_d') },
-                { title: t('works.m8_t'), category: t('works.m8_c'), year: "10k+ DL", image: "/placeholder.jpg", accent: "group-hover:text-amethyst", bg: "from-amethyst/10", desc: t('works.m8_d') },
+                { title: t('works.m1_t'), category: t('works.m1_c'), year: "100k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-red-500 dark:group-hover:text-red-400", bg: "from-red-500/10", desc: t('works.m1_d') },
+                { title: t('works.m2_t'), category: t('works.m2_c'), year: "50k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-amber-500", bg: "from-amber-500/10", desc: t('works.m2_d') },
+                { title: t('works.m3_t'), category: t('works.m3_c'), year: "1k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-green-500", bg: "from-green-500/10", desc: t('works.m3_d') },
+                { title: t('works.m4_t'), category: t('works.m4_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-blue-500", bg: "from-blue-500/10", desc: t('works.m4_d') },
+                { title: t('works.m5_t'), category: t('works.m5_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-pink-500", bg: "from-pink-500/10", desc: t('works.m5_d') },
+                { title: t('works.m6_t'), category: t('works.m6_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-cyan-500", bg: "from-cyan-500/10", desc: t('works.m6_d') },
+                { title: t('works.m7_t'), category: t('works.m7_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-orange-500", bg: "from-orange-500/10", desc: t('works.m7_d') },
+                { title: t('works.m8_t'), category: t('works.m8_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-amethyst", bg: "from-amethyst/10", desc: t('works.m8_d') },
               ].map((work, idx) => (
                 <div key={idx} className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center">
                   <div className="w-full md:w-1/2 lg:w-[60%] h-[50vh] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700">
