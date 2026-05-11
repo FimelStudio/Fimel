@@ -16,6 +16,38 @@
   100% { transform: translateX(-100%); }
 }
 
+@keyframes spin-slow {
+  0% { transform: rotateX(-20deg) rotateY(0deg); }
+  100% { transform: rotateX(-20deg) rotateY(360deg); }
+}
+
+.mc-block {
+  --tz: 4rem; /* For mobile: w-32 -> 8rem diameter -> 4rem radius */
+}
+
+@media (min-width: 640px) {
+  .mc-block {
+    --tz: 6rem; /* For sm and up: w-48 -> 12rem diameter -> 6rem radius */
+  }
+}
+
+.mc-face {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  image-rendering: pixelated; /* Essential for true Minecraft texture sharpness */
+}
+
+@layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
+}
+
 @layer base {
   body {
     @apply bg-paper text-obsidian dark:bg-obsidian dark:text-white overflow-x-hidden antialiased transition-colors duration-700;

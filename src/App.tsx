@@ -52,13 +52,18 @@ function ParticleCubes({ isDark }: { isDark: boolean }) {
 function App() {
   const { t, i18n } = useTranslation();
   const mainRef = useRef<HTMLDivElement>(null);
-  const horizontalSecRef = useRef<HTMLElement>(null);
-  const horizontalWrapRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
   const [isDark, setIsDark] = useState(false);
   const lenisRef = useRef<Lenis | null>(null);
 
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [copiedQQ, setCopiedQQ] = useState(false);
+
+  const handleCopyQQ = () => {
+    navigator.clipboard.writeText("937760015");
+    setCopiedQQ(true);
+    setTimeout(() => setCopiedQQ(false), 2000);
+  };
 
   useEffect(() => {
     if (isDark) {
@@ -128,26 +133,6 @@ function App() {
         );
       });
 
-      // Horizontal Layout GSAP
-      if (horizontalSecRef.current && horizontalWrapRef.current) {
-        const wrapWidth = horizontalWrapRef.current.scrollWidth;
-        const windowWidth = window.innerWidth;
-        const scrollDistance = wrapWidth - windowWidth;
-
-        gsap.to(horizontalWrapRef.current, {
-          x: -scrollDistance,
-          ease: "none",
-          scrollTrigger: {
-            trigger: horizontalSecRef.current,
-            pin: true,
-            scrub: 1,
-            start: "top top",
-            end: () => "+=" + scrollDistance,
-            invalidateOnRefresh: true,
-          }
-        });
-      }
-
       // Parallax bindings
       gsap.utils.toArray<HTMLElement>('.parallax-bg').forEach((elem) => {
         gsap.fromTo(elem,
@@ -216,7 +201,7 @@ function App() {
       <div className={`${loading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-1000`}>
         
         <nav className="fixed top-0 left-0 w-full z-40 flex items-center justify-between px-6 py-8 md:px-12 pointer-events-none mix-blend-difference text-white">
-          <div className="text-xl font-bold tracking-[0.3em] uppercase pointer-events-auto">FIMEL.</div>
+          <a href="#hero" onClick={(e) => handleNavClick(e, '#hero')} className="text-xl font-bold tracking-[0.3em] uppercase pointer-events-auto hover-target hover:text-diamond transition-colors">FIMEL.</a>
           <div className="hidden md:flex gap-10 text-xs tracking-widest uppercase font-mono pointer-events-auto">
               <a href="#about" onClick={(e) => handleNavClick(e, '#about')} className="hover:text-diamond transition-colors hover-target">{t('nav.about')}</a>
               <a href="#works" onClick={(e) => handleNavClick(e, '#works')} className="hover:text-diamond transition-colors hover-target">{t('nav.works')}</a>
@@ -246,19 +231,19 @@ function App() {
           </div>
         </nav>
 
-        <section className="relative w-full h-screen overflow-hidden flex flex-col justify-center px-6 md:px-16 lg:px-24 bg-paper dark:bg-obsidian transition-colors duration-700">
+        <section id="hero" className="relative w-full h-screen overflow-hidden flex flex-col justify-center px-6 md:px-16 lg:px-24 bg-paper dark:bg-obsidian transition-colors duration-700">
           <div className="parallax-hero absolute inset-[-10%] w-[120%] h-[120%] z-0 opacity-70 pointer-events-none">
             <ParticleCubes isDark={isDark} />
           </div>
           
           <div className="relative z-10 max-w-screen-2xl w-full flex flex-col items-start gap-2">
             <div className="overflow-visible p-6 -m-6">
-              <h1 className="hero-title text-[14vw] lg:text-[11vw] leading-tight font-extrabold tracking-tighter uppercase text-obsidian dark:text-white transition-colors duration-700 pb-4">
+              <h1 className="hero-title pt-4 text-[14vw] lg:text-[11vw] leading-tight font-extrabold tracking-tighter uppercase text-obsidian dark:text-white transition-colors duration-700 pb-4 pr-8">
                 {t('hero.crafting')}
               </h1>
             </div>
             <div className="overflow-visible p-6 -m-6">
-              <h1 className="hero-title text-[14vw] lg:text-[11vw] leading-tight font-extrabold tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-amethyst via-diamond to-obsidian dark:to-white lg:ml-[10vw] pb-4">
+              <h1 className="hero-title text-[14vw] lg:text-[11vw] leading-tight font-extrabold tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-amethyst to-diamond lg:ml-[10vw] pb-4 pr-8">
                 {t('hero.worlds')}
               </h1>
             </div>
@@ -284,8 +269,18 @@ function App() {
             <span>{t('marq.puz')}</span> <Diamond size={20} /> 
             <span>{t('marq.vdl')}</span> <Diamond size={20} />
             <span>{t('marq.jve')}</span> <Diamond size={20} />
+            <span>{t('marq.pvp')}</span> <Diamond size={20} /> 
+            <span>{t('marq.rpg')}</span> <Diamond size={20} /> 
+            <span>{t('marq.puz')}</span> <Diamond size={20} /> 
+            <span>{t('marq.vdl')}</span> <Diamond size={20} />
+            <span>{t('marq.jve')}</span> <Diamond size={20} />
           </div>
           <div className="animate-marquee flex gap-12 items-center text-2xl font-bold uppercase tracking-widest shrink-0 px-6" aria-hidden="true">
+            <span>{t('marq.pvp')}</span> <Diamond size={20} /> 
+            <span>{t('marq.rpg')}</span> <Diamond size={20} /> 
+            <span>{t('marq.puz')}</span> <Diamond size={20} /> 
+            <span>{t('marq.vdl')}</span> <Diamond size={20} />
+            <span>{t('marq.jve')}</span> <Diamond size={20} />
             <span>{t('marq.pvp')}</span> <Diamond size={20} /> 
             <span>{t('marq.rpg')}</span> <Diamond size={20} /> 
             <span>{t('marq.puz')}</span> <Diamond size={20} /> 
@@ -319,43 +314,41 @@ function App() {
               </div>
             </div>
             
-            <div className="w-full lg:w-[45%] relative h-[60vh] lg:h-auto overflow-hidden rounded-sm group reveal-up bg-[#e5e5e5] dark:bg-[#050505] p-10 flex items-center justify-center transition-colors duration-700">
+            <div className="w-full lg:w-[45%] relative h-[60vh] lg:h-auto overflow-hidden rounded-sm group reveal-up bg-[#e5e5e5] dark:bg-[#050505] p-10 flex items-center justify-center transition-colors duration-700 perspective-1000">
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(155,89,182,0.15),transparent_70%)] opacity-50"></div>
-              <div className="relative z-10 w-48 h-48 sm:w-64 sm:h-64 border border-obsidian/20 dark:border-white/20 transform rotate-45 transition-all duration-[2000ms] group-hover:rotate-180 flex items-center justify-center bg-white/40 dark:bg-white/5 backdrop-blur-md">
-                <div className="w-3/4 h-3/4 border-2 border-diamond/50 -rotate-[15deg]"></div>
-                <div className="absolute inset-0 border border-amethyst/30 rotate-[30deg]"></div>
+              
+              {/* CSS 3D Minecraft Block */}
+              <div className="relative z-10 w-32 h-32 sm:w-48 sm:h-48 transform-style-3d mc-block">
+                
+                {/* Spin and Hover Wrappers to prevent transform conflicts */}
+                <div className="absolute inset-0 transform-style-3d animate-[spin-slow_15s_linear_infinite] group-hover:[animation-play-state:paused]">
+                  <div className="absolute inset-0 transform-style-3d transition-transform duration-[1500ms] ease-out group-hover:[transform:scale3d(1.25,1.25,1.25)_rotateX(15deg)_rotateY(-30deg)]">
+                    
+                    {/* Front */}
+                    <div className="mc-face border-2 border-obsidian/30 dark:border-white/30" 
+                         style={{ transform: "rotateY(0deg) translateZ(var(--tz))", backgroundImage: "url('/textures/block_side.png')" }}></div>
+                    {/* Back */}
+                    <div className="mc-face border-2 border-obsidian/30 dark:border-white/30" 
+                         style={{ transform: "rotateY(180deg) translateZ(var(--tz))", backgroundImage: "url('/textures/block_side.png')" }}></div>
+                    {/* Right */}
+                    <div className="mc-face border-2 border-obsidian/30 dark:border-white/30" 
+                         style={{ transform: "rotateY(90deg) translateZ(var(--tz))", backgroundImage: "url('/textures/block_side.png')" }}></div>
+                    {/* Left */}
+                    <div className="mc-face border-2 border-obsidian/30 dark:border-white/30" 
+                         style={{ transform: "rotateY(-90deg) translateZ(var(--tz))", backgroundImage: "url('/textures/block_side.png')" }}></div>
+                    {/* Top */}
+                    <div className="mc-face border-2 border-obsidian/30 dark:border-white/30 bg-[#7cbd6b]" 
+                         style={{ transform: "rotateX(90deg) translateZ(var(--tz))", backgroundImage: "url('/textures/block_top.png')", backgroundBlendMode: 'multiply' }}></div>
+                    {/* Bottom */}
+                    <div className="mc-face border-2 border-obsidian/30 dark:border-white/30 bg-obsidian/20 dark:bg-obsidian/10" 
+                         style={{ transform: "rotateX(-90deg) translateZ(var(--tz))", backgroundImage: "url('/textures/block_bottom.png')" }}></div>
+                  
+                  </div>
+                </div>
               </div>
+
               <div className="absolute bottom-6 right-6 text-xs text-obsidian/30 dark:text-white/20 font-mono transition-colors duration-700">{t('about.render')}</div>
             </div>
-          </div>
-        </section>
-
-        {/* --- HORIZONTAL SCROLL SECTION --- */}
-        <section ref={horizontalSecRef} className="h-screen w-full relative overflow-hidden bg-paper dark:bg-obsidian border-y border-obsidian/5 dark:border-white/5 transition-colors duration-700 z-10 flex items-center hidden md:flex">
-          <div className="absolute top-[10%] left-6 md:left-16 lg:left-24 font-mono text-diamond tracking-[0.2em] text-sm flex items-center gap-6 z-20 mix-blend-difference text-white">
-            <span className="w-12 h-[1px] bg-diamond"></span>
-            {t('process.title')}
-          </div>
-          <div ref={horizontalWrapRef} className="flex flex-nowrap w-[250vw] sm:w-[200vw] h-full items-center px-[10vw]">
-            {[
-              { id: 1, text: t('process.p1'), sub: t('process.p1_sub'), color: "from-amethyst to-transparent" },
-              { id: 2, text: t('process.p2'), sub: t('process.p2_sub'), color: "from-diamond to-transparent" },
-              { id: 3, text: t('process.p3'), sub: t('process.p3_sub'), color: "from-blue-500 to-transparent" },
-              { id: 4, text: t('process.p4'), sub: t('process.p4_sub'), color: "from-pink-500 to-transparent" }
-            ].map((p, idx) => (
-              <div key={idx} className="w-[80vw] sm:w-[50vw] h-[60vh] shrink-0 flex flex-col justify-end px-12 pb-20 relative group">
-                <div className="absolute left-10 top-1/2 -translate-y-1/2 opacity-5 dark:opacity-10 text-[20vw] leading-none font-black text-obsidian dark:text-white transition-all duration-1000 group-hover:scale-110 pointer-events-none">
-                  0{p.id}
-                </div>
-                <div className={`w-full max-w-sm h-1 mb-8 bg-gradient-to-r ${p.color} scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-700`}></div>
-                <h3 className="text-5xl lg:text-7xl font-black uppercase tracking-tighter text-obsidian dark:text-white transition-colors duration-700 pb-2 relative z-10">
-                  {p.text}
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400 font-mono text-sm tracking-widest uppercase transition-colors duration-700">
-                  {p.sub}
-                </p>
-              </div>
-            ))}
           </div>
         </section>
 
@@ -396,18 +389,31 @@ function App() {
 
             <div className="space-y-32">
               {[
-                { title: "PROJECT ZERO", category: t('works.map1'), year: "2024", accent: "group-hover:text-red-500 dark:group-hover:text-red-400", bg: "from-red-500/10" },
-                { title: "ECHOES OF END", category: t('works.map2'), year: "2023", accent: "group-hover:text-amethyst", bg: "from-amethyst/10" },
-                { title: "THE TESSERACT", category: t('works.map3'), year: "2022", accent: "group-hover:text-diamond", bg: "from-diamond/10" },
+                { title: t('works.m1_t'), category: t('works.m1_c'), year: "100k+ DL", image: "/placeholder.jpg", accent: "group-hover:text-red-500 dark:group-hover:text-red-400", bg: "from-red-500/10", desc: t('works.m1_d') },
+                { title: t('works.m2_t'), category: t('works.m2_c'), year: "50k+ DL", image: "/placeholder.jpg", accent: "group-hover:text-amber-500", bg: "from-amber-500/10", desc: t('works.m2_d') },
+                { title: t('works.m3_t'), category: t('works.m3_c'), year: "1k+ DL", image: "/placeholder.jpg", accent: "group-hover:text-green-500", bg: "from-green-500/10", desc: t('works.m3_d') },
+                { title: t('works.m4_t'), category: t('works.m4_c'), year: "10k+ DL", image: "/placeholder.jpg", accent: "group-hover:text-blue-500", bg: "from-blue-500/10", desc: t('works.m4_d') },
+                { title: t('works.m5_t'), category: t('works.m5_c'), year: "10k+ DL", image: "/placeholder.jpg", accent: "group-hover:text-pink-500", bg: "from-pink-500/10", desc: t('works.m5_d') },
+                { title: t('works.m6_t'), category: t('works.m6_c'), year: "10k+ DL", image: "/placeholder.jpg", accent: "group-hover:text-cyan-500", bg: "from-cyan-500/10", desc: t('works.m6_d') },
+                { title: t('works.m7_t'), category: t('works.m7_c'), year: "10k+ DL", image: "/placeholder.jpg", accent: "group-hover:text-orange-500", bg: "from-orange-500/10", desc: t('works.m7_d') },
+                { title: t('works.m8_t'), category: t('works.m8_c'), year: "10k+ DL", image: "/placeholder.jpg", accent: "group-hover:text-amethyst", bg: "from-amethyst/10", desc: t('works.m8_d') },
               ].map((work, idx) => (
                 <div key={idx} className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center">
                   <div className="w-full md:w-1/2 lg:w-[60%] h-[50vh] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700">
                     <div className="parallax-bg absolute inset-[-20%] w-[140%] h-[140%]">
-                      <div className="w-full h-full bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(0,0,0,0.03)_20px,rgba(0,0,0,0.03)_40px)] dark:bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(255,255,255,0.02)_20px,rgba(255,255,255,0.02)_40px)] group-hover:scale-110 transition-transform duration-[1.5s] ease-out"></div>
+                      {work.image ? (
+                        <img 
+                          src={work.image} 
+                          alt={work.title} 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" 
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(0,0,0,0.03)_20px,rgba(0,0,0,0.03)_40px)] dark:bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(255,255,255,0.02)_20px,rgba(255,255,255,0.02)_40px)] group-hover:scale-110 transition-transform duration-[1.5s] ease-out"></div>
+                      )}
                     </div>
-                    <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700`}></div>
+                    <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
                     <div className="parallax-text absolute inset-0 flex items-center justify-center mix-blend-overlay">
-                       <span className="text-obsidian/20 dark:text-white/20 font-black text-6xl md:text-8xl tracking-tighter transition-colors duration-700">MC_DATA_{idx+1}</span>
+                       <span className="text-obsidian/20 dark:text-white/20 font-black text-6xl md:text-8xl tracking-tighter transition-colors duration-700">MAP_{idx+1}</span>
                     </div>
                   </div>
                   
@@ -420,7 +426,7 @@ function App() {
                       {work.title}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400 font-light font-sans max-w-md text-base md:text-lg leading-relaxed transition-colors duration-700">
-                      {t('works.desc')}
+                      {work.desc}
                     </p>
                     <button className="w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono group-hover:text-obsidian dark:group-hover:text-white text-gray-500 transition-colors mt-4">
                       <MousePointerClick className="w-4 h-4" /> {t('works.view')}
@@ -442,17 +448,23 @@ function App() {
             <p className="text-gray-600 dark:text-gray-400 text-lg md:text-xl font-light transition-colors duration-700">
               <Trans i18nKey="footer.desc" />
             </p>
-            <a href="mailto:hello@fimel.studio" className="inline-block mt-8 text-2xl md:text-5xl font-light text-obsidian dark:text-white hover:text-diamond dark:hover:text-diamond transition-all duration-300 border-b border-obsidian/20 dark:border-white/20 hover:border-diamond pb-2 hover-target">
-              hello@fimel.studio
+            <a href="mailto:fimel.studio@hotmail.com" className="inline-block mt-8 text-2xl md:text-5xl font-light text-obsidian dark:text-white hover:text-diamond dark:hover:text-diamond transition-all duration-300 border-b border-obsidian/20 dark:border-white/20 hover:border-diamond pb-2 hover-target">
+              fimel.studio@hotmail.com
             </a>
           </div>
 
-          <div className="w-full max-w-screen-2xl border-t border-obsidian/10 dark:border-white/10 pt-10 flex flex-col md:flex-row items-center justify-between gap-8 text-xs text-gray-500 font-mono uppercase tracking-widest z-10 reveal-up transition-colors duration-700">
+          <div className="w-full max-w-screen-2xl border-t border-obsidian/10 dark:border-white/10 pt-10 flex flex-col md:flex-row items-center justify-between gap-8 text-xs text-gray-500 font-mono uppercase tracking-widest z-10 transition-colors duration-700">
             <p>{t('footer.copy')}</p>
-            <div className="flex gap-8">
-              <a href="#" className="hover:text-obsidian dark:hover:text-white transition-colors">X (Twitter)</a>
-              <a href="#" className="hover:text-obsidian dark:hover:text-white transition-colors">Bilibili</a>
-              <a href="#" className="hover:text-obsidian dark:hover:text-white transition-colors">GitHub</a>
+            <div className="flex gap-8 items-center">
+              {/* <a href="#" className="hover:text-obsidian dark:hover:text-white transition-colors">X (Twitter)</a> */}
+              {/* <a href="#" className="hover:text-obsidian dark:hover:text-white transition-colors">Bilibili</a> */}
+              <button 
+                onClick={handleCopyQQ} 
+                className="hover:text-obsidian dark:hover:text-white transition-colors cursor-pointer hover-target"
+              >
+                {copiedQQ ? "COPIED!" : "QQ Group: 937760015"}
+              </button>
+              {/* <a href="#" className="hover:text-obsidian dark:hover:text-white transition-colors">GitHub</a> */}
             </div>
           </div>
           
