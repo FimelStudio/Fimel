@@ -461,9 +461,20 @@ function App() {
               <div className="relative group hover-target py-2">
                 <a href="#works" onClick={(e) => handleNavClick(e, '#works')} className="hover:text-diamond transition-colors inline-block">{t('nav.works')}</a>
                 <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-300 z-50 flex flex-col items-center">
-                  <div className="bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-xs whitespace-nowrap overflow-hidden">
-                    <a href="#works" onClick={(e) => handleNavClick(e, '#works')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-center">Bedrock/Netease</a>
-                    <a href="#works" onClick={(e) => handleNavClick(e, '#works')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-center border-t border-obsidian/5 dark:border-white/5">Java Edition</a>
+                  <div className="bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-xs whitespace-nowrap overflow-visible">
+                    {/* Maps Group */}
+                    <div className="group/maps relative">
+                      <a href="#works-maps" onClick={(e) => handleNavClick(e, '#works-maps')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors w-full text-left flex justify-between items-center gap-6">
+                        {t('nav.nav_maps')} <span className="text-[10px] opacity-50">▶</span>
+                      </a>
+                      <div className="absolute left-full top-0 opacity-0 pointer-events-none group-hover/maps:opacity-100 group-hover/maps:pointer-events-auto transition-opacity duration-300 bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col">
+                        <a href="#works-maps" onClick={(e) => handleNavClick(e, '#works-maps')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-b border-obsidian/5 dark:border-white/5 whitespace-nowrap">{t('nav.nav_maps_be')}</a>
+                        <a href="#works-maps" onClick={(e) => handleNavClick(e, '#works-maps')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left whitespace-nowrap">{t('nav.nav_maps_je')}</a>
+                      </div>
+                    </div>
+                    {/* Mods & Tools */}
+                    <a href="#works-mods" onClick={(e) => handleNavClick(e, '#works-mods')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-t border-obsidian/5 dark:border-white/5">{t('nav.nav_mods')}</a>
+                    <a href="#works-tools" onClick={(e) => handleNavClick(e, '#works-tools')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-t border-obsidian/5 dark:border-white/5">{t('nav.nav_tools')}</a>
                   </div>
                 </div>
               </div>
@@ -636,6 +647,33 @@ function App() {
                 </div>
               ))}
             </div>
+
+            {/* Team Members Section */}
+            <div className="mt-32 border-t border-obsidian/10 dark:border-white/10 pt-20 transition-colors duration-700">
+              <div className="reveal-up font-mono text-amethyst tracking-[0.2em] text-sm flex items-center gap-6 mb-16">
+                <span className="w-12 h-[1px] bg-amethyst"></span>
+                {t('team.tag')}
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {[
+                  { name: "Ylong", role: t('team.role1'), letter: "Y", color: "text-diamond" },
+                  { name: "TreeHey", role: t('team.role2'), letter: "T", color: "text-amethyst" },
+                  { name: "水晶", role: t('team.role4'), letter: "水", color: "text-[#00d2d3]" },
+                  { name: "橙子", role: t('team.role3'), letter: "橙", color: "text-[#ffa500]" }
+                ].map((member, idx) => (
+                  <div key={idx} className="reveal-up group relative p-8 bg-white/40 dark:bg-black/40 border border-obsidian/5 dark:border-white/5 hover:bg-white dark:hover:bg-[#111] transition-colors duration-500 flex flex-col items-center text-center">
+                    <div className="w-20 h-20 rounded-full bg-paper dark:bg-obsidian border border-obsidian/10 dark:border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 overflow-hidden">
+                      {/* You can replace this letter with an actual img tag if you have member avatars */}
+                      <span className={`text-3xl font-black ${member.color} opacity-50 group-hover:opacity-100 transition-opacity`}>{member.letter}</span>
+                    </div>
+                    <h4 className="text-xl font-bold text-obsidian dark:text-white mb-2">{member.name}</h4>
+                    <p className="text-xs uppercase tracking-widest font-mono text-gray-500">{member.role}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
         </section>
 
@@ -650,60 +688,209 @@ function App() {
               </a>
             </div>
 
-            <div className="space-y-32">
-              {[
-                { title: t('works.m1_t'), category: t('works.m1_c'), year: "100k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-red-500 dark:group-hover:text-red-400", bg: "from-red-500/10", desc: t('works.m1_d'), link: "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648588173337957318" },
-                { title: t('works.m2_t'), category: t('works.m2_c'), year: "50k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-amber-500", bg: "from-amber-500/10", desc: t('works.m2_d') },
-                { title: t('works.m3_t'), category: t('works.m3_c'), year: "1k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-green-500", bg: "from-green-500/10", desc: t('works.m3_d') },
-                { title: t('works.m4_t'), category: t('works.m4_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-blue-500", bg: "from-blue-500/10", desc: t('works.m4_d') },
-                { title: t('works.m5_t'), category: t('works.m5_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-pink-500", bg: "from-pink-500/10", desc: t('works.m5_d') },
-                { title: t('works.m6_t'), category: t('works.m6_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-cyan-500", bg: "from-cyan-500/10", desc: t('works.m6_d') },
-                { title: t('works.m7_t'), category: t('works.m7_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-orange-500", bg: "from-orange-500/10", desc: t('works.m7_d') },
-                { title: t('works.m8_t'), category: t('works.m8_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-amethyst", bg: "from-amethyst/10", desc: t('works.m8_d') },
-              ].map((work, idx) => (
-                <div key={idx} className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center">
-                  <div className="w-full md:w-1/2 lg:w-[60%] h-[50vh] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700">
-                    <div className="parallax-bg absolute inset-[-20%] w-[140%] h-[140%]">
-                      {work.image ? (
-                        <img 
-                          src={work.image} 
-                          alt={work.title} 
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" 
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(0,0,0,0.03)_20px,rgba(0,0,0,0.03)_40px)] dark:bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(255,255,255,0.02)_20px,rgba(255,255,255,0.02)_40px)] group-hover:scale-110 transition-transform duration-[1.5s] ease-out"></div>
-                      )}
-                    </div>
-                    <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
-                    <div className="parallax-text absolute inset-0 flex items-center justify-center mix-blend-overlay">
-                       <span className="text-obsidian/20 dark:text-white/20 font-black text-6xl md:text-8xl tracking-tighter transition-colors duration-700">MAP_{idx+1}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="w-full md:w-1/2 lg:w-[40%] flex flex-col justify-center space-y-8">
-                    <div className="text-xs uppercase font-mono tracking-widest text-gray-500 border-b border-obsidian/10 dark:border-white/10 pb-4 flex justify-between transition-colors duration-700">
-                      <span>{work.category}</span>
-                      <span>{work.year}</span>
-                    </div>
-                    <h3 className={`text-4xl md:text-5xl lg:text-7xl font-bold uppercase tracking-tighter transition-colors duration-500 text-obsidian dark:text-white ${work.accent}`}>
-                      {work.title}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 font-light font-sans max-w-md text-base md:text-lg leading-relaxed transition-colors duration-700">
-                      {work.desc}
-                    </p>
-                    
-                    {work.link ? (
-                      <a href={work.link} target="_blank" rel="noopener noreferrer" className="w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono hover:text-diamond text-gray-500 transition-colors mt-4">
-                        <MousePointerClick className="w-4 h-4" /> {t('works.view')}
-                      </a>
-                    ) : (
-                      <div className="w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono text-gray-500/50 dark:text-gray-500/50 mt-4 cursor-not-allowed" title="Link Coming Soon">
-                        <MousePointerClick className="w-4 h-4" /> {t('works.view')}
+            <div className="space-y-48">
+              {/* Category: Maps */}
+              <div id="works-maps" className="scroll-mt-32">
+                <div className="reveal-up font-mono text-diamond tracking-[0.2em] text-sm flex items-center gap-6 mb-16">
+                  <span className="w-12 h-[1px] bg-diamond"></span>
+                  {t('works.category_maps')}
+                </div>
+                
+                {/* Subcategory: Bedrock / NetEase */}
+                <div id="works-maps-be" className="scroll-mt-32 mb-16">
+                  <h4 className="reveal-up text-lg font-bold tracking-widest uppercase text-obsidian/50 dark:text-white/50 border-b border-obsidian/10 dark:border-white/10 pb-4 mb-16">
+                    {t('nav.nav_maps_be')}
+                  </h4>
+                  <div className="space-y-32">
+                    {[
+                      { title: t('works.m1_t'), category: t('works.m1_c'), year: "100k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-red-500 dark:group-hover:text-red-400", bg: "from-red-500/10", desc: t('works.m1_d'), link: "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648588173337957318" },
+                      { title: t('works.m2_t'), category: t('works.m2_c'), year: "50k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-amber-500", bg: "from-amber-500/10", desc: t('works.m2_d') },
+                      { title: t('works.m3_t'), category: t('works.m3_c'), year: "1k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-green-500", bg: "from-green-500/10", desc: t('works.m3_d') },
+                      { title: t('works.m4_t'), category: t('works.m4_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-blue-500", bg: "from-blue-500/10", desc: t('works.m4_d') },
+                      { title: t('works.m5_t'), category: t('works.m5_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-pink-500", bg: "from-pink-500/10", desc: t('works.m5_d') },
+                      { title: t('works.m6_t'), category: t('works.m6_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-cyan-500", bg: "from-cyan-500/10", desc: t('works.m6_d') },
+                      { title: t('works.m7_t'), category: t('works.m7_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-orange-500", bg: "from-orange-500/10", desc: t('works.m7_d') },
+                      { title: t('works.m8_t'), category: t('works.m8_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-amethyst", bg: "from-amethyst/10", desc: t('works.m8_d') },
+                    ].map((work, idx) => (
+                      <div key={`map-${idx}`} className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center">
+                        <div className="w-full md:w-1/2 lg:w-[60%] h-[50vh] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700">
+                          <div className="parallax-bg absolute inset-[-20%] w-[140%] h-[140%]">
+                            {work.image ? (
+                              <img 
+                                src={work.image} 
+                                alt={work.title} 
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" 
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(0,0,0,0.03)_20px,rgba(0,0,0,0.03)_40px)] dark:bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(255,255,255,0.02)_20px,rgba(255,255,255,0.02)_40px)] group-hover:scale-110 transition-transform duration-[1.5s] ease-out"></div>
+                            )}
+                          </div>
+                          <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
+                          <div className="parallax-text absolute inset-0 flex items-center justify-center mix-blend-overlay">
+                             <span className="text-obsidian/20 dark:text-white/20 font-black text-6xl md:text-8xl tracking-tighter transition-colors duration-700">MAP_{idx+1}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="w-full md:w-1/2 lg:w-[40%] flex flex-col justify-center space-y-8">
+                          <div className="text-xs uppercase font-mono tracking-widest text-gray-500 border-b border-obsidian/10 dark:border-white/10 pb-4 flex justify-between transition-colors duration-700">
+                            <span>{work.category}</span>
+                            <span>{work.year}</span>
+                          </div>
+                          <h3 className={`text-4xl md:text-5xl lg:text-7xl font-bold uppercase tracking-tighter transition-colors duration-500 text-obsidian dark:text-white ${work.accent}`}>
+                            {work.title}
+                          </h3>
+                          <p className="text-gray-600 dark:text-gray-400 font-light font-sans max-w-md text-base md:text-lg leading-relaxed transition-colors duration-700">
+                            {work.desc}
+                          </p>
+                          
+                          {work.link ? (
+                            <a href={work.link} target="_blank" rel="noopener noreferrer" className="w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono hover:text-diamond text-gray-500 transition-colors mt-4">
+                              <MousePointerClick className="w-4 h-4" /> {t('works.view')}
+                            </a>
+                          ) : (
+                            <div className="w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono text-gray-500/50 dark:text-gray-500/50 mt-4 cursor-not-allowed" title="Link Coming Soon">
+                              <MousePointerClick className="w-4 h-4" /> {t('works.view')}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    )}
+                    ))}
                   </div>
                 </div>
-              ))}
+
+                {/* Subcategory: Java Edition */}
+                <div id="works-maps-je" className="scroll-mt-32 pt-16">
+                  <h4 className="reveal-up text-lg font-bold tracking-widest uppercase text-obsidian/50 dark:text-white/50 border-b border-obsidian/10 dark:border-white/10 pb-4 mb-16">
+                    {t('nav.nav_maps_je')}
+                  </h4>
+                  <div className="space-y-32">
+                    {[
+                      { title: t('works.m9_t'), category: t('works.m9_c'), year: "Java", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-[#ff9ff3]", bg: "from-[#ff9ff3]/10", desc: t('works.m9_d'), link: undefined },
+                      { title: t('works.m10_t'), category: t('works.m10_c'), year: "Java", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-diamond", bg: "from-diamond/10", desc: t('works.m10_d'), link: undefined },
+                    ].map((work, idx) => (
+                      <div key={`java-${idx}`} className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center">
+                        <div className="w-full md:w-1/2 lg:w-[60%] h-[50vh] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700">
+                          <div className="parallax-bg absolute inset-[-20%] w-[140%] h-[140%]">
+                            {work.image ? (
+                              <img 
+                                src={work.image} 
+                                alt={work.title} 
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" 
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(0,0,0,0.03)_20px,rgba(0,0,0,0.03)_40px)] dark:bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(255,255,255,0.02)_20px,rgba(255,255,255,0.02)_40px)] group-hover:scale-110 transition-transform duration-[1.5s] ease-out"></div>
+                            )}
+                          </div>
+                          <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
+                          <div className="parallax-text absolute inset-0 flex items-center justify-center mix-blend-overlay">
+                             <span className="text-obsidian/20 dark:text-white/20 font-black text-6xl md:text-8xl tracking-tighter transition-colors duration-700">MAP_{idx+9}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="w-full md:w-1/2 lg:w-[40%] flex flex-col justify-center space-y-8">
+                          <div className="text-xs uppercase font-mono tracking-widest text-gray-500 border-b border-obsidian/10 dark:border-white/10 pb-4 flex justify-between transition-colors duration-700">
+                            <span>{work.category}</span>
+                            <span>{work.year}</span>
+                          </div>
+                          <h3 className={`text-4xl md:text-5xl lg:text-7xl font-bold uppercase tracking-tighter transition-colors duration-500 text-obsidian dark:text-white ${work.accent}`}>
+                            {work.title}
+                          </h3>
+                          <p className="text-gray-600 dark:text-gray-400 font-light font-sans max-w-md text-base md:text-lg leading-relaxed transition-colors duration-700">
+                            {work.desc}
+                          </p>
+                          
+                          {work.link ? (
+                            <a href={work.link} target="_blank" rel="noopener noreferrer" className="w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono hover:text-diamond text-gray-500 transition-colors mt-4">
+                              <MousePointerClick className="w-4 h-4" /> {t('works.view')}
+                            </a>
+                          ) : (
+                            <div className="w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono text-gray-500/50 dark:text-gray-500/50 mt-4 cursor-not-allowed" title="Link Coming Soon">
+                              <MousePointerClick className="w-4 h-4" /> {t('works.view')}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Category: Mods */}
+              <div id="works-mods" className="scroll-mt-32">
+                <div className="reveal-up font-mono text-emerald-500 tracking-[0.2em] text-sm flex items-center gap-6 mb-16">
+                  <span className="w-12 h-[1px] bg-emerald-500"></span>
+                  {t('works.category_mods')}
+                </div>
+                <div className="space-y-32">
+                  {[
+                    { title: t('works.mod1_t'), category: t('works.mod1_c'), year: "WIP", image: "", accent: "group-hover:text-emerald-500", bg: "from-emerald-500/10", desc: t('works.mod1_d'), code: "MOD_1" },
+                  ].map((work, idx) => (
+                    <div key={`mod-${idx}`} className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center">
+                      <div className="w-full md:w-1/2 lg:w-[60%] h-[50vh] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700">
+                        <div className="parallax-bg absolute inset-[-20%] w-[140%] h-[140%]">
+                          <div className="w-full h-full bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(0,0,0,0.03)_20px,rgba(0,0,0,0.03)_40px)] dark:bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(255,255,255,0.02)_20px,rgba(255,255,255,0.02)_40px)] group-hover:scale-110 transition-transform duration-[1.5s] ease-out"></div>
+                        </div>
+                        <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
+                        <div className="parallax-text absolute inset-0 flex items-center justify-center mix-blend-overlay">
+                           <span className="text-obsidian/20 dark:text-white/20 font-black text-6xl md:text-8xl tracking-tighter transition-colors duration-700">{work.code}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="w-full md:w-1/2 lg:w-[40%] flex flex-col justify-center space-y-8">
+                        <div className="text-xs uppercase font-mono tracking-widest text-gray-500 border-b border-obsidian/10 dark:border-white/10 pb-4 flex justify-between transition-colors duration-700">
+                          <span>{work.category}</span>
+                          <span>{work.year}</span>
+                        </div>
+                        <h3 className={`text-4xl md:text-5xl lg:text-7xl font-bold uppercase tracking-tighter transition-colors duration-500 text-obsidian dark:text-white ${work.accent}`}>
+                          {work.title}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-400 font-light font-sans max-w-md text-base md:text-lg leading-relaxed transition-colors duration-700">
+                          {work.desc}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Category: Tools */}
+              <div id="works-tools" className="scroll-mt-32">
+                <div className="reveal-up font-mono text-blue-500 tracking-[0.2em] text-sm flex items-center gap-6 mb-16">
+                  <span className="w-12 h-[1px] bg-blue-500"></span>
+                  {t('works.category_tools')}
+                </div>
+                <div className="space-y-32">
+                  {[
+                    { title: t('works.tool1_t'), category: t('works.tool1_c'), year: "WIP", image: "", accent: "group-hover:text-blue-500", bg: "from-blue-500/10", desc: t('works.tool1_d'), code: "TOOL_1" },
+                  ].map((work, idx) => (
+                    <div key={`tool-${idx}`} className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center">
+                      <div className="w-full md:w-1/2 lg:w-[60%] h-[50vh] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700">
+                        <div className="parallax-bg absolute inset-[-20%] w-[140%] h-[140%]">
+                          <div className="w-full h-full bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(0,0,0,0.03)_20px,rgba(0,0,0,0.03)_40px)] dark:bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(255,255,255,0.02)_20px,rgba(255,255,255,0.02)_40px)] group-hover:scale-110 transition-transform duration-[1.5s] ease-out"></div>
+                        </div>
+                        <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
+                        <div className="parallax-text absolute inset-0 flex items-center justify-center mix-blend-overlay">
+                           <span className="text-obsidian/20 dark:text-white/20 font-black text-6xl md:text-8xl tracking-tighter transition-colors duration-700">{work.code}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="w-full md:w-1/2 lg:w-[40%] flex flex-col justify-center space-y-8">
+                        <div className="text-xs uppercase font-mono tracking-widest text-gray-500 border-b border-obsidian/10 dark:border-white/10 pb-4 flex justify-between transition-colors duration-700">
+                          <span>{work.category}</span>
+                          <span>{work.year}</span>
+                        </div>
+                        <h3 className={`text-4xl md:text-5xl lg:text-7xl font-bold uppercase tracking-tighter transition-colors duration-500 text-obsidian dark:text-white ${work.accent}`}>
+                          {work.title}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-400 font-light font-sans max-w-md text-base md:text-lg leading-relaxed transition-colors duration-700">
+                          {work.desc}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>
