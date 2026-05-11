@@ -3,14 +3,136 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { Canvas } from '@react-three/fiber';
-import { Float, Box, Stars } from '@react-three/drei';
+import { Float, Box, Stars, useTexture } from '@react-three/drei';
+import * as THREE from 'three';
 import { ArrowUpRight, MousePointerClick, Diamond, Sword, Map, Code, Sun, Moon, Globe } from 'lucide-react';
 import { useTranslation, Trans } from 'react-i18next';
 import CustomCursor from './components/CustomCursor';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// ==========================================
+// 🎲 MINECRAFT BLOCK TEXTURE CONFIGURATION
+// You can add more block types here once you put the images in public/textures/
+// ==========================================
+const BLOCK_TEXTURES = [
+  {
+    id: 'grass',
+    top: 'block_top.png',
+    side: 'block_side.png',
+    bottom: 'block_bottom.png'
+  },
+  // Example: how to add more blocks later (uncomment and change names when files are ready)
+  {
+    id: 'stone',
+    top: 'stone.png',     // if you have public/textures/stone.png
+    side: 'stone.png',    
+    bottom: 'stone.png'   
+  },
+  {
+    id: 'oak_planks',
+    top: 'oak_planks.png',
+    side: 'oak_planks.png',
+    bottom: 'oak_planks.png'
+  },
+  {
+    id: 'oak_log',
+    top: 'oak_log_top.png',
+    side: 'oak_log.png',
+    bottom: 'oak_log_top.png'
+  },
+  {
+    id: 'diamond_block',
+    top: 'diamond_block.png',
+    side: 'diamond_block.png',
+    bottom: 'diamond_block.png'
+  },
+  {
+    id: 'crafting_table',
+    top: 'crafting_table_top.png',
+    side: 'crafting_table_side.png',
+    bottom: 'oak_planks.png' // using oak planks for bottom since crafting table doesn't have a unique bottom texture
+  }
+];
+
+function MinecraftBlock({ cube, isDark }: { cube: any, isDark: boolean }) {
+  const basePath = import.meta.env.BASE_URL;
+  const config = BLOCK_TEXTURES[cube.textureIndex];
+  
+  // Load textures based on the randomly assigned block type
+  const textures = useTexture({
+    mapTop: `${basePath}textures/${config.top}`,
+    mapSide: `${basePath}textures/${config.side}`,
+    mapBottom: `${basePath}textures/${config.bottom}`,
+  });
+
+  // Make textures pixelated (Minecraft style)
+  React.useMemo(() => {
+    Object.values(textures).forEach((tex) => {
+      tex.magFilter = THREE.NearestFilter;
+      tex.minFilter = THREE.NearestFilter;
+      tex.generateMipmaps = false;
+    });
+  }, [textures]);
+
+  const { mapTop, mapSide, mapBottom } = textures;
+
+  // Add the original color tinting back lightly, or just show the block
+  // If we tint it based on the original colors it still looks magical
+  const tintColor = cube.colorType === 0 
+    ? (isDark ? "#d0d0d0" : "#ffffff") 
+    : cube.colorType === 1 
+      ? (isDark ? "#d8cbe0" : "#fbf7ff") // 更轻微的淡紫色
+      : (isDark ? "#cbd8d8" : "#f7ffff"); // 更轻微的淡青色
+
+  // Box geometry materials array: right, left, top, bottom, front, back
+  const materials = React.useMemo(() => {
+    const commonProps = { 
+      roughness: isDark ? 0.6 : 0.8, 
+      metalness: 0.1,
+      color: tintColor
+    };
+    return [
+      new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps }),
+      new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps }),
+      new THREE.MeshStandardMaterial({ map: mapTop, ...commonProps }),
+      new THREE.MeshStandardMaterial({ map: mapBottom, ...commonProps }),
+      new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps }),
+      new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps }),
+    ];
+  }, [mapSide, mapTop, mapBottom, isDark, tintColor]);
+
+  return (
+    <Float
+      speed={cube.speed}
+      rotationIntensity={cube.rotationIntensity}
+      floatIntensity={cube.floatIntensity}
+      position={cube.position}
+    >
+      <Box args={cube.size} material={materials} />
+    </Float>
+  );
+}
+
 function ParticleCubes({ isDark }: { isDark: boolean }) {
+  // Generate random values once to prevent jumping when re-rendering (e.g., language/theme switch)
+  const cubes = React.useMemo(() => {
+    return Array.from({ length: 40 }).map((_, i) => ({
+      speed: Math.random() * 2 + 1,
+      rotationIntensity: Math.random() * 2,
+      floatIntensity: Math.random() * 3,
+      position: [
+        (Math.random() - 0.5) * 30,
+        (Math.random() - 0.5) * 30,
+        (Math.random() - 0.5) * 20 - 5
+      ] as [number, number, number],
+      // Generate a single random size so that all 3 dimensions are identical (perfect cube)
+      size: Array(3).fill(Math.random() * 0.8 + 0.2) as [number, number, number],
+      colorType: i % 3,
+      textureIndex: Math.floor(Math.random() * BLOCK_TEXTURES.length)
+    }));
+  }, []);
+
   return (
     <Canvas camera={{ position: [0, 0, 15], fov: 45 }} gl={{ alpha: true, antialias: true }}>
       <ambientLight intensity={isDark ? 0.4 : 0.8} />
@@ -19,32 +141,11 @@ function ParticleCubes({ isDark }: { isDark: boolean }) {
       
       {isDark && <Stars radius={50} depth={50} count={2000} factor={4} saturation={0} fade speed={1} />}
 
-      {Array.from({ length: 40 }).map((_, i) => (
-        <Float
-          key={i}
-          speed={Math.random() * 2 + 1}
-          rotationIntensity={Math.random() * 2}
-          floatIntensity={Math.random() * 3}
-          position={[
-            (Math.random() - 0.5) * 30,
-            (Math.random() - 0.5) * 30,
-            (Math.random() - 0.5) * 20 - 5
-          ]}
-        >
-          <Box args={[Math.random() * 0.8 + 0.2, Math.random() * 0.8 + 0.2, Math.random() * 0.8 + 0.2]}>
-            <meshPhysicalMaterial 
-              color={i % 3 === 0 ? (isDark ? "#0a0a0a" : "#ffffff") : i % 3 === 1 ? "#9b59b6" : "#00d2d3"}
-              roughness={isDark ? 0.1 : 0.2}
-              metalness={isDark ? 0.8 : 0.5}
-              transmission={i % 3 !== 0 ? 0.9 : 0}
-              thickness={1}
-              envMapIntensity={2}
-              clearcoat={1}
-              clearcoatRoughness={0.1}
-            />
-          </Box>
-        </Float>
-      ))}
+      <React.Suspense fallback={null}>
+        {cubes.map((cube, i) => (
+          <MinecraftBlock key={i} cube={cube} isDark={isDark} />
+        ))}
+      </React.Suspense>
     </Canvas>
   );
 }
@@ -59,13 +160,15 @@ function App() {
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [copiedQQ, setCopiedQQ] = useState(false);
 
+  const basePath = import.meta.env.BASE_URL;
+  // Logo display toggle based on exact file name
+  const logoPath = `${basePath}Fimel%20logo.png`;
+
   const handleCopyQQ = () => {
     navigator.clipboard.writeText("937760015");
     setCopiedQQ(true);
     setTimeout(() => setCopiedQQ(false), 2000);
   };
-
-  const basePath = import.meta.env.BASE_URL;
 
   useEffect(() => {
     if (isDark) {
@@ -203,10 +306,22 @@ function App() {
       <div className={`${loading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-1000`}>
         
         <nav className="fixed top-0 left-0 w-full z-40 flex items-center justify-between px-6 py-8 md:px-12 pointer-events-none mix-blend-difference text-white">
-          <a href="#hero" onClick={(e) => handleNavClick(e, '#hero')} className="text-xl font-bold tracking-[0.3em] uppercase pointer-events-auto hover-target hover:text-diamond transition-colors">FIMEL.</a>
-          <div className="hidden md:flex gap-10 text-xs tracking-widest uppercase font-mono pointer-events-auto">
+          <a href="#hero" onClick={(e) => handleNavClick(e, '#hero')} className="pointer-events-auto hover-target transition-transform hover:scale-105">
+            <img src={logoPath} alt="FIMEL Logo" className="h-12 md:h-16 object-contain invert" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement!.innerHTML = '<span class="text-xl font-bold tracking-[0.3em] uppercase">FIMEL.</span>'; }} />
+          </a>
+          <div className="hidden md:flex items-center gap-10 text-xs tracking-widest uppercase font-mono pointer-events-auto">
               <a href="#about" onClick={(e) => handleNavClick(e, '#about')} className="hover:text-diamond transition-colors hover-target">{t('nav.about')}</a>
-              <a href="#works" onClick={(e) => handleNavClick(e, '#works')} className="hover:text-diamond transition-colors hover-target">{t('nav.works')}</a>
+              
+              <div className="relative group hover-target py-2">
+                <a href="#works" onClick={(e) => handleNavClick(e, '#works')} className="hover:text-diamond transition-colors inline-block">{t('nav.works')}</a>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-300 z-50 flex flex-col items-center">
+                  <div className="bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-xs whitespace-nowrap overflow-hidden">
+                    <a href="#works" onClick={(e) => handleNavClick(e, '#works')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-center">Bedrock/Netease</a>
+                    <a href="#works" onClick={(e) => handleNavClick(e, '#works')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-center border-t border-obsidian/5 dark:border-white/5">Java Edition</a>
+                  </div>
+                </div>
+              </div>
+
               <a href="#contact" onClick={(e) => handleNavClick(e, '#contact')} className="hover:text-diamond transition-colors hover-target">{t('nav.contact')}</a>
             </div>
             <div className="flex items-center gap-6 pointer-events-auto relative">
