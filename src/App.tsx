@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Box, Stars, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { ArrowUpRight, MousePointerClick, Diamond, Sword, Map, Code, Sun, Moon, Globe } from 'lucide-react';
@@ -149,20 +149,21 @@ function MinecraftBlock({ cube, isDark }: { cube: any, isDark: boolean }) {
 
   const { mapTop, mapSide, mapBottom } = textures;
 
-  // Add the original color tinting back lightly, or just show the block
-  // If we tint it based on the original colors it still looks magical
-  const tintColor = cube.colorType === 0 
-    ? (isDark ? "#d0d0d0" : "#ffffff") 
-    : cube.colorType === 1 
-      ? (isDark ? "#d8cbe0" : "#fbf7ff") // 更轻微的淡紫色
-      : (isDark ? "#cbd8d8" : "#f7ffff"); // 更轻微的淡青色
-
   // Box geometry materials array: right, left, top, bottom, front, back
   const materials = React.useMemo(() => {
+    // Initial color based on initial theme so it doesn't always lerp from white 
+    // when loading in light mode
+    const initColor = new THREE.Color(
+      cube.colorType === 0 
+        ? (isDark ? "#d0d0d0" : "#ffffff") 
+        : cube.colorType === 1 
+          ? (isDark ? "#d8cbe0" : "#ffffff") 
+          : (isDark ? "#cbd8d8" : "#ffffff")
+    );
     const commonProps = { 
       roughness: isDark ? 0.6 : 0.8, 
       metalness: 0.1,
-      color: tintColor
+      color: initColor
     };
     return [
       new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps }),
@@ -172,7 +173,33 @@ function MinecraftBlock({ cube, isDark }: { cube: any, isDark: boolean }) {
       new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps }),
       new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps }),
     ];
-  }, [mapSide, mapTop, mapBottom, isDark, tintColor]);
+    // DO NOT add isDark in dependency array so we don't recreate the array
+    // Wait, wait... Actually, we update the existing object instead.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapSide, mapTop, mapBottom]); // no isDark here
+
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  useFrame((_, delta) => {
+    if (meshRef.current) {
+      const targetColor = new THREE.Color(
+        cube.colorType === 0 
+          ? (isDark ? "#d0d0d0" : "#ffffff") 
+          : cube.colorType === 1 
+            ? (isDark ? "#d8cbe0" : "#ffffff") 
+            : (isDark ? "#cbd8d8" : "#ffffff")
+      );
+      const targetRoughness = isDark ? 0.6 : 0.8;
+
+      const mats = meshRef.current.material;
+      if (Array.isArray(mats)) {
+        mats.forEach((mat: any) => {
+          mat.color.lerp(targetColor, delta * 3);
+          mat.roughness = THREE.MathUtils.lerp(mat.roughness, targetRoughness, delta * 3);
+        });
+      }
+    }
+  });
 
   return (
     <Float
@@ -181,8 +208,43 @@ function MinecraftBlock({ cube, isDark }: { cube: any, isDark: boolean }) {
       floatIntensity={cube.floatIntensity}
       position={cube.position}
     >
-      <Box args={cube.size} material={materials} />
+      <Box ref={meshRef} args={cube.size} material={materials} />
     </Float>
+  );
+}
+
+function SceneLights({ isDark }: { isDark: boolean }) {
+  const ambientRef = useRef<THREE.AmbientLight>(null);
+  const dirLight1Ref = useRef<THREE.DirectionalLight>(null);
+  const dirLight2Ref = useRef<THREE.DirectionalLight>(null);
+
+  // Use refs to store target values for the light to smoothly interpolate
+  // without React overriding them instantly on the next render.
+  useFrame((_, delta) => {
+    const lerpFactor = delta * 3;
+    if (ambientRef.current) {
+      ambientRef.current.intensity = THREE.MathUtils.lerp(ambientRef.current.intensity, isDark ? 0.4 : 0.6, lerpFactor);
+    }
+    if (dirLight1Ref.current) {
+      dirLight1Ref.current.intensity = THREE.MathUtils.lerp(dirLight1Ref.current.intensity, isDark ? 5 : 1.2, lerpFactor);
+      dirLight1Ref.current.color.lerp(new THREE.Color(isDark ? "#9b59b6" : "#ffffff"), lerpFactor);
+    }
+    if (dirLight2Ref.current) {
+      dirLight2Ref.current.intensity = THREE.MathUtils.lerp(dirLight2Ref.current.intensity, isDark ? 5 : 0.6, lerpFactor);
+      dirLight2Ref.current.color.lerp(new THREE.Color(isDark ? "#00d2d3" : "#ffffff"), lerpFactor);
+    }
+  });
+
+  // Remove the isDark dependency from the props so R3F doesn't instantly snap them!
+  // Initialize with the first theme value, then rely on useFrame.
+  const [initIsDark] = useState(isDark);
+
+  return (
+    <>
+      <ambientLight ref={ambientRef} intensity={initIsDark ? 0.4 : 0.6} />
+      <directionalLight ref={dirLight1Ref} position={[10, 10, 10]} intensity={initIsDark ? 5 : 1.2} color={initIsDark ? "#9b59b6" : "#ffffff"} />
+      <directionalLight ref={dirLight2Ref} position={[-10, -10, -10]} intensity={initIsDark ? 5 : 0.6} color={initIsDark ? "#00d2d3" : "#ffffff"} />
+    </>
   );
 }
 
@@ -246,9 +308,7 @@ function ParticleCubes({ isDark }: { isDark: boolean }) {
 
   return (
     <Canvas camera={{ position: [0, 0, 15], fov: 45 }} gl={{ alpha: true, antialias: true }}>
-      <ambientLight intensity={isDark ? 0.4 : 0.8} />
-      <directionalLight position={[10, 10, 10]} intensity={isDark ? 2 : 1.5} color="#9b59b6" />
-      <directionalLight position={[-10, -10, -10]} intensity={isDark ? 2 : 1.5} color="#00d2d3" />
+      <SceneLights isDark={isDark} />
       
       {isDark && <Stars radius={50} depth={50} count={2000} factor={4} saturation={0} fade speed={1} />}
 
@@ -269,6 +329,7 @@ function App() {
   const lenisRef = useRef<Lenis | null>(null);
 
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [copiedQQ, setCopiedQQ] = useState(false);
 
   const basePath = import.meta.env.BASE_URL;
@@ -313,6 +374,7 @@ function App() {
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, target: string) => {
     e.preventDefault();
+    setMobileMenuOpen(false);
     if (lenisRef.current) {
       lenisRef.current.scrollTo(target, { duration: 1.5, easing: (t) => 1 - Math.pow(1 - t, 4) });
     }
@@ -322,6 +384,7 @@ function App() {
     i18n.changeLanguage(lng);
     localStorage.setItem('fimel_user_lang', lng);
     setLangMenuOpen(false);
+    setMobileMenuOpen(false);
   };
 
   // Auto detect IP to switch language on first visit
@@ -499,11 +562,34 @@ function App() {
               <button onClick={() => setIsDark(!isDark)} className="hover:text-diamond transition-colors hover-target">
                 {isDark ? <Sun size={18} /> : <Moon size={18} />}
               </button>
-            <div className="block md:hidden">
-              <span className="text-xs uppercase font-mono tracking-widest border-b border-white">{t('nav.menu')}</span>
+            <div className="block md:hidden pointer-events-auto">
+              <button 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="text-xs uppercase font-mono tracking-widest border-b border-white transition-colors py-1"
+              >
+                {mobileMenuOpen ? 'CLOSE' : t('nav.menu')}
+              </button>
             </div>
           </div>
         </nav>
+
+        {/* Mobile Navigation Dropdown (Outside the mix-blend-difference nav) */}
+        <div className={`fixed top-[88px] md:top-[120px] left-0 w-full bg-paper/95 dark:bg-[#111]/95 text-obsidian dark:text-white transition-all duration-300 overflow-hidden backdrop-blur-md shadow-2xl z-40 ${mobileMenuOpen ? 'max-h-96 border-b border-obsidian/10 dark:border-white/10' : 'max-h-0'} pointer-events-auto`}>
+          <div className="flex flex-col p-6 font-mono text-xs uppercase tracking-widest gap-4">
+            <a href="#about" onClick={(e) => handleNavClick(e, '#about')} className="hover:text-diamond transition-colors py-2">{t('nav.about')}</a>
+            
+            <div className="flex flex-col gap-2">
+              <span className="text-gray-500 py-2">{t('nav.works')}</span>
+              <div className="flex flex-col pl-4 gap-3 border-l border-obsidian/10 dark:border-white/10 ml-2">
+                <a href="#works-maps" onClick={(e) => handleNavClick(e, '#works-maps')} className="hover:text-diamond transition-colors">{t('nav.nav_maps')} (BE/JE)</a>
+                <a href="#works-mods" onClick={(e) => handleNavClick(e, '#works-mods')} className="hover:text-diamond transition-colors">{t('nav.nav_mods')}</a>
+                <a href="#works-tools" onClick={(e) => handleNavClick(e, '#works-tools')} className="hover:text-diamond transition-colors">{t('nav.nav_tools')}</a>
+              </div>
+            </div>
+
+            <a href="#contact" onClick={(e) => handleNavClick(e, '#contact')} className="hover:text-diamond transition-colors py-2">{t('nav.contact')}</a>
+          </div>
+        </div>
 
         <section id="hero" className="relative w-full h-screen overflow-hidden flex flex-col justify-center px-6 md:px-16 lg:px-24 bg-paper dark:bg-obsidian transition-colors duration-700">
           <div className="parallax-hero absolute inset-[-10%] w-[120%] h-[120%] z-0 opacity-70 pointer-events-none">
