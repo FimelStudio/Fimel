@@ -20,7 +20,7 @@ const BLOCK_TEXTURES = [
     id: 'grass',
     top: 'block_top.png',
     side: 'block_side.png',
-    bottom: 'block_bottom.png'
+    bottom: 'dirt.png'
   },
   // Example: how to add more blocks later (uncomment and change names when files are ready)
   {
@@ -52,7 +52,79 @@ const BLOCK_TEXTURES = [
     top: 'crafting_table_top.png',
     side: 'crafting_table_side.png',
     bottom: 'oak_planks.png' // using oak planks for bottom since crafting table doesn't have a unique bottom texture
-  }
+  },
+  {
+    id: 'dirt',
+    top: 'dirt.png',
+    side: 'dirt.png',
+    bottom: 'dirt.png'
+  },
+  {
+    id: 'sand',
+    top: 'sand.png',
+    side: 'sand.png',
+    bottom: 'sand.png'
+  },
+  {
+    id: 'gravel',
+    top: 'gravel.png',
+    side: 'gravel.png',
+    bottom: 'gravel.png'
+  },
+  {
+    id: 'ice',
+    top: 'ice.png',
+    side: 'ice.png',
+    bottom: 'ice.png'
+  },
+  {
+    id: 'cobblestone',
+    top: 'cobblestone.png',
+    side: 'cobblestone.png',
+    bottom: 'cobblestone.png'
+  },
+  {
+    id: 'emerald_block',
+    top: 'emerald_block.png',
+    side: 'emerald_block.png',
+    bottom: 'emerald_block.png'
+  },
+  {
+    id: 'gold_block',
+    top: 'gold_block.png',
+    side: 'gold_block.png',
+    bottom: 'gold_block.png'
+  },
+  {
+    id: 'redstone_block',
+    top: 'redstone_block.png',
+    side: 'redstone_block.png',
+    bottom: 'redstone_block.png'
+  },
+  {
+    id: 'iron_block',
+    top: 'iron_block.png',
+    side: 'iron_block.png',
+    bottom: 'iron_block.png'
+  },
+  {
+    id: 'obsidian',
+    top: 'obsidian.png',
+    side: 'obsidian.png',
+    bottom: 'obsidian.png'
+  },
+  {
+    id: 'cherry_leaves',
+    top: 'cherry_leaves.png',
+    side: 'cherry_leaves.png',
+    bottom: 'cherry_leaves.png'
+  },
+  {
+    id: 'cactus',
+    top: 'cactus_top.png',
+    side: 'cactus_side.png',
+    bottom: 'cactus_bottom.png'
+  },
 ];
 
 function MinecraftBlock({ cube, isDark }: { cube: any, isDark: boolean }) {
@@ -117,20 +189,59 @@ function MinecraftBlock({ cube, isDark }: { cube: any, isDark: boolean }) {
 function ParticleCubes({ isDark }: { isDark: boolean }) {
   // Generate random values once to prevent jumping when re-rendering (e.g., language/theme switch)
   const cubes = React.useMemo(() => {
-    return Array.from({ length: 40 }).map((_, i) => ({
-      speed: Math.random() * 2 + 1,
-      rotationIntensity: Math.random() * 2,
-      floatIntensity: Math.random() * 3,
-      position: [
-        (Math.random() - 0.5) * 30,
-        (Math.random() - 0.5) * 30,
-        (Math.random() - 0.5) * 20 - 5
-      ] as [number, number, number],
-      // Generate a single random size so that all 3 dimensions are identical (perfect cube)
-      size: Array(3).fill(Math.random() * 0.8 + 0.2) as [number, number, number],
-      colorType: i % 3,
-      textureIndex: Math.floor(Math.random() * BLOCK_TEXTURES.length)
-    }));
+    const generated: any[] = [];
+    
+    // Check if it's mobile to adapt the generation volume (phones need tall/narrow boxes)
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    
+    // Significantly increased block count for a dense, immersive feel
+    const count = isMobile ? 65 : 110; 
+    
+    for (let i = 0; i < count; i++) {
+      const textureIndex = i % BLOCK_TEXTURES.length;
+      let finalPos = [0, 0, 0] as [number, number, number];
+
+      // Pure randomized uniform scattering with gentle overlap prevention
+      for (let attempt = 0; attempt < 40; attempt++) {
+        const testPos = [
+          (Math.random() - 0.5) * (isMobile ? 26 : 52), // Ultra-wide X spread for desktop
+          (Math.random() - 0.5) * (isMobile ? 40 : 28), // Taller Y spread
+          (Math.random() - 0.5) * 25 - 5 // Deep Z spread (-17.5 to 7.5) to bring blocks closer to camera
+        ] as [number, number, number];
+
+        let isValid = true;
+        for (const existingCube of generated) {
+          const dx = existingCube.position[0] - testPos[0];
+          const dy = existingCube.position[1] - testPos[1];
+          const dz = existingCube.position[2] - testPos[2];
+          const distSq = dx * dx + dy * dy + dz * dz;
+
+          // Gentle collision: Same blocks must be dist 12 apart, any blocks dist 3 apart
+          const minAllowedDistSq = existingCube.textureIndex === textureIndex ? 12 : 3;
+          if (distSq < minAllowedDistSq) {
+            isValid = false;
+            break;
+          }
+        }
+
+        if (isValid || attempt === 39) {
+          finalPos = testPos;
+          break;
+        }
+      }
+
+      generated.push({
+        speed: Math.random() * 1.5 + 0.5,
+        rotationIntensity: Math.random() * 1.5,
+        floatIntensity: Math.random() * 2,
+        position: finalPos,
+        // Block sizes made slightly bigger overall to reduce empty space
+        size: Array(3).fill(Math.random() * 0.9 + 0.35) as [number, number, number],
+        colorType: i % 3,
+        textureIndex: textureIndex
+      });
+    }
+    return generated;
   }, []);
 
   return (
@@ -209,8 +320,43 @@ function App() {
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
+    localStorage.setItem('fimel_user_lang', lng);
     setLangMenuOpen(false);
   };
+
+  // Auto detect IP to switch language on first visit
+  useEffect(() => {
+    const storedLang = localStorage.getItem('fimel_user_lang');
+    if (!storedLang) {
+      // First check IP via a free API
+      fetch('https://ipapi.co/json/')
+        .then(res => res.json())
+        .then(data => {
+          const country = data.country_code;
+          if (['CN', 'TW', 'HK', 'MO', 'SG'].includes(country)) {
+            i18n.changeLanguage('zh');
+          } else if (country === 'JP') {
+            i18n.changeLanguage('ja');
+          } else {
+            i18n.changeLanguage('en');
+          }
+        })
+        .catch(() => {
+          // Fallback to browser language if IP request fails (e.g. adblocker)
+          const browserLang = navigator.language.toLowerCase();
+          if (browserLang.includes('zh')) {
+            i18n.changeLanguage('zh');
+          } else if (browserLang.includes('ja')) {
+            i18n.changeLanguage('ja');
+          } else {
+            i18n.changeLanguage('en');
+          }
+        });
+    } else {
+      // If user had selected a language before, enforce it
+      i18n.changeLanguage(storedLang);
+    }
+  }, [i18n]);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 2500);
