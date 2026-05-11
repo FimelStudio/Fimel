@@ -18,8 +18,6 @@ export default function CustomCursor({ isDark }: { isDark: boolean }) {
     const xToFollower = gsap.quickTo(follower, "x", { duration: 0.5, ease: "power3" });
     const yToFollower = gsap.quickTo(follower, "y", { duration: 0.5, ease: "power3" });
 
-    let isHovering = false;
-
     const onMouseMove = (e: MouseEvent) => {
       xToCursor(e.clientX);
       yToCursor(e.clientY);
@@ -28,13 +26,11 @@ export default function CustomCursor({ isDark }: { isDark: boolean }) {
     };
 
     const enterHover = () => {
-      isHovering = true;
       gsap.to(cursor, { scale: 0, duration: 0.3 });
       gsap.to(follower, { scale: 2.5, backgroundColor: isDark ? "rgba(255,255,255,1)" : "rgba(10,10,10,1)", mixBlendMode: "difference", border: "none", duration: 0.3 });
     };
 
     const leaveHover = () => {
-      isHovering = false;
       gsap.to(cursor, { scale: 1, duration: 0.3 });
       gsap.to(follower, { scale: 1, backgroundColor: "transparent", mixBlendMode: "normal", border: isDark ? "1px solid rgba(255,255,255,0.4)" : "1px solid rgba(10,10,10,0.4)", duration: 0.3 });
     };
