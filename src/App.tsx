@@ -652,7 +652,7 @@ function App() {
 
             <div className="space-y-32">
               {[
-                { title: t('works.m1_t'), category: t('works.m1_c'), year: "100k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-red-500 dark:group-hover:text-red-400", bg: "from-red-500/10", desc: t('works.m1_d') },
+                { title: t('works.m1_t'), category: t('works.m1_c'), year: "100k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-red-500 dark:group-hover:text-red-400", bg: "from-red-500/10", desc: t('works.m1_d'), link: "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648588173337957318" },
                 { title: t('works.m2_t'), category: t('works.m2_c'), year: "50k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-amber-500", bg: "from-amber-500/10", desc: t('works.m2_d') },
                 { title: t('works.m3_t'), category: t('works.m3_c'), year: "1k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-green-500", bg: "from-green-500/10", desc: t('works.m3_d') },
                 { title: t('works.m4_t'), category: t('works.m4_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-blue-500", bg: "from-blue-500/10", desc: t('works.m4_d') },
@@ -691,9 +691,16 @@ function App() {
                     <p className="text-gray-600 dark:text-gray-400 font-light font-sans max-w-md text-base md:text-lg leading-relaxed transition-colors duration-700">
                       {work.desc}
                     </p>
-                    <button className="w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono group-hover:text-obsidian dark:group-hover:text-white text-gray-500 transition-colors mt-4">
-                      <MousePointerClick className="w-4 h-4" /> {t('works.view')}
-                    </button>
+                    
+                    {work.link ? (
+                      <a href={work.link} target="_blank" rel="noopener noreferrer" className="w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono hover:text-diamond text-gray-500 transition-colors mt-4">
+                        <MousePointerClick className="w-4 h-4" /> {t('works.view')}
+                      </a>
+                    ) : (
+                      <div className="w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono text-gray-500/50 dark:text-gray-500/50 mt-4 cursor-not-allowed" title="Link Coming Soon">
+                        <MousePointerClick className="w-4 h-4" /> {t('works.view')}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
