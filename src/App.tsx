@@ -130,10 +130,7 @@ const BLOCK_TEXTURES = [
 
 const FEATURED_MAPS = [
   {
-    title: "狼人杀-F小镇",
-    subtitle: "Werewolf: F-Town",
-    category: "网易基岩版地图",
-    genre: "狼人杀 PvP / 推理生存",
+    i18nKey: "werewolfFTown",
     downloads: "427,397",
     rating: "3.9",
     comments: "78",
@@ -145,16 +142,10 @@ const FEATURED_MAPS = [
     image: "maps/werewolf-f-town.png",
     link: "https://resource-minecraft.h5.163.com/#/detail?id=4648588173337957318",
     accent: "group-hover:text-red-500 dark:group-hover:text-red-400",
-    bg: "from-red-500/10",
-    desc: "开局随机分配侦探、狼人和平民。狼人需要清除侦探与平民，侦探持弓找出狼人，平民可收集资源购买箭矢反击。",
-    players: "多人推理",
-    components: ["随机身份", "侦探弓箭", "金币购买", "狼人阵营"]
+    bg: "from-red-500/10"
   },
   {
-    title: "饥饿游戏：旧城迷行",
-    subtitle: "Hunger Games: Old City",
-    category: "网易基岩版地图",
-    genre: "生存竞技 / PvP",
+    i18nKey: "hungerGamesOldCity",
     downloads: "84,098",
     rating: "4.3",
     comments: "51",
@@ -166,16 +157,10 @@ const FEATURED_MAPS = [
     image: "maps/hunger-games-old-city.png",
     link: "https://resource-minecraft.h5.163.com/#/detail?id=4657291854883079467",
     accent: "group-hover:text-amber-500",
-    bg: "from-amber-500/10",
-    desc: "旧城废墟中的自由混战。玩家选择天赋后分散出生，通过 TNT 获取物资，并利用铁砧、工作台、特殊区域与道具争夺最终胜利。",
-    players: "多人乱斗",
-    components: ["12 种天赋", "TNT 物资", "特殊地区", "死斗玩法"]
+    bg: "from-amber-500/10"
   },
   {
-    title: "ABYSS天坑",
-    subtitle: "Abyss Sky Pit",
-    category: "网易基岩版地图",
-    genre: "乱斗 PvP / 1v1",
+    i18nKey: "abyssSkyPit",
     downloads: "1,990",
     rating: "4.3",
     comments: "10",
@@ -187,16 +172,10 @@ const FEATURED_MAPS = [
     image: "maps/abyss-sky-pit.png",
     link: "https://resource-minecraft.h5.163.com/#/detail?id=4649770038789663060",
     accent: "group-hover:text-green-500",
-    bg: "from-green-500/10",
-    desc: "以多人乱斗 PvP 为主，也提供纯净 1v1 对战。强化弓箭、雪球破坏、击杀连播与方块皮肤系统让战局持续变化。",
-    players: "多人 / 1v1",
-    components: ["强化远程武器", "技能系统", "连杀播报", "方块皮肤"]
+    bg: "from-green-500/10"
   },
   {
-    title: "FML空生自然竞技场职业大乱斗",
-    subtitle: "FML Sky Nature Arena",
-    category: "网易基岩版地图",
-    genre: "职业大乱斗 PvP",
+    i18nKey: "fmlSkyNatureArena",
     downloads: "33,251",
     rating: "4.7",
     comments: "27",
@@ -208,16 +187,10 @@ const FEATURED_MAPS = [
     image: "maps/fml-sky-nature-arena.png",
     link: "https://resource-minecraft.h5.163.com/#/detail?id=4646359448597896554",
     accent: "group-hover:text-blue-500",
-    bg: "from-blue-500/10",
-    desc: "空生堂职业 PvP 大乱斗内置 24 种职业，并提供死亡榜、凋零风暴、爆炸箭、闪瞎眼等多种可切换游戏设置。",
-    players: "多人职业战",
-    components: ["24 种职业", "死亡榜", "模式设置区", "特殊规则"]
+    bg: "from-blue-500/10"
   },
   {
-    title: "逃走中",
-    subtitle: "Run For Money",
-    category: "网易基岩版地图",
-    genre: "追逐竞技 / PvP",
+    i18nKey: "runForMoney",
     downloads: "17,809",
     rating: "4.2",
     comments: "29",
@@ -229,16 +202,10 @@ const FEATURED_MAPS = [
     image: "maps/run-for-money.png",
     link: "https://resource-minecraft.h5.163.com/#/detail?id=4653059746050819814",
     accent: "group-hover:text-rose-500",
-    bg: "from-rose-500/10",
-    desc: "随机玩家会成为被猎杀目标，其余玩家化身猎人展开追捕。目标需要开箱寻找道具、撑过追杀轮次，并在最终 PvP 中活到最后。",
-    players: "多人竞技",
-    components: ["随机目标", "猎人追捕", "道具开箱", "最终 PvP"]
+    bg: "from-rose-500/10"
   },
   {
-    title: "通电2雪域危机",
-    subtitle: "Power On 2: Snow Crisis",
-    category: "网易基岩版地图",
-    genre: "非对称解谜生存",
+    i18nKey: "powerOn2SnowCrisis",
     downloads: "22,286",
     rating: "5.0",
     comments: "16",
@@ -250,16 +217,10 @@ const FEATURED_MAPS = [
     image: "maps/power-on-2-snow-crisis.png",
     link: "https://resource-minecraft.h5.163.com/#/detail?id=4655644384723477429",
     accent: "group-hover:text-cyan-500",
-    bg: "from-cyan-500/10",
-    desc: "《通电》最终章。玩家深入破败极地科考站，在严寒环境中重启发电机，并破解围绕设施展开的逻辑谜题。",
-    players: "多人协作",
-    components: ["发电机重启", "极地科考站", "逻辑谜题", "生存闯关"]
+    bg: "from-cyan-500/10"
   },
   {
-    title: "海岛逃生--黎明前夕",
-    subtitle: "Island Escape: Before Dawn",
-    category: "网易基岩版地图",
-    genre: "感染逃生 / 阵营对抗",
+    i18nKey: "islandEscapeBeforeDawn",
     downloads: "39,520",
     rating: "4.2",
     comments: "15",
@@ -271,16 +232,10 @@ const FEATURED_MAPS = [
     image: "maps/island-escape-before-dawn.png",
     link: "https://resource-minecraft.h5.163.com/#/detail?id=4677793220493990518",
     accent: "group-hover:text-emerald-500",
-    bg: "from-emerald-500/10",
-    desc: "4-8 人逃生地图。人类阵营需要修复岛上五座信号塔并等待直升机撤离，感染者则要阻止修复并扩散感染。",
-    players: "4-8 人",
-    components: ["人类/感染者阵营", "五座信号塔", "职业协作", "直升机撤离"]
+    bg: "from-emerald-500/10"
   },
   {
-    title: "紫晶幻域：救世光源",
-    subtitle: "Amethyst: Salvation",
-    category: "网易基岩版地图",
-    genre: "闯关 RPG / 冒险剧情",
+    i18nKey: "amethystSalvation",
     downloads: "13,523",
     rating: "4.7",
     comments: "90",
@@ -292,66 +247,9 @@ const FEATURED_MAPS = [
     image: "maps/amethyst-salvation.png",
     link: "https://resource-minecraft.h5.163.com/#/detail?id=4672593901126936215",
     accent: "group-hover:text-amethyst",
-    bg: "from-amethyst/10",
-    desc: "幻想大陆被黑暗势力笼罩，玩家选择职业后从初始村庄出发，购买道具、升级装备，并击败被紫水晶魔法召唤出的亡灵敌人。",
-    players: "多人 RPG",
-    components: ["职业选择", "剧情闯关", "装备升级", "亡灵敌人"]
+    bg: "from-amethyst/10"
   }
 ];
-
-const MAP_DESCRIPTIONS: Record<string, { zh: string; en: string; ja: string }> = {
-  "狼人杀-F小镇": {
-    zh: "开局随机分配侦探、狼人和平民。狼人需要清除侦探与平民，侦探持弓找出狼人，平民可收集资源购买箭矢反击。",
-    en: "Players are randomly assigned as detective, werewolf, or villager. Werewolves hunt everyone down, the detective uses a bow to identify threats, and villagers collect resources to buy arrows and fight back.",
-    ja: "開始時に探偵、人狼、村人がランダムに割り当てられます。人狼は探偵と村人を狩り、探偵は弓で人狼を見抜き、村人は資源を集めて矢を買い反撃します。"
-  },
-  "饥饿游戏：旧城迷行": {
-    zh: "旧城废墟中的自由混战。玩家选择天赋后分散出生，通过 TNT 获取物资，并利用铁砧、工作台、特殊区域与道具争夺最终胜利。",
-    en: "A free-for-all survival battle in a ruined old city. Choose a talent, spawn apart, gather loot through TNT, and use crafting stations, special zones, and items to fight for the final win.",
-    ja: "廃墟となった旧市街でのサバイバル乱戦です。才能を選んで分散スポーンし、TNTで物資を集め、金床、作業台、特殊エリア、アイテムを活用して勝利を目指します。"
-  },
-  "ABYSS天坑": {
-    zh: "以多人乱斗 PvP 为主，也提供纯净 1v1 对战。强化弓箭、雪球破坏、击杀连播与方块皮肤系统让战局持续变化。",
-    en: "A PvP arena focused on multiplayer brawls with a clean 1v1 mode as well. Enhanced bows, block-breaking snowballs, kill streak broadcasts, and block skins keep each match shifting.",
-    ja: "多人数乱闘PvPを中心に、純粋な1v1対戦にも対応したマップです。強化された弓、ブロックを壊せる雪玉、連続キル演出、ブロックスキンが戦況を変化させます。"
-  },
-  "FML空生自然竞技场职业大乱斗": {
-    zh: "空生堂职业 PvP 大乱斗内置 24 种职业，并提供死亡榜、凋零风暴、爆炸箭、闪瞎眼等多种可切换游戏设置。",
-    en: "A class-based PvP brawl with 24 playable roles, plus configurable rules such as death rankings, Wither Storm mode, explosive arrows, and flash effects.",
-    ja: "24種類の職業で戦うクラス制PvP乱闘マップです。死亡ランキング、ウィザーストーム、爆発矢、視界妨害など、複数のルール設定を切り替えられます。"
-  },
-  "逃走中": {
-    zh: "随机玩家会成为被猎杀目标，其余玩家化身猎人展开追捕。目标需要开箱寻找道具、撑过追杀轮次，并在最终 PvP 中活到最后。",
-    en: "One random player becomes the target while everyone else becomes a hunter. The target opens chests for tools, survives chase rounds, and then fights to be the last standing in the final PvP.",
-    ja: "ランダムなプレイヤーが標的となり、他のプレイヤーはハンターとして追跡します。標的はチェストから道具を探して追跡ラウンドを生き延び、最後のPvPで生存を目指します。"
-  },
-  "通电2雪域危机": {
-    zh: "《通电》最终章。玩家深入破败极地科考站，在严寒环境中重启发电机，并破解围绕设施展开的逻辑谜题。",
-    en: "The final chapter of Power On. Players enter a ruined polar research station, restart generators in the cold, and solve logic puzzles built around the facility.",
-    ja: "『通電』シリーズの最終章です。荒廃した極地研究施設に入り、厳寒の中で発電機を再起動し、施設をめぐるロジックパズルを解きます。"
-  },
-  "海岛逃生--黎明前夕": {
-    zh: "4-8 人逃生地图。人类阵营需要修复岛上五座信号塔并等待直升机撤离，感染者则要阻止修复并扩散感染。",
-    en: "A 4-8 player escape map. Humans repair five signal towers and wait for helicopter extraction, while the infected team blocks repairs and spreads infection.",
-    ja: "4〜8人向けの脱出マップです。人間陣営は島の5つの信号塔を修理してヘリの救助を待ち、感染者陣営は修理を妨害して感染を広げます。"
-  },
-  "紫晶幻域：救世光源": {
-    zh: "幻想大陆被黑暗势力笼罩，玩家选择职业后从初始村庄出发，购买道具、升级装备，并击败被紫水晶魔法召唤出的亡灵敌人。",
-    en: "A fantasy continent has fallen under darkness. Choose a class, begin from the starting village, buy items, upgrade gear, and defeat undead enemies summoned by amethyst magic.",
-    ja: "幻想大陸が闇の勢力に覆われています。職業を選び、始まりの村から旅立ち、道具購入と装備強化を重ねながら、紫水晶の魔法で召喚された亡霊を倒します。"
-  }
-};
-
-const getCurrentLanguage = (language: string): keyof (typeof MAP_DESCRIPTIONS)[string] => {
-  if (language.startsWith('ja')) return 'ja';
-  if (language.startsWith('en')) return 'en';
-  return 'zh';
-};
-
-const getMapDescription = (work: (typeof FEATURED_MAPS)[number], language: string) => {
-  const descriptions = MAP_DESCRIPTIONS[work.title];
-  return descriptions?.[getCurrentLanguage(language)] ?? work.desc;
-};
 
 function MinecraftBlock({ cube, isDark }: { cube: any, isDark: boolean }) {
   const basePath = import.meta.env.BASE_URL;
@@ -1045,8 +943,8 @@ function App() {
                 {[
                   { name: "Ylong", role: t('team.role1'), letter: "Y", color: "text-diamond" },
                   { name: "TreeHey", role: t('team.role2'), letter: "T", color: "text-amethyst" },
-                  { name: "水晶", role: t('team.role4'), letter: "水", color: "text-[#00d2d3]" },
-                  { name: "橙子", role: t('team.role3'), letter: "橙", color: "text-[#ffa500]" }
+                  { name: "crystal215", role: t('team.role4'), letter: "水", color: "text-[#00d2d3]" },
+                  { name: "chengzi", role: t('team.role3'), letter: "橙", color: "text-[#ffa500]" }
                 ].map((member, idx) => (
                   <div key={idx} className="reveal-up group relative p-8 bg-white/40 dark:bg-black/40 border border-obsidian/5 dark:border-white/5 hover:bg-white dark:hover:bg-[#111] transition-colors duration-500 flex flex-col items-center text-center">
                     <div className="w-20 h-20 rounded-full bg-paper dark:bg-obsidian border border-obsidian/10 dark:border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 overflow-hidden">
@@ -1155,11 +1053,20 @@ function App() {
                     {t('nav.nav_maps_be')}
                   </h4>
                   <div className="space-y-28">
-                    {FEATURED_MAPS.map((work) => (
+                    {FEATURED_MAPS.map((work) => {
+                      const title = t(`works.bedrockMaps.${work.i18nKey}.title`);
+                      const subtitle = t(`works.bedrockMaps.${work.i18nKey}.subtitle`);
+                      const category = t(`works.bedrockMaps.${work.i18nKey}.category`);
+                      const genre = t(`works.bedrockMaps.${work.i18nKey}.genre`);
+                      const description = t(`works.bedrockMaps.${work.i18nKey}.desc`);
+                      const players = t(`works.bedrockMaps.${work.i18nKey}.players`);
+                      const components = t(`works.bedrockMaps.${work.i18nKey}.components`, { returnObjects: true }) as string[];
+
+                      return (
                       <article
                         key={work.link}
                         className="reveal-up group relative flex flex-col md:flex-row gap-10 lg:gap-16 items-stretch"
-                        onMouseEnter={() => setTooltipContent({ visible: true, title: work.title, category: work.genre, desc: getMapDescription(work, i18n.language) })}
+                        onMouseEnter={() => setTooltipContent({ visible: true, title, category: genre, desc: description })}
                         onMouseLeave={() => setTooltipContent({ visible: false, title: '', category: '', desc: '' })}
                       >
                         <a
@@ -1167,12 +1074,12 @@ function App() {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="hover-target w-full md:w-1/2 lg:w-[58%] min-h-[22rem] md:min-h-[34rem] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700"
-                          aria-label={`查看 ${work.title} 的网易资源中心详情`}
+                          aria-label={t('works.open_detail_aria', { title })}
                         >
                           <div className="parallax-bg absolute inset-[-18%] w-[136%] h-[136%]">
                             <img
                               src={`${basePath}${work.image}`}
-                              alt={work.title}
+                              alt={title}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out"
                             />
                           </div>
@@ -1181,29 +1088,29 @@ function App() {
 
                         <div className="w-full md:w-1/2 lg:w-[42%] flex flex-col justify-center py-2 md:py-6">
                           <div className="text-xs uppercase font-mono tracking-widest text-gray-500 border-b border-obsidian/10 dark:border-white/10 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 transition-colors duration-700">
-                            <span>{work.category}</span>
-                            <span>{work.genre}</span>
+                            <span>{category}</span>
+                            <span>{genre}</span>
                           </div>
 
                           <div className="mt-7 space-y-3">
-                            <p className="text-xs font-mono uppercase tracking-[0.25em] text-gray-500">{work.subtitle}</p>
+                            <p className="text-xs font-mono uppercase tracking-[0.25em] text-gray-500">{subtitle}</p>
                             <h3 className={`text-3xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tighter leading-[0.95] break-words transition-colors duration-500 text-obsidian dark:text-white ${work.accent}`}>
-                              {work.title}
+                              {title}
                             </h3>
                           </div>
 
                           <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-4 text-sm font-mono text-obsidian dark:text-white">
                             <div className="flex items-center gap-2 min-w-0">
                               <Download className="w-4 h-4 text-diamond shrink-0" />
-                              <span className="truncate">{work.downloads} 下载</span>
+                              <span className="truncate">{t('works.downloads_metric', { downloads: work.downloads })}</span>
                             </div>
                             <div className="flex items-center gap-2 min-w-0">
                               <Star className="w-4 h-4 text-amber-500 shrink-0" />
-                              <span className="truncate">{work.rating} 评分</span>
+                              <span className="truncate">{t('works.rating_metric', { rating: work.rating })}</span>
                             </div>
                             <div className="flex items-center gap-2 min-w-0">
                               <MessageCircle className="w-4 h-4 text-amethyst shrink-0" />
-                              <span className="truncate">{work.comments} 评论 / {work.remarks} 评价</span>
+                              <span className="truncate">{t('works.comments_metric', { comments: work.comments, remarks: work.remarks })}</span>
                             </div>
                             <div className="flex items-center gap-2 min-w-0">
                               <Package className="w-4 h-4 text-gray-500 shrink-0" />
@@ -1211,16 +1118,16 @@ function App() {
                             </div>
                             <div className="flex items-center gap-2 min-w-0">
                               <CalendarDays className="w-4 h-4 text-gray-500 shrink-0" />
-                              <span className="truncate">发布时间 {work.released}</span>
+                              <span className="truncate">{t('works.released_metric', { date: work.released })}</span>
                             </div>
                             <div className="flex items-center gap-2 min-w-0">
                               <Users className="w-4 h-4 text-gray-500 shrink-0" />
-                              <span className="truncate">{work.players}</span>
+                              <span className="truncate">{players}</span>
                             </div>
                           </div>
 
                           <div className="mt-7 flex flex-wrap gap-2">
-                            {work.components.map((component) => (
+                            {components.map((component) => (
                               <span key={component} className="border border-obsidian/10 dark:border-white/10 px-3 py-2 text-xs text-gray-600 dark:text-gray-300">
                                 {component}
                               </span>
@@ -1228,7 +1135,7 @@ function App() {
                           </div>
 
                           <p className="mt-7 text-gray-600 dark:text-gray-400 font-light font-sans max-w-xl text-base md:text-lg leading-relaxed transition-colors duration-700">
-                            {getMapDescription(work, i18n.language)}
+                            {description}
                           </p>
 
                           <a
@@ -1241,7 +1148,8 @@ function App() {
                           </a>
                         </div>
                       </article>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
