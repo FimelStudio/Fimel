@@ -591,7 +591,7 @@ function App() {
           <a href="#hero" onClick={(e) => handleNavClick(e, '#hero')} className="pointer-events-auto hover-target transition-transform hover:scale-105">
             <img src={logoPath} alt="FIMEL Logo" className="h-12 md:h-16 object-contain invert" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement!.innerHTML = '<span class="text-xl font-bold tracking-[0.3em] uppercase">FIMEL.</span>'; }} />
           </a>
-          <div className="hidden md:flex items-center gap-10 text-xs tracking-widest uppercase font-mono pointer-events-auto">
+          <div className="hidden md:flex items-center gap-10 text-s tracking-widest uppercase font-mono pointer-events-auto">
               <a href="#about" onClick={(e) => handleNavClick(e, '#about')} className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all hover-target rounded-sm">{t('nav.about')}</a>
               
               <div className="relative group hover-target py-2">
