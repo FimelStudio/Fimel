@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { ArrowUpRight, MousePointerClick, Diamond, Sword, Map, Code, Sun, Moon, Globe } from 'lucide-react';
 import { useTranslation, Trans } from 'react-i18next';
 import CustomCursor from './components/CustomCursor';
+import HotbarNav from './components/HotbarNav';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -331,6 +332,37 @@ function App() {
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [copiedQQ, setCopiedQQ] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  
+  const [advancement, setAdvancement] = useState<{ title: string; desc: string; visible: boolean } | null>(null);
+  const unlockedAdvancements = useRef<Set<string>>(new Set());
+
+  // MCTooltip state & ref setup
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const [tooltipContent, setTooltipContent] = useState<{ visible: boolean; title: string; category: string; desc: string }>({
+    visible: false, title: '', category: '', desc: ''
+  });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (tooltipRef.current && tooltipContent.visible) {
+        // Offset slightly to avoid cursor blocking
+        const x = e.clientX + 15;
+        const y = e.clientY + 15;
+        
+        // Ensure tooltip doesn't clip off screen right/bottom
+        const rect = tooltipRef.current.getBoundingClientRect();
+        const adjustedX = x + rect.width > window.innerWidth ? e.clientX - rect.width - 5 : x;
+        const adjustedY = y + rect.height > window.innerHeight ? e.clientY - rect.height - 5 : y;
+        
+        tooltipRef.current.style.transform = `translate(${adjustedX}px, ${adjustedY}px)`;
+      }
+    };
+    if (tooltipContent.visible) {
+      window.addEventListener('mousemove', handleMouseMove);
+    }
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [tooltipContent.visible]);
 
   const basePath = import.meta.env.BASE_URL;
   // Logo display toggle based on exact file name
@@ -351,6 +383,20 @@ function App() {
   }, [isDark]);
 
   useEffect(() => {
+    if (scrollProgress > 0.1 && !unlockedAdvancements.current.has('first_steps')) {
+      unlockedAdvancements.current.add('first_steps');
+      setAdvancement({
+        title: "Advancement Made!",
+        desc: "First Steps",
+        visible: true
+      });
+      setTimeout(() => {
+        setAdvancement(prev => prev ? { ...prev, visible: false } : null);
+      }, 4000);
+    }
+  }, [scrollProgress]);
+
+  useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -358,7 +404,10 @@ function App() {
     });
     lenisRef.current = lenis;
 
-    lenis.on('scroll', ScrollTrigger.update);
+    lenis.on('scroll', (e: any) => {
+      ScrollTrigger.update();
+      setScrollProgress(e.progress);
+    });
     gsap.ticker.add((time) => {
       lenis.raf(time * 1000);
     });
@@ -514,16 +563,57 @@ function App() {
 
       <div className={`${loading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-1000`}>
         
+        {/* Minecraft Tooltip */}
+        <div 
+          ref={tooltipRef}
+          className="fixed top-0 left-0 pointer-events-none z-[100] px-4 py-3 opacity-0 transition-opacity duration-150 image-rendering-pixelated"
+          style={{ 
+            opacity: tooltipContent.visible ? 1 : 0,
+            borderStyle: 'solid',
+            borderWidth: '8px',
+            borderImageSource: `url(${basePath}HUD/Tooltip_background.png)`,
+            borderImageSlice: '6 fill',
+            borderImageRepeat: 'stretch',
+            textShadow: '2px 2px 0px #3f3f3f'
+          }}
+        >
+          <div className="flex flex-col gap-1 font-mono textShadow-mc -mt-1 -mx-0.5">
+            <span className="text-[#FFFF55] text-lg font-bold">{tooltipContent.title}</span>
+            <span className="text-[#AAAAAA] text-xs uppercase tracking-widest">{tooltipContent.category}</span>
+            <span className="text-[#5555FF] text-sm mt-1 max-w-[250px] leading-snug">{tooltipContent.desc}</span>
+          </div>
+        </div>
+
+        {/* Phase 3 Hotbar Navigation HUD */}
+        <HotbarNav handleNavClick={handleNavClick} />
+
+        {/* MC Experience Bar Scroll Indicator */}
+        <div className="fixed bottom-6 md:bottom-8 left-0 w-full z-50 pointer-events-none flex justify-center drop-shadow-md transition-transform duration-300">
+          <div 
+            className="w-[182px] h-[5px] md:w-[364px] md:h-[10px] bg-no-repeat bg-cover image-rendering-pixelated"
+            style={{ backgroundImage: `url(${basePath}HUD/experience_bar_background.png)` }}
+          >
+            <div 
+              className="h-full bg-no-repeat bg-cover image-rendering-pixelated transition-all duration-100 ease-out"
+              style={{ 
+                width: `${scrollProgress * 100}%`,
+                backgroundImage: `url(${basePath}HUD/experience_bar_progress.png)`
+              }}
+            />
+          </div>
+        </div>
+
         <nav className="fixed top-0 left-0 w-full z-40 flex items-center justify-between px-6 py-8 md:px-12 pointer-events-none mix-blend-difference text-white">
           <a href="#hero" onClick={(e) => handleNavClick(e, '#hero')} className="pointer-events-auto hover-target transition-transform hover:scale-105">
             <img src={logoPath} alt="FIMEL Logo" className="h-12 md:h-16 object-contain invert" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement!.innerHTML = '<span class="text-xl font-bold tracking-[0.3em] uppercase">FIMEL.</span>'; }} />
           </a>
           <div className="hidden md:flex items-center gap-10 text-xs tracking-widest uppercase font-mono pointer-events-auto">
-              <a href="#about" onClick={(e) => handleNavClick(e, '#about')} className="hover:text-diamond transition-colors hover-target">{t('nav.about')}</a>
+              <a href="#about" onClick={(e) => handleNavClick(e, '#about')} className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all hover-target rounded-sm">{t('nav.about')}</a>
               
               <div className="relative group hover-target py-2">
-                <a href="#works" onClick={(e) => handleNavClick(e, '#works')} className="hover:text-diamond transition-colors inline-block">{t('nav.works')}</a>
+                <a href="#works" onClick={(e) => handleNavClick(e, '#works')} className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all inline-block rounded-sm">{t('nav.works')}</a>
                 <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-300 z-50 flex flex-col items-center">
+                  {/* Using monochrome outline for nested dropdowns as well */}
                   <div className="bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-xs whitespace-nowrap overflow-visible">
                     {/* Maps Group */}
                     <div className="group/maps relative">
@@ -542,11 +632,11 @@ function App() {
                 </div>
               </div>
 
-              <a href="#contact" onClick={(e) => handleNavClick(e, '#contact')} className="hover:text-diamond transition-colors hover-target">{t('nav.contact')}</a>
+              <a href="#contact" onClick={(e) => handleNavClick(e, '#contact')} className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all hover-target rounded-sm">{t('nav.contact')}</a>
             </div>
             <div className="flex items-center gap-6 pointer-events-auto relative">
               <div className="relative hover-target">
-                <button onClick={() => setLangMenuOpen(!langMenuOpen)} className="hover:text-diamond transition-colors flex items-center gap-2">
+                <button onClick={() => setLangMenuOpen(!langMenuOpen)} className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all flex items-center gap-2 rounded-sm">
                   <Globe size={18} />
                   <span className="text-xs font-mono hidden md:block">{i18n.language.toUpperCase()}</span>
                 </button>
@@ -559,7 +649,7 @@ function App() {
               )}
             </div>
             
-              <button onClick={() => setIsDark(!isDark)} className="hover:text-diamond transition-colors hover-target">
+              <button onClick={() => setIsDark(!isDark)} className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all hover-target rounded-sm">
                 {isDark ? <Sun size={18} /> : <Moon size={18} />}
               </button>
             <div className="block md:hidden pointer-events-auto">
@@ -576,18 +666,18 @@ function App() {
         {/* Mobile Navigation Dropdown (Outside the mix-blend-difference nav) */}
         <div className={`fixed top-[88px] md:top-[120px] left-0 w-full bg-paper/95 dark:bg-[#111]/95 text-obsidian dark:text-white transition-all duration-300 overflow-hidden backdrop-blur-md shadow-2xl z-40 ${mobileMenuOpen ? 'max-h-96 border-b border-obsidian/10 dark:border-white/10' : 'max-h-0'} pointer-events-auto`}>
           <div className="flex flex-col p-6 font-mono text-xs uppercase tracking-widest gap-4">
-            <a href="#about" onClick={(e) => handleNavClick(e, '#about')} className="hover:text-diamond transition-colors py-2">{t('nav.about')}</a>
+            <a href="#about" onClick={(e) => handleNavClick(e, '#about')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-2 transition-all rounded-sm">{t('nav.about')}</a>
             
             <div className="flex flex-col gap-2">
-              <span className="text-gray-500 py-2">{t('nav.works')}</span>
+              <span className="text-gray-500 py-2 px-2">{t('nav.works')}</span>
               <div className="flex flex-col pl-4 gap-3 border-l border-obsidian/10 dark:border-white/10 ml-2">
-                <a href="#works-maps" onClick={(e) => handleNavClick(e, '#works-maps')} className="hover:text-diamond transition-colors">{t('nav.nav_maps')} (BE/JE)</a>
-                <a href="#works-mods" onClick={(e) => handleNavClick(e, '#works-mods')} className="hover:text-diamond transition-colors">{t('nav.nav_mods')}</a>
-                <a href="#works-tools" onClick={(e) => handleNavClick(e, '#works-tools')} className="hover:text-diamond transition-colors">{t('nav.nav_tools')}</a>
+                <a href="#works-maps" onClick={(e) => handleNavClick(e, '#works-maps')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_maps')} (BE/JE)</a>
+                <a href="#works-mods" onClick={(e) => handleNavClick(e, '#works-mods')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_mods')}</a>
+                <a href="#works-tools" onClick={(e) => handleNavClick(e, '#works-tools')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_tools')}</a>
               </div>
             </div>
 
-            <a href="#contact" onClick={(e) => handleNavClick(e, '#contact')} className="hover:text-diamond transition-colors py-2">{t('nav.contact')}</a>
+            <a href="#contact" onClick={(e) => handleNavClick(e, '#contact')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-2 transition-all rounded-sm">{t('nav.contact')}</a>
           </div>
         </div>
 
@@ -798,17 +888,28 @@ function App() {
                       { title: t('works.m7_t'), category: t('works.m7_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-orange-500", bg: "from-orange-500/10", desc: t('works.m7_d') },
                       { title: t('works.m8_t'), category: t('works.m8_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-amethyst", bg: "from-amethyst/10", desc: t('works.m8_d') },
                     ].map((work, idx) => (
-                      <div key={`map-${idx}`} className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center">
+                      <div 
+                        key={`map-${idx}`} 
+                        className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center"
+                        onMouseEnter={() => setTooltipContent({ visible: true, title: work.title, category: work.category, desc: work.desc })}
+                        onMouseLeave={() => setTooltipContent({ visible: false, title: '', category: '', desc: '' })}
+                      >
                         <div className="w-full md:w-1/2 lg:w-[60%] h-[50vh] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700">
                           <div className="parallax-bg absolute inset-[-20%] w-[140%] h-[140%]">
-                            {work.image ? (
+                            {work.image && !work.image.includes('placeholder') ? (
                               <img 
                                 src={work.image} 
                                 alt={work.title} 
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" 
                               />
                             ) : (
-                              <div className="w-full h-full bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(0,0,0,0.03)_20px,rgba(0,0,0,0.03)_40px)] dark:bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(255,255,255,0.02)_20px,rgba(255,255,255,0.02)_40px)] group-hover:scale-110 transition-transform duration-[1.5s] ease-out"></div>
+                              <div 
+                                className="w-full h-full bg-repeat image-rendering-pixelated group-hover:scale-110 transition-transform duration-[1.5s] ease-out saturate-50 dark:saturate-100 opacity-60 dark:opacity-40"
+                                style={{
+                                  backgroundImage: `url(${basePath}textures/${BLOCK_TEXTURES[(idx * 3) % BLOCK_TEXTURES.length].top})`,
+                                  backgroundSize: '128px'
+                                }}
+                              ></div>
                             )}
                           </div>
                           <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
@@ -854,17 +955,28 @@ function App() {
                       { title: t('works.m9_t'), category: t('works.m9_c'), year: "Java", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-[#ff9ff3]", bg: "from-[#ff9ff3]/10", desc: t('works.m9_d'), link: undefined },
                       { title: t('works.m10_t'), category: t('works.m10_c'), year: "Java", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-diamond", bg: "from-diamond/10", desc: t('works.m10_d'), link: undefined },
                     ].map((work, idx) => (
-                      <div key={`java-${idx}`} className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center">
+                      <div 
+                        key={`java-${idx}`} 
+                        className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center"
+                        onMouseEnter={() => setTooltipContent({ visible: true, title: work.title, category: work.category, desc: work.desc })}
+                        onMouseLeave={() => setTooltipContent({ visible: false, title: '', category: '', desc: '' })}
+                      >
                         <div className="w-full md:w-1/2 lg:w-[60%] h-[50vh] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700">
                           <div className="parallax-bg absolute inset-[-20%] w-[140%] h-[140%]">
-                            {work.image ? (
+                            {work.image && !work.image.includes('placeholder') ? (
                               <img 
                                 src={work.image} 
                                 alt={work.title} 
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" 
                               />
                             ) : (
-                              <div className="w-full h-full bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(0,0,0,0.03)_20px,rgba(0,0,0,0.03)_40px)] dark:bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(255,255,255,0.02)_20px,rgba(255,255,255,0.02)_40px)] group-hover:scale-110 transition-transform duration-[1.5s] ease-out"></div>
+                              <div 
+                                className="w-full h-full bg-repeat image-rendering-pixelated group-hover:scale-110 transition-transform duration-[1.5s] ease-out saturate-50 dark:saturate-100 opacity-60 dark:opacity-40"
+                                style={{
+                                  backgroundImage: `url(${basePath}textures/${BLOCK_TEXTURES[((idx + 5) * 3) % BLOCK_TEXTURES.length].top})`,
+                                  backgroundSize: '128px'
+                                }}
+                              ></div>
                             )}
                           </div>
                           <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
@@ -915,7 +1027,21 @@ function App() {
                     <div key={`mod-${idx}`} className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center">
                       <div className="w-full md:w-1/2 lg:w-[60%] h-[50vh] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700">
                         <div className="parallax-bg absolute inset-[-20%] w-[140%] h-[140%]">
-                          <div className="w-full h-full bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(0,0,0,0.03)_20px,rgba(0,0,0,0.03)_40px)] dark:bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(255,255,255,0.02)_20px,rgba(255,255,255,0.02)_40px)] group-hover:scale-110 transition-transform duration-[1.5s] ease-out"></div>
+                          {work.image && !work.image.includes('placeholder') ? (
+                            <img 
+                              src={work.image} 
+                              alt={work.title} 
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" 
+                            />
+                          ) : (
+                            <div 
+                              className="w-full h-full bg-repeat image-rendering-pixelated group-hover:scale-110 transition-transform duration-[1.5s] ease-out saturate-50 dark:saturate-100 opacity-60 dark:opacity-40"
+                              style={{
+                                backgroundImage: `url(${basePath}textures/${BLOCK_TEXTURES[7 % BLOCK_TEXTURES.length].top})`,
+                                backgroundSize: '128px'
+                              }}
+                            ></div>
+                          )}
                         </div>
                         <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
                         <div className="parallax-text absolute inset-0 flex items-center justify-center mix-blend-overlay">
@@ -953,7 +1079,21 @@ function App() {
                     <div key={`tool-${idx}`} className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center">
                       <div className="w-full md:w-1/2 lg:w-[60%] h-[50vh] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700">
                         <div className="parallax-bg absolute inset-[-20%] w-[140%] h-[140%]">
-                          <div className="w-full h-full bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(0,0,0,0.03)_20px,rgba(0,0,0,0.03)_40px)] dark:bg-[repeating-linear-gradient(45deg,transparent,transparent_20px,rgba(255,255,255,0.02)_20px,rgba(255,255,255,0.02)_40px)] group-hover:scale-110 transition-transform duration-[1.5s] ease-out"></div>
+                          {work.image && !work.image.includes('placeholder') ? (
+                            <img 
+                              src={work.image} 
+                              alt={work.title} 
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" 
+                            />
+                          ) : (
+                            <div 
+                              className="w-full h-full bg-repeat image-rendering-pixelated group-hover:scale-110 transition-transform duration-[1.5s] ease-out saturate-50 dark:saturate-100 opacity-60 dark:opacity-40"
+                              style={{
+                                backgroundImage: `url(${basePath}textures/${BLOCK_TEXTURES[17 % BLOCK_TEXTURES.length].top})`,
+                                backgroundSize: '128px'
+                              }}
+                            ></div>
+                          )}
                         </div>
                         <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
                         <div className="parallax-text absolute inset-0 flex items-center justify-center mix-blend-overlay">
@@ -1015,6 +1155,24 @@ function App() {
             <span className="text-[25vw] font-black uppercase tracking-tighter leading-none block">FIMEL</span>
           </div>
         </footer>
+
+        {/* Minecraft Advancement Toast */}
+        <div 
+          className={`fixed top-4 right-4 z-[100] w-[320px] h-[64px] transition-transform duration-500 ease-in-out pointer-events-none bg-no-repeat bg-center bg-contain image-rendering-pixelated flex items-center px-4`}
+          style={{ 
+            backgroundImage: `url('${basePath}HUD/Toast_advancement.png')`,
+            transform: advancement?.visible ? 'translateX(0)' : 'translateX(150%)'
+          }}
+        >
+          <div className="flex flex-col ml-[68px] justify-center mt-1">
+            <span className="text-[#FFFF55] font-['Minecraftia',monospace] text-[13px] leading-[1.2] tracking-wide" style={{ textShadow: '2px 2px 0px #3f3f3f' }}>
+              {advancement?.title}
+            </span>
+            <span className="text-white font-['Minecraftia',monospace] text-[13px] leading-[1.2] tracking-wide" style={{ textShadow: '2px 2px 0px #3f3f3f' }}>
+              {advancement?.desc}
+            </span>
+          </div>
+        </div>
 
       </div>
     </div>
