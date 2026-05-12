@@ -585,23 +585,7 @@ function App() {
         </div>
 
         {/* Phase 3 Hotbar Navigation HUD */}
-        <HotbarNav handleNavClick={handleNavClick} />
-
-        {/* MC Experience Bar Scroll Indicator */}
-        <div className="fixed bottom-6 md:bottom-8 left-0 w-full z-50 pointer-events-none flex justify-center drop-shadow-md transition-transform duration-300">
-          <div 
-            className="w-[182px] h-[5px] md:w-[364px] md:h-[10px] bg-no-repeat bg-cover image-rendering-pixelated"
-            style={{ backgroundImage: `url(${basePath}HUD/experience_bar_background.png)` }}
-          >
-            <div 
-              className="h-full bg-no-repeat bg-cover image-rendering-pixelated transition-all duration-100 ease-out"
-              style={{ 
-                width: `${scrollProgress * 100}%`,
-                backgroundImage: `url(${basePath}HUD/experience_bar_progress.png)`
-              }}
-            />
-          </div>
-        </div>
+        <HotbarNav scrollProgress={scrollProgress} handleNavClick={handleNavClick} />
 
         <nav className="fixed top-0 left-0 w-full z-40 flex items-center justify-between px-6 py-8 md:px-12 pointer-events-none mix-blend-difference text-white">
           <a href="#hero" onClick={(e) => handleNavClick(e, '#hero')} className="pointer-events-auto hover-target transition-transform hover:scale-105">
