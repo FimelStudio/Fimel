@@ -5,7 +5,7 @@ import Lenis from 'lenis';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Box, Stars, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
-import { ArrowUpRight, MousePointerClick, Diamond, Sword, Map, Code, Sun, Moon, Globe } from 'lucide-react';
+import { ArrowUpRight, MousePointerClick, Diamond, Sword, Map, Code, Sun, Moon, Globe, Star, Download, MessageCircle, Users, Package, CalendarDays } from 'lucide-react';
 import { useTranslation, Trans } from 'react-i18next';
 import CustomCursor from './components/CustomCursor';
 import HotbarNav from './components/HotbarNav';
@@ -127,6 +127,231 @@ const BLOCK_TEXTURES = [
     bottom: 'cactus_bottom.png'
   },
 ];
+
+const FEATURED_MAPS = [
+  {
+    title: "狼人杀-F小镇",
+    subtitle: "Werewolf: F-Town",
+    category: "网易基岩版地图",
+    genre: "狼人杀 PvP / 推理生存",
+    downloads: "427,397",
+    rating: "3.9",
+    comments: "78",
+    remarks: "176",
+    size: "183 KB",
+    version: "v1.23",
+    released: "2021-07-12",
+    updated: "2021-07-12",
+    image: "maps/werewolf-f-town.png",
+    link: "https://resource-minecraft.h5.163.com/#/detail?id=4648588173337957318",
+    accent: "group-hover:text-red-500 dark:group-hover:text-red-400",
+    bg: "from-red-500/10",
+    desc: "开局随机分配侦探、狼人和平民。狼人需要清除侦探与平民，侦探持弓找出狼人，平民可收集资源购买箭矢反击。",
+    players: "多人推理",
+    components: ["随机身份", "侦探弓箭", "金币购买", "狼人阵营"]
+  },
+  {
+    title: "饥饿游戏：旧城迷行",
+    subtitle: "Hunger Games: Old City",
+    category: "网易基岩版地图",
+    genre: "生存竞技 / PvP",
+    downloads: "84,098",
+    rating: "4.3",
+    comments: "51",
+    remarks: "95",
+    size: "11.7 MB",
+    version: "v2.2",
+    released: "2022-08-09",
+    updated: "2022-08-28",
+    image: "maps/hunger-games-old-city.png",
+    link: "https://resource-minecraft.h5.163.com/#/detail?id=4657291854883079467",
+    accent: "group-hover:text-amber-500",
+    bg: "from-amber-500/10",
+    desc: "旧城废墟中的自由混战。玩家选择天赋后分散出生，通过 TNT 获取物资，并利用铁砧、工作台、特殊区域与道具争夺最终胜利。",
+    players: "多人乱斗",
+    components: ["12 种天赋", "TNT 物资", "特殊地区", "死斗玩法"]
+  },
+  {
+    title: "ABYSS天坑",
+    subtitle: "Abyss Sky Pit",
+    category: "网易基岩版地图",
+    genre: "乱斗 PvP / 1v1",
+    downloads: "1,990",
+    rating: "4.3",
+    comments: "10",
+    remarks: "16",
+    size: "3.8 MB",
+    version: "v1.23",
+    released: "2021-09-03",
+    updated: "2021-09-03",
+    image: "maps/abyss-sky-pit.png",
+    link: "https://resource-minecraft.h5.163.com/#/detail?id=4649770038789663060",
+    accent: "group-hover:text-green-500",
+    bg: "from-green-500/10",
+    desc: "以多人乱斗 PvP 为主，也提供纯净 1v1 对战。强化弓箭、雪球破坏、击杀连播与方块皮肤系统让战局持续变化。",
+    players: "多人 / 1v1",
+    components: ["强化远程武器", "技能系统", "连杀播报", "方块皮肤"]
+  },
+  {
+    title: "FML空生自然竞技场职业大乱斗",
+    subtitle: "FML Sky Nature Arena",
+    category: "网易基岩版地图",
+    genre: "职业大乱斗 PvP",
+    downloads: "33,251",
+    rating: "4.7",
+    comments: "27",
+    remarks: "41",
+    size: "1.1 MB",
+    version: "v1.21",
+    released: "2021-04-02",
+    updated: "2021-07-14",
+    image: "maps/fml-sky-nature-arena.png",
+    link: "https://resource-minecraft.h5.163.com/#/detail?id=4646359448597896554",
+    accent: "group-hover:text-blue-500",
+    bg: "from-blue-500/10",
+    desc: "空生堂职业 PvP 大乱斗内置 24 种职业，并提供死亡榜、凋零风暴、爆炸箭、闪瞎眼等多种可切换游戏设置。",
+    players: "多人职业战",
+    components: ["24 种职业", "死亡榜", "模式设置区", "特殊规则"]
+  },
+  {
+    title: "逃走中",
+    subtitle: "Run For Money",
+    category: "网易基岩版地图",
+    genre: "追逐竞技 / PvP",
+    downloads: "17,809",
+    rating: "4.2",
+    comments: "29",
+    remarks: "40",
+    size: "564 KB",
+    version: "v2.0",
+    released: "2022-01-28",
+    updated: "2022-01-30",
+    image: "maps/run-for-money.png",
+    link: "https://resource-minecraft.h5.163.com/#/detail?id=4653059746050819814",
+    accent: "group-hover:text-rose-500",
+    bg: "from-rose-500/10",
+    desc: "随机玩家会成为被猎杀目标，其余玩家化身猎人展开追捕。目标需要开箱寻找道具、撑过追杀轮次，并在最终 PvP 中活到最后。",
+    players: "多人竞技",
+    components: ["随机目标", "猎人追捕", "道具开箱", "最终 PvP"]
+  },
+  {
+    title: "通电2雪域危机",
+    subtitle: "Power On 2: Snow Crisis",
+    category: "网易基岩版地图",
+    genre: "非对称解谜生存",
+    downloads: "22,286",
+    rating: "5.0",
+    comments: "16",
+    remarks: "63",
+    size: "6.8 MB",
+    version: "v2.1",
+    released: "2022-06-02",
+    updated: "2022-06-02",
+    image: "maps/power-on-2-snow-crisis.png",
+    link: "https://resource-minecraft.h5.163.com/#/detail?id=4655644384723477429",
+    accent: "group-hover:text-cyan-500",
+    bg: "from-cyan-500/10",
+    desc: "《通电》最终章。玩家深入破败极地科考站，在严寒环境中重启发电机，并破解围绕设施展开的逻辑谜题。",
+    players: "多人协作",
+    components: ["发电机重启", "极地科考站", "逻辑谜题", "生存闯关"]
+  },
+  {
+    title: "海岛逃生--黎明前夕",
+    subtitle: "Island Escape: Before Dawn",
+    category: "网易基岩版地图",
+    genre: "感染逃生 / 阵营对抗",
+    downloads: "39,520",
+    rating: "4.2",
+    comments: "15",
+    remarks: "39",
+    size: "18.3 MB",
+    version: "v3.2",
+    released: "2025-02-16",
+    updated: "2025-02-16",
+    image: "maps/island-escape-before-dawn.png",
+    link: "https://resource-minecraft.h5.163.com/#/detail?id=4677793220493990518",
+    accent: "group-hover:text-emerald-500",
+    bg: "from-emerald-500/10",
+    desc: "4-8 人逃生地图。人类阵营需要修复岛上五座信号塔并等待直升机撤离，感染者则要阻止修复并扩散感染。",
+    players: "4-8 人",
+    components: ["人类/感染者阵营", "五座信号塔", "职业协作", "直升机撤离"]
+  },
+  {
+    title: "紫晶幻域：救世光源",
+    subtitle: "Amethyst: Salvation",
+    category: "网易基岩版地图",
+    genre: "闯关 RPG / 冒险剧情",
+    downloads: "13,523",
+    rating: "4.7",
+    comments: "90",
+    remarks: "192",
+    size: "3.7 MB",
+    version: "v2.11",
+    released: "2024-07-01",
+    updated: "2024-09-20",
+    image: "maps/amethyst-salvation.png",
+    link: "https://resource-minecraft.h5.163.com/#/detail?id=4672593901126936215",
+    accent: "group-hover:text-amethyst",
+    bg: "from-amethyst/10",
+    desc: "幻想大陆被黑暗势力笼罩，玩家选择职业后从初始村庄出发，购买道具、升级装备，并击败被紫水晶魔法召唤出的亡灵敌人。",
+    players: "多人 RPG",
+    components: ["职业选择", "剧情闯关", "装备升级", "亡灵敌人"]
+  }
+];
+
+const MAP_DESCRIPTIONS: Record<string, { zh: string; en: string; ja: string }> = {
+  "狼人杀-F小镇": {
+    zh: "开局随机分配侦探、狼人和平民。狼人需要清除侦探与平民，侦探持弓找出狼人，平民可收集资源购买箭矢反击。",
+    en: "Players are randomly assigned as detective, werewolf, or villager. Werewolves hunt everyone down, the detective uses a bow to identify threats, and villagers collect resources to buy arrows and fight back.",
+    ja: "開始時に探偵、人狼、村人がランダムに割り当てられます。人狼は探偵と村人を狩り、探偵は弓で人狼を見抜き、村人は資源を集めて矢を買い反撃します。"
+  },
+  "饥饿游戏：旧城迷行": {
+    zh: "旧城废墟中的自由混战。玩家选择天赋后分散出生，通过 TNT 获取物资，并利用铁砧、工作台、特殊区域与道具争夺最终胜利。",
+    en: "A free-for-all survival battle in a ruined old city. Choose a talent, spawn apart, gather loot through TNT, and use crafting stations, special zones, and items to fight for the final win.",
+    ja: "廃墟となった旧市街でのサバイバル乱戦です。才能を選んで分散スポーンし、TNTで物資を集め、金床、作業台、特殊エリア、アイテムを活用して勝利を目指します。"
+  },
+  "ABYSS天坑": {
+    zh: "以多人乱斗 PvP 为主，也提供纯净 1v1 对战。强化弓箭、雪球破坏、击杀连播与方块皮肤系统让战局持续变化。",
+    en: "A PvP arena focused on multiplayer brawls with a clean 1v1 mode as well. Enhanced bows, block-breaking snowballs, kill streak broadcasts, and block skins keep each match shifting.",
+    ja: "多人数乱闘PvPを中心に、純粋な1v1対戦にも対応したマップです。強化された弓、ブロックを壊せる雪玉、連続キル演出、ブロックスキンが戦況を変化させます。"
+  },
+  "FML空生自然竞技场职业大乱斗": {
+    zh: "空生堂职业 PvP 大乱斗内置 24 种职业，并提供死亡榜、凋零风暴、爆炸箭、闪瞎眼等多种可切换游戏设置。",
+    en: "A class-based PvP brawl with 24 playable roles, plus configurable rules such as death rankings, Wither Storm mode, explosive arrows, and flash effects.",
+    ja: "24種類の職業で戦うクラス制PvP乱闘マップです。死亡ランキング、ウィザーストーム、爆発矢、視界妨害など、複数のルール設定を切り替えられます。"
+  },
+  "逃走中": {
+    zh: "随机玩家会成为被猎杀目标，其余玩家化身猎人展开追捕。目标需要开箱寻找道具、撑过追杀轮次，并在最终 PvP 中活到最后。",
+    en: "One random player becomes the target while everyone else becomes a hunter. The target opens chests for tools, survives chase rounds, and then fights to be the last standing in the final PvP.",
+    ja: "ランダムなプレイヤーが標的となり、他のプレイヤーはハンターとして追跡します。標的はチェストから道具を探して追跡ラウンドを生き延び、最後のPvPで生存を目指します。"
+  },
+  "通电2雪域危机": {
+    zh: "《通电》最终章。玩家深入破败极地科考站，在严寒环境中重启发电机，并破解围绕设施展开的逻辑谜题。",
+    en: "The final chapter of Power On. Players enter a ruined polar research station, restart generators in the cold, and solve logic puzzles built around the facility.",
+    ja: "『通電』シリーズの最終章です。荒廃した極地研究施設に入り、厳寒の中で発電機を再起動し、施設をめぐるロジックパズルを解きます。"
+  },
+  "海岛逃生--黎明前夕": {
+    zh: "4-8 人逃生地图。人类阵营需要修复岛上五座信号塔并等待直升机撤离，感染者则要阻止修复并扩散感染。",
+    en: "A 4-8 player escape map. Humans repair five signal towers and wait for helicopter extraction, while the infected team blocks repairs and spreads infection.",
+    ja: "4〜8人向けの脱出マップです。人間陣営は島の5つの信号塔を修理してヘリの救助を待ち、感染者陣営は修理を妨害して感染を広げます。"
+  },
+  "紫晶幻域：救世光源": {
+    zh: "幻想大陆被黑暗势力笼罩，玩家选择职业后从初始村庄出发，购买道具、升级装备，并击败被紫水晶魔法召唤出的亡灵敌人。",
+    en: "A fantasy continent has fallen under darkness. Choose a class, begin from the starting village, buy items, upgrade gear, and defeat undead enemies summoned by amethyst magic.",
+    ja: "幻想大陸が闇の勢力に覆われています。職業を選び、始まりの村から旅立ち、道具購入と装備強化を重ねながら、紫水晶の魔法で召喚された亡霊を倒します。"
+  }
+};
+
+const getCurrentLanguage = (language: string): keyof (typeof MAP_DESCRIPTIONS)[string] => {
+  if (language.startsWith('ja')) return 'ja';
+  if (language.startsWith('en')) return 'en';
+  return 'zh';
+};
+
+const getMapDescription = (work: (typeof FEATURED_MAPS)[number], language: string) => {
+  const descriptions = MAP_DESCRIPTIONS[work.title];
+  return descriptions?.[getCurrentLanguage(language)] ?? work.desc;
+};
 
 function MinecraftBlock({ cube, isDark }: { cube: any, isDark: boolean }) {
   const basePath = import.meta.env.BASE_URL;
@@ -589,7 +814,7 @@ function App() {
 
         <nav className="fixed top-0 left-0 w-full z-40 flex items-center justify-between px-6 py-8 md:px-12 pointer-events-none mix-blend-difference text-white">
           <a href="#hero" onClick={(e) => handleNavClick(e, '#hero')} className="pointer-events-auto hover-target transition-transform hover:scale-105">
-            <img src={logoPath} alt="FIMEL Logo" className="h-12 md:h-16 object-contain invert" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement!.innerHTML = '<span class="text-xl font-bold tracking-[0.3em] uppercase">FIMEL.</span>'; }} />
+            <img src={logoPath} alt="FIMEL Logo" className="h-[4.5rem] md:h-24 object-contain invert" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement!.innerHTML = '<span class="text-[1.875rem] font-bold tracking-[0.3em] uppercase">FIMEL.</span>'; }} />
           </a>
           <div className="hidden md:flex items-center gap-10 text-s tracking-widest uppercase font-mono pointer-events-auto">
               <a href="#about" onClick={(e) => handleNavClick(e, '#about')} className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all hover-target rounded-sm">{t('nav.about')}</a>
@@ -605,8 +830,8 @@ function App() {
                         {t('nav.nav_maps')} <span className="text-[10px] opacity-50">▶</span>
                       </a>
                       <div className="absolute left-full top-0 opacity-0 pointer-events-none group-hover/maps:opacity-100 group-hover/maps:pointer-events-auto transition-opacity duration-300 bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col">
-                        <a href="#works-maps" onClick={(e) => handleNavClick(e, '#works-maps')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-b border-obsidian/5 dark:border-white/5 whitespace-nowrap">{t('nav.nav_maps_be')}</a>
-                        <a href="#works-maps" onClick={(e) => handleNavClick(e, '#works-maps')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left whitespace-nowrap">{t('nav.nav_maps_je')}</a>
+                        <a href="#works-maps-je" onClick={(e) => handleNavClick(e, '#works-maps-je')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-b border-obsidian/5 dark:border-white/5 whitespace-nowrap">{t('nav.nav_maps_je')}</a>
+                        <a href="#works-maps-be" onClick={(e) => handleNavClick(e, '#works-maps-be')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left whitespace-nowrap">{t('nav.nav_maps_be')}</a>
                       </div>
                     </div>
                     {/* Mods & Tools */}
@@ -618,16 +843,16 @@ function App() {
 
               <a href="#contact" onClick={(e) => handleNavClick(e, '#contact')} className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all hover-target rounded-sm">{t('nav.contact')}</a>
             </div>
-            <div className="flex items-center gap-6 pointer-events-auto relative">
+            <div className="flex items-center gap-4 md:gap-9 pointer-events-auto relative">
               <div className="relative hover-target">
                 <button onClick={() => setLangMenuOpen(!langMenuOpen)} className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all flex items-center gap-2 rounded-sm">
                   <Globe size={18} />
                   <span className="text-xs font-mono hidden md:block">{i18n.language.toUpperCase()}</span>
                 </button>
               {langMenuOpen && (
-                <div className="absolute right-0 mt-4 w-32 py-2 bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-xs z-50">
+                <div className="absolute right-0 mt-6 w-48 py-3 bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-lg z-50 [&>button]:px-6 [&>button]:py-3">
                   <button onClick={() => changeLanguage('zh')} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/10 text-left">中文 (ZH)</button>
-                  <button onClick={() => changeLanguage('en')} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/10 text-left">English (EN)</button>
+                  <button onClick={() => changeLanguage('en')} className="px-6 py-3 hover:bg-gray-100 dark:hover:bg-white/10 text-left">English (EN)</button>
                   <button onClick={() => changeLanguage('ja')} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/10 text-left">日本語 (JA)</button>
                 </div>
               )}
@@ -655,7 +880,8 @@ function App() {
             <div className="flex flex-col gap-2">
               <span className="text-gray-500 py-2 px-2">{t('nav.works')}</span>
               <div className="flex flex-col pl-4 gap-3 border-l border-obsidian/10 dark:border-white/10 ml-2">
-                <a href="#works-maps" onClick={(e) => handleNavClick(e, '#works-maps')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_maps')} (BE/JE)</a>
+                <a href="#works-maps-je" onClick={(e) => handleNavClick(e, '#works-maps-je')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_maps_je')}</a>
+                <a href="#works-maps-be" onClick={(e) => handleNavClick(e, '#works-maps-be')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_maps_be')}</a>
                 <a href="#works-mods" onClick={(e) => handleNavClick(e, '#works-mods')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_mods')}</a>
                 <a href="#works-tools" onClick={(e) => handleNavClick(e, '#works-tools')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_tools')}</a>
               </div>
@@ -856,81 +1082,8 @@ function App() {
                   {t('works.category_maps')}
                 </div>
                 
-                {/* Subcategory: Bedrock / NetEase */}
-                <div id="works-maps-be" className="scroll-mt-32 mb-16">
-                  <h4 className="reveal-up text-lg font-bold tracking-widest uppercase text-obsidian/50 dark:text-white/50 border-b border-obsidian/10 dark:border-white/10 pb-4 mb-16">
-                    {t('nav.nav_maps_be')}
-                  </h4>
-                  <div className="space-y-32">
-                    {[
-                      { title: t('works.m1_t'), category: t('works.m1_c'), year: "100k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-red-500 dark:group-hover:text-red-400", bg: "from-red-500/10", desc: t('works.m1_d'), link: "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648588173337957318" },
-                      { title: t('works.m2_t'), category: t('works.m2_c'), year: "50k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-amber-500", bg: "from-amber-500/10", desc: t('works.m2_d') },
-                      { title: t('works.m3_t'), category: t('works.m3_c'), year: "1k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-green-500", bg: "from-green-500/10", desc: t('works.m3_d') },
-                      { title: t('works.m4_t'), category: t('works.m4_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-blue-500", bg: "from-blue-500/10", desc: t('works.m4_d') },
-                      { title: t('works.m5_t'), category: t('works.m5_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-pink-500", bg: "from-pink-500/10", desc: t('works.m5_d') },
-                      { title: t('works.m6_t'), category: t('works.m6_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-cyan-500", bg: "from-cyan-500/10", desc: t('works.m6_d') },
-                      { title: t('works.m7_t'), category: t('works.m7_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-orange-500", bg: "from-orange-500/10", desc: t('works.m7_d') },
-                      { title: t('works.m8_t'), category: t('works.m8_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-amethyst", bg: "from-amethyst/10", desc: t('works.m8_d') },
-                    ].map((work, idx) => (
-                      <div 
-                        key={`map-${idx}`} 
-                        className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center"
-                        onMouseEnter={() => setTooltipContent({ visible: true, title: work.title, category: work.category, desc: work.desc })}
-                        onMouseLeave={() => setTooltipContent({ visible: false, title: '', category: '', desc: '' })}
-                      >
-                        <div className="w-full md:w-1/2 lg:w-[60%] h-[50vh] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700">
-                          <div className="parallax-bg absolute inset-[-20%] w-[140%] h-[140%]">
-                            {work.image && !work.image.includes('placeholder') ? (
-                              <img 
-                                src={work.image} 
-                                alt={work.title} 
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" 
-                              />
-                            ) : (
-                              <div 
-                                className="w-full h-full bg-repeat image-rendering-pixelated group-hover:scale-110 transition-transform duration-[1.5s] ease-out saturate-50 dark:saturate-100 opacity-60 dark:opacity-40"
-                                style={{
-                                  backgroundImage: `url(${basePath}textures/${BLOCK_TEXTURES[(idx * 3) % BLOCK_TEXTURES.length].top})`,
-                                  backgroundSize: '128px'
-                                }}
-                              ></div>
-                            )}
-                          </div>
-                          <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
-                          <div className="parallax-text absolute inset-0 flex items-center justify-center mix-blend-overlay">
-                             <span className="text-obsidian/20 dark:text-white/20 font-black text-6xl md:text-8xl tracking-tighter transition-colors duration-700">MAP_{idx+1}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="w-full md:w-1/2 lg:w-[40%] flex flex-col justify-center space-y-8">
-                          <div className="text-xs uppercase font-mono tracking-widest text-gray-500 border-b border-obsidian/10 dark:border-white/10 pb-4 flex justify-between transition-colors duration-700">
-                            <span>{work.category}</span>
-                            <span>{work.year}</span>
-                          </div>
-                          <h3 className={`text-4xl md:text-5xl lg:text-7xl font-bold uppercase tracking-tighter transition-colors duration-500 text-obsidian dark:text-white ${work.accent}`}>
-                            {work.title}
-                          </h3>
-                          <p className="text-gray-600 dark:text-gray-400 font-light font-sans max-w-md text-base md:text-lg leading-relaxed transition-colors duration-700">
-                            {work.desc}
-                          </p>
-                          
-                          {work.link ? (
-                            <a href={work.link} target="_blank" rel="noopener noreferrer" className="w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono hover:text-diamond text-gray-500 transition-colors mt-4">
-                              <MousePointerClick className="w-4 h-4" /> {t('works.view')}
-                            </a>
-                          ) : (
-                            <div className="w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono text-gray-500/50 dark:text-gray-500/50 mt-4 cursor-not-allowed" title="Link Coming Soon">
-                              <MousePointerClick className="w-4 h-4" /> {t('works.view')}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Subcategory: Java Edition */}
-                <div id="works-maps-je" className="scroll-mt-32 pt-16">
+                <div id="works-maps-je" className="scroll-mt-32 mb-16">
                   <h4 className="reveal-up text-lg font-bold tracking-widest uppercase text-obsidian/50 dark:text-white/50 border-b border-obsidian/10 dark:border-white/10 pb-4 mb-16">
                     {t('nav.nav_maps_je')}
                   </h4>
@@ -940,7 +1093,7 @@ function App() {
                       { title: t('works.m10_t'), category: t('works.m10_c'), year: "Java", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-diamond", bg: "from-diamond/10", desc: t('works.m10_d'), link: undefined },
                     ].map((work, idx) => (
                       <div 
-                        key={`java-${idx}`} 
+                        key={`java-${idx}`}
                         className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center"
                         onMouseEnter={() => setTooltipContent({ visible: true, title: work.title, category: work.category, desc: work.desc })}
                         onMouseLeave={() => setTooltipContent({ visible: false, title: '', category: '', desc: '' })}
@@ -992,6 +1145,102 @@ function App() {
                           )}
                         </div>
                       </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Subcategory: Bedrock / NetEase */}
+                <div id="works-maps-be" className="scroll-mt-32 pt-16">
+                  <h4 className="reveal-up text-lg font-bold tracking-widest uppercase text-obsidian/50 dark:text-white/50 border-b border-obsidian/10 dark:border-white/10 pb-4 mb-16">
+                    {t('nav.nav_maps_be')}
+                  </h4>
+                  <div className="space-y-28">
+                    {FEATURED_MAPS.map((work) => (
+                      <article
+                        key={work.link}
+                        className="reveal-up group relative flex flex-col md:flex-row gap-10 lg:gap-16 items-stretch"
+                        onMouseEnter={() => setTooltipContent({ visible: true, title: work.title, category: work.genre, desc: getMapDescription(work, i18n.language) })}
+                        onMouseLeave={() => setTooltipContent({ visible: false, title: '', category: '', desc: '' })}
+                      >
+                        <a
+                          href={work.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover-target w-full md:w-1/2 lg:w-[58%] min-h-[22rem] md:min-h-[34rem] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700"
+                          aria-label={`查看 ${work.title} 的网易资源中心详情`}
+                        >
+                          <div className="parallax-bg absolute inset-[-18%] w-[136%] h-[136%]">
+                            <img
+                              src={`${basePath}${work.image}`}
+                              alt={work.title}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out"
+                            />
+                          </div>
+                          <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
+                        </a>
+
+                        <div className="w-full md:w-1/2 lg:w-[42%] flex flex-col justify-center py-2 md:py-6">
+                          <div className="text-xs uppercase font-mono tracking-widest text-gray-500 border-b border-obsidian/10 dark:border-white/10 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 transition-colors duration-700">
+                            <span>{work.category}</span>
+                            <span>{work.genre}</span>
+                          </div>
+
+                          <div className="mt-7 space-y-3">
+                            <p className="text-xs font-mono uppercase tracking-[0.25em] text-gray-500">{work.subtitle}</p>
+                            <h3 className={`text-3xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tighter leading-[0.95] break-words transition-colors duration-500 text-obsidian dark:text-white ${work.accent}`}>
+                              {work.title}
+                            </h3>
+                          </div>
+
+                          <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-4 text-sm font-mono text-obsidian dark:text-white">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Download className="w-4 h-4 text-diamond shrink-0" />
+                              <span className="truncate">{work.downloads} 下载</span>
+                            </div>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Star className="w-4 h-4 text-amber-500 shrink-0" />
+                              <span className="truncate">{work.rating} 评分</span>
+                            </div>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <MessageCircle className="w-4 h-4 text-amethyst shrink-0" />
+                              <span className="truncate">{work.comments} 评论 / {work.remarks} 评价</span>
+                            </div>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Package className="w-4 h-4 text-gray-500 shrink-0" />
+                              <span className="truncate">{work.size} · {work.version}</span>
+                            </div>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <CalendarDays className="w-4 h-4 text-gray-500 shrink-0" />
+                              <span className="truncate">发布时间 {work.released}</span>
+                            </div>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Users className="w-4 h-4 text-gray-500 shrink-0" />
+                              <span className="truncate">{work.players}</span>
+                            </div>
+                          </div>
+
+                          <div className="mt-7 flex flex-wrap gap-2">
+                            {work.components.map((component) => (
+                              <span key={component} className="border border-obsidian/10 dark:border-white/10 px-3 py-2 text-xs text-gray-600 dark:text-gray-300">
+                                {component}
+                              </span>
+                            ))}
+                          </div>
+
+                          <p className="mt-7 text-gray-600 dark:text-gray-400 font-light font-sans max-w-xl text-base md:text-lg leading-relaxed transition-colors duration-700">
+                            {getMapDescription(work, i18n.language)}
+                          </p>
+
+                          <a
+                            href={work.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover-target mt-8 w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono text-gray-500 hover:text-obsidian dark:hover:text-white transition-colors"
+                          >
+                            <MousePointerClick className="w-4 h-4" /> {t('works.view')}
+                          </a>
+                        </div>
+                      </article>
                     ))}
                   </div>
                 </div>
