@@ -5,7 +5,7 @@ import Lenis from 'lenis';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Box, Stars, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
-import { ArrowUpRight, MousePointerClick, Diamond, Sword, Map, Code, Sun, Moon, Globe } from 'lucide-react';
+import { ArrowUpRight, MousePointerClick, Diamond, Sword, Map, Code, Sun, Moon, Globe, Star, Download, MessageCircle, Users, Package, CalendarDays } from 'lucide-react';
 import { useTranslation, Trans } from 'react-i18next';
 import CustomCursor from './components/CustomCursor';
 import HotbarNav from './components/HotbarNav';
@@ -247,6 +247,128 @@ function SmokeEffect({ position }: { position: [number, number, number] }) {
     </group>
   );
 }
+const FEATURED_MAPS = [
+  {
+    i18nKey: "werewolfFTown",
+    downloads: "427,397",
+    rating: "3.9",
+    comments: "78",
+    remarks: "176",
+    size: "183 KB",
+    version: "v1.23",
+    released: "2021-07-12",
+    updated: "2021-07-12",
+    image: "maps/werewolf-f-town.png",
+    link: "https://resource-minecraft.h5.163.com/#/detail?id=4648588173337957318",
+    accent: "group-hover:text-red-500 dark:group-hover:text-red-400",
+    bg: "from-red-500/10"
+  },
+  {
+    i18nKey: "hungerGamesOldCity",
+    downloads: "84,098",
+    rating: "4.3",
+    comments: "51",
+    remarks: "95",
+    size: "11.7 MB",
+    version: "v2.2",
+    released: "2022-08-09",
+    updated: "2022-08-28",
+    image: "maps/hunger-games-old-city.png",
+    link: "https://resource-minecraft.h5.163.com/#/detail?id=4657291854883079467",
+    accent: "group-hover:text-amber-500",
+    bg: "from-amber-500/10"
+  },
+  {
+    i18nKey: "abyssSkyPit",
+    downloads: "1,990",
+    rating: "4.3",
+    comments: "10",
+    remarks: "16",
+    size: "3.8 MB",
+    version: "v1.23",
+    released: "2021-09-03",
+    updated: "2021-09-03",
+    image: "maps/abyss-sky-pit.png",
+    link: "https://resource-minecraft.h5.163.com/#/detail?id=4649770038789663060",
+    accent: "group-hover:text-green-500",
+    bg: "from-green-500/10"
+  },
+  {
+    i18nKey: "fmlSkyNatureArena",
+    downloads: "33,251",
+    rating: "4.7",
+    comments: "27",
+    remarks: "41",
+    size: "1.1 MB",
+    version: "v1.21",
+    released: "2021-04-02",
+    updated: "2021-07-14",
+    image: "maps/fml-sky-nature-arena.png",
+    link: "https://resource-minecraft.h5.163.com/#/detail?id=4646359448597896554",
+    accent: "group-hover:text-blue-500",
+    bg: "from-blue-500/10"
+  },
+  {
+    i18nKey: "runForMoney",
+    downloads: "17,809",
+    rating: "4.2",
+    comments: "29",
+    remarks: "40",
+    size: "564 KB",
+    version: "v2.0",
+    released: "2022-01-28",
+    updated: "2022-01-30",
+    image: "maps/run-for-money.png",
+    link: "https://resource-minecraft.h5.163.com/#/detail?id=4653059746050819814",
+    accent: "group-hover:text-rose-500",
+    bg: "from-rose-500/10"
+  },
+  {
+    i18nKey: "powerOn2SnowCrisis",
+    downloads: "22,286",
+    rating: "5.0",
+    comments: "16",
+    remarks: "63",
+    size: "6.8 MB",
+    version: "v2.1",
+    released: "2022-06-02",
+    updated: "2022-06-02",
+    image: "maps/power-on-2-snow-crisis.png",
+    link: "https://resource-minecraft.h5.163.com/#/detail?id=4655644384723477429",
+    accent: "group-hover:text-cyan-500",
+    bg: "from-cyan-500/10"
+  },
+  {
+    i18nKey: "islandEscapeBeforeDawn",
+    downloads: "39,520",
+    rating: "4.2",
+    comments: "15",
+    remarks: "39",
+    size: "18.3 MB",
+    version: "v3.2",
+    released: "2025-02-16",
+    updated: "2025-02-16",
+    image: "maps/island-escape-before-dawn.png",
+    link: "https://resource-minecraft.h5.163.com/#/detail?id=4677793220493990518",
+    accent: "group-hover:text-emerald-500",
+    bg: "from-emerald-500/10"
+  },
+  {
+    i18nKey: "amethystSalvation",
+    downloads: "13,523",
+    rating: "4.7",
+    comments: "90",
+    remarks: "192",
+    size: "3.7 MB",
+    version: "v2.11",
+    released: "2024-07-01",
+    updated: "2024-09-20",
+    image: "maps/amethyst-salvation.png",
+    link: "https://resource-minecraft.h5.163.com/#/detail?id=4672593901126936215",
+    accent: "group-hover:text-amethyst",
+    bg: "from-amethyst/10"
+  }
+];
 
 function MinecraftBlock({ cube, isDark }: { cube: any, isDark: boolean }) {
   const basePath = import.meta.env.BASE_URL;
@@ -801,7 +923,7 @@ function App() {
 
         <nav className="fixed top-0 left-0 w-full z-40 flex items-center justify-between px-6 py-8 md:px-12 pointer-events-none mix-blend-difference text-white">
           <a href="#hero" onClick={(e) => handleNavClick(e, '#hero')} className="pointer-events-auto hover-target transition-transform hover:scale-105">
-            <img src={logoPath} alt="FIMEL Logo" className="h-12 md:h-16 object-contain invert" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement!.innerHTML = '<span class="text-xl font-bold tracking-[0.3em] uppercase">FIMEL.</span>'; }} />
+            <img src={logoPath} alt="FIMEL Logo" className="h-[4.5rem] md:h-24 object-contain invert" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement!.innerHTML = '<span class="text-[1.875rem] font-bold tracking-[0.3em] uppercase">FIMEL.</span>'; }} />
           </a>
           <div className="hidden md:flex items-center gap-10 text-s tracking-widest uppercase font-mono pointer-events-auto">
               <a href="#about" onClick={(e) => handleNavClick(e, '#about')} className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all hover-target rounded-sm">{t('nav.about')}</a>
@@ -817,8 +939,8 @@ function App() {
                         {t('nav.nav_maps')} <span className="text-[10px] opacity-50">▶</span>
                       </a>
                       <div className="absolute left-full top-0 opacity-0 pointer-events-none group-hover/maps:opacity-100 group-hover/maps:pointer-events-auto transition-opacity duration-300 bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col">
-                        <a href="#works-maps" onClick={(e) => handleNavClick(e, '#works-maps')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-b border-obsidian/5 dark:border-white/5 whitespace-nowrap">{t('nav.nav_maps_be')}</a>
-                        <a href="#works-maps" onClick={(e) => handleNavClick(e, '#works-maps')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left whitespace-nowrap">{t('nav.nav_maps_je')}</a>
+                        <a href="#works-maps-je" onClick={(e) => handleNavClick(e, '#works-maps-je')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-b border-obsidian/5 dark:border-white/5 whitespace-nowrap">{t('nav.nav_maps_je')}</a>
+                        <a href="#works-maps-be" onClick={(e) => handleNavClick(e, '#works-maps-be')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left whitespace-nowrap">{t('nav.nav_maps_be')}</a>
                       </div>
                     </div>
                     {/* Mods & Tools */}
@@ -830,16 +952,16 @@ function App() {
 
               <a href="#contact" onClick={(e) => handleNavClick(e, '#contact')} className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all hover-target rounded-sm">{t('nav.contact')}</a>
             </div>
-            <div className="flex items-center gap-6 pointer-events-auto relative">
+            <div className="flex items-center gap-4 md:gap-9 pointer-events-auto relative">
               <div className="relative hover-target">
                 <button onClick={() => setLangMenuOpen(!langMenuOpen)} className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all flex items-center gap-2 rounded-sm">
                   <Globe size={18} />
                   <span className="text-xs font-mono hidden md:block">{i18n.language.toUpperCase()}</span>
                 </button>
               {langMenuOpen && (
-                <div className="absolute right-0 mt-4 w-32 py-2 bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-xs z-50">
+                <div className="absolute right-0 mt-6 w-48 py-3 bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-lg z-50 [&>button]:px-6 [&>button]:py-3">
                   <button onClick={() => changeLanguage('zh')} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/10 text-left">中文 (ZH)</button>
-                  <button onClick={() => changeLanguage('en')} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/10 text-left">English (EN)</button>
+                  <button onClick={() => changeLanguage('en')} className="px-6 py-3 hover:bg-gray-100 dark:hover:bg-white/10 text-left">English (EN)</button>
                   <button onClick={() => changeLanguage('ja')} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/10 text-left">日本語 (JA)</button>
                 </div>
               )}
@@ -867,7 +989,8 @@ function App() {
             <div className="flex flex-col gap-2">
               <span className="text-gray-500 py-2 px-2">{t('nav.works')}</span>
               <div className="flex flex-col pl-4 gap-3 border-l border-obsidian/10 dark:border-white/10 ml-2">
-                <a href="#works-maps" onClick={(e) => handleNavClick(e, '#works-maps')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_maps')} (BE/JE)</a>
+                <a href="#works-maps-je" onClick={(e) => handleNavClick(e, '#works-maps-je')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_maps_je')}</a>
+                <a href="#works-maps-be" onClick={(e) => handleNavClick(e, '#works-maps-be')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_maps_be')}</a>
                 <a href="#works-mods" onClick={(e) => handleNavClick(e, '#works-mods')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_mods')}</a>
                 <a href="#works-tools" onClick={(e) => handleNavClick(e, '#works-tools')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_tools')}</a>
               </div>
@@ -1031,8 +1154,8 @@ function App() {
                 {[
                   { name: "Ylong", role: t('team.role1'), letter: "Y", color: "text-diamond" },
                   { name: "TreeHey", role: t('team.role2'), letter: "T", color: "text-amethyst" },
-                  { name: "水晶", role: t('team.role4'), letter: "水", color: "text-[#00d2d3]" },
-                  { name: "橙子", role: t('team.role3'), letter: "橙", color: "text-[#ffa500]" }
+                  { name: "crystal215", role: t('team.role4'), letter: "水", color: "text-[#00d2d3]" },
+                  { name: "chengzi", role: t('team.role3'), letter: "橙", color: "text-[#ffa500]" }
                 ].map((member, idx) => (
                   <div key={idx} className="reveal-up group relative p-8 bg-white/40 dark:bg-black/40 border border-obsidian/5 dark:border-white/5 hover:bg-white dark:hover:bg-[#111] transition-colors duration-500 flex flex-col items-center text-center">
                     <div className="w-20 h-20 rounded-full bg-paper dark:bg-obsidian border border-obsidian/10 dark:border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 overflow-hidden">
@@ -1068,81 +1191,8 @@ function App() {
                   {t('works.category_maps')}
                 </div>
                 
-                {/* Subcategory: Bedrock / NetEase */}
-                <div id="works-maps-be" className="scroll-mt-32 mb-16">
-                  <h4 className="reveal-up text-lg font-bold tracking-widest uppercase text-obsidian/50 dark:text-white/50 border-b border-obsidian/10 dark:border-white/10 pb-4 mb-16">
-                    {t('nav.nav_maps_be')}
-                  </h4>
-                  <div className="space-y-32">
-                    {[
-                      { title: t('works.m1_t'), category: t('works.m1_c'), year: "100k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-red-500 dark:group-hover:text-red-400", bg: "from-red-500/10", desc: t('works.m1_d'), link: "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648588173337957318" },
-                      { title: t('works.m2_t'), category: t('works.m2_c'), year: "50k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-amber-500", bg: "from-amber-500/10", desc: t('works.m2_d') },
-                      { title: t('works.m3_t'), category: t('works.m3_c'), year: "1k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-green-500", bg: "from-green-500/10", desc: t('works.m3_d') },
-                      { title: t('works.m4_t'), category: t('works.m4_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-blue-500", bg: "from-blue-500/10", desc: t('works.m4_d') },
-                      { title: t('works.m5_t'), category: t('works.m5_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-pink-500", bg: "from-pink-500/10", desc: t('works.m5_d') },
-                      { title: t('works.m6_t'), category: t('works.m6_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-cyan-500", bg: "from-cyan-500/10", desc: t('works.m6_d') },
-                      { title: t('works.m7_t'), category: t('works.m7_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-orange-500", bg: "from-orange-500/10", desc: t('works.m7_d') },
-                      { title: t('works.m8_t'), category: t('works.m8_c'), year: "10k+ DL", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-amethyst", bg: "from-amethyst/10", desc: t('works.m8_d') },
-                    ].map((work, idx) => (
-                      <div 
-                        key={`map-${idx}`} 
-                        className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center"
-                        onMouseEnter={() => setTooltipContent({ visible: true, title: work.title, category: work.category, desc: work.desc })}
-                        onMouseLeave={() => setTooltipContent({ visible: false, title: '', category: '', desc: '' })}
-                      >
-                        <div className="w-full md:w-1/2 lg:w-[60%] h-[50vh] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700">
-                          <div className="parallax-bg absolute inset-[-20%] w-[140%] h-[140%]">
-                            {work.image && !work.image.includes('placeholder') ? (
-                              <img 
-                                src={work.image} 
-                                alt={work.title} 
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" 
-                              />
-                            ) : (
-                              <div 
-                                className="w-full h-full bg-repeat image-rendering-pixelated group-hover:scale-110 transition-transform duration-[1.5s] ease-out saturate-50 dark:saturate-100 opacity-60 dark:opacity-40"
-                                style={{
-                                  backgroundImage: `url(${basePath}textures/${BLOCK_TEXTURES[(idx * 3) % BLOCK_TEXTURES.length].top})`,
-                                  backgroundSize: '128px'
-                                }}
-                              ></div>
-                            )}
-                          </div>
-                          <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
-                          <div className="parallax-text absolute inset-0 flex items-center justify-center mix-blend-overlay">
-                             <span className="text-obsidian/20 dark:text-white/20 font-black text-6xl md:text-8xl tracking-tighter transition-colors duration-700">MAP_{idx+1}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="w-full md:w-1/2 lg:w-[40%] flex flex-col justify-center space-y-8">
-                          <div className="text-xs uppercase font-mono tracking-widest text-gray-500 border-b border-obsidian/10 dark:border-white/10 pb-4 flex justify-between transition-colors duration-700">
-                            <span>{work.category}</span>
-                            <span>{work.year}</span>
-                          </div>
-                          <h3 className={`text-4xl md:text-5xl lg:text-7xl font-bold uppercase tracking-tighter transition-colors duration-500 text-obsidian dark:text-white ${work.accent}`}>
-                            {work.title}
-                          </h3>
-                          <p className="text-gray-600 dark:text-gray-400 font-light font-sans max-w-md text-base md:text-lg leading-relaxed transition-colors duration-700">
-                            {work.desc}
-                          </p>
-                          
-                          {work.link ? (
-                            <a href={work.link} target="_blank" rel="noopener noreferrer" className="w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono hover:text-diamond text-gray-500 transition-colors mt-4">
-                              <MousePointerClick className="w-4 h-4" /> {t('works.view')}
-                            </a>
-                          ) : (
-                            <div className="w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono text-gray-500/50 dark:text-gray-500/50 mt-4 cursor-not-allowed" title="Link Coming Soon">
-                              <MousePointerClick className="w-4 h-4" /> {t('works.view')}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Subcategory: Java Edition */}
-                <div id="works-maps-je" className="scroll-mt-32 pt-16">
+                <div id="works-maps-je" className="scroll-mt-32 mb-16">
                   <h4 className="reveal-up text-lg font-bold tracking-widest uppercase text-obsidian/50 dark:text-white/50 border-b border-obsidian/10 dark:border-white/10 pb-4 mb-16">
                     {t('nav.nav_maps_je')}
                   </h4>
@@ -1152,7 +1202,7 @@ function App() {
                       { title: t('works.m10_t'), category: t('works.m10_c'), year: "Java", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-diamond", bg: "from-diamond/10", desc: t('works.m10_d'), link: undefined },
                     ].map((work, idx) => (
                       <div 
-                        key={`java-${idx}`} 
+                        key={`java-${idx}`}
                         className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center"
                         onMouseEnter={() => setTooltipContent({ visible: true, title: work.title, category: work.category, desc: work.desc })}
                         onMouseLeave={() => setTooltipContent({ visible: false, title: '', category: '', desc: '' })}
@@ -1205,6 +1255,112 @@ function App() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                {/* Subcategory: Bedrock / NetEase */}
+                <div id="works-maps-be" className="scroll-mt-32 pt-16">
+                  <h4 className="reveal-up text-lg font-bold tracking-widest uppercase text-obsidian/50 dark:text-white/50 border-b border-obsidian/10 dark:border-white/10 pb-4 mb-16">
+                    {t('nav.nav_maps_be')}
+                  </h4>
+                  <div className="space-y-28">
+                    {FEATURED_MAPS.map((work) => {
+                      const title = t(`works.bedrockMaps.${work.i18nKey}.title`);
+                      const subtitle = t(`works.bedrockMaps.${work.i18nKey}.subtitle`);
+                      const category = t(`works.bedrockMaps.${work.i18nKey}.category`);
+                      const genre = t(`works.bedrockMaps.${work.i18nKey}.genre`);
+                      const description = t(`works.bedrockMaps.${work.i18nKey}.desc`);
+                      const players = t(`works.bedrockMaps.${work.i18nKey}.players`);
+                      const components = t(`works.bedrockMaps.${work.i18nKey}.components`, { returnObjects: true }) as string[];
+
+                      return (
+                      <article
+                        key={work.link}
+                        className="reveal-up group relative flex flex-col md:flex-row gap-10 lg:gap-16 items-stretch"
+                        onMouseEnter={() => setTooltipContent({ visible: true, title, category: genre, desc: description })}
+                        onMouseLeave={() => setTooltipContent({ visible: false, title: '', category: '', desc: '' })}
+                      >
+                        <a
+                          href={work.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover-target w-full md:w-1/2 lg:w-[58%] min-h-[22rem] md:min-h-[34rem] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700"
+                          aria-label={t('works.open_detail_aria', { title })}
+                        >
+                          <div className="parallax-bg absolute inset-[-18%] w-[136%] h-[136%]">
+                            <img
+                              src={`${basePath}${work.image}`}
+                              alt={title}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out"
+                            />
+                          </div>
+                          <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
+                        </a>
+
+                        <div className="w-full md:w-1/2 lg:w-[42%] flex flex-col justify-center py-2 md:py-6">
+                          <div className="text-xs uppercase font-mono tracking-widest text-gray-500 border-b border-obsidian/10 dark:border-white/10 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 transition-colors duration-700">
+                            <span>{category}</span>
+                            <span>{genre}</span>
+                          </div>
+
+                          <div className="mt-7 space-y-3">
+                            <p className="text-xs font-mono uppercase tracking-[0.25em] text-gray-500">{subtitle}</p>
+                            <h3 className={`text-3xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tighter leading-[0.95] break-words transition-colors duration-500 text-obsidian dark:text-white ${work.accent}`}>
+                              {title}
+                            </h3>
+                          </div>
+
+                          <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-4 text-sm font-mono text-obsidian dark:text-white">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Download className="w-4 h-4 text-diamond shrink-0" />
+                              <span className="truncate">{t('works.downloads_metric', { downloads: work.downloads })}</span>
+                            </div>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Star className="w-4 h-4 text-amber-500 shrink-0" />
+                              <span className="truncate">{t('works.rating_metric', { rating: work.rating })}</span>
+                            </div>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <MessageCircle className="w-4 h-4 text-amethyst shrink-0" />
+                              <span className="truncate">{t('works.comments_metric', { comments: work.comments, remarks: work.remarks })}</span>
+                            </div>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Package className="w-4 h-4 text-gray-500 shrink-0" />
+                              <span className="truncate">{work.size} · {work.version}</span>
+                            </div>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <CalendarDays className="w-4 h-4 text-gray-500 shrink-0" />
+                              <span className="truncate">{t('works.released_metric', { date: work.released })}</span>
+                            </div>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Users className="w-4 h-4 text-gray-500 shrink-0" />
+                              <span className="truncate">{players}</span>
+                            </div>
+                          </div>
+
+                          <div className="mt-7 flex flex-wrap gap-2">
+                            {components.map((component) => (
+                              <span key={component} className="border border-obsidian/10 dark:border-white/10 px-3 py-2 text-xs text-gray-600 dark:text-gray-300">
+                                {component}
+                              </span>
+                            ))}
+                          </div>
+
+                          <p className="mt-7 text-gray-600 dark:text-gray-400 font-light font-sans max-w-xl text-base md:text-lg leading-relaxed transition-colors duration-700">
+                            {description}
+                          </p>
+
+                          <a
+                            href={work.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover-target mt-8 w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono text-gray-500 hover:text-obsidian dark:hover:text-white transition-colors"
+                          >
+                            <MousePointerClick className="w-4 h-4" /> {t('works.view')}
+                          </a>
+                        </div>
+                      </article>
+                      );
+                    })}
                   </div>
                 </div>
 

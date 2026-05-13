@@ -11,8 +11,8 @@ export default function HotbarNav({ scrollProgress, handleNavClick }: { scrollPr
   const slots = [
     { id: '#hero', tooltip: 'Respawn (Home)', icon: Home, color: '#FFFF55' },
     { id: '#about', tooltip: t('nav.about'), icon: Info, color: 'white' },
-    { id: '#works-maps-be', tooltip: t('nav.nav_maps_be'), icon: Map, color: 'white' },
     { id: '#works-maps-je', tooltip: t('nav.nav_maps_je'), icon: Library, color: 'white' },
+    { id: '#works-maps-be', tooltip: t('nav.nav_maps_be'), icon: Map, color: 'white' },
     { id: '#works-mods', tooltip: t('nav.nav_mods'), icon: Wrench, color: 'white' },
     { id: '#works-tools', tooltip: t('nav.nav_tools'), icon: PenTool, color: 'white' },
     { id: '#works', tooltip: 'PvP', icon: Swords, color: '#AAAAAA' },
@@ -21,7 +21,7 @@ export default function HotbarNav({ scrollProgress, handleNavClick }: { scrollPr
   ];
 
   useEffect(() => {
-    const sectionIds = ['hero', 'about', 'works-maps-be', 'works-maps-je', 'works-mods', 'works-tools', 'contact'];
+    const sectionIds = ['hero', 'about', 'works-maps-je', 'works-maps-be', 'works-mods', 'works-tools', 'contact'];
     
     const handleScroll = () => {
       // Trigger point slightly above the middle of the screen

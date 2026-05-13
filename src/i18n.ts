@@ -34,7 +34,86 @@ const resources = {
         m10_t: "剧透太多的RPG", m10_c: "沉浸式 RPG", m10_d: "致敬/授权自 KSB 工作室的同名作品改编，宏大的 Java 版叙事 RPG 企划。",
         mod1_t: "未定模组项目", mod1_c: "系统扩充", mod1_d: "更多硬核引擎拓展与独立模组正在研发中，敬请期待。",
         tool1_t: "开发工具链", tool1_c: "工作流集", tool1_d: "基于数据包与插件架构定制的可视化开发辅助与优化脚本框架。",
-        view: "查看详情" 
+        view: "查看详情",
+        open_detail_aria: "查看 {{title}} 的网易资源中心详情",
+        downloads_metric: "{{downloads}} 下载",
+        rating_metric: "{{rating}} 评分",
+        comments_metric: "{{comments}} 评论 / {{remarks}} 评价",
+        released_metric: "发布时间 {{date}}",
+        bedrockMaps: {
+          werewolfFTown: {
+            title: "狼人杀-F小镇",
+            subtitle: "Werewolf: F-Town",
+            category: "网易基岩版地图",
+            genre: "狼人杀 PvP / 推理生存",
+            desc: "开局随机分配侦探、狼人和平民。狼人需要清除侦探与平民，侦探持弓找出狼人，平民可收集资源购买箭矢反击。",
+            players: "多人推理",
+            components: ["随机身份", "侦探弓箭", "金币购买", "狼人阵营"]
+          },
+          hungerGamesOldCity: {
+            title: "饥饿游戏：旧城迷行",
+            subtitle: "Hunger Games: Old City",
+            category: "网易基岩版地图",
+            genre: "生存竞技 / PvP",
+            desc: "旧城废墟中的自由混战。玩家选择天赋后分散出生，通过 TNT 获取物资，并利用铁砧、工作台、特殊区域与道具争夺最终胜利。",
+            players: "多人乱斗",
+            components: ["12 种天赋", "TNT 物资", "特殊地区", "死斗玩法"]
+          },
+          abyssSkyPit: {
+            title: "ABYSS天坑",
+            subtitle: "Abyss Sky Pit",
+            category: "网易基岩版地图",
+            genre: "乱斗 PvP / 1v1",
+            desc: "以多人乱斗 PvP 为主，也提供纯净 1v1 对战。强化弓箭、雪球破坏、击杀连播与方块皮肤系统让战局持续变化。",
+            players: "多人 / 1v1",
+            components: ["强化远程武器", "技能系统", "连杀播报", "方块皮肤"]
+          },
+          fmlSkyNatureArena: {
+            title: "FML空生自然竞技场职业大乱斗",
+            subtitle: "FML Sky Nature Arena",
+            category: "网易基岩版地图",
+            genre: "职业大乱斗 PvP",
+            desc: "空生堂职业 PvP 大乱斗内置 24 种职业，并提供死亡榜、凋零风暴、爆炸箭、闪瞎眼等多种可切换游戏设置。",
+            players: "多人职业战",
+            components: ["24 种职业", "死亡榜", "模式设置区", "特殊规则"]
+          },
+          runForMoney: {
+            title: "逃走中",
+            subtitle: "Run For Money",
+            category: "网易基岩版地图",
+            genre: "追逐竞技 / PvP",
+            desc: "随机玩家会成为被猎杀目标，其余玩家化身猎人展开追捕。目标需要开箱寻找道具、撑过追杀轮次，并在最终 PvP 中活到最后。",
+            players: "多人竞技",
+            components: ["随机目标", "猎人追捕", "道具开箱", "最终 PvP"]
+          },
+          powerOn2SnowCrisis: {
+            title: "通电2雪域危机",
+            subtitle: "Power On 2: Snow Crisis",
+            category: "网易基岩版地图",
+            genre: "非对称解谜生存",
+            desc: "《通电》最终章。玩家深入破败极地科考站，在严寒环境中重启发电机，并破解围绕设施展开的逻辑谜题。",
+            players: "多人协作",
+            components: ["发电机重启", "极地科考站", "逻辑谜题", "生存闯关"]
+          },
+          islandEscapeBeforeDawn: {
+            title: "海岛逃生--黎明前夕",
+            subtitle: "Island Escape: Before Dawn",
+            category: "网易基岩版地图",
+            genre: "感染逃生 / 阵营对抗",
+            desc: "4-8 人逃生地图。人类阵营需要修复岛上五座信号塔并等待直升机撤离，感染者则要阻止修复并扩散感染。",
+            players: "4-8 人",
+            components: ["人类/感染者阵营", "五座信号塔", "职业协作", "直升机撤离"]
+          },
+          amethystSalvation: {
+            title: "紫晶幻域：救世光源",
+            subtitle: "Amethyst: Salvation",
+            category: "网易基岩版地图",
+            genre: "闯关 RPG / 冒险剧情",
+            desc: "幻想大陆被黑暗势力笼罩，玩家选择职业后从初始村庄出发，购买道具、升级装备，并击败被紫水晶魔法召唤出的亡灵敌人。",
+            players: "多人 RPG",
+            components: ["职业选择", "剧情闯关", "装备升级", "亡灵敌人"]
+          }
+        }
       },
       footer: { title: "准备好<br/>合作了吗？", desc: "若需了解更多详细信息或探讨合作，欢迎随时联络我们。", copy: "© 2019-2026 FIMEL 工作室 · 版权所有" }
     }
@@ -71,7 +150,86 @@ const resources = {
         m10_t: "TOO MANY SPOILERS RPG", m10_c: "Immersive RPG", m10_d: "An immersive narrative RPG in Java Edition, based on the original work by KSB Studio.",
         mod1_t: "Untitled Mod Project", mod1_c: "System Expansion", mod1_d: "More hardcore engine expansions & standalone mods are in development.",
         tool1_t: "Dev Toolchain", tool1_c: "Workflow Set", tool1_d: "Custom visual dev helpers and optimization scripts based on datapacks & plugins.",
-        view: "View Details" 
+        view: "View Details",
+        open_detail_aria: "Open {{title}} on NetEase Resource Center",
+        downloads_metric: "{{downloads}} downloads",
+        rating_metric: "{{rating}} rating",
+        comments_metric: "{{comments}} comments / {{remarks}} reviews",
+        released_metric: "Released {{date}}",
+        bedrockMaps: {
+          werewolfFTown: {
+            title: "Werewolf: F-Town",
+            subtitle: "Werewolf: F-Town",
+            category: "NetEase Bedrock Map",
+            genre: "Werewolf PvP / Deduction Survival",
+            desc: "Players are randomly assigned as detective, werewolf, or villager. Werewolves hunt everyone down, the detective uses a bow to identify threats, and villagers collect resources to buy arrows and fight back.",
+            players: "Multiplayer deduction",
+            components: ["Random roles", "Detective bow", "Coin shop", "Werewolf team"]
+          },
+          hungerGamesOldCity: {
+            title: "Hunger Games: Old City",
+            subtitle: "Hunger Games: Old City",
+            category: "NetEase Bedrock Map",
+            genre: "Survival Battle / PvP",
+            desc: "A free-for-all survival battle in a ruined old city. Choose a talent, spawn apart, gather loot through TNT, and use crafting stations, special zones, and items to fight for the final win.",
+            players: "Multiplayer brawl",
+            components: ["12 talents", "TNT loot", "Special zones", "Deathmatch mode"]
+          },
+          abyssSkyPit: {
+            title: "Abyss Sky Pit",
+            subtitle: "Abyss Sky Pit",
+            category: "NetEase Bedrock Map",
+            genre: "Brawl PvP / 1v1",
+            desc: "A PvP arena focused on multiplayer brawls with a clean 1v1 mode as well. Enhanced bows, block-breaking snowballs, kill streak broadcasts, and block skins keep each match shifting.",
+            players: "Multiplayer / 1v1",
+            components: ["Enhanced ranged weapons", "Skill system", "Kill streak calls", "Block skins"]
+          },
+          fmlSkyNatureArena: {
+            title: "FML Sky Nature Arena: Class Brawl",
+            subtitle: "FML Sky Nature Arena",
+            category: "NetEase Bedrock Map",
+            genre: "Class Brawl PvP",
+            desc: "A class-based PvP brawl with 24 playable roles, plus configurable rules such as death rankings, Wither Storm mode, explosive arrows, and flash effects.",
+            players: "Multiplayer class battle",
+            components: ["24 classes", "Death ranking", "Mode settings", "Special rules"]
+          },
+          runForMoney: {
+            title: "Run For Money",
+            subtitle: "Run For Money",
+            category: "NetEase Bedrock Map",
+            genre: "Chase Arena / PvP",
+            desc: "One random player becomes the target while everyone else becomes a hunter. The target opens chests for tools, survives chase rounds, and then fights to be the last standing in the final PvP.",
+            players: "Multiplayer arena",
+            components: ["Random target", "Hunter chase", "Item chests", "Final PvP"]
+          },
+          powerOn2SnowCrisis: {
+            title: "Power On 2: Snow Crisis",
+            subtitle: "Power On 2: Snow Crisis",
+            category: "NetEase Bedrock Map",
+            genre: "Asymmetric Puzzle Survival",
+            desc: "The final chapter of Power On. Players enter a ruined polar research station, restart generators in the cold, and solve logic puzzles built around the facility.",
+            players: "Co-op multiplayer",
+            components: ["Generator restart", "Polar station", "Logic puzzles", "Survival stages"]
+          },
+          islandEscapeBeforeDawn: {
+            title: "Island Escape: Before Dawn",
+            subtitle: "Island Escape: Before Dawn",
+            category: "NetEase Bedrock Map",
+            genre: "Infection Escape / Team Clash",
+            desc: "A 4-8 player escape map. Humans repair five signal towers and wait for helicopter extraction, while the infected team blocks repairs and spreads infection.",
+            players: "4-8 players",
+            components: ["Human / infected teams", "Five signal towers", "Class teamwork", "Helicopter extraction"]
+          },
+          amethystSalvation: {
+            title: "Amethyst: Salvation",
+            subtitle: "Amethyst: Salvation",
+            category: "NetEase Bedrock Map",
+            genre: "RPG Adventure / Story",
+            desc: "A fantasy continent has fallen under darkness. Choose a class, begin from the starting village, buy items, upgrade gear, and defeat undead enemies summoned by amethyst magic.",
+            players: "Multiplayer RPG",
+            components: ["Class selection", "Story stages", "Gear upgrades", "Undead enemies"]
+          }
+        }
       },
       footer: { title: "Ready to<br/>Collaborate?", desc: "If you require more detailed information or wish to discuss a potential collaboration, please feel free to reach out.", copy: "© 2019-2026 FIMEL STUDIO. ALL RIGHTS RESERVED." }
     }
@@ -108,7 +266,86 @@ const resources = {
         m10_t: "ネタバレが多すぎるRPG", m10_c: "ストーリー RPG", m10_d: "KSBスタジオの原作に基づいた、Java版没入型ストーリーRPG。",
         mod1_t: "未定のMODプロジェク", mod1_c: "システム拡張", mod1_d: "さらにハードコアなエンジン拡張と独立したMODが開発中です。ご期待ください。",
         tool1_t: "開発ツールチェーン", tool1_c: "ワークフロー", tool1_d: "データパックとプラグインアーキテクチャに基づく、カスタムな視覚的開発支援と最適化スクリプトフレームワーク。",
-        view: "詳細を見る" 
+        view: "詳細を見る",
+        open_detail_aria: "NetEaseリソースセンターで{{title}}を開く",
+        downloads_metric: "{{downloads}} ダウンロード",
+        rating_metric: "{{rating}} 評価",
+        comments_metric: "{{comments}} コメント / {{remarks}} レビュー",
+        released_metric: "公開日 {{date}}",
+        bedrockMaps: {
+          werewolfFTown: {
+            title: "人狼殺：Fタウン",
+            subtitle: "Werewolf: F-Town",
+            category: "NetEase統合版マップ",
+            genre: "人狼 PvP / 推理サバイバル",
+            desc: "開始時に探偵、人狼、村人がランダムに割り当てられます。人狼は探偵と村人を狩り、探偵は弓で人狼を見抜き、村人は資源を集めて矢を買い反撃します。",
+            players: "多人数推理",
+            components: ["ランダム役職", "探偵の弓", "コイン購入", "人狼陣営"]
+          },
+          hungerGamesOldCity: {
+            title: "ハンガーゲーム：旧市街迷行",
+            subtitle: "Hunger Games: Old City",
+            category: "NetEase統合版マップ",
+            genre: "サバイバル競技 / PvP",
+            desc: "廃墟となった旧市街でのサバイバル乱戦です。才能を選んで分散スポーンし、TNTで物資を集め、金床、作業台、特殊エリア、アイテムを活用して勝利を目指します。",
+            players: "多人数乱闘",
+            components: ["12種類の才能", "TNT物資", "特殊エリア", "デスマッチ"]
+          },
+          abyssSkyPit: {
+            title: "ABYSS天坑",
+            subtitle: "Abyss Sky Pit",
+            category: "NetEase統合版マップ",
+            genre: "乱闘 PvP / 1v1",
+            desc: "多人数乱闘PvPを中心に、純粋な1v1対戦にも対応したマップです。強化された弓、ブロックを壊せる雪玉、連続キル演出、ブロックスキンが戦況を変化させます。",
+            players: "多人数 / 1v1",
+            components: ["強化遠距離武器", "スキルシステム", "連続キル通知", "ブロックスキン"]
+          },
+          fmlSkyNatureArena: {
+            title: "FML空生自然アリーナ職業大乱闘",
+            subtitle: "FML Sky Nature Arena",
+            category: "NetEase統合版マップ",
+            genre: "職業大乱闘 PvP",
+            desc: "24種類の職業で戦うクラス制PvP乱闘マップです。死亡ランキング、ウィザーストーム、爆発矢、視界妨害など、複数のルール設定を切り替えられます。",
+            players: "多人数職業戦",
+            components: ["24種類の職業", "死亡ランキング", "モード設定", "特殊ルール"]
+          },
+          runForMoney: {
+            title: "逃走中",
+            subtitle: "Run For Money",
+            category: "NetEase統合版マップ",
+            genre: "追跡競技 / PvP",
+            desc: "ランダムなプレイヤーが標的となり、他のプレイヤーはハンターとして追跡します。標的はチェストから道具を探して追跡ラウンドを生き延び、最後のPvPで生存を目指します。",
+            players: "多人数競技",
+            components: ["ランダム標的", "ハンター追跡", "アイテムチェスト", "最終PvP"]
+          },
+          powerOn2SnowCrisis: {
+            title: "通電2：雪域危機",
+            subtitle: "Power On 2: Snow Crisis",
+            category: "NetEase統合版マップ",
+            genre: "非対称パズルサバイバル",
+            desc: "『通電』シリーズの最終章です。荒廃した極地研究施設に入り、厳寒の中で発電機を再起動し、施設をめぐるロジックパズルを解きます。",
+            players: "多人数協力",
+            components: ["発電機再起動", "極地研究施設", "ロジックパズル", "サバイバル攻略"]
+          },
+          islandEscapeBeforeDawn: {
+            title: "海島脱出：夜明け前",
+            subtitle: "Island Escape: Before Dawn",
+            category: "NetEase統合版マップ",
+            genre: "感染脱出 / 陣営対抗",
+            desc: "4〜8人向けの脱出マップです。人間陣営は島の5つの信号塔を修理してヘリの救助を待ち、感染者陣営は修理を妨害して感染を広げます。",
+            players: "4〜8人",
+            components: ["人間/感染者陣営", "5つの信号塔", "職業協力", "ヘリ撤収"]
+          },
+          amethystSalvation: {
+            title: "紫晶幻域：救世光源",
+            subtitle: "Amethyst: Salvation",
+            category: "NetEase統合版マップ",
+            genre: "RPG冒険 / ストーリー",
+            desc: "幻想大陸が闇の勢力に覆われています。職業を選び、始まりの村から旅立ち、道具購入と装備強化を重ねながら、紫水晶の魔法で召喚された亡霊を倒します。",
+            players: "多人数RPG",
+            components: ["職業選択", "ストーリー攻略", "装備強化", "亡霊の敵"]
+          }
+        }
       },
       footer: { title: "協業の<br/>ご検討を", desc: "より詳しい情報について、あるいは協業をご検討の際は、いつでもお気軽にご連絡ください。", copy: "© 2019-2026 FIMEL STUDIO. ALL RIGHTS RESERVED." }
     }
