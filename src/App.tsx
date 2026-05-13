@@ -12,6 +12,10 @@ import HotbarNav from './components/HotbarNav';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Preload particle textures so they don't cause Suspense fallbacks on click
+useTexture.preload(`${import.meta.env.BASE_URL}textures/smoke.png`);
+useTexture.preload(`${import.meta.env.BASE_URL}textures/explosion.png`);
+
 // ==========================================
 // 🎲 MINECRAFT BLOCK TEXTURE CONFIGURATION
 // You can add more block types here once you put the images in public/textures/
@@ -126,17 +130,140 @@ const BLOCK_TEXTURES = [
     side: 'cactus_side.png',
     bottom: 'cactus_bottom.png'
   },
+  {
+    id: 'TNT',
+    top: 'TNT_top.png',
+    side: 'TNT_side.png',
+    bottom: 'TNT_bottom.png'
+  }
 ];
+
+// ==========================================
+// 💥 TNT PARTICLE EFFECTS
+// ==========================================
+function ExplosionEffect({ position }: { position: [number, number, number] }) {
+  const basePath = import.meta.env.BASE_URL;
+  const texture = useTexture(`${basePath}textures/explosion.png`);
+  
+  React.useMemo(() => {
+    texture.magFilter = THREE.NearestFilter;
+    texture.minFilter = THREE.NearestFilter;
+  }, [texture]);
+
+  const groupRef = useRef<THREE.Group>(null);
+  
+  const particles = React.useMemo(() => {
+    return Array.from({ length: 15 }).map(() => ({
+      velocity: new THREE.Vector3(
+        (Math.random() - 0.5) * 2,
+        (Math.random() - 0.5) * 2,
+        (Math.random() - 0.5) * 2
+      ).normalize().multiplyScalar(Math.random() * 8 + 4),
+      scale: Math.random() * 2.0 + 1.0,
+      lifetime: Math.random() * 0.8 + 0.2,
+      maxLife: 1.0
+    }));
+  }, []);
+
+  useFrame((_, delta) => {
+    if (groupRef.current) {
+      groupRef.current.children.forEach((child, i) => {
+        const p = particles[i];
+        if (p.lifetime > 0) {
+          p.lifetime -= delta;
+          child.position.addScaledVector(p.velocity, delta);
+          const progress = Math.max(0, p.lifetime / p.maxLife);
+          child.scale.setScalar(p.scale * (1 + (1 - progress)));
+          (child as THREE.Sprite).material.opacity = progress;
+        } else {
+          (child as THREE.Sprite).material.opacity = 0;
+        }
+      });
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={position}>
+      {particles.map((p, i) => (
+        <sprite key={i}>
+          <spriteMaterial map={texture} transparent opacity={1} depthWrite={false} />
+        </sprite>
+      ))}
+    </group>
+  );
+}
+
+function SmokeEffect({ position }: { position: [number, number, number] }) {
+  const basePath = import.meta.env.BASE_URL;
+  const texture = useTexture(`${basePath}textures/smoke.png`);
+  
+  React.useMemo(() => {
+    texture.magFilter = THREE.NearestFilter;
+    texture.minFilter = THREE.NearestFilter;
+  }, [texture]);
+  
+  const groupRef = useRef<THREE.Group>(null);
+  
+  const particles = React.useMemo(() => {
+    return Array.from({ length: 8 }).map(() => ({
+      startPos: new THREE.Vector3((Math.random()-0.5), 0.5, (Math.random()-0.5)),
+      velocity: new THREE.Vector3((Math.random()-0.5)*0.5, Math.random() * 1.5 + 1.0, (Math.random()-0.5)*0.5),
+      lifetime: Math.random() * -1.0, // Delay start
+      maxLife: 1.2
+    }));
+  }, []);
+
+  useFrame((_, delta) => {
+    if (groupRef.current) {
+      groupRef.current.children.forEach((child, i) => {
+        const p = particles[i];
+        p.lifetime += delta;
+        if (p.lifetime > p.maxLife) {
+          p.lifetime = 0;
+          p.startPos.set((Math.random()-0.5), 0.5, (Math.random()-0.5));
+          child.position.copy(p.startPos);
+        }
+        
+        if (p.lifetime > 0) {
+          child.position.addScaledVector(p.velocity, delta);
+          const progress = p.lifetime / p.maxLife;
+          const fade = progress < 0.2 ? progress / 0.2 : 1.0 - (progress - 0.2) / 0.8;
+          child.scale.setScalar(0.5 + progress * 1.5);
+          (child as THREE.Sprite).material.opacity = fade * 0.7;
+        } else {
+          (child as THREE.Sprite).material.opacity = 0;
+        }
+      });
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={position}>
+      {particles.map((p, i) => (
+        <sprite key={i} position={p.startPos}>
+          <spriteMaterial map={texture} transparent opacity={0} color="#333333" depthWrite={false} />
+        </sprite>
+      ))}
+    </group>
+  );
+}
 
 function MinecraftBlock({ cube, isDark }: { cube: any, isDark: boolean }) {
   const basePath = import.meta.env.BASE_URL;
   const config = BLOCK_TEXTURES[cube.textureIndex];
+  const isTNT = config.id === 'TNT';
+  
+  const [primed, setPrimed] = useState(false);
+  const [exploded, setExploded] = useState(false);
+  const fuseTime = useRef(0);
   
   // Load textures based on the randomly assigned block type
   const textures = useTexture({
     mapTop: `${basePath}textures/${config.top}`,
     mapSide: `${basePath}textures/${config.side}`,
     mapBottom: `${basePath}textures/${config.bottom}`,
+    // Load optional particle textures here (they will fail silently or console error if missing, but it's fine for placeholders)
+    // Note: If you want to use dedicated sprite particles, it's better to load them separately or inside a separate component.
   });
 
   // Make textures pixelated (Minecraft style)
@@ -161,55 +288,140 @@ function MinecraftBlock({ cube, isDark }: { cube: any, isDark: boolean }) {
           ? (isDark ? "#d8cbe0" : "#ffffff") 
           : (isDark ? "#cbd8d8" : "#ffffff")
     );
+    // Grass top texture needs a green biome tint, otherwise it's just grayscale
+    const topColor = config.id === 'grass' ? new THREE.Color("#7cb342").multiply(initColor) : initColor;
+    const sideColor = config.id === 'cherry_leaves' ? new THREE.Color("#ffb4d6").multiply(initColor) : initColor; // optional: cherry leaves tint if they are grayscale
+
     const commonProps = { 
       roughness: isDark ? 0.6 : 0.8, 
       metalness: 0.1,
       color: initColor
     };
     return [
-      new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps }),
-      new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps }),
-      new THREE.MeshStandardMaterial({ map: mapTop, ...commonProps }),
+      new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps, color: sideColor }),
+      new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps, color: sideColor }),
+      new THREE.MeshStandardMaterial({ map: mapTop, ...commonProps, color: topColor }),
       new THREE.MeshStandardMaterial({ map: mapBottom, ...commonProps }),
-      new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps }),
-      new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps }),
+      new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps, color: sideColor }),
+      new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps, color: sideColor }),
     ];
     // DO NOT add isDark in dependency array so we don't recreate the array
     // Wait, wait... Actually, we update the existing object instead.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapSide, mapTop, mapBottom]); // no isDark here
+  }, [mapSide, mapTop, mapBottom, config.id]); // no isDark here
 
   const meshRef = useRef<THREE.Mesh>(null);
+  const expandRef = useRef(1);
 
   useFrame((_, delta) => {
-    if (meshRef.current) {
-      const targetColor = new THREE.Color(
-        cube.colorType === 0 
-          ? (isDark ? "#d0d0d0" : "#ffffff") 
-          : cube.colorType === 1 
-            ? (isDark ? "#d8cbe0" : "#ffffff") 
-            : (isDark ? "#cbd8d8" : "#ffffff")
-      );
-      const targetRoughness = isDark ? 0.6 : 0.8;
+    if (exploded) return;
 
-      const mats = meshRef.current.material;
-      if (Array.isArray(mats)) {
-        mats.forEach((mat: any) => {
-          mat.color.lerp(targetColor, delta * 3);
-          mat.roughness = THREE.MathUtils.lerp(mat.roughness, targetRoughness, delta * 3);
-        });
+    if (meshRef.current) {
+      if (primed) {
+        fuseTime.current += delta;
+        // TNT mechanics: 4 seconds fuse (80 redstone ticks)
+        if (fuseTime.current >= 4) {
+          setExploded(true);
+          setPrimed(false);
+          // 播放爆炸音效
+          const audio = new Audio(`${basePath}sound/Explosion2.ogg`);
+          audio.volume = 0.5;
+          audio.play().catch(() => {});
+          
+          // 可选：在这里可以通过某种方式触发相机震动或物理爆炸（推开其它方块）
+        } else {
+          // 闪烁效果 (越接近爆炸闪得越快)
+          const progress = fuseTime.current / 4;
+          const flashRate = Math.max(2, 10 * progress);
+          const isWhite = Math.sin(fuseTime.current * flashRate * Math.PI) > 0;
+          
+          // 轻微膨胀效果
+          expandRef.current = 1 + (0.15 * progress);
+          meshRef.current.scale.set(expandRef.current, expandRef.current, expandRef.current);
+          
+          const mats = meshRef.current.material;
+          if (Array.isArray(mats)) {
+            mats.forEach((mat: any) => {
+              mat.emissive.set(isWhite ? "#ffffff" : "#000000");
+              mat.emissiveIntensity = isWhite ? 0.6 : 0;
+            });
+          }
+        }
+      } else {
+        const targetColor = new THREE.Color(
+          cube.colorType === 0 
+            ? (isDark ? "#d0d0d0" : "#ffffff") 
+            : cube.colorType === 1 
+              ? (isDark ? "#d8cbe0" : "#ffffff") 
+              : (isDark ? "#cbd8d8" : "#ffffff")
+        );
+        const topTargetColor = config.id === 'grass' ? new THREE.Color("#7cb342").multiply(targetColor) : targetColor;
+        const sideTargetColor = config.id === 'cherry_leaves' ? new THREE.Color("#ffb4d6").multiply(targetColor) : targetColor;
+
+        const targetRoughness = isDark ? 0.6 : 0.8;
+
+        const mats = meshRef.current.material;
+        if (Array.isArray(mats)) {
+          mats.forEach((mat: any, index: number) => {
+            // Apply biome tinting to specific faces smoothly
+            const actualTargetColor = index === 2 ? topTargetColor : sideTargetColor;
+            // The bottom (3) usually does not need biome tint unless it's leaves, we just simplify here by applying to all sides/bottom except top
+            const finalColor = index === 2 ? topTargetColor : (index === 3 && config.id !== 'cherry_leaves' ? targetColor : sideTargetColor);
+            
+            mat.color.lerp(finalColor, delta * 3);
+            mat.roughness = THREE.MathUtils.lerp(mat.roughness, targetRoughness, delta * 3);
+            mat.emissive.set("#000000");
+          });
+        }
       }
     }
   });
 
+  const handleClick = (e: any) => {
+    if (isTNT && !primed && !exploded) {
+      e.stopPropagation();
+      setPrimed(true);
+      // 播放点燃音效（嘶嘶声）
+      const audio = new Audio(`${basePath}sound/Fuse.ogg`);
+      audio.volume = 0.5;
+      audio.play().catch(() => {});
+    }
+  };
+
+  // 如果爆炸了，可以不渲染方块，这里可以替换为爆炸粒子效果
+  if (exploded) {
+    return (
+      <Float
+        speed={0}
+        rotationIntensity={0}
+        floatIntensity={0}
+        position={cube.position}
+      >
+        <ExplosionEffect position={[0, 0, 0]} />
+      </Float>
+    );
+  }
+
   return (
     <Float
-      speed={cube.speed}
-      rotationIntensity={cube.rotationIntensity}
-      floatIntensity={cube.floatIntensity}
+      speed={primed ? 0 : cube.speed} // 点燃时停止浮动，模拟重力或准备状态
+      rotationIntensity={primed ? 0 : cube.rotationIntensity}
+      floatIntensity={primed ? 0 : cube.floatIntensity}
       position={cube.position}
     >
-      <Box ref={meshRef} args={cube.size} material={materials} />
+      {primed && !exploded && <SmokeEffect position={[0, 0, 0]} />}
+      <Box 
+        ref={meshRef} 
+        args={cube.size} 
+        material={materials} 
+        onClick={handleClick}
+        onPointerOver={(e) => {
+          if (isTNT && !primed && !exploded) document.body.style.cursor = 'pointer';
+        }}
+        onPointerOut={(e) => {
+          if (isTNT) document.body.style.cursor = 'auto';
+        }}
+      />
     </Float>
   );
 }
@@ -670,19 +882,19 @@ function App() {
             <ParticleCubes isDark={isDark} />
           </div>
           
-          <div className="relative z-10 max-w-screen-2xl w-full flex flex-col items-start gap-2">
-            <div className="overflow-visible p-6 -m-6">
+          <div className="relative z-10 max-w-screen-2xl w-full flex flex-col items-start gap-2 pointer-events-none">
+            <div className="overflow-visible p-6 -m-6 pointer-events-auto">
               <h1 className="hero-title pt-4 text-[14vw] lg:text-[11vw] leading-tight font-extrabold tracking-tighter uppercase text-obsidian dark:text-white transition-colors duration-700 pb-4 pr-8">
                 {t('hero.crafting')}
               </h1>
             </div>
-            <div className="overflow-visible p-6 -m-6">
+            <div className="overflow-visible p-6 -m-6 pointer-events-auto">
               <h1 className="hero-title text-[14vw] lg:text-[11vw] leading-tight font-extrabold tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-amethyst to-diamond lg:ml-[10vw] pb-4 pr-8">
                 {t('hero.worlds')}
               </h1>
             </div>
             
-            <div className="hero-sub mt-12 flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-10 max-w-3xl">
+            <div className="hero-sub mt-12 flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-10 max-w-3xl pointer-events-auto">
               <div className="w-16 h-[2px] bg-diamond hidden md:block"></div>
               <p className="text-base md:text-xl font-light tracking-wide text-gray-600 dark:text-gray-400 leading-relaxed font-sans transition-colors duration-700">
                 <Trans i18nKey="hero.sub" />
