@@ -184,7 +184,7 @@ function ExplosionEffect({ position }: { position: [number, number, number] }) {
 
   return (
     <group ref={groupRef} position={position}>
-      {particles.map((p, i) => (
+      {particles.map((_, i) => (
         <sprite key={i}>
           <spriteMaterial map={texture} transparent opacity={1} depthWrite={false} />
         </sprite>
@@ -486,7 +486,6 @@ function MinecraftBlock({ cube, isDark }: { cube: any, isDark: boolean }) {
         if (Array.isArray(mats)) {
           mats.forEach((mat: any, index: number) => {
             // Apply biome tinting to specific faces smoothly
-            const actualTargetColor = index === 2 ? topTargetColor : sideTargetColor;
             // The bottom (3) usually does not need biome tint unless it's leaves, we just simplify here by applying to all sides/bottom except top
             const finalColor = index === 2 ? topTargetColor : (index === 3 && config.id !== 'cherry_leaves' ? targetColor : sideTargetColor);
             
@@ -537,10 +536,10 @@ function MinecraftBlock({ cube, isDark }: { cube: any, isDark: boolean }) {
         args={cube.size} 
         material={materials} 
         onClick={handleClick}
-        onPointerOver={(e) => {
+        onPointerOver={() => {
           if (isTNT && !primed && !exploded) document.body.style.cursor = 'pointer';
         }}
-        onPointerOut={(e) => {
+        onPointerOut={() => {
           if (isTNT) document.body.style.cursor = 'auto';
         }}
       />
@@ -921,17 +920,48 @@ function App() {
         {/* Phase 3 Hotbar Navigation HUD */}
         <HotbarNav scrollProgress={scrollProgress} handleNavClick={handleNavClick} />
 
+        {/* --- NAV LAYER 1: BASE DIFFERENCE HIGHLIGHTS --- */}
         <nav className="fixed top-0 left-0 w-full z-40 flex items-center justify-between px-6 py-8 md:px-12 pointer-events-none mix-blend-difference text-white">
-          <a href="#hero" onClick={(e) => handleNavClick(e, '#hero')} className="pointer-events-auto hover-target transition-transform hover:scale-105">
+          <div className="pointer-events-auto transition-transform hover:scale-105">
             <img src={logoPath} alt="FIMEL Logo" className="h-[4.5rem] md:h-24 object-contain invert" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement!.innerHTML = '<span class="text-[1.875rem] font-bold tracking-[0.3em] uppercase">FIMEL.</span>'; }} />
-          </a>
+          </div>
           <div className="hidden md:flex items-center gap-10 text-s tracking-widest uppercase font-mono pointer-events-auto">
-              <a href="#about" onClick={(e) => handleNavClick(e, '#about')} className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all hover-target rounded-sm">{t('nav.about')}</a>
+              <span className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all rounded-sm">{t('nav.about')}</span>
               
-              <div className="relative group hover-target py-2">
-                <a href="#works" onClick={(e) => handleNavClick(e, '#works')} className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all inline-block rounded-sm">{t('nav.works')}</a>
+              <div className="py-2">
+                <span className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all inline-block rounded-sm">{t('nav.works')}</span>
+              </div>
+
+              <span className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all rounded-sm">{t('nav.contact')}</span>
+          </div>
+          <div className="flex items-center gap-4 md:gap-9 pointer-events-auto">
+              <div className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all flex items-center gap-2 rounded-sm">
+                <Globe size={18} />
+                <span className="text-xs font-mono hidden md:block">{i18n.language.toUpperCase()}</span>
+              </div>
+            
+              <button className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all rounded-sm">
+                {isDark ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+              <div className="block md:hidden">
+                <span className="text-xs uppercase font-mono tracking-widest border-b border-white transition-colors py-1">
+                  {mobileMenuOpen ? 'CLOSE' : t('nav.menu')}
+                </span>
+              </div>
+          </div>
+        </nav>
+
+        {/* --- NAV LAYER 2: INTERACTION & DROPDOWNS --- */}
+        <nav className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 py-8 md:px-12 pointer-events-none">
+          <a href="#hero" onClick={(e) => handleNavClick(e, '#hero')} className="pointer-events-auto h-[4.5rem] md:h-24 w-1 flex-1 max-w-[12rem] outline-none">
+            {/* Transparent Hitbox overlay for Logo */}
+          </a>
+          <div className="hidden md:flex items-center gap-10 text-s tracking-widest uppercase font-mono pointer-events-none">
+              <a href="#about" onClick={(e) => handleNavClick(e, '#about')} className="pointer-events-auto px-3 py-1.5 text-transparent select-none outline-none">{t('nav.about')}</a>
+              
+              <div className="relative group py-2 pointer-events-auto">
+                <a href="#works" onClick={(e) => handleNavClick(e, '#works')} className="px-3 py-1.5 inline-block text-transparent select-none outline-none">{t('nav.works')}</a>
                 <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-300 z-50 flex flex-col items-center">
-                  {/* Using monochrome outline for nested dropdowns as well */}
                   <div className="bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-xs whitespace-nowrap overflow-visible">
                     {/* Maps Group */}
                     <div className="group/maps relative">
@@ -950,13 +980,13 @@ function App() {
                 </div>
               </div>
 
-              <a href="#contact" onClick={(e) => handleNavClick(e, '#contact')} className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all hover-target rounded-sm">{t('nav.contact')}</a>
-            </div>
-            <div className="flex items-center gap-4 md:gap-9 pointer-events-auto relative">
-              <div className="relative hover-target">
-                <button onClick={() => setLangMenuOpen(!langMenuOpen)} className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all flex items-center gap-2 rounded-sm">
-                  <Globe size={18} />
-                  <span className="text-xs font-mono hidden md:block">{i18n.language.toUpperCase()}</span>
+              <a href="#contact" onClick={(e) => handleNavClick(e, '#contact')} className="pointer-events-auto px-3 py-1.5 text-transparent select-none outline-none">{t('nav.contact')}</a>
+          </div>
+          <div className="flex items-center gap-4 md:gap-9 pointer-events-none relative">
+              <div className="relative pointer-events-auto">
+                <button onClick={() => setLangMenuOpen(!langMenuOpen)} className="px-3 py-1.5 flex items-center gap-2 text-transparent select-none outline-none">
+                  <Globe size={18} className="opacity-0" />
+                  <span className="text-xs font-mono hidden md:block opacity-0">{i18n.language.toUpperCase()}</span>
                 </button>
               {langMenuOpen && (
                 <div className="absolute right-0 mt-6 w-48 py-3 bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-lg z-50 [&>button]:px-6 [&>button]:py-3">
@@ -967,13 +997,13 @@ function App() {
               )}
             </div>
             
-              <button onClick={() => setIsDark(!isDark)} className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all hover-target rounded-sm">
-                {isDark ? <Sun size={18} /> : <Moon size={18} />}
+              <button className="pointer-events-auto px-3 py-1.5 text-transparent select-none outline-none" onClick={() => setIsDark(!isDark)}>
+                <Sun size={18} className="opacity-0" />
               </button>
             <div className="block md:hidden pointer-events-auto">
               <button 
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="text-xs uppercase font-mono tracking-widest border-b border-white transition-colors py-1"
+                className="text-xs uppercase font-mono tracking-widest border-b border-transparent text-transparent py-1 select-none outline-none"
               >
                 {mobileMenuOpen ? 'CLOSE' : t('nav.menu')}
               </button>
