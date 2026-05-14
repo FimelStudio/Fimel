@@ -5,10 +5,11 @@ import Lenis from 'lenis';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Box, Stars, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
-import { ArrowUpRight, MousePointerClick, Diamond, Sword, Map, Code, Sun, Moon, Globe, Star, Download, MessageCircle, Users, Package, CalendarDays } from 'lucide-react';
+import { ArrowUpRight, MousePointerClick, Diamond, Sword, Map, Code, Sun, Moon, Globe, Star, Download, MessageCircle, Users, Package, CalendarDays, Search, ArrowLeft, ExternalLink } from 'lucide-react';
 import { useTranslation, Trans } from 'react-i18next';
 import CustomCursor from './components/CustomCursor';
 import HotbarNav from './components/HotbarNav';
+import { useDownloadCounters } from './hooks/useDownloadCounters';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -370,6 +371,24 @@ const FEATURED_MAPS = [
   }
 ];
 
+type WorkPage = 'home' | 'maps-overview' | 'maps-java' | 'maps-bedrock' | 'mods' | 'tools';
+type WorkContentPage = Exclude<WorkPage, 'home'>;
+
+const WORK_PAGE_HASHES: Record<WorkContentPage, string> = {
+  'maps-overview': '#/works/maps',
+  'maps-java': '#/works/maps-java',
+  'maps-bedrock': '#/works/maps-bedrock',
+  mods: '#/works/mods',
+  tools: '#/works/tools'
+};
+
+const DOWNLOAD_TRACKED_WORKS = ['minecraft-obj-cubizer'] as const;
+
+const getWorkPageFromHash = (hash: string): WorkPage => {
+  const found = Object.entries(WORK_PAGE_HASHES).find(([, value]) => value === hash);
+  return found ? found[0] as WorkContentPage : 'home';
+};
+
 function MinecraftBlock({ cube, isDark }: { cube: any, isDark: boolean }) {
   const basePath = import.meta.env.BASE_URL;
   const config = BLOCK_TEXTURES[cube.textureIndex];
@@ -666,6 +685,8 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [copiedQQ, setCopiedQQ] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [activePage, setActivePage] = useState<WorkPage>(() => getWorkPageFromHash(window.location.hash));
+  const [workSearch, setWorkSearch] = useState('');
   
   const [advancement, setAdvancement] = useState<{ title: string; desc: string; visible: boolean } | null>(null);
   const unlockedAdvancements = useRef<Set<string>>(new Set());
@@ -698,6 +719,30 @@ function App() {
   }, [tooltipContent.visible]);
 
   const basePath = import.meta.env.BASE_URL;
+  const {
+    configured: downloadCountersConfigured,
+    counts: downloadCounts,
+    loading: downloadCountersLoading,
+    recordDownload,
+  } = useDownloadCounters(DOWNLOAD_TRACKED_WORKS);
+  const numberFormatter = new Intl.NumberFormat(i18n.resolvedLanguage || i18n.language);
+  const getDownloadCounterLabel = (slug?: string) => {
+    if (!slug) {
+      return null;
+    }
+
+    if (!downloadCountersConfigured) {
+      return t('workPages.download_count_pending');
+    }
+
+    if (downloadCountersLoading) {
+      return t('workPages.download_count_loading');
+    }
+
+    return t('workPages.download_count_metric', {
+      count: numberFormatter.format(downloadCounts[slug] ?? 0),
+    });
+  };
   // Logo display toggle based on exact file name
   const logoPath = `${basePath}Fimel%20logo.png`;
 
@@ -706,6 +751,23 @@ function App() {
     setCopiedQQ(true);
     setTimeout(() => setCopiedQQ(false), 2000);
   };
+
+  useEffect(() => {
+    const syncPageFromHash = () => {
+      setActivePage(getWorkPageFromHash(window.location.hash));
+      setWorkSearch('');
+      setMobileMenuOpen(false);
+      setLangMenuOpen(false);
+    };
+
+    window.addEventListener('hashchange', syncPageFromHash);
+    window.addEventListener('popstate', syncPageFromHash);
+
+    return () => {
+      window.removeEventListener('hashchange', syncPageFromHash);
+      window.removeEventListener('popstate', syncPageFromHash);
+    };
+  }, []);
 
   useEffect(() => {
     if (isDark) {
@@ -754,12 +816,49 @@ function App() {
     };
   }, []);
 
+  const openWorkPage = (page: WorkContentPage) => {
+    const hash = WORK_PAGE_HASHES[page];
+    window.history.pushState(null, '', hash);
+    setActivePage(page);
+    setWorkSearch('');
+    setMobileMenuOpen(false);
+    setLangMenuOpen(false);
+    requestAnimationFrame(() => {
+      if (lenisRef.current) {
+        lenisRef.current.scrollTo(0, { duration: 0.8 });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+  };
+
+  const scrollHomeTo = (target: string) => {
+    requestAnimationFrame(() => {
+      window.setTimeout(() => {
+        if (lenisRef.current) {
+          lenisRef.current.scrollTo(target, { duration: 1.5, easing: (t) => 1 - Math.pow(1 - t, 4) });
+        } else {
+          document.querySelector(target)?.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 0);
+    });
+  };
+
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, target: string) => {
     e.preventDefault();
     setMobileMenuOpen(false);
-    if (lenisRef.current) {
-      lenisRef.current.scrollTo(target, { duration: 1.5, easing: (t) => 1 - Math.pow(1 - t, 4) });
+    setLangMenuOpen(false);
+
+    const targetPage = getWorkPageFromHash(target);
+    if (targetPage !== 'home') {
+      openWorkPage(targetPage);
+      return;
     }
+
+    setActivePage('home');
+    setWorkSearch('');
+    window.history.pushState(null, '', target);
+    scrollHomeTo(target);
   };
 
   const changeLanguage = (lng: string) => {
@@ -877,7 +976,393 @@ function App() {
 
     }, mainRef);
     return () => ctx.revert();
-  }, [loading, i18n.language]);
+  }, [loading, i18n.language, activePage]);
+
+  const renderWorkPage = () => {
+    const page = activePage as WorkContentPage;
+    const pageCopy = {
+      'maps-overview': {
+        eyebrow: t('workPages.maps.eyebrow'),
+        title: t('workPages.maps.title'),
+        desc: t('workPages.maps.desc'),
+        accent: 'text-diamond',
+        line: 'bg-diamond',
+        texture: 'diamond_block.png',
+        statValue: '10+'
+      },
+      'maps-java': {
+        eyebrow: t('workPages.java.eyebrow'),
+        title: t('workPages.java.title'),
+        desc: t('workPages.java.desc'),
+        accent: 'text-[#ff9ff3]',
+        line: 'bg-[#ff9ff3]',
+        texture: 'obsidian.png',
+        statValue: '2'
+      },
+      'maps-bedrock': {
+        eyebrow: t('workPages.bedrock.eyebrow'),
+        title: t('workPages.bedrock.title'),
+        desc: t('workPages.bedrock.desc'),
+        accent: 'text-diamond',
+        line: 'bg-diamond',
+        texture: 'emerald_block.png',
+        statValue: `${FEATURED_MAPS.length}`
+      },
+      mods: {
+        eyebrow: t('workPages.mods.eyebrow'),
+        title: t('workPages.mods.title'),
+        desc: t('workPages.mods.desc'),
+        accent: 'text-emerald-500',
+        line: 'bg-emerald-500',
+        texture: 'redstone_block.png',
+        statValue: 'WIP'
+      },
+      tools: {
+        eyebrow: t('workPages.tools.eyebrow'),
+        title: t('workPages.tools.title'),
+        desc: t('workPages.tools.desc'),
+        accent: 'text-blue-500',
+        line: 'bg-blue-500',
+        texture: 'iron_block.png',
+        statValue: 'WIP'
+      }
+    }[page];
+
+    const bedrockEntries = FEATURED_MAPS.map((work) => {
+      const components = t(`works.bedrockMaps.${work.i18nKey}.components`, { returnObjects: true }) as string[];
+      return {
+        ...work,
+        title: t(`works.bedrockMaps.${work.i18nKey}.title`),
+        subtitle: t(`works.bedrockMaps.${work.i18nKey}.subtitle`),
+        category: t(`works.bedrockMaps.${work.i18nKey}.category`),
+        genre: t(`works.bedrockMaps.${work.i18nKey}.genre`),
+        desc: t(`works.bedrockMaps.${work.i18nKey}.desc`),
+        players: t(`works.bedrockMaps.${work.i18nKey}.players`),
+        components
+      };
+    });
+    const query = workSearch.trim().toLocaleLowerCase();
+    const filteredBedrockEntries = query
+      ? bedrockEntries.filter((work) => `${work.title} ${work.subtitle} ${work.category} ${work.genre} ${work.desc} ${work.players} ${work.components.join(' ')}`.toLocaleLowerCase().includes(query))
+      : bedrockEntries;
+
+    type ProjectEntry = {
+      title: string;
+      subtitle: string;
+      category: string;
+      status: string;
+      desc: string;
+      texture: string;
+      accent: string;
+      tags: string[];
+      image?: string;
+      download?: string;
+      downloadSlug?: string;
+      version?: string;
+      author?: string;
+      fileLabel?: string;
+    };
+
+    const objCubizerDownload = `${basePath}plugins/minecraft-obj-cubizer/minecraft_obj_cubizer-v0.1.3.zip`;
+    const objCubizerLogo = `${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.png`;
+
+    const javaEntries: ProjectEntry[] = [
+      {
+        title: t('works.m9_t'),
+        subtitle: 'Island Escape: Java Core',
+        category: t('works.m9_c'),
+        status: t('workPages.status.prototype'),
+        desc: t('works.m9_d'),
+        texture: 'ice.png',
+        accent: 'group-hover:text-[#ff9ff3]',
+        tags: t('workPages.java.project1_tags', { returnObjects: true }) as string[]
+      },
+      {
+        title: t('works.m10_t'),
+        subtitle: 'Narrative RPG',
+        category: t('works.m10_c'),
+        status: t('workPages.status.design'),
+        desc: t('works.m10_d'),
+        texture: 'amethyst',
+        accent: 'group-hover:text-diamond',
+        tags: t('workPages.java.project2_tags', { returnObjects: true }) as string[]
+      }
+    ];
+
+    const modsEntries: ProjectEntry[] = [
+      {
+        title: t('works.mod1_t'),
+        subtitle: 'Engine Extension',
+        category: t('works.mod1_c'),
+        status: t('workPages.status.wip'),
+        desc: t('works.mod1_d'),
+        texture: 'redstone_block.png',
+        accent: 'group-hover:text-emerald-500',
+        tags: t('workPages.mods.tags', { returnObjects: true }) as string[]
+      }
+    ];
+
+    const toolsEntries: ProjectEntry[] = [
+      {
+        title: t('workPages.tools.objCubizer.title'),
+        subtitle: t('workPages.tools.objCubizer.subtitle'),
+        category: t('workPages.tools.objCubizer.category'),
+        status: t('workPages.tools.objCubizer.status'),
+        desc: t('workPages.tools.objCubizer.desc'),
+        texture: 'diamond_block.png',
+        image: objCubizerLogo,
+        download: objCubizerDownload,
+        downloadSlug: 'minecraft-obj-cubizer',
+        version: 'v0.1.3',
+        author: 'Ylong',
+        fileLabel: 'ZIP · 14.5 KB',
+        accent: 'group-hover:text-diamond',
+        tags: t('workPages.tools.objCubizer.tags', { returnObjects: true }) as string[]
+      },
+      {
+        title: t('works.tool1_t'),
+        subtitle: 'Production Toolchain',
+        category: t('works.tool1_c'),
+        status: t('workPages.status.wip'),
+        desc: t('works.tool1_d'),
+        texture: 'iron_block.png',
+        accent: 'group-hover:text-blue-500',
+        tags: t('workPages.tools.tags', { returnObjects: true }) as string[]
+      }
+    ];
+
+    const renderTexturePanel = (texture: string, code: string, image?: string, title?: string) => (
+      <div className="relative min-h-[18rem] md:min-h-[24rem] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] border border-obsidian/5 dark:border-white/5 rounded-sm isolate">
+        {image ? (
+          <img src={image} alt={title ?? code} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" />
+        ) : (
+          <div
+            className="absolute inset-[-20%] w-[140%] h-[140%] bg-repeat image-rendering-pixelated opacity-60 dark:opacity-40 group-hover:scale-110 transition-transform duration-[1.5s] ease-out"
+            style={{
+              backgroundImage: texture === 'amethyst'
+                ? `url(${basePath}textures/diamond_block.png)`
+                : `url(${basePath}textures/${texture})`,
+              backgroundSize: '128px'
+            }}
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent dark:from-white/5 mix-blend-overlay"></div>
+        <div className={`absolute inset-0 flex items-center justify-center mix-blend-overlay ${image ? 'opacity-0 group-hover:opacity-100 transition-opacity duration-700' : ''}`}>
+          <span className="text-obsidian/20 dark:text-white/20 font-black text-5xl md:text-7xl tracking-tighter">{code}</span>
+        </div>
+      </div>
+    );
+
+    const renderProjectCard = (work: ProjectEntry, idx: number) => (
+      <article key={`${work.title}-${idx}`} className="reveal-up group grid md:grid-cols-[1.1fr_0.9fr] gap-8 md:gap-12 items-stretch">
+        {renderTexturePanel(work.texture, `DEV_${idx + 1}`, work.image, work.title)}
+        <div className="flex flex-col justify-center border-y border-obsidian/10 dark:border-white/10 py-8">
+          <div className="flex items-center justify-between gap-4 text-xs uppercase tracking-[0.22em] font-mono text-gray-500">
+            <span>{work.category}</span>
+            <span>{work.status}</span>
+          </div>
+          <p className="mt-8 text-xs font-mono uppercase tracking-[0.25em] text-gray-500">{work.subtitle}</p>
+          <h3 className={`mt-3 text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none text-obsidian dark:text-white transition-colors duration-500 ${work.accent}`}>
+            {work.title}
+          </h3>
+          <p className="mt-7 text-gray-600 dark:text-gray-400 text-base md:text-lg leading-relaxed max-w-xl">{work.desc}</p>
+          <div className="mt-7 flex flex-wrap gap-2">
+            {work.tags.map((tag) => (
+              <span key={tag} className="border border-obsidian/10 dark:border-white/10 px-3 py-2 text-xs text-gray-600 dark:text-gray-300">{tag}</span>
+            ))}
+          </div>
+          {(work.version || work.author || work.fileLabel) && (
+            <div className="mt-7 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono text-gray-500">
+              {work.version && <span>{t('workPages.tools.objCubizer.version_label')}: {work.version}</span>}
+              {work.author && <span>{t('workPages.tools.objCubizer.author_label')}: {work.author}</span>}
+              {work.fileLabel && <span>{t('workPages.tools.objCubizer.file_label')}: {work.fileLabel}</span>}
+            </div>
+          )}
+          {work.downloadSlug && (
+            <div className="mt-5 flex items-center gap-2 text-xs font-mono uppercase tracking-[0.18em] text-gray-500">
+              <Download className="w-4 h-4 text-diamond" />
+              <span>{getDownloadCounterLabel(work.downloadSlug)}</span>
+            </div>
+          )}
+          {work.download && (
+            <a
+              href={work.download}
+              download
+              onClick={() => {
+                if (work.downloadSlug) {
+                  void recordDownload(work.downloadSlug);
+                }
+              }}
+              className="hover-target mt-8 w-fit flex items-center gap-3 border border-obsidian dark:border-white px-5 py-4 text-xs uppercase tracking-[0.2em] font-mono hover:text-diamond hover:border-diamond transition-colors"
+            >
+              <Download className="w-4 h-4" /> {t('workPages.tools.objCubizer.download')}
+            </a>
+          )}
+        </div>
+      </article>
+    );
+
+    const renderBedrockCard = (work: typeof bedrockEntries[number], _idx: number, compact = false) => (
+      <article
+        key={work.link}
+        className={`reveal-up group bg-white/40 dark:bg-black/40 border border-obsidian/5 dark:border-white/5 hover:border-obsidian/20 dark:hover:border-white/20 transition-colors duration-500 ${compact ? '' : 'grid lg:grid-cols-[0.95fr_1.05fr] gap-0'}`}
+        onMouseEnter={() => setTooltipContent({ visible: true, title: work.title, category: work.genre, desc: work.desc })}
+        onMouseLeave={() => setTooltipContent({ visible: false, title: '', category: '', desc: '' })}
+      >
+        <a href={work.link} target="_blank" rel="noopener noreferrer" className="hover-target block relative min-h-[18rem] md:min-h-[24rem] overflow-hidden isolate" aria-label={t('works.open_detail_aria', { title: work.title })}>
+          <img src={`${basePath}${work.image}`} alt={work.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" />
+          <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
+          <div className="absolute left-4 top-4 bg-black/70 text-white text-[10px] uppercase tracking-[0.2em] font-mono px-3 py-2">{work.category}</div>
+        </a>
+        <div className="p-6 md:p-8 flex flex-col justify-between gap-8">
+          <div>
+            <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.22em] font-mono text-gray-500">
+              <span>{work.genre}</span>
+              <span className="h-px w-8 bg-obsidian/20 dark:bg-white/20"></span>
+              <span>{work.players}</span>
+            </div>
+            <p className="mt-6 text-xs font-mono uppercase tracking-[0.25em] text-gray-500">{work.subtitle}</p>
+            <h3 className={`mt-3 text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none text-obsidian dark:text-white transition-colors duration-500 ${work.accent}`}>
+              {work.title}
+            </h3>
+            <p className="mt-5 text-gray-600 dark:text-gray-400 leading-relaxed">{work.desc}</p>
+          </div>
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-3 text-xs font-mono text-obsidian dark:text-white">
+              <span className="flex items-center gap-2"><Download className="w-4 h-4 text-diamond" />{t('works.downloads_metric', { downloads: work.downloads })}</span>
+              <span className="flex items-center gap-2"><Star className="w-4 h-4 text-amber-500" />{t('works.rating_metric', { rating: work.rating })}</span>
+              <span className="flex items-center gap-2"><MessageCircle className="w-4 h-4 text-amethyst" />{t('works.comments_metric', { comments: work.comments, remarks: work.remarks })}</span>
+              <span className="flex items-center gap-2"><Package className="w-4 h-4 text-gray-500" />{work.size} · {work.version}</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {work.components.map((component) => (
+                <span key={component} className="border border-obsidian/10 dark:border-white/10 px-3 py-2 text-xs text-gray-600 dark:text-gray-300">{component}</span>
+              ))}
+            </div>
+            <a href={work.link} target="_blank" rel="noopener noreferrer" className="hover-target w-fit flex items-center gap-3 text-xs uppercase tracking-[0.2em] font-mono text-gray-500 hover:text-obsidian dark:hover:text-white transition-colors">
+              <ExternalLink className="w-4 h-4" /> {t('workPages.open_external')}
+            </a>
+          </div>
+        </div>
+      </article>
+    );
+
+    const heroStats = [
+      { label: t('workPages.stats.projects'), value: pageCopy.statValue },
+      { label: t('workPages.stats.platform'), value: activePage === 'maps-java' ? 'Java' : activePage === 'maps-bedrock' ? 'Bedrock' : 'Fimel' },
+      { label: t('workPages.stats.mode'), value: activePage === 'mods' || activePage === 'tools' ? t('workPages.status.wip') : t('workPages.status.live') }
+    ];
+
+    return (
+      <main className="min-h-screen bg-paper dark:bg-obsidian text-obsidian dark:text-white transition-colors duration-700">
+        <section className="relative min-h-[82vh] overflow-hidden flex items-center px-6 md:px-16 lg:px-24 pt-36 pb-20 border-b border-obsidian/10 dark:border-white/10">
+          <div className="parallax-hero absolute inset-[-10%] w-[120%] h-[120%] opacity-40 pointer-events-none">
+            <ParticleCubes isDark={isDark} />
+          </div>
+          <div
+            className="absolute right-[-10%] bottom-[-20%] w-[55vw] h-[55vw] max-w-[680px] max-h-[680px] opacity-10 bg-repeat image-rendering-pixelated pointer-events-none"
+            style={{ backgroundImage: `url(${basePath}textures/${pageCopy.texture})`, backgroundSize: '96px' }}
+          ></div>
+          <div className="relative z-10 max-w-screen-2xl w-full">
+            <a href="#hero" onClick={(e) => handleNavClick(e, '#hero')} className="hover-target inline-flex items-center gap-3 text-xs uppercase tracking-[0.2em] font-mono text-gray-500 hover:text-obsidian dark:hover:text-white transition-colors mb-12">
+              <ArrowLeft className="w-4 h-4" /> {t('workPages.back_home')}
+            </a>
+            <p className={`hero-sub font-mono text-sm uppercase tracking-[0.35em] mb-6 ${pageCopy.accent}`}>{pageCopy.eyebrow}</p>
+            <h1 className="hero-title text-[17vw] md:text-[11vw] lg:text-[8vw] leading-[0.85] font-black uppercase tracking-tighter max-w-6xl">
+              {pageCopy.title}
+            </h1>
+            <p className="hero-sub mt-10 max-w-3xl text-lg md:text-2xl leading-relaxed text-gray-600 dark:text-gray-400 font-light">
+              {pageCopy.desc}
+            </p>
+            <div className="hero-sub mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl">
+              {heroStats.map((stat) => (
+                <div key={stat.label} className="border-y border-obsidian/10 dark:border-white/10 py-5">
+                  <div className={`text-3xl font-black uppercase ${pageCopy.accent}`}>{stat.value}</div>
+                  <div className="text-xs font-mono uppercase tracking-[0.2em] text-gray-500 mt-2">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="px-6 md:px-16 lg:px-24 py-24 md:py-32">
+          <div className="max-w-screen-2xl mx-auto">
+            {(activePage === 'maps-bedrock' || activePage === 'maps-overview') && (
+              <div className="reveal-up flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16">
+                <div>
+                  <div className={`font-mono text-xs uppercase tracking-[0.25em] flex items-center gap-4 ${pageCopy.accent}`}>
+                    <span className={`w-10 h-px ${pageCopy.line}`}></span>
+                    {activePage === 'maps-overview' ? t('workPages.maps.catalog') : t('workPages.bedrock.catalog')}
+                  </div>
+                  <h2 className="mt-5 text-4xl md:text-6xl font-black uppercase tracking-tighter">{t('workPages.catalog_title')}</h2>
+                </div>
+                <label className="relative w-full lg:w-[28rem] block">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  <input
+                    value={workSearch}
+                    onChange={(event) => setWorkSearch(event.target.value)}
+                    placeholder={t('workPages.search_placeholder')}
+                    className="w-full bg-white/60 dark:bg-black/50 border border-obsidian/10 dark:border-white/10 py-4 pl-11 pr-4 outline-none focus:border-diamond font-mono text-sm transition-colors"
+                  />
+                </label>
+              </div>
+            )}
+
+            {activePage === 'maps-overview' && (
+              <div className="space-y-24">
+                <div className="grid lg:grid-cols-2 gap-8">
+                  {filteredBedrockEntries.slice(0, 4).map((work, idx) => renderBedrockCard(work, idx, true))}
+                </div>
+                <div className="reveal-up flex flex-wrap gap-4">
+                  <a href={WORK_PAGE_HASHES['maps-bedrock']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-bedrock'])} className="hover-target inline-flex items-center gap-3 border border-obsidian dark:border-white px-5 py-4 font-mono text-xs uppercase tracking-[0.2em] hover:text-diamond hover:border-diamond transition-colors">
+                    {t('workPages.view_bedrock')} <ArrowUpRight className="w-4 h-4" />
+                  </a>
+                  <a href={WORK_PAGE_HASHES['maps-java']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-java'])} className="hover-target inline-flex items-center gap-3 border border-obsidian/20 dark:border-white/20 px-5 py-4 font-mono text-xs uppercase tracking-[0.2em] hover:text-[#ff9ff3] hover:border-[#ff9ff3] transition-colors">
+                    {t('workPages.view_java')} <ArrowUpRight className="w-4 h-4" />
+                  </a>
+                </div>
+                <div className="space-y-16">
+                  <h2 className="reveal-up text-4xl md:text-6xl font-black uppercase tracking-tighter">{t('nav.nav_maps_je')}</h2>
+                  {javaEntries.map(renderProjectCard)}
+                </div>
+              </div>
+            )}
+
+            {activePage === 'maps-bedrock' && (
+              <div className="space-y-10">
+                {filteredBedrockEntries.length ? (
+                  filteredBedrockEntries.map((work, idx) => renderBedrockCard(work, idx))
+                ) : (
+                  <div className="reveal-up border-y border-obsidian/10 dark:border-white/10 py-16 text-center">
+                    <p className="text-gray-500 font-mono uppercase tracking-[0.2em]">{t('workPages.no_results')}</p>
+                    <button onClick={() => setWorkSearch('')} className="hover-target mt-6 text-diamond font-mono text-xs uppercase tracking-[0.2em]">{t('workPages.clear_search')}</button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activePage === 'maps-java' && (
+              <div className="space-y-16">
+                {javaEntries.map(renderProjectCard)}
+              </div>
+            )}
+
+            {activePage === 'mods' && (
+              <div className="space-y-16">
+                {modsEntries.map(renderProjectCard)}
+              </div>
+            )}
+
+            {activePage === 'tools' && (
+              <div className="space-y-16">
+                {toolsEntries.map(renderProjectCard)}
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
+    );
+  };
 
   return (
     <div ref={mainRef} className="w-full font-sans transition-colors duration-700 selection:bg-diamond selection:text-white dark:selection:text-obsidian">
@@ -918,7 +1403,7 @@ function App() {
         </div>
 
         {/* Phase 3 Hotbar Navigation HUD */}
-        <HotbarNav scrollProgress={scrollProgress} handleNavClick={handleNavClick} />
+        <HotbarNav scrollProgress={scrollProgress} handleNavClick={handleNavClick} activePage={activePage} />
 
         {/* --- NAV LAYER 1: BASE DIFFERENCE HIGHLIGHTS --- */}
         <nav className="fixed top-0 left-0 w-full z-40 flex items-center justify-between px-6 py-8 md:px-12 pointer-events-none mix-blend-difference text-white">
@@ -965,17 +1450,17 @@ function App() {
                   <div className="bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-xs whitespace-nowrap overflow-visible">
                     {/* Maps Group */}
                     <div className="group/maps relative">
-                      <a href="#works-maps" onClick={(e) => handleNavClick(e, '#works-maps')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors w-full text-left flex justify-between items-center gap-6">
+                      <a href={WORK_PAGE_HASHES['maps-overview']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-overview'])} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors w-full text-left flex justify-between items-center gap-6">
                         {t('nav.nav_maps')} <span className="text-[10px] opacity-50">▶</span>
                       </a>
                       <div className="absolute left-full top-0 opacity-0 pointer-events-none group-hover/maps:opacity-100 group-hover/maps:pointer-events-auto transition-opacity duration-300 bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col">
-                        <a href="#works-maps-je" onClick={(e) => handleNavClick(e, '#works-maps-je')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-b border-obsidian/5 dark:border-white/5 whitespace-nowrap">{t('nav.nav_maps_je')}</a>
-                        <a href="#works-maps-be" onClick={(e) => handleNavClick(e, '#works-maps-be')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left whitespace-nowrap">{t('nav.nav_maps_be')}</a>
+                        <a href={WORK_PAGE_HASHES['maps-java']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-java'])} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-b border-obsidian/5 dark:border-white/5 whitespace-nowrap">{t('nav.nav_maps_je')}</a>
+                        <a href={WORK_PAGE_HASHES['maps-bedrock']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-bedrock'])} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left whitespace-nowrap">{t('nav.nav_maps_be')}</a>
                       </div>
                     </div>
                     {/* Mods & Tools */}
-                    <a href="#works-mods" onClick={(e) => handleNavClick(e, '#works-mods')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-t border-obsidian/5 dark:border-white/5">{t('nav.nav_mods')}</a>
-                    <a href="#works-tools" onClick={(e) => handleNavClick(e, '#works-tools')} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-t border-obsidian/5 dark:border-white/5">{t('nav.nav_tools')}</a>
+                    <a href={WORK_PAGE_HASHES.mods} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.mods)} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-t border-obsidian/5 dark:border-white/5">{t('nav.nav_mods')}</a>
+                    <a href={WORK_PAGE_HASHES.tools} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.tools)} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-t border-obsidian/5 dark:border-white/5">{t('nav.nav_tools')}</a>
                   </div>
                 </div>
               </div>
@@ -1019,10 +1504,10 @@ function App() {
             <div className="flex flex-col gap-2">
               <span className="text-gray-500 py-2 px-2">{t('nav.works')}</span>
               <div className="flex flex-col pl-4 gap-3 border-l border-obsidian/10 dark:border-white/10 ml-2">
-                <a href="#works-maps-je" onClick={(e) => handleNavClick(e, '#works-maps-je')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_maps_je')}</a>
-                <a href="#works-maps-be" onClick={(e) => handleNavClick(e, '#works-maps-be')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_maps_be')}</a>
-                <a href="#works-mods" onClick={(e) => handleNavClick(e, '#works-mods')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_mods')}</a>
-                <a href="#works-tools" onClick={(e) => handleNavClick(e, '#works-tools')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_tools')}</a>
+                <a href={WORK_PAGE_HASHES['maps-java']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-java'])} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_maps_je')}</a>
+                <a href={WORK_PAGE_HASHES['maps-bedrock']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-bedrock'])} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_maps_be')}</a>
+                <a href={WORK_PAGE_HASHES.mods} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.mods)} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_mods')}</a>
+                <a href={WORK_PAGE_HASHES.tools} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.tools)} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_tools')}</a>
               </div>
             </div>
 
@@ -1030,6 +1515,8 @@ function App() {
           </div>
         </div>
 
+        {activePage === 'home' ? (
+        <>
         <section id="hero" className="relative w-full h-screen overflow-hidden flex flex-col justify-center px-6 md:px-16 lg:px-24 bg-paper dark:bg-obsidian transition-colors duration-700">
           <div className="parallax-hero absolute inset-[-10%] w-[120%] h-[120%] z-0 opacity-70 pointer-events-none">
             <ParticleCubes isDark={isDark} />
@@ -1456,6 +1943,7 @@ function App() {
                 </div>
                 <div className="space-y-32">
                   {[
+                    { title: t('workPages.tools.objCubizer.title'), category: t('workPages.tools.objCubizer.category'), year: "v0.1.3", image: `${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.png`, accent: "group-hover:text-diamond", bg: "from-diamond/10", desc: t('workPages.tools.objCubizer.desc'), code: "OBJ_1", download: `${basePath}plugins/minecraft-obj-cubizer/minecraft_obj_cubizer-v0.1.3.zip`, downloadSlug: 'minecraft-obj-cubizer' },
                     { title: t('works.tool1_t'), category: t('works.tool1_c'), year: "WIP", image: "", accent: "group-hover:text-blue-500", bg: "from-blue-500/10", desc: t('works.tool1_d'), code: "TOOL_1" },
                   ].map((work, idx) => (
                     <div key={`tool-${idx}`} className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center">
@@ -1494,6 +1982,26 @@ function App() {
                         <p className="text-gray-600 dark:text-gray-400 font-light font-sans max-w-md text-base md:text-lg leading-relaxed transition-colors duration-700">
                           {work.desc}
                         </p>
+                        {'downloadSlug' in work && work.downloadSlug && (
+                          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.18em] text-gray-500">
+                            <Download className="w-4 h-4 text-diamond" />
+                            <span>{getDownloadCounterLabel(work.downloadSlug)}</span>
+                          </div>
+                        )}
+                        {'download' in work && work.download && (
+                          <a
+                            href={work.download}
+                            download
+                            onClick={() => {
+                              if ('downloadSlug' in work && work.downloadSlug) {
+                                void recordDownload(work.downloadSlug);
+                              }
+                            }}
+                            className="hover-target w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono text-gray-500 hover:text-obsidian dark:hover:text-white transition-colors"
+                          >
+                            <Download className="w-4 h-4" /> {t('workPages.tools.objCubizer.download')}
+                          </a>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -1537,6 +2045,10 @@ function App() {
             <span className="text-[25vw] font-black uppercase tracking-tighter leading-none block">FIMEL</span>
           </div>
         </footer>
+        </>
+        ) : (
+          renderWorkPage()
+        )}
 
         {/* Minecraft Advancement Toast */}
         <div 

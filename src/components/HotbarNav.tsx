@@ -1,26 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Home, Info, Map, Library, Wrench, PenTool, Swords, Blocks, Mail, ChevronUp, ChevronDown } from 'lucide-react';
 
-export default function HotbarNav({ scrollProgress, handleNavClick }: { scrollProgress: number, handleNavClick: (e: React.MouseEvent<HTMLAnchorElement>, id: string) => void }) {
+export default function HotbarNav({ scrollProgress, handleNavClick, activePage }: { scrollProgress: number, handleNavClick: (e: React.MouseEvent<HTMLAnchorElement>, id: string) => void, activePage: string }) {
   const { t } = useTranslation();
   const basePath = import.meta.env.BASE_URL;
   const [isOpen, setIsOpen] = useState(false);
   const [activeSlot, setActiveSlot] = useState(0);
 
-  const slots = [
-    { id: '#hero', tooltip: 'Respawn (Home)', icon: Home, color: '#FFFF55' },
-    { id: '#about', tooltip: t('nav.about'), icon: Info, color: 'white' },
-    { id: '#works-maps-je', tooltip: t('nav.nav_maps_je'), icon: Library, color: 'white' },
-    { id: '#works-maps-be', tooltip: t('nav.nav_maps_be'), icon: Map, color: 'white' },
-    { id: '#works-mods', tooltip: t('nav.nav_mods'), icon: Wrench, color: 'white' },
-    { id: '#works-tools', tooltip: t('nav.nav_tools'), icon: PenTool, color: 'white' },
-    { id: '#works', tooltip: 'PvP', icon: Swords, color: '#AAAAAA' },
-    { id: '#works', tooltip: 'Blocks', icon: Blocks, color: '#AAAAAA' },
-    { id: '#contact', tooltip: t('nav.contact'), icon: Mail, color: '#FFFF55' },
-  ];
+  const slots = useMemo(() => [
+    { id: '#hero', tooltip: 'Respawn (Home)', icon: Home, color: '#FFFF55', page: 'home' },
+    { id: '#about', tooltip: t('nav.about'), icon: Info, color: 'white', page: 'home' },
+    { id: '#/works/maps-java', tooltip: t('nav.nav_maps_je'), icon: Library, color: 'white', page: 'maps-java' },
+    { id: '#/works/maps-bedrock', tooltip: t('nav.nav_maps_be'), icon: Map, color: 'white', page: 'maps-bedrock' },
+    { id: '#/works/mods', tooltip: t('nav.nav_mods'), icon: Wrench, color: 'white', page: 'mods' },
+    { id: '#/works/tools', tooltip: t('nav.nav_tools'), icon: PenTool, color: 'white', page: 'tools' },
+    { id: '#works', tooltip: 'PvP', icon: Swords, color: '#AAAAAA', page: 'home' },
+    { id: '#works', tooltip: 'Blocks', icon: Blocks, color: '#AAAAAA', page: 'home' },
+    { id: '#contact', tooltip: t('nav.contact'), icon: Mail, color: '#FFFF55', page: 'home' },
+  ], [t]);
+
+  const activePageSlot = activePage !== 'home' ? slots.findIndex(slot => slot.page === activePage) : -1;
+  const visibleActiveSlot = activePageSlot !== -1 ? activePageSlot : activeSlot;
 
   useEffect(() => {
+    if (activePage !== 'home') {
+      return;
+    }
+
     const sectionIds = ['hero', 'about', 'works-maps-je', 'works-maps-be', 'works-mods', 'works-tools', 'contact'];
     
     const handleScroll = () => {
@@ -53,7 +60,7 @@ export default function HotbarNav({ scrollProgress, handleNavClick }: { scrollPr
     setTimeout(handleScroll, 100);
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [slots, activeSlot]);
+  }, [slots, activeSlot, activePage]);
 
   return (
     <>
@@ -73,9 +80,9 @@ export default function HotbarNav({ scrollProgress, handleNavClick }: { scrollPr
         {/* Active slot name overlay (Text above EXP bar) */}
       <div 
         className="text-white text-xs md:text-sm font-mono tracking-widest h-5 md:h-6 transition-opacity duration-300 mb-1 md:mb-1.5 pointer-events-none flex items-center"
-        style={{ textShadow: '2px 2px 0px #3f3f3f', color: slots[activeSlot]?.color || 'white' }}
+        style={{ textShadow: '2px 2px 0px #3f3f3f', color: slots[visibleActiveSlot]?.color || 'white' }}
       >
-        {slots[activeSlot]?.tooltip}
+        {slots[visibleActiveSlot]?.tooltip}
       </div>
         
         {/* MC Experience Bar Scroll Indicator (Embedded above hotbar) */}
@@ -100,8 +107,8 @@ export default function HotbarNav({ scrollProgress, handleNavClick }: { scrollPr
             className="flex-1 h-full cursor-pointer hover:bg-white/20 transition-colors flex items-center justify-center relative z-10 group"
           >
             <slot.icon 
-              className={`w-[18px] h-[18px] md:w-5 md:h-5 opacity-70 group-hover:opacity-100 transition-opacity transform group-hover:scale-110 ${idx === activeSlot ? 'opacity-100 animate-pulse' : ''}`} 
-              color={idx === activeSlot ? slot.color : 'currentColor'}
+              className={`w-[18px] h-[18px] md:w-5 md:h-5 opacity-70 group-hover:opacity-100 transition-opacity transform group-hover:scale-110 ${idx === visibleActiveSlot ? 'opacity-100 animate-pulse' : ''}`} 
+              color={idx === visibleActiveSlot ? slot.color : 'currentColor'}
             />
           </a>
         ))}
@@ -111,14 +118,14 @@ export default function HotbarNav({ scrollProgress, handleNavClick }: { scrollPr
           className="absolute top-[-1.5px] md:top-[-2px] w-[36px] h-[36px] md:w-[48px] md:h-[48px] pointer-events-none bg-no-repeat bg-cover transition-all duration-200 ease-out image-rendering-pixelated hidden md:block z-20"
           style={{ 
             backgroundImage: `url(${basePath}HUD/Hotbar_selection.png)`,
-            left: `calc(-2px + ${activeSlot * 40}px)`
+            left: `calc(-2px + ${visibleActiveSlot * 40}px)`
           }}
         />
         <div 
           className="absolute top-[-1.5px] w-[36px] h-[36px] pointer-events-none bg-no-repeat bg-cover transition-all duration-200 ease-out image-rendering-pixelated md:hidden z-20"
           style={{ 
             backgroundImage: `url(${basePath}HUD/Hotbar_selection.png)`,
-            left: `calc(-1.5px + ${activeSlot * 30.33}px)`
+            left: `calc(-1.5px + ${visibleActiveSlot * 30.33}px)`
           }}
         />
       </div>

@@ -115,6 +115,64 @@ const resources = {
           }
         }
       },
+      workPages: {
+        back_home: "返回主页",
+        open_external: "打开地图链接",
+        search_placeholder: "搜索地图、玩法、组件标签...",
+        catalog_title: "内容索引",
+        no_results: "没有找到匹配的地图",
+        clear_search: "清空搜索",
+        download_count_metric: "下载 {{count}} 次",
+        download_count_loading: "正在读取下载次数",
+        download_count_pending: "连接 Supabase 后显示下载次数",
+        view_bedrock: "查看全部基岩版地图",
+        view_java: "查看 Java 原生版",
+        stats: { projects: "内容数量", platform: "主要平台", mode: "状态" },
+        status: { live: "已发布", wip: "开发中", prototype: "原型重构", design: "企划设计" },
+        maps: {
+          eyebrow: "作品阵列 / 地图",
+          title: "地图作品",
+          desc: "以主页作为入口，这里集中展示 Fimel 的地图内容：已发布的网易基岩版地图、Java 原生版企划，以及可继续展开的玩法分类。整体结构参考内容索引页，保留主页的像素、体素和高对比排版语言。",
+          catalog: "精选地图目录"
+        },
+        bedrock: {
+          eyebrow: "地图作品 / 基岩版",
+          title: "网易基岩版地图",
+          desc: "集中呈现已经上线网易资源中心的基岩版地图。每个条目保留封面、类型、下载量、评分、组件标签和外部链接，方便玩家直接跳转查看。 ",
+          catalog: "基岩版地图库"
+        },
+        java: {
+          eyebrow: "地图作品 / Java",
+          title: "Java 原生版地图",
+          desc: "这里展示正在迁移或重新设计为 Java 原生端的地图项目，重点放在服务端逻辑、数据包、插件协作和更自由的多人体验。",
+          project1_tags: ["Java 重构", "感染逃生", "塔防协作", "核心机制"],
+          project2_tags: ["剧情 RPG", "任务链", "定制系统", "世界观"]
+        },
+        mods: {
+          eyebrow: "作品阵列 / 模组",
+          title: "模组开发",
+          desc: "面向更底层的系统拓展，包含自定义机制、服务端辅助和未来独立模组方向。当前以研发与预研内容为主。",
+          tags: ["系统扩充", "机制原型", "服务端联动", "开发中"]
+        },
+        tools: {
+          eyebrow: "作品阵列 / 工具",
+          title: "插件与工具",
+          desc: "沉淀 Fimel 地图制作流程里的脚本、插件、数据处理和可视化辅助工具，让复杂玩法更容易生产、调试与维护。",
+          tags: ["工作流", "数据包辅助", "插件工具", "自动化"],
+          objCubizer: {
+            title: "Minecraft OBJ 方块转换器",
+            subtitle: "Minecraft OBJ Cubizer",
+            category: "Blockbench 桌面插件",
+            status: "v0.1.3 发布",
+            desc: "把 Mineways 等工具导出的 Minecraft 建筑 OBJ 转换成 Blockbench Java Block/Item 方块模型，重建轴对齐长方体，读取 MTL 与 PNG 贴图，并支持把 OBJ 贴图导出到资源包目录，方便接入 Animated Java 原版动画流程。",
+            tags: ["OBJ 转方块", "MTL/PNG 贴图", "Java Block/Item", "资源包导出", "Animated Java"],
+            download: "下载插件",
+            version_label: "版本",
+            author_label: "作者",
+            file_label: "文件"
+          }
+        }
+      },
       footer: { title: "准备好<br/>合作了吗？", desc: "若需了解更多详细信息或探讨合作，欢迎随时联络我们。", copy: "© 2019-2026 FIMEL 工作室 · 版权所有" }
     }
   },
@@ -231,6 +289,64 @@ const resources = {
           }
         }
       },
+      workPages: {
+        back_home: "Back Home",
+        open_external: "Open Map Link",
+        search_placeholder: "Search maps, modes, components...",
+        catalog_title: "Content Index",
+        no_results: "No matching maps found",
+        clear_search: "Clear Search",
+        download_count_metric: "{{count}} tracked downloads",
+        download_count_loading: "Loading download count",
+        download_count_pending: "Connect Supabase to show downloads",
+        view_bedrock: "View All Bedrock Maps",
+        view_java: "View Java Edition",
+        stats: { projects: "Content Count", platform: "Main Platform", mode: "Status" },
+        status: { live: "Released", wip: "In Development", prototype: "Prototype Rebuild", design: "Design Phase" },
+        maps: {
+          eyebrow: "Works / Maps",
+          title: "Map Projects",
+          desc: "The homepage remains the entry point, while this page focuses the Fimel map catalogue: released NetEase Bedrock maps, Java Edition plans, and expandable gameplay categories. It keeps the studio's voxel, pixel, and high-contrast language while acting like a content index.",
+          catalog: "Featured Map Catalogue"
+        },
+        bedrock: {
+          eyebrow: "Maps / Bedrock",
+          title: "NetEase Bedrock Maps",
+          desc: "A focused catalogue of Bedrock maps published on NetEase Resource Center. Each entry keeps its cover, type, downloads, rating, component tags, and external detail link for quick browsing.",
+          catalog: "Bedrock Map Library"
+        },
+        java: {
+          eyebrow: "Maps / Java",
+          title: "Java Edition Maps",
+          desc: "Projects being migrated or redesigned for native Java Edition, emphasizing server logic, datapacks, plugin cooperation, and freer multiplayer experiences.",
+          project1_tags: ["Java rebuild", "Infection escape", "Tower teamwork", "Core mechanics"],
+          project2_tags: ["Story RPG", "Quest chain", "Custom systems", "Worldbuilding"]
+        },
+        mods: {
+          eyebrow: "Works / Mods",
+          title: "Mod Development",
+          desc: "Lower-level system expansion for custom mechanics, server-side support, and future standalone mods. This page currently highlights R&D and pre-production directions.",
+          tags: ["System expansion", "Mechanic prototype", "Server integration", "In development"]
+        },
+        tools: {
+          eyebrow: "Works / Tools",
+          title: "Plugins & Tools",
+          desc: "Scripts, plugins, data processing, and visual helpers distilled from Fimel's map production pipeline, making complex gameplay easier to build, debug, and maintain.",
+          tags: ["Workflow", "Datapack helper", "Plugin tools", "Automation"],
+          objCubizer: {
+            title: "Minecraft OBJ Cubizer",
+            subtitle: "Minecraft OBJ Cubizer",
+            category: "Blockbench Desktop Plugin",
+            status: "v0.1.3 Released",
+            desc: "Converts Minecraft building OBJ exports from tools like Mineways into Blockbench Java Block/Item cube models. It rebuilds axis-aligned cuboids, reads MTL and PNG textures, and can export OBJ textures into a resource-pack folder for Animated Java vanilla animation workflows.",
+            tags: ["OBJ to cubes", "MTL/PNG textures", "Java Block/Item", "Resource pack export", "Animated Java"],
+            download: "Download Plugin",
+            version_label: "Version",
+            author_label: "Author",
+            file_label: "File"
+          }
+        }
+      },
       footer: { title: "Ready to<br/>Collaborate?", desc: "If you require more detailed information or wish to discuss a potential collaboration, please feel free to reach out.", copy: "© 2019-2026 FIMEL STUDIO. ALL RIGHTS RESERVED." }
     }
   },
@@ -344,6 +460,64 @@ const resources = {
             desc: "幻想大陸が闇の勢力に覆われています。職業を選び、始まりの村から旅立ち、道具購入と装備強化を重ねながら、紫水晶の魔法で召喚された亡霊を倒します。",
             players: "多人数RPG",
             components: ["職業選択", "ストーリー攻略", "装備強化", "亡霊の敵"]
+          }
+        }
+      },
+      workPages: {
+        back_home: "ホームへ戻る",
+        open_external: "マップリンクを開く",
+        search_placeholder: "マップ、モード、コンポーネントを検索...",
+        catalog_title: "コンテンツ索引",
+        no_results: "一致するマップが見つかりません",
+        clear_search: "検索をクリア",
+        download_count_metric: "累計ダウンロード {{count}} 件",
+        download_count_loading: "ダウンロード数を読み込み中",
+        download_count_pending: "Supabase接続後に表示",
+        view_bedrock: "統合版マップをすべて見る",
+        view_java: "Java版を見る",
+        stats: { projects: "内容数", platform: "主要プラットフォーム", mode: "状態" },
+        status: { live: "公開済み", wip: "開発中", prototype: "プロトタイプ再構築", design: "企画設計" },
+        maps: {
+          eyebrow: "作品 / マップ",
+          title: "マップ制作",
+          desc: "ホームページを入口として残し、このページではFimelのマップカタログを集約します。公開済みのNetEase統合版マップ、Java版の企画、展開可能なゲームプレイ分類を、ホームと同じボクセル、ピクセル、高コントラストの表現で整理します。",
+          catalog: "注目マップカタログ"
+        },
+        bedrock: {
+          eyebrow: "マップ / 統合版",
+          title: "NetEase統合版マップ",
+          desc: "NetEaseリソースセンターで公開された統合版マップをまとめたページです。各項目にはカバー、タイプ、ダウンロード数、評価、コンポーネントタグ、外部リンクを保持しています。",
+          catalog: "統合版マップライブラリ"
+        },
+        java: {
+          eyebrow: "マップ / Java",
+          title: "Java版マップ",
+          desc: "Java版ネイティブ向けに移植または再設計しているプロジェクトです。サーバーロジック、データパック、プラグイン連携、より自由なマルチプレイ体験を重視します。",
+          project1_tags: ["Java再構築", "感染脱出", "タワー協力", "コア機構"],
+          project2_tags: ["ストーリーRPG", "クエストチェーン", "カスタムシステム", "世界観"]
+        },
+        mods: {
+          eyebrow: "作品 / MOD",
+          title: "MOD開発",
+          desc: "カスタム機構、サーバー補助、将来的な独立MODに向けた低レイヤーのシステム拡張です。現在は研究開発と事前制作の方向性を中心に展示しています。",
+          tags: ["システム拡張", "機構プロトタイプ", "サーバー連携", "開発中"]
+        },
+        tools: {
+          eyebrow: "作品 / ツール",
+          title: "プラグイン・ツール",
+          desc: "Fimelのマップ制作工程から生まれたスクリプト、プラグイン、データ処理、視覚的な補助ツールです。複雑なゲームプレイの制作、デバッグ、保守を支援します。",
+          tags: ["ワークフロー", "データパック補助", "プラグインツール", "自動化"],
+          objCubizer: {
+            title: "Minecraft OBJ キューブ変換ツール",
+            subtitle: "Minecraft OBJ Cubizer",
+            category: "Blockbench デスクトッププラグイン",
+            status: "v0.1.3 公開",
+            desc: "Minewaysなどから書き出したMinecraft建築OBJを、BlockbenchのJava Block/Item用キューブモデルへ変換します。軸に沿った直方体を再構築し、MTLとPNGテクスチャを読み込み、OBJテクスチャをリソースパックフォルダへ書き出せるため、Animated Javaのバニラアニメーション制作に接続しやすくなります。",
+            tags: ["OBJをキューブ化", "MTL/PNGテクスチャ", "Java Block/Item", "リソースパック出力", "Animated Java"],
+            download: "プラグインをダウンロード",
+            version_label: "バージョン",
+            author_label: "作者",
+            file_label: "ファイル"
           }
         }
       },
