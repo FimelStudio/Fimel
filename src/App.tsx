@@ -1069,7 +1069,7 @@ function App() {
       fileLabel?: string;
     };
 
-    const objCubizerDownload = `${basePath}plugins/minecraft-obj-cubizer/minecraft_obj_cubizer-v0.1.3.zip`;
+    const objCubizerDownload = `${basePath}plugins/minecraft-obj-cubizer/minecraft_obj_cubizer-v1.0.0.zip`;
     const objCubizerLogo = `${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.png`;
     const objCubizerRepo = 'https://github.com/Ylong4004/minecraft_obj_cubizer';
 
@@ -1121,9 +1121,9 @@ function App() {
         download: objCubizerDownload,
         downloadSlug: 'minecraft-obj-cubizer',
         repo: objCubizerRepo,
-        version: 'v0.1.3',
+        version: 'v1.0.0',
         author: 'Ylong',
-        fileLabel: 'ZIP · 14.5 KB',
+        fileLabel: 'ZIP · 19.8 KB',
         accent: 'group-hover:text-diamond',
         tags: t('workPages.tools.objCubizer.tags', { returnObjects: true }) as string[]
       },
@@ -1965,7 +1965,7 @@ function App() {
                 </div>
                 <div className="space-y-32">
                   {[
-                    { title: t('workPages.tools.objCubizer.title'), category: t('workPages.tools.objCubizer.category'), year: "v0.1.3", image: `${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.png`, accent: "group-hover:text-diamond", bg: "from-diamond/10", desc: t('workPages.tools.objCubizer.desc'), code: "OBJ_1", download: `${basePath}plugins/minecraft-obj-cubizer/minecraft_obj_cubizer-v0.1.3.zip`, downloadSlug: 'minecraft-obj-cubizer', repo: 'https://github.com/Ylong4004/minecraft_obj_cubizer' },
+                    { title: t('workPages.tools.objCubizer.title'), category: t('workPages.tools.objCubizer.category'), year: "v1.0.0", image: `${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.png`, accent: "group-hover:text-diamond", bg: "from-diamond/10", desc: t('workPages.tools.objCubizer.desc'), code: "OBJ_1", download: `${basePath}plugins/minecraft-obj-cubizer/minecraft_obj_cubizer-v1.0.0.zip`, downloadSlug: 'minecraft-obj-cubizer', repo: 'https://github.com/Ylong4004/minecraft_obj_cubizer' },
                     { title: t('works.tool1_t'), category: t('works.tool1_c'), year: "WIP", image: "", accent: "group-hover:text-blue-500", bg: "from-blue-500/10", desc: t('works.tool1_d'), code: "TOOL_1" },
                   ].map((work, idx) => (
                     <div key={`tool-${idx}`} className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center">
