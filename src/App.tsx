@@ -988,7 +988,8 @@ function App() {
         accent: 'text-diamond',
         line: 'bg-diamond',
         texture: 'diamond_block.png',
-        statValue: '10+'
+        statValue: '10+',
+        mode: t('workPages.status.live')
       },
       'maps-java': {
         eyebrow: t('workPages.java.eyebrow'),
@@ -997,7 +998,8 @@ function App() {
         accent: 'text-[#ff9ff3]',
         line: 'bg-[#ff9ff3]',
         texture: 'obsidian.png',
-        statValue: '2'
+        statValue: '2',
+        mode: t('workPages.status.prototype')
       },
       'maps-bedrock': {
         eyebrow: t('workPages.bedrock.eyebrow'),
@@ -1006,7 +1008,8 @@ function App() {
         accent: 'text-diamond',
         line: 'bg-diamond',
         texture: 'emerald_block.png',
-        statValue: `${FEATURED_MAPS.length}`
+        statValue: `${FEATURED_MAPS.length}`,
+        mode: t('workPages.status.live')
       },
       mods: {
         eyebrow: t('workPages.mods.eyebrow'),
@@ -1015,7 +1018,8 @@ function App() {
         accent: 'text-emerald-500',
         line: 'bg-emerald-500',
         texture: 'redstone_block.png',
-        statValue: 'WIP'
+        statValue: '1',
+        mode: t('workPages.status.wip')
       },
       tools: {
         eyebrow: t('workPages.tools.eyebrow'),
@@ -1024,7 +1028,8 @@ function App() {
         accent: 'text-blue-500',
         line: 'bg-blue-500',
         texture: 'iron_block.png',
-        statValue: 'WIP'
+        statValue: '2',
+        mode: t('workPages.status.released_research')
       }
     }[page];
 
@@ -1058,6 +1063,7 @@ function App() {
       image?: string;
       download?: string;
       downloadSlug?: string;
+      repo?: string;
       version?: string;
       author?: string;
       fileLabel?: string;
@@ -1065,6 +1071,7 @@ function App() {
 
     const objCubizerDownload = `${basePath}plugins/minecraft-obj-cubizer/minecraft_obj_cubizer-v0.1.3.zip`;
     const objCubizerLogo = `${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.png`;
+    const objCubizerRepo = 'https://github.com/Ylong4004/minecraft_obj_cubizer';
 
     const javaEntries: ProjectEntry[] = [
       {
@@ -1113,6 +1120,7 @@ function App() {
         image: objCubizerLogo,
         download: objCubizerDownload,
         downloadSlug: 'minecraft-obj-cubizer',
+        repo: objCubizerRepo,
         version: 'v0.1.3',
         author: 'Ylong',
         fileLabel: 'ZIP · 14.5 KB',
@@ -1184,19 +1192,33 @@ function App() {
               <span>{getDownloadCounterLabel(work.downloadSlug)}</span>
             </div>
           )}
-          {work.download && (
-            <a
-              href={work.download}
-              download
-              onClick={() => {
-                if (work.downloadSlug) {
-                  void recordDownload(work.downloadSlug);
-                }
-              }}
-              className="hover-target mt-8 w-fit flex items-center gap-3 border border-obsidian dark:border-white px-5 py-4 text-xs uppercase tracking-[0.2em] font-mono hover:text-diamond hover:border-diamond transition-colors"
-            >
-              <Download className="w-4 h-4" /> {t('workPages.tools.objCubizer.download')}
-            </a>
+          {(work.download || work.repo) && (
+            <div className="mt-8 flex flex-wrap gap-3">
+              {work.download && (
+                <a
+                  href={work.download}
+                  download
+                  onClick={() => {
+                    if (work.downloadSlug) {
+                      void recordDownload(work.downloadSlug);
+                    }
+                  }}
+                  className="hover-target w-fit flex items-center gap-3 border border-obsidian dark:border-white px-5 py-4 text-xs uppercase tracking-[0.2em] font-mono hover:text-diamond hover:border-diamond transition-colors"
+                >
+                  <Download className="w-4 h-4" /> {t('workPages.tools.objCubizer.download')}
+                </a>
+              )}
+              {work.repo && (
+                <a
+                  href={work.repo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover-target w-fit flex items-center gap-3 border border-obsidian/25 dark:border-white/25 px-5 py-4 text-xs uppercase tracking-[0.2em] font-mono text-gray-600 dark:text-gray-300 hover:text-obsidian hover:border-obsidian dark:hover:text-white dark:hover:border-white transition-colors"
+                >
+                  <Code className="w-4 h-4" /> {t('workPages.tools.objCubizer.repo')}
+                </a>
+              )}
+            </div>
           )}
         </div>
       </article>
@@ -1250,7 +1272,7 @@ function App() {
     const heroStats = [
       { label: t('workPages.stats.projects'), value: pageCopy.statValue },
       { label: t('workPages.stats.platform'), value: activePage === 'maps-java' ? 'Java' : activePage === 'maps-bedrock' ? 'Bedrock' : 'Fimel' },
-      { label: t('workPages.stats.mode'), value: activePage === 'mods' || activePage === 'tools' ? t('workPages.status.wip') : t('workPages.status.live') }
+      { label: t('workPages.stats.mode'), value: pageCopy.mode }
     ];
 
     return (
@@ -1943,7 +1965,7 @@ function App() {
                 </div>
                 <div className="space-y-32">
                   {[
-                    { title: t('workPages.tools.objCubizer.title'), category: t('workPages.tools.objCubizer.category'), year: "v0.1.3", image: `${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.png`, accent: "group-hover:text-diamond", bg: "from-diamond/10", desc: t('workPages.tools.objCubizer.desc'), code: "OBJ_1", download: `${basePath}plugins/minecraft-obj-cubizer/minecraft_obj_cubizer-v0.1.3.zip`, downloadSlug: 'minecraft-obj-cubizer' },
+                    { title: t('workPages.tools.objCubizer.title'), category: t('workPages.tools.objCubizer.category'), year: "v0.1.3", image: `${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.png`, accent: "group-hover:text-diamond", bg: "from-diamond/10", desc: t('workPages.tools.objCubizer.desc'), code: "OBJ_1", download: `${basePath}plugins/minecraft-obj-cubizer/minecraft_obj_cubizer-v0.1.3.zip`, downloadSlug: 'minecraft-obj-cubizer', repo: 'https://github.com/Ylong4004/minecraft_obj_cubizer' },
                     { title: t('works.tool1_t'), category: t('works.tool1_c'), year: "WIP", image: "", accent: "group-hover:text-blue-500", bg: "from-blue-500/10", desc: t('works.tool1_d'), code: "TOOL_1" },
                   ].map((work, idx) => (
                     <div key={`tool-${idx}`} className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center">
@@ -1988,19 +2010,33 @@ function App() {
                             <span>{getDownloadCounterLabel(work.downloadSlug)}</span>
                           </div>
                         )}
-                        {'download' in work && work.download && (
-                          <a
-                            href={work.download}
-                            download
-                            onClick={() => {
-                              if ('downloadSlug' in work && work.downloadSlug) {
-                                void recordDownload(work.downloadSlug);
-                              }
-                            }}
-                            className="hover-target w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono text-gray-500 hover:text-obsidian dark:hover:text-white transition-colors"
-                          >
-                            <Download className="w-4 h-4" /> {t('workPages.tools.objCubizer.download')}
-                          </a>
+                        {(('download' in work && work.download) || ('repo' in work && work.repo)) && (
+                          <div className="flex flex-wrap gap-4">
+                            {'download' in work && work.download && (
+                              <a
+                                href={work.download}
+                                download
+                                onClick={() => {
+                                  if ('downloadSlug' in work && work.downloadSlug) {
+                                    void recordDownload(work.downloadSlug);
+                                  }
+                                }}
+                                className="hover-target w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono text-gray-500 hover:text-obsidian dark:hover:text-white transition-colors"
+                              >
+                                <Download className="w-4 h-4" /> {t('workPages.tools.objCubizer.download')}
+                              </a>
+                            )}
+                            {'repo' in work && work.repo && (
+                              <a
+                                href={work.repo}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover-target w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono text-gray-500 hover:text-obsidian dark:hover:text-white transition-colors"
+                              >
+                                <Code className="w-4 h-4" /> {t('workPages.tools.objCubizer.repo')}
+                              </a>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>

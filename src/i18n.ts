@@ -128,7 +128,7 @@ const resources = {
         view_bedrock: "查看全部基岩版地图",
         view_java: "查看 Java 原生版",
         stats: { projects: "内容数量", platform: "主要平台", mode: "状态" },
-        status: { live: "已发布", wip: "开发中", prototype: "原型重构", design: "企划设计" },
+        status: { live: "已发布", wip: "开发中", prototype: "原型重构", design: "企划设计", released_research: "已发布 / 预研中" },
         maps: {
           eyebrow: "作品阵列 / 地图",
           title: "地图作品",
@@ -167,6 +167,7 @@ const resources = {
             desc: "把 Mineways 等工具导出的 Minecraft 建筑 OBJ 转换成 Blockbench Java Block/Item 方块模型，重建轴对齐长方体，读取 MTL 与 PNG 贴图，并支持把 OBJ 贴图导出到资源包目录，方便接入 Animated Java 原版动画流程。",
             tags: ["OBJ 转方块", "MTL/PNG 贴图", "Java Block/Item", "资源包导出", "Animated Java"],
             download: "下载插件",
+            repo: "查看 GitHub 仓库",
             version_label: "版本",
             author_label: "作者",
             file_label: "文件"
@@ -302,7 +303,7 @@ const resources = {
         view_bedrock: "View All Bedrock Maps",
         view_java: "View Java Edition",
         stats: { projects: "Content Count", platform: "Main Platform", mode: "Status" },
-        status: { live: "Released", wip: "In Development", prototype: "Prototype Rebuild", design: "Design Phase" },
+        status: { live: "Released", wip: "In Development", prototype: "Prototype Rebuild", design: "Design Phase", released_research: "Released / R&D" },
         maps: {
           eyebrow: "Works / Maps",
           title: "Map Projects",
@@ -341,6 +342,7 @@ const resources = {
             desc: "Converts Minecraft building OBJ exports from tools like Mineways into Blockbench Java Block/Item cube models. It rebuilds axis-aligned cuboids, reads MTL and PNG textures, and can export OBJ textures into a resource-pack folder for Animated Java vanilla animation workflows.",
             tags: ["OBJ to cubes", "MTL/PNG textures", "Java Block/Item", "Resource pack export", "Animated Java"],
             download: "Download Plugin",
+            repo: "View GitHub Repo",
             version_label: "Version",
             author_label: "Author",
             file_label: "File"
@@ -476,7 +478,7 @@ const resources = {
         view_bedrock: "統合版マップをすべて見る",
         view_java: "Java版を見る",
         stats: { projects: "内容数", platform: "主要プラットフォーム", mode: "状態" },
-        status: { live: "公開済み", wip: "開発中", prototype: "プロトタイプ再構築", design: "企画設計" },
+        status: { live: "公開済み", wip: "開発中", prototype: "プロトタイプ再構築", design: "企画設計", released_research: "公開済み / 研究開発" },
         maps: {
           eyebrow: "作品 / マップ",
           title: "マップ制作",
@@ -515,6 +517,7 @@ const resources = {
             desc: "Minewaysなどから書き出したMinecraft建築OBJを、BlockbenchのJava Block/Item用キューブモデルへ変換します。軸に沿った直方体を再構築し、MTLとPNGテクスチャを読み込み、OBJテクスチャをリソースパックフォルダへ書き出せるため、Animated Javaのバニラアニメーション制作に接続しやすくなります。",
             tags: ["OBJをキューブ化", "MTL/PNGテクスチャ", "Java Block/Item", "リソースパック出力", "Animated Java"],
             download: "プラグインをダウンロード",
+            repo: "GitHub リポジトリを見る",
             version_label: "バージョン",
             author_label: "作者",
             file_label: "ファイル"
