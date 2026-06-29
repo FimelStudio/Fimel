@@ -2057,8 +2057,8 @@ function App() {
             <p className="text-gray-600 dark:text-gray-400 text-lg md:text-xl font-light transition-colors duration-700">
               <Trans i18nKey="footer.desc" />
             </p>
-            <a href="mailto:fimel.studio@foxmail.com" className="inline-block mt-8 text-2xl md:text-5xl font-light text-obsidian dark:text-white hover:text-diamond dark:hover:text-diamond transition-all duration-300 border-b border-obsidian/20 dark:border-white/20 hover:border-diamond pb-2 hover-target">
-              fimel.studio@foxmail.com
+            <a href="mailto:fimel.studio.mc@gmail.com" className="inline-block mt-8 text-2xl md:text-5xl font-light text-obsidian dark:text-white hover:text-diamond dark:hover:text-diamond transition-all duration-300 border-b border-obsidian/20 dark:border-white/20 hover:border-diamond pb-2 hover-target">
+              fimel.studio.mc@gmail.com
             </a>
           </div>
 
