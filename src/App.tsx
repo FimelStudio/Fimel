@@ -371,10 +371,11 @@ const FEATURED_MAPS = [
   }
 ];
 
-type WorkPage = 'home' | 'maps-overview' | 'maps-java' | 'maps-bedrock' | 'mods' | 'tools';
+type WorkPage = 'home' | 'studio' | 'maps-overview' | 'maps-java' | 'maps-bedrock' | 'mods' | 'tools';
 type WorkContentPage = Exclude<WorkPage, 'home'>;
 
 const WORK_PAGE_HASHES: Record<WorkContentPage, string> = {
+  studio: '#/studio',
   'maps-overview': '#/works/maps',
   'maps-java': '#/works/maps-java',
   'maps-bedrock': '#/works/maps-bedrock',
@@ -719,6 +720,72 @@ function App() {
   }, [tooltipContent.visible]);
 
   const basePath = import.meta.env.BASE_URL;
+  const contentLocale = i18n.resolvedLanguage || i18n.language;
+  const siteMeta = contentLocale.startsWith('zh')
+    ? {
+        bingoCategory: 'Minecraft 1.21.11 · Fabric 模组',
+        bingoDescription: '将“不要做挑战”重构并融入 Bingo 对局：队伍共享生命、对抗词条、特殊事件与可选语音关键词，让竞速目标之外多一层持续博弈。',
+        bingoTags: ['Bingo 对局', 'DDI 规则', '356 条词条', '可选语音实验'],
+        contactLabels: ['项目合作', '创作者联动', '玩家反馈 / 技术支持'],
+        studio: {
+          originTitle: '从方块出发，构筑可被记住的体验。',
+          originBody: 'Fimel 以 Minecraft 内容创作为起点，但我们关心的不只是地图本身：一段玩法如何被理解，一座世界如何被探索，一套系统如何让玩家愿意留下来。',
+          milestones: [
+            { year: '2019', title: 'Fimel 成立', desc: '从 Minecraft 地图、建筑与玩法设计开始。' },
+            { year: '2021—2025', title: '已发布作品持续累积', desc: '网易基岩版地图陆续上线，沉淀 PvP、PvE、RPG、解谜与逃脱体验。' },
+            { year: 'NOW', title: '向 Java 与工具继续生长', desc: 'Java 地图正在制作；桌面插件与可游玩的模组已公开发布。' }
+          ],
+          principles: [
+            { number: '01', title: '玩法先于装饰', desc: '先定义玩家要做什么、为什么继续，再决定世界如何呈现。' },
+            { number: '02', title: '世界也是系统', desc: '建筑、关卡、规则与反馈共同构成可探索的体验。' },
+            { number: '03', title: '技术服务体验', desc: '命令、数据包、红石、模组与工具应让创意更可实现。' },
+            { number: '04', title: '从 Minecraft 继续生长', desc: '保留方块世界的创作根基，也为未来互动作品预留空间。' }
+          ]
+        }
+      }
+    : contentLocale.startsWith('ja')
+      ? {
+          bingoCategory: 'Minecraft 1.21.11 · Fabric Mod',
+          bingoDescription: 'Bingo matches reworked with the “Don’t Do It” challenge: shared team lives, opponent objectives, special events, and optional voice-keyword play.',
+          bingoTags: ['Bingo match', 'DDI rules', '356 objectives', 'Optional voice'],
+          contactLabels: ['プロジェクト協業', 'クリエイター連携', 'プレイヤー / 技術サポート'],
+          studio: {
+            originTitle: 'ブロックから始まる、記憶に残る体験。',
+            originBody: 'Fimel は Minecraft コンテンツ制作から始まりました。私たちが扱うのはマップだけではなく、遊び方、探索される世界、そしてプレイヤーを留めるシステムです。',
+            milestones: [
+              { year: '2019', title: 'Fimel 設立', desc: 'Minecraft のマップ、建築、ゲームプレイデザインから始動。' },
+              { year: '2021—2025', title: '公開作品を継続', desc: 'NetEase Bedrock のマップを公開し、多様なプレイ体験を積み重ねました。' },
+              { year: 'NOW', title: 'Java とツールへ', desc: 'Java マップを制作中。デスクトッププラグインとプレイ可能な MOD を公開中です。' }
+            ],
+            principles: [
+              { number: '01', title: '装飾より先に遊び', desc: 'プレイヤーの行動と継続理由を定義してから、世界を形にします。' },
+              { number: '02', title: '世界もシステム', desc: '建築、レベル、ルール、フィードバックで探索体験を作ります。' },
+              { number: '03', title: '技術は体験のために', desc: 'コマンド、データパック、MOD、ツールで創造を実現します。' },
+              { number: '04', title: 'Minecraft から広がる', desc: 'ブロック世界の根を保ち、次のインタラクティブ作品へ進みます。' }
+            ]
+          }
+        }
+      : {
+          bingoCategory: 'Minecraft 1.21.11 · Fabric Mod',
+          bingoDescription: 'A rework of the “Don’t Do It” challenge inside Bingo matches: shared team lives, opposing objectives, special events, and optional voice-keyword play.',
+          bingoTags: ['Bingo matches', 'DDI rules', '356 objectives', 'Optional voice'],
+          contactLabels: ['Project collaboration', 'Creator collaboration', 'Player feedback / technical support'],
+          studio: {
+            originTitle: 'Starting with blocks, building experiences worth remembering.',
+            originBody: 'Fimel began with Minecraft creation, but we care about more than maps: how a game is understood, how a world is explored, and how systems invite players to stay.',
+            milestones: [
+              { year: '2019', title: 'Fimel founded', desc: 'Started with Minecraft maps, architecture, and gameplay design.' },
+              { year: '2021—2025', title: 'Released works accumulated', desc: 'NetEase Bedrock maps launched across PvP, PvE, RPG, puzzle, and escape experiences.' },
+              { year: 'NOW', title: 'Growing through Java and tools', desc: 'Java maps are in production; a desktop plugin and a playable mod are publicly available.' }
+            ],
+            principles: [
+              { number: '01', title: 'Play before decoration', desc: 'We define what players do and why they continue before deciding how a world looks.' },
+              { number: '02', title: 'A world is also a system', desc: 'Architecture, level flow, rules, and feedback form an explorable experience together.' },
+              { number: '03', title: 'Technology serves experience', desc: 'Commands, data packs, redstone, mods, and tools make creative ideas possible.' },
+              { number: '04', title: 'Growing from Minecraft', desc: 'We keep our block-world roots while leaving room for future interactive work.' }
+            ]
+          }
+        };
   const {
     configured: downloadCountersConfigured,
     counts: downloadCounts,
@@ -978,8 +1045,114 @@ function App() {
     return () => ctx.revert();
   }, [loading, i18n.language, activePage]);
 
+  const renderStudioPage = () => {
+    const capabilities = [
+      { icon: Sword, title: t('core.pvp'), desc: t('core.pvp_d') },
+      { icon: Map, title: t('core.rpg'), desc: t('core.rpg_d') },
+      { icon: Code, title: t('core.puz'), desc: t('core.puz_d') }
+    ];
+    const team = [
+      { name: 'Ylong', role: t('team.role1'), letter: 'Y', color: 'text-diamond' },
+      { name: 'TreeHey', role: t('team.role2'), letter: 'T', color: 'text-amethyst' },
+      { name: 'crystal215', role: t('team.role4'), letter: 'C', color: 'text-[#00d2d3]' },
+      { name: 'chengzi', role: t('team.role3'), letter: 'C', color: 'text-[#ffa500]' }
+    ];
+
+    return (
+      <main className="min-h-screen bg-paper dark:bg-obsidian text-obsidian dark:text-white transition-colors duration-700">
+        <section className="relative min-h-[82vh] overflow-hidden flex items-center px-6 md:px-16 lg:px-24 pt-36 pb-20 border-b border-obsidian/10 dark:border-white/10">
+          <div className="parallax-hero absolute inset-[-10%] w-[120%] h-[120%] opacity-45 pointer-events-none"><ParticleCubes isDark={isDark} /></div>
+          <div className="relative z-10 max-w-screen-2xl w-full">
+            <a href="#hero" onClick={(e) => handleNavClick(e, '#hero')} className="hover-target inline-flex items-center gap-3 text-xs uppercase tracking-[0.2em] font-mono text-gray-500 hover:text-obsidian dark:hover:text-white transition-colors mb-12"><ArrowLeft className="w-4 h-4" /> {t('workPages.back_home')}</a>
+            <p className="hero-sub font-mono text-sm uppercase tracking-[0.35em] mb-6 text-amethyst">{t('about.tag')}</p>
+            <h1 className="hero-title text-[15vw] md:text-[10vw] lg:text-[7vw] leading-[0.88] font-black tracking-tighter max-w-6xl text-obsidian dark:text-white"><Trans i18nKey="about.title" /></h1>
+            <p className="hero-sub mt-10 max-w-3xl text-lg md:text-2xl leading-relaxed text-gray-600 dark:text-gray-400 font-light">{t('about.desc')}</p>
+            <div className="hero-sub mt-12 grid grid-cols-2 gap-4 max-w-xl">
+              <div className="border-y border-obsidian/10 dark:border-white/10 py-5"><div className="text-3xl font-black text-diamond">{t('about.y1')}</div><div className="text-xs font-mono uppercase tracking-[0.2em] text-gray-500 mt-2">{t('about.y1_sub')}</div></div>
+              <div className="border-y border-obsidian/10 dark:border-white/10 py-5"><div className="text-3xl font-black text-diamond">{t('about.y2')}</div><div className="text-xs font-mono uppercase tracking-[0.2em] text-gray-500 mt-2">{t('about.y2_sub')}</div></div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-24 md:py-32 px-6 md:px-16 lg:px-24 bg-paper dark:bg-obsidian transition-colors duration-700">
+          <div className="max-w-screen-xl mx-auto grid lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-24 items-stretch">
+            <div className="reveal-up flex flex-col justify-center py-4">
+              <div className="font-mono text-amethyst tracking-[0.2em] text-sm flex items-center gap-6"><span className="w-12 h-px bg-amethyst"></span>STUDIO / ORIGIN</div>
+              <h2 className="mt-8 text-4xl md:text-6xl font-black tracking-tighter leading-[0.95] text-obsidian dark:text-white">{siteMeta.studio.originTitle}</h2>
+              <p className="mt-8 max-w-2xl text-lg md:text-xl font-light leading-relaxed text-gray-600 dark:text-gray-400">{siteMeta.studio.originBody}</p>
+              <div className="mt-10 flex flex-wrap gap-3 text-xs font-mono uppercase tracking-[0.15em] text-gray-500"><span className="border border-obsidian/10 dark:border-white/10 px-3 py-2">Minecraft</span><span className="border border-obsidian/10 dark:border-white/10 px-3 py-2">Gameplay</span><span className="border border-obsidian/10 dark:border-white/10 px-3 py-2">World Systems</span></div>
+            </div>
+            <div className="reveal-up relative min-h-[22rem] overflow-hidden border border-obsidian/10 dark:border-white/10 bg-[#e5e5e5] dark:bg-[#050505] perspective-1000 group">
+              <div className="parallax-bg absolute inset-[-15%] w-[130%] h-[130%] opacity-35 dark:opacity-25 bg-repeat image-rendering-pixelated" style={{ backgroundImage: `url(${basePath}textures/stone.png)`, backgroundSize: '96px' }}></div>
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,210,211,0.18),transparent_65%)]"></div>
+              <div className="absolute inset-0 flex items-center justify-center transform-style-3d">
+                <div className="relative w-32 h-32 md:w-44 md:h-44 transform-style-3d animate-[spin-slow_15s_linear_infinite] group-hover:[animation-play-state:paused]">
+                  <div className="absolute inset-0 border-2 border-diamond/70 bg-diamond/10 shadow-[0_0_55px_rgba(0,210,211,0.25)] transform rotate-[22deg]"></div>
+                  <div className="absolute inset-5 border-2 border-amethyst/60 bg-amethyst/10 transform -rotate-[18deg]"></div>
+                  <div className="absolute inset-10 border-2 border-obsidian/30 dark:border-white/50 transform rotate-[45deg]"></div>
+                </div>
+              </div>
+              <span className="absolute right-5 bottom-5 text-[10px] font-mono uppercase tracking-[0.2em] text-obsidian/35 dark:text-white/35">FIMEL // WORLD_CORE</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-24 md:py-32 px-6 md:px-16 lg:px-24 bg-[#e5e5e5] dark:bg-[#050505] transition-colors duration-700">
+          <div className="max-w-screen-xl mx-auto">
+            <div className="reveal-up font-mono text-diamond tracking-[0.2em] text-sm flex items-center gap-6 mb-16"><span className="w-12 h-px bg-diamond"></span>{t('core.tag')}</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {capabilities.map((item) => (
+                <article key={item.title} className="reveal-up group relative p-8 md:p-10 bg-white/40 dark:bg-black/40 border border-obsidian/5 dark:border-white/5 hover:border-obsidian/20 dark:hover:border-white/20 transition-colors duration-700">
+                  <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-diamond via-amethyst to-transparent scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-700"></div>
+                  <item.icon className="w-10 h-10 text-obsidian/30 dark:text-white/30 group-hover:text-obsidian dark:group-hover:text-white transition-colors duration-500 mb-10" strokeWidth={1.5} />
+                  <h2 className="text-2xl font-bold mb-5 tracking-wide">{item.title}</h2><p className="text-gray-600 dark:text-gray-400 font-light leading-relaxed">{item.desc}</p>
+                </article>
+              ))}
+            </div>
+            <div className="mt-28 border-t border-obsidian/10 dark:border-white/10 pt-16">
+              <div className="reveal-up font-mono text-diamond tracking-[0.2em] text-sm flex items-center gap-6 mb-12"><span className="w-12 h-px bg-diamond"></span>WORLD_LOG / MILESTONES</div>
+              <div className="grid md:grid-cols-3 border-t border-obsidian/10 dark:border-white/10">
+                {siteMeta.studio.milestones.map((milestone) => (
+                  <article key={milestone.year} className="reveal-up min-h-[15rem] py-8 md:px-8 border-b md:border-b-0 md:border-r border-obsidian/10 dark:border-white/10 last:border-r-0 first:md:pl-0">
+                    <p className="font-mono text-sm tracking-[0.16em] text-diamond">{milestone.year}</p>
+                    <h2 className="mt-8 text-2xl md:text-3xl font-black tracking-tighter leading-none">{milestone.title}</h2>
+                    <p className="mt-5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{milestone.desc}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+            <div className="mt-28 border-t border-obsidian/10 dark:border-white/10 pt-16">
+              <div className="reveal-up font-mono text-amethyst tracking-[0.2em] text-sm flex items-center gap-6 mb-12"><span className="w-12 h-px bg-amethyst"></span>PROCESS / PRINCIPLES</div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {siteMeta.studio.principles.map((principle) => (
+                  <article key={principle.number} className="reveal-up group min-h-[17rem] p-7 border border-obsidian/10 dark:border-white/10 bg-white/35 dark:bg-black/20 hover:bg-white dark:hover:bg-[#111] transition-colors duration-500">
+                    <p className="font-mono text-sm text-amethyst">{principle.number}</p>
+                    <h2 className="mt-12 text-2xl font-black tracking-tighter leading-none">{principle.title}</h2>
+                    <p className="mt-5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{principle.desc}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+            <div className="mt-28 border-t border-obsidian/10 dark:border-white/10 pt-16">
+              <div className="reveal-up font-mono text-amethyst tracking-[0.2em] text-sm flex items-center gap-6 mb-12"><span className="w-12 h-px bg-amethyst"></span>{t('team.tag')}</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {team.map((member) => (
+                  <article key={member.name} className="reveal-up group relative p-8 bg-white/40 dark:bg-black/40 border border-obsidian/5 dark:border-white/5 hover:bg-white dark:hover:bg-[#111] transition-colors duration-500 flex flex-col items-center text-center">
+                    <div className="w-20 h-20 rounded-full bg-paper dark:bg-obsidian border border-obsidian/10 dark:border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500"><span className={`text-3xl font-black ${member.color} opacity-50 group-hover:opacity-100 transition-opacity`}>{member.letter}</span></div>
+                    <h2 className="text-xl font-bold mb-2">{member.name}</h2><p className="text-xs uppercase tracking-widest font-mono text-gray-500">{member.role}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    );
+  };
+
   const renderWorkPage = () => {
-    const page = activePage as WorkContentPage;
+    if (activePage === 'studio') return renderStudioPage();
+    const page = activePage as Exclude<WorkContentPage, 'studio'>;
     const pageCopy = {
       'maps-overview': {
         eyebrow: t('workPages.maps.eyebrow'),
@@ -1072,6 +1245,7 @@ function App() {
     const objCubizerDownload = `${basePath}plugins/minecraft-obj-cubizer/minecraft_obj_cubizer-1.4.0.zip`;
     const objCubizerLogo = `${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.svg`;
     const objCubizerRepo = 'https://github.com/Ylong4004/minecraft_obj_cubizer';
+    const bingoLogo = `${basePath}bingo-but-dont-do-it-logo.png`;
 
     const javaEntries: ProjectEntry[] = [
       {
@@ -1098,14 +1272,16 @@ function App() {
 
     const modsEntries: ProjectEntry[] = [
       {
-        title: t('works.mod1_t'),
-        subtitle: 'Engine Extension',
-        category: t('works.mod1_c'),
-        status: t('workPages.status.wip'),
-        desc: t('works.mod1_d'),
+        title: 'Bingo × Don\'t Do It',
+        subtitle: 'Competitive Minecraft Mod',
+        category: siteMeta.bingoCategory,
+        status: t('workPages.status.live'),
+        desc: siteMeta.bingoDescription,
         texture: 'redstone_block.png',
+        image: bingoLogo,
         accent: 'group-hover:text-emerald-500',
-        tags: t('workPages.mods.tags', { returnObjects: true }) as string[]
+        tags: siteMeta.bingoTags,
+        repo: 'https://github.com/Ylong4004/bingo-but-dont-do-it'
       }
     ];
 
@@ -1464,7 +1640,7 @@ function App() {
             {/* Transparent Hitbox overlay for Logo */}
           </a>
           <div className="hidden md:flex items-center gap-10 text-s tracking-widest uppercase font-mono pointer-events-none">
-              <a href="#about" onClick={(e) => handleNavClick(e, '#about')} className="pointer-events-auto px-3 py-1.5 text-transparent select-none outline-none">{t('nav.about')}</a>
+              <a href={WORK_PAGE_HASHES.studio} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.studio)} className="pointer-events-auto px-3 py-1.5 text-transparent select-none outline-none">{t('nav.about')}</a>
               
               <div className="relative group py-2 pointer-events-auto">
                 <a href="#works" onClick={(e) => handleNavClick(e, '#works')} className="px-3 py-1.5 inline-block text-transparent select-none outline-none">{t('nav.works')}</a>
@@ -1521,7 +1697,7 @@ function App() {
         {/* Mobile Navigation Dropdown (Outside the mix-blend-difference nav) */}
         <div className={`fixed top-[88px] md:top-[120px] left-0 w-full bg-paper/95 dark:bg-[#111]/95 text-obsidian dark:text-white transition-all duration-300 overflow-hidden backdrop-blur-md shadow-2xl z-40 ${mobileMenuOpen ? 'max-h-96 border-b border-obsidian/10 dark:border-white/10' : 'max-h-0'} pointer-events-auto`}>
           <div className="flex flex-col p-6 font-mono text-xs uppercase tracking-widest gap-4">
-            <a href="#about" onClick={(e) => handleNavClick(e, '#about')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-2 transition-all rounded-sm">{t('nav.about')}</a>
+            <a href={WORK_PAGE_HASHES.studio} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.studio)} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-2 transition-all rounded-sm">{t('nav.about')}</a>
             
             <div className="flex flex-col gap-2">
               <span className="text-gray-500 py-2 px-2">{t('nav.works')}</span>
@@ -1660,6 +1836,7 @@ function App() {
           </div>
         </section>
 
+        {false && (
         <section className="py-32 bg-[#e5e5e5] dark:bg-[#050505] px-6 md:px-16 lg:px-24 transition-colors duration-700">
           <div className="max-w-screen-xl mx-auto">
             <div className="reveal-up font-mono text-diamond tracking-[0.2em] text-sm flex items-center gap-6 mb-20">
@@ -1710,6 +1887,7 @@ function App() {
 
           </div>
         </section>
+        )}
 
         <section id="works" className="py-32 md:py-48 px-6 md:px-16 lg:px-24 bg-paper dark:bg-obsidian transition-colors duration-700">
           <div className="max-w-screen-xl mx-auto">
@@ -1722,6 +1900,135 @@ function App() {
               </a>
             </div>
 
+            {/* Homepage is a curated entry point. Full work cards remain available through the existing maps / mods / tools pages. */}
+            <div className="space-y-24">
+              <div className="reveal-up grid lg:grid-cols-[0.8fr_1.2fr] gap-8 border-y border-obsidian/10 dark:border-white/10 py-8 md:py-12">
+                <div className="flex flex-col justify-between gap-8">
+                  <div>
+                    <div className="font-mono text-diamond tracking-[0.2em] text-sm flex items-center gap-4">
+                      <span className="w-10 h-px bg-diamond"></span>
+                      {t('nav.nav_maps_je')}
+                    </div>
+                    <h3 className="mt-6 text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none text-obsidian dark:text-white">
+                      {t('workPages.status.prototype')}
+                    </h3>
+                  </div>
+                  <a href={WORK_PAGE_HASHES['maps-java']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-java'])} className="hover-target w-fit flex items-center gap-3 text-xs uppercase tracking-[0.2em] font-mono text-gray-500 hover:text-diamond transition-colors">
+                    {t('workPages.view_java')} <ArrowUpRight className="w-4 h-4" />
+                  </a>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-5">
+                  {[
+                    { title: t('works.m9_t'), category: t('works.m9_c'), desc: t('works.m9_d'), texture: 'ice.png', accent: 'hover:border-[#ff9ff3] hover:text-[#ff9ff3]' },
+                    { title: t('works.m10_t'), category: t('works.m10_c'), desc: t('works.m10_d'), texture: 'diamond_block.png', accent: 'hover:border-diamond hover:text-diamond' }
+                  ].map((work) => (
+                    <a key={work.title} href={WORK_PAGE_HASHES['maps-java']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-java'])} className={`hover-target group relative min-h-[18rem] overflow-hidden border border-obsidian/10 dark:border-white/10 p-6 flex flex-col justify-end transition-colors duration-500 ${work.accent}`}>
+                      <div className="parallax-bg absolute inset-[-18%] w-[136%] h-[136%] opacity-30 dark:opacity-40 bg-repeat image-rendering-pixelated group-hover:scale-110 transition-transform duration-[1.5s] ease-out" style={{ backgroundImage: `url(${basePath}textures/${work.texture})`, backgroundSize: '112px' }}></div>
+                      <div className="relative z-10">
+                        <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-gray-500">{work.category}</p>
+                        <h4 className="mt-3 text-2xl md:text-3xl font-bold uppercase tracking-tighter leading-none">{work.title}</h4>
+                        <p className="mt-4 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{work.desc}</p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              <div className="reveal-up flex flex-col md:flex-row md:items-end justify-between gap-8">
+                <div>
+                  <div className="font-mono text-diamond tracking-[0.2em] text-sm flex items-center gap-4">
+                    <span className="w-10 h-px bg-diamond"></span>
+                    {t('workPages.status.live')}
+                  </div>
+                  <h3 className="mt-5 text-4xl md:text-6xl font-black uppercase tracking-tighter text-obsidian dark:text-white">{t('works.category_maps')}</h3>
+                </div>
+                <a href={WORK_PAGE_HASHES['maps-overview']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-overview'])} className="hover-target w-fit flex items-center gap-3 border-b border-obsidian dark:border-white pb-2 text-xs uppercase tracking-[0.2em] font-mono text-obsidian dark:text-white hover:text-diamond hover:border-diamond transition-colors">
+                  {t('workPages.maps.catalog')} <ArrowUpRight className="w-4 h-4" />
+                </a>
+              </div>
+
+              <div className="grid lg:grid-cols-3 gap-6">
+                {[FEATURED_MAPS[6], FEATURED_MAPS[7], FEATURED_MAPS[0]].map((work) => {
+                  const title = t(`works.bedrockMaps.${work.i18nKey}.title`);
+                  const category = t(`works.bedrockMaps.${work.i18nKey}.genre`);
+                  const description = t(`works.bedrockMaps.${work.i18nKey}.desc`);
+                  return (
+                    <article key={work.link} className="reveal-up group relative min-h-[30rem] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] border border-obsidian/5 dark:border-white/5" onMouseEnter={() => setTooltipContent({ visible: true, title, category, desc: description })} onMouseLeave={() => setTooltipContent({ visible: false, title: '', category: '', desc: '' })}>
+                      <a href={work.link} target="_blank" rel="noopener noreferrer" className="hover-target absolute inset-0" aria-label={t('works.open_detail_aria', { title })}>
+                        <div className="parallax-bg absolute inset-[-18%] w-[136%] h-[136%]">
+                          <img src={`${basePath}${work.image}`} alt={title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" />
+                        </div>
+                        <div className={`absolute inset-0 bg-gradient-to-t ${work.bg} via-transparent to-obsidian/45 opacity-80 group-hover:opacity-100 transition-opacity duration-700`}></div>
+                        <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+                          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/70">{category}</p>
+                          <h4 className="mt-3 text-3xl font-bold uppercase tracking-tighter leading-none">{title}</h4>
+                          <div className="mt-5 flex items-center gap-3 text-xs font-mono text-white/80"><Download className="w-4 h-4 text-diamond" />{t('works.downloads_metric', { downloads: work.downloads })}</div>
+                        </div>
+                      </a>
+                    </article>
+                  );
+                })}
+              </div>
+
+              <div className="reveal-up flex flex-wrap gap-4 pt-2">
+                <a href={WORK_PAGE_HASHES['maps-overview']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-overview'])} className="hover-target inline-flex items-center gap-3 border border-obsidian dark:border-white px-5 py-4 font-mono text-xs uppercase tracking-[0.2em] hover:text-diamond hover:border-diamond transition-colors">{t('nav.nav_maps')} <ArrowUpRight className="w-4 h-4" /></a>
+                <a href={WORK_PAGE_HASHES.tools} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.tools)} className="hover-target inline-flex items-center gap-3 border border-obsidian/20 dark:border-white/20 px-5 py-4 font-mono text-xs uppercase tracking-[0.2em] text-gray-500 hover:text-diamond hover:border-diamond transition-colors">{t('nav.nav_tools')} <ArrowUpRight className="w-4 h-4" /></a>
+                <a href={WORK_PAGE_HASHES.mods} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.mods)} className="hover-target inline-flex items-center gap-3 border border-obsidian/20 dark:border-white/20 px-5 py-4 font-mono text-xs uppercase tracking-[0.2em] text-gray-500 hover:text-diamond hover:border-diamond transition-colors">{t('nav.nav_mods')} <ArrowUpRight className="w-4 h-4" /></a>
+              </div>
+
+              <div className="pt-16 md:pt-24 border-t border-obsidian/10 dark:border-white/10">
+                <div className="reveal-up flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10">
+                  <div>
+                    <div className="font-mono text-blue-500 tracking-[0.2em] text-sm flex items-center gap-4">
+                      <span className="w-10 h-px bg-blue-500"></span>
+                      {t('nav.nav_tools')}
+                    </div>
+                    <h3 className="mt-5 text-4xl md:text-6xl font-black uppercase tracking-tighter text-obsidian dark:text-white">LAB / SYSTEMS</h3>
+                  </div>
+                  <a href={WORK_PAGE_HASHES.tools} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.tools)} className="hover-target w-fit flex items-center gap-3 border-b border-obsidian dark:border-white pb-2 text-xs uppercase tracking-[0.2em] font-mono text-obsidian dark:text-white hover:text-blue-500 hover:border-blue-500 transition-colors">
+                    {t('nav.nav_tools')} <ArrowUpRight className="w-4 h-4" />
+                  </a>
+                </div>
+                <div className="max-w-4xl">
+                  <a href={WORK_PAGE_HASHES.tools} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.tools)} className="hover-target reveal-up group relative min-h-[22rem] overflow-hidden p-7 md:p-10 border border-obsidian/10 dark:border-white/10 flex flex-col justify-end bg-[#e5e5e5] dark:bg-[#050505]">
+                    <div className="parallax-bg absolute inset-[-15%] w-[130%] h-[130%] opacity-20 dark:opacity-30 group-hover:scale-110 transition-transform duration-[1.5s] ease-out flex items-center justify-center p-10">
+                      <img src={`${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.svg`} alt="Minecraft OBJ Cubizer" className="w-full h-full max-w-md object-contain opacity-90" />
+                    </div>
+                    <div className="relative z-10">
+                      <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-gray-500">Blockbench Desktop Plugin · Released</p>
+                      <h4 className="mt-3 text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none text-obsidian dark:text-white group-hover:text-diamond transition-colors">Minecraft OBJ Cubizer</h4>
+                      <p className="mt-5 max-w-xl text-sm md:text-base leading-relaxed text-gray-600 dark:text-gray-400">{t('workPages.tools.objCubizer.desc')}</p>
+                    </div>
+                  </a>
+                </div>
+              </div>
+
+              <div className="pt-16 md:pt-24 border-t border-obsidian/10 dark:border-white/10">
+                <div className="reveal-up flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10">
+                  <div>
+                    <div className="font-mono text-emerald-500 tracking-[0.2em] text-sm flex items-center gap-4">
+                      <span className="w-10 h-px bg-emerald-500"></span>
+                      {t('nav.nav_mods')}
+                    </div>
+                    <h3 className="mt-5 text-4xl md:text-6xl font-black uppercase tracking-tighter text-obsidian dark:text-white">MOD / PLAYABLE SYSTEMS</h3>
+                  </div>
+                  <a href={WORK_PAGE_HASHES.mods} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.mods)} className="hover-target w-fit flex items-center gap-3 border-b border-obsidian dark:border-white pb-2 text-xs uppercase tracking-[0.2em] font-mono text-obsidian dark:text-white hover:text-emerald-500 hover:border-emerald-500 transition-colors">
+                    {t('nav.nav_mods')} <ArrowUpRight className="w-4 h-4" />
+                  </a>
+                </div>
+                <a href={WORK_PAGE_HASHES.mods} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.mods)} className="hover-target reveal-up group relative block min-h-[18rem] overflow-hidden p-7 md:p-10 border border-obsidian/10 dark:border-white/10 bg-[#07120a]">
+                  <img src={`${basePath}bingo-but-dont-do-it-logo.png`} alt="Bingo × Don't Do It" className="parallax-bg absolute inset-[-10%] w-[120%] h-[120%] object-contain p-8 md:p-12 opacity-55 group-hover:opacity-80 group-hover:scale-105 transition-all duration-[1.2s] ease-out" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#07120a] via-[#07120a]/55 to-transparent"></div>
+                  <div className="relative z-10 max-w-xl pt-24">
+                    <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-300">{siteMeta.bingoCategory} · {t('workPages.status.live')}</p>
+                    <h4 className="mt-3 text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none text-white">Bingo × Don't Do It</h4>
+                    <p className="mt-5 text-sm md:text-base leading-relaxed text-white/70">{siteMeta.bingoDescription}</p>
+                  </div>
+                </a>
+              </div>
+            </div>
+
+            {false && (
             <div className="space-y-48">
               {/* Category: Maps */}
               <div id="works-maps" className="scroll-mt-32">
@@ -2044,6 +2351,7 @@ function App() {
                 </div>
               </div>
             </div>
+            )}
           </div>
         </section>
 
@@ -2057,6 +2365,11 @@ function App() {
             <p className="text-gray-600 dark:text-gray-400 text-lg md:text-xl font-light transition-colors duration-700">
               <Trans i18nKey="footer.desc" />
             </p>
+            <div className="flex flex-wrap justify-center gap-3 text-[10px] md:text-xs font-mono uppercase tracking-[0.16em] text-gray-500">
+              {siteMeta.contactLabels.map((label) => (
+                <span key={label} className="border border-obsidian/10 dark:border-white/10 px-3 py-2">{label}</span>
+              ))}
+            </div>
             <a href="mailto:fimel.studio.mc@gmail.com" className="inline-block mt-8 text-2xl md:text-5xl font-light text-obsidian dark:text-white hover:text-diamond dark:hover:text-diamond transition-all duration-300 border-b border-obsidian/20 dark:border-white/20 hover:border-diamond pb-2 hover-target">
               fimel.studio.mc@gmail.com
             </a>
@@ -2065,7 +2378,7 @@ function App() {
           <div className="w-full max-w-screen-2xl border-t border-obsidian/10 dark:border-white/10 pt-10 flex flex-col md:flex-row items-center justify-between gap-8 text-xs text-gray-500 font-mono uppercase tracking-widest z-10 transition-colors duration-700">
             <p>{t('footer.copy')}</p>
             <div className="flex gap-8 items-center">
-              {/* <a href="#" className="hover:text-obsidian dark:hover:text-white transition-colors">X (Twitter)</a> */}
+              <a href="https://x.com/FimelStudio" target="_blank" rel="noopener noreferrer" className="hover:text-obsidian dark:hover:text-white transition-colors hover-target">X / @FimelStudio</a>
               {/* <a href="#" className="hover:text-obsidian dark:hover:text-white transition-colors">Bilibili</a> */}
               <button 
                 onClick={handleCopyQQ} 

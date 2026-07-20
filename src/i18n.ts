@@ -4,7 +4,7 @@ import { initReactI18next } from 'react-i18next';
 const resources = {
   zh: {
     translation: {
-      nav: { about: "关于我们", works: "作品阵列", contact: "联络合作", menu: "菜单", nav_maps: "地图作品", nav_maps_be: "基岩版 / 网易版", nav_maps_je: "Java 原生版", nav_mods: "模组开发", nav_tools: "插件与工具" },
+      nav: { about: "关于我们", works: "作品阵列", contact: "联络合作", menu: "菜单", nav_maps: "地图作品", nav_maps_be: "基岩版 / 网易版", nav_maps_je: "Java 版", nav_mods: "模组 / MODS", nav_tools: "插件与工具" },
       hero: { gen: "世界生成中...", crafting: "构筑", worlds: "无限", sub: "以机制重组法则，用指令重制原版。<br/>专注于顶尖的 Minecraft 玩法构筑，为您提供远超常理的 PVP、RPG 及硬核解密地图游玩体验。", scroll: "向下滑动" },
       marq: { pvp: "PVP 竞技场", rpg: "RPG 沉浸冒险", puz: "硬核解密", vdl: "体素视觉设计", jve: "Java 原生架构" },
       about: { tag: "工作室宣言", title: "打破传统边界，<br />重塑沙盒交互。", desc: "Fimel 工作室成立于 2019 年。由于起初专注于中国版 Minecraft（网易版），我们在 PvP、PvE、RPG、逃生及建筑等众多类型上均有建树，并取得了众多现象级的下载成绩与玩家口碑。如今团队正同时进军 Java 原生端，在各大神仙服与平台不断刷新玩家的体验认知。", y1: "2019", y1_sub: "创立年份", y2: "10+", y2_sub: "总发行佳作", render: "核心方块载入完毕" },
@@ -20,7 +20,7 @@ const resources = {
       works: {
         title: "入选<br/>作品", inquire: "获取游玩授权", 
         category_maps: "地图作品 / MAPS",
-        category_mods: "模组开发 / MODS",
+        category_mods: "模组 / MODS",
         category_tools: "插件与工具 / TOOLS & PLUGINS",
         m1_t: "狼人杀：F小镇", m1_c: "狼人杀 PvP", m1_d: "网易版现象级角色扮演与推理生存地图。",
         m2_t: "饥饿游戏：旧城迷行", m2_c: "PvP 竞技", m2_d: "基于旧城废墟的冒险与杀戮。",
@@ -126,13 +126,13 @@ const resources = {
         download_count_loading: "正在读取下载次数",
         download_count_pending: "连接 Supabase 后显示下载次数",
         view_bedrock: "查看全部基岩版地图",
-        view_java: "查看 Java 原生版",
+        view_java: "查看 Java 版",
         stats: { projects: "内容数量", platform: "主要平台", mode: "状态" },
         status: { live: "已发布", wip: "开发中", prototype: "原型重构", design: "企划设计", released_research: "已发布 / 预研中" },
         maps: {
           eyebrow: "作品阵列 / 地图",
           title: "地图作品",
-          desc: "以主页作为入口，这里集中展示 Fimel 的地图内容：已发布的网易基岩版地图、Java 原生版企划，以及可继续展开的玩法分类。整体结构参考内容索引页，保留主页的像素、体素和高对比排版语言。",
+          desc: "以主页作为入口，这里集中展示 Fimel 的地图内容：已发布的网易基岩版地图、Java 版企划，以及可继续展开的玩法分类。整体结构参考内容索引页，保留主页的像素、体素和高对比排版语言。",
           catalog: "精选地图目录"
         },
         bedrock: {
@@ -143,14 +143,14 @@ const resources = {
         },
         java: {
           eyebrow: "地图作品 / Java",
-          title: "Java 原生版地图",
-          desc: "这里展示正在迁移或重新设计为 Java 原生端的地图项目，重点放在服务端逻辑、数据包、插件协作和更自由的多人体验。",
+          title: "Java 版地图",
+          desc: "这里展示正在迁移或重新设计为 Java 版的地图项目，重点放在服务端逻辑、数据包、插件协作和更自由的多人体验。",
           project1_tags: ["Java 重构", "感染逃生", "塔防协作", "核心机制"],
           project2_tags: ["剧情 RPG", "任务链", "定制系统", "世界观"]
         },
         mods: {
           eyebrow: "作品阵列 / 模组",
-          title: "模组开发",
+          title: "模组",
           desc: "面向更底层的系统拓展，包含自定义机制、服务端辅助和未来独立模组方向。当前以研发与预研内容为主。",
           tags: ["系统扩充", "机制原型", "服务端联动", "开发中"]
         },
@@ -354,7 +354,7 @@ const resources = {
   },
   ja: {
     translation: {
-      nav: { about: "我々について", works: "作品", contact: "お問い合わせ", menu: "メニュー", nav_maps: "マップ制作", nav_maps_be: "統合版 / NetEase版", nav_maps_je: "Java版", nav_mods: "MOD開発", nav_tools: "プラグイン・ツール" },
+      nav: { about: "我々について", works: "作品", contact: "お問い合わせ", menu: "メニュー", nav_maps: "マップ制作", nav_maps_be: "統合版 / NetEase版", nav_maps_je: "Java版", nav_mods: "MOD", nav_tools: "プラグイン・ツール" },
       hero: { gen: "世界を生成中...", crafting: "創造", worlds: "無限", sub: "コマンドで法則を再構築し、ロジックでバニラを刷新する。<br/>トップクラスのMinecraftゲームプレイ開発に専念し、常識を覆すPVP、RPG、謎解きのマップ体験を提供します。", scroll: "スクロール" },
       marq: { pvp: "PVP アリーナ", rpg: "RPG アドベンチャー", puz: "謎解きマップ", vdl: "ボクセルデザイン", jve: "Java版 ネイティブ" },
       about: { tag: "マニフェスト", title: "境界を越え、<br />サンドボックスを再定義する", desc: "Fimel スタジオは2019年に設立されました。初期は主に中国版『Minecraft』（NetEase版）に注力しており、PvP、PvE、RPG、脱出、建築など様々なジャンルのマップ制作を行ってきました。そこでの驚異的なダウンロード数と成功を経て、現在私たちはJava版ネイティブへと活動を広げ、プレイヤーの常識を覆す体験を提供し続けています。", y1: "2019", y1_sub: "設立年", y2: "10+", y2_sub: "総発行作品", render: "コアブロックをレンダリング" },
@@ -370,7 +370,7 @@ const resources = {
       works: { 
         title: "これまでの<br/>代表作", inquire: "アクセス申請", 
         category_maps: "マップ制作 / MAPS",
-        category_mods: "MOD開発 / MODS",
+        category_mods: "MODS",
         category_tools: "プラグイン・ツール / TOOLS",
         m1_t: "狼人殺 F小镇", m1_c: "人狼風 PvP", m1_d: "10万+DL。NetEase版での傑作人狼風サバイバルマップ。",
         m2_t: "饥饿游戏：旧城迷行", m2_c: "サバイバル PvP", m2_d: "5万+DL。廃墟となった旧市街での極限サバイバル。",
@@ -500,7 +500,7 @@ const resources = {
         },
         mods: {
           eyebrow: "作品 / MOD",
-          title: "MOD開発",
+          title: "MOD",
           desc: "カスタム機構、サーバー補助、将来的な独立MODに向けた低レイヤーのシステム拡張です。現在は研究開発と事前制作の方向性を中心に展示しています。",
           tags: ["システム拡張", "機構プロトタイプ", "サーバー連携", "開発中"]
         },

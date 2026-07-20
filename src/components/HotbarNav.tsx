@@ -10,7 +10,7 @@ export default function HotbarNav({ scrollProgress, handleNavClick, activePage }
 
   const slots = useMemo(() => [
     { id: '#hero', tooltip: 'Respawn (Home)', icon: Home, color: '#FFFF55', page: 'home' },
-    { id: '#about', tooltip: t('nav.about'), icon: Info, color: 'white', page: 'home' },
+    { id: '#/studio', tooltip: t('nav.about'), icon: Info, color: 'white', page: 'studio' },
     { id: '#/works/maps-java', tooltip: t('nav.nav_maps_je'), icon: Library, color: 'white', page: 'maps-java' },
     { id: '#/works/maps-bedrock', tooltip: t('nav.nav_maps_be'), icon: Map, color: 'white', page: 'maps-bedrock' },
     { id: '#/works/mods', tooltip: t('nav.nav_mods'), icon: Wrench, color: 'white', page: 'mods' },
