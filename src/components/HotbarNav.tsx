@@ -15,8 +15,8 @@ export default function HotbarNav({ scrollProgress, handleNavClick, activePage }
     { id: '#/works/maps-bedrock', tooltip: t('nav.nav_maps_be'), icon: Map, color: 'white', page: 'maps-bedrock' },
     { id: '#/works/mods', tooltip: t('nav.nav_mods'), icon: Wrench, color: 'white', page: 'mods' },
     { id: '#/works/tools', tooltip: t('nav.nav_tools'), icon: PenTool, color: 'white', page: 'tools' },
-    { id: '#works', tooltip: 'PvP', icon: Swords, color: '#AAAAAA', page: 'home' },
-    { id: '#works', tooltip: 'Blocks', icon: Blocks, color: '#AAAAAA', page: 'home' },
+    { id: '#quick-entry', tooltip: t('home.featured_cta'), icon: Blocks, color: '#55FFFF', page: 'home' },
+    { id: '#/works/maps', tooltip: t('nav.works'), icon: Swords, color: '#AAAAAA', page: 'maps-overview' },
     { id: '#contact', tooltip: t('nav.contact'), icon: Mail, color: '#FFFF55', page: 'home' },
   ], [t]);
 
@@ -28,7 +28,13 @@ export default function HotbarNav({ scrollProgress, handleNavClick, activePage }
       return;
     }
 
-    const sectionIds = ['hero', 'about', 'works-maps-je', 'works-maps-be', 'works-mods', 'works-tools', 'contact'];
+    const homeSections = [
+      { id: 'hero', slotIndex: 0 },
+      { id: 'quick-entry', slotIndex: 6 },
+      { id: 'about', slotIndex: 1 },
+      { id: 'works', slotIndex: 7 },
+      { id: 'contact', slotIndex: 8 },
+    ];
     
     const handleScroll = () => {
       // Trigger point slightly above the middle of the screen
@@ -36,11 +42,11 @@ export default function HotbarNav({ scrollProgress, handleNavClick, activePage }
       
       let newActiveIndex = -1;
       // Search from bottom up to find the deepest matching section
-      for (let i = sectionIds.length - 1; i >= 0; i--) {
-        const el = document.getElementById(sectionIds[i]);
+      for (let i = homeSections.length - 1; i >= 0; i--) {
+        const section = homeSections[i];
+        const el = document.getElementById(section.id);
         if (el && el.offsetTop <= triggerPoint) {
-          const id = `#${sectionIds[i]}`;
-          newActiveIndex = slots.findIndex(s => s.id === id);
+          newActiveIndex = section.slotIndex;
           break;
         }
       }

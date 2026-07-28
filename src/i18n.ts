@@ -4,8 +4,27 @@ import { initReactI18next } from 'react-i18next';
 const resources = {
   zh: {
     translation: {
-      nav: { about: "关于我们", works: "作品阵列", contact: "联络合作", menu: "菜单", nav_maps: "地图作品", nav_maps_be: "基岩版 / 网易版", nav_maps_je: "Java 版", nav_mods: "模组 / MODS", nav_tools: "插件与工具" },
+      nav: { about: "关于我们", works: "地图作品", contact: "联络合作", menu: "菜单", nav_maps: "地图作品", nav_maps_all: "全部地图", nav_maps_be: "基岩版 / 网易版", nav_maps_je: "Java 版地图 / 数据包", nav_mods: "模组 / MODS", nav_tools: "插件与工具" },
       hero: { gen: "世界生成中...", crafting: "构筑", worlds: "无限", sub: "以机制重组法则，用指令重制原版。<br/>专注于顶尖的 Minecraft 玩法构筑，为您提供远超常理的 PVP、RPG 及硬核解密地图游玩体验。", scroll: "向下滑动" },
+      home: {
+        studio_label: "MINECRAFT 游戏与互动创意工作室",
+        featured_cta: "快速浏览作品",
+        current_cta: "查看正在制作",
+        status_java: "2 个 Java 项目在制",
+        status_maps: "8 张地图已发布",
+        quick_tag: "快速入口 / START HERE",
+        quick_title: "从这里进入 Fimel 的作品",
+        maps_title: "地图作品",
+        maps_featured: "海岛逃生：黎明前夕",
+        maps_desc: "从代表地图开始，浏览已发布的网易基岩版作品，以及正在制作的 Java 版地图与数据包。",
+        mods_title: "模组",
+        mods_featured: "Bingo But Don't Do It",
+        mods_desc: "已完成并可继续体验的机制、规则与系统扩展。",
+        tools_title: "插件与工具",
+        tools_featured: "Minecraft OBJ Cubizer",
+        tools_desc: "已发布的方块转换器，以及服务创作者工作流的技术实验。",
+        enter: "进入"
+      },
       marq: { pvp: "PVP 竞技场", rpg: "RPG 沉浸冒险", puz: "硬核解密", vdl: "体素视觉设计", jve: "Java 原生架构" },
       about: { tag: "工作室宣言", title: "打破传统边界，<br />重塑沙盒交互。", desc: "Fimel 工作室成立于 2019 年。由于起初专注于中国版 Minecraft（网易版），我们在 PvP、PvE、RPG、逃生及建筑等众多类型上均有建树，并取得了众多现象级的下载成绩与玩家口碑。如今团队正同时进军 Java 原生端，在各大神仙服与平台不断刷新玩家的体验认知。", y1: "2019", y1_sub: "创立年份", y2: "10+", y2_sub: "总发行佳作", render: "核心方块载入完毕" },
       process: { title: "构筑维度", p1: "视觉设计", p1_sub: "从零开始的美学构筑", p2: "原生地形", p2_sub: "亿万级方块尺度演算", p3: "机制编程", p3_sub: "底层引擎逻辑重构", p4: "交互叙事", p4_sub: "多维沉浸感知设计" },
@@ -126,39 +145,39 @@ const resources = {
         download_count_loading: "正在读取下载次数",
         download_count_pending: "连接 Supabase 后显示下载次数",
         view_bedrock: "查看全部基岩版地图",
-        view_java: "查看 Java 版",
+        view_java: "查看 Java 版地图 / 数据包",
         stats: { projects: "内容数量", platform: "主要平台", mode: "状态" },
         status: { live: "已发布", wip: "开发中", prototype: "原型重构", design: "企划设计", released_research: "已发布 / 预研中" },
         maps: {
-          eyebrow: "作品阵列 / 地图",
+          eyebrow: "地图作品 / 总览",
           title: "地图作品",
-          desc: "以主页作为入口，这里集中展示 Fimel 的地图内容：已发布的网易基岩版地图、Java 版企划，以及可继续展开的玩法分类。整体结构参考内容索引页，保留主页的像素、体素和高对比排版语言。",
-          catalog: "精选地图目录"
+          desc: "汇集 Fimel 已发布与正在制作的地图内容。你可以进入网易基岩版作品库，或查看正在开发的 Java 版地图与数据包项目。",
+          catalog: "地图目录"
         },
         bedrock: {
           eyebrow: "地图作品 / 基岩版",
           title: "网易基岩版地图",
-          desc: "集中呈现已经上线网易资源中心的基岩版地图。每个条目保留封面、类型、下载量、评分、组件标签和外部链接，方便玩家直接跳转查看。 ",
+          desc: "收录已在网易 Minecraft 资源中心发布的基岩版地图，覆盖 PvP、PvE、RPG、解谜与逃生等玩法。由于平台入口限制，本站提供封面、玩法信息与资源中心入口。",
           catalog: "基岩版地图库"
         },
         java: {
-          eyebrow: "地图作品 / Java",
-          title: "Java 版地图",
-          desc: "这里展示正在迁移或重新设计为 Java 版的地图项目，重点放在服务端逻辑、数据包、插件协作和更自由的多人体验。",
+          eyebrow: "地图作品 / Java 与数据包",
+          title: "Java 版地图 / 数据包",
+          desc: "展示正在制作的 Java 版地图及配套数据包。当前项目重点包括玩法系统重构、多人协作逻辑、任务流程与服务端适配，发布状态会随开发进度更新。",
           project1_tags: ["Java 重构", "感染逃生", "塔防协作", "核心机制"],
           project2_tags: ["剧情 RPG", "任务链", "定制系统", "世界观"]
         },
         mods: {
-          eyebrow: "作品阵列 / 模组",
+          eyebrow: "模组 / 已发布与实验",
           title: "模组",
-          desc: "面向更底层的系统拓展，包含自定义机制、服务端辅助和未来独立模组方向。当前以研发与预研内容为主。",
-          tags: ["系统扩充", "机制原型", "服务端联动", "开发中"]
+          desc: "收录 Fimel 开发的可游玩模组与机制实验。当前可体验项目为 Bingo But Don't Do It，后续项目会按完成度和维护状态加入。",
+          tags: ["玩法模组", "机制重构", "Fabric", "已发布"]
         },
         tools: {
-          eyebrow: "作品阵列 / 工具",
+          eyebrow: "插件与工具 / 创作工作流",
           title: "插件与工具",
-          desc: "沉淀 Fimel 地图制作流程里的脚本、插件、数据处理和可视化辅助工具，让复杂玩法更容易生产、调试与维护。",
-          tags: ["工作流", "数据包辅助", "插件工具", "自动化"],
+          desc: "收录 Fimel 在地图制作和技术美术流程中开发的插件与辅助工具。当前已发布 Minecraft OBJ Cubizer，并提供下载、版本与 GitHub 入口。",
+          tags: ["Blockbench 插件", "模型转换", "创作工作流", "已发布"],
           objCubizer: {
             title: "Minecraft OBJ 方块转换器",
             subtitle: "Minecraft OBJ Cubizer",
@@ -179,8 +198,27 @@ const resources = {
   },
   en: {
     translation: {
-      nav: { about: "About", works: "Works", contact: "Contact", menu: "Menu", nav_maps: "Maps", nav_maps_be: "Bedrock / NetEase", nav_maps_je: "Java Edition", nav_mods: "Mods", nav_tools: "Tools & Plugins" },
+      nav: { about: "About", works: "Maps", contact: "Contact", menu: "Menu", nav_maps: "Maps", nav_maps_all: "All Maps", nav_maps_be: "Bedrock / NetEase", nav_maps_je: "Java Maps / Datapacks", nav_mods: "Mods", nav_tools: "Tools & Plugins" },
       hero: { gen: "GENERATING WORLD...", crafting: "CRAFTING", worlds: "WORLDS", sub: "Restructuring rules through commands, reinventing vanilla through logic.<br/>Dedicated to top-tier Minecraft gameplay development, delivering mind-blowing PVP, RPG, and hardcore puzzle map experiences.", scroll: "Scroll" },
+      home: {
+        studio_label: "MINECRAFT GAME & INTERACTIVE CREATIVE STUDIO",
+        featured_cta: "Browse the Work",
+        current_cta: "See What's In Production",
+        status_java: "2 Java projects in production",
+        status_maps: "8 maps released",
+        quick_tag: "QUICK ENTRY / START HERE",
+        quick_title: "Discover Fimel through our work",
+        maps_title: "Maps",
+        maps_featured: "Island Escape: Before Dawn",
+        maps_desc: "Start with a signature map, then explore released NetEase Bedrock work and Java maps and datapacks in production.",
+        mods_title: "Mods",
+        mods_featured: "Bingo But Don't Do It",
+        mods_desc: "A completed, playable expansion of Minecraft mechanics, rules, and systems.",
+        tools_title: "Plugins & Tools",
+        tools_featured: "Minecraft OBJ Cubizer",
+        tools_desc: "A released block-conversion tool and technical experiments for creator workflows.",
+        enter: "Enter"
+      },
       marq: { pvp: "PvP Arenas", rpg: "RPG Adventures", puz: "Puzzle Maps", vdl: "Voxel Design", jve: "Minecraft Java Edition" },
       about: { tag: "STUDIO MANIFESTO", title: "Breaking limits,<br />Reshaping sandbox.", desc: "Fimel Studio was established in 2019. Having initially focused on the Chinese edition of Minecraft (NetEase Edition), our works span PvP, PvE, RPG, escaping, and building maps. After phenomenal success and millions of downloads there, we are now pushing the boundaries of Java Edition gameplay across various platforms.", y1: "2019", y1_sub: "Est. Year", y2: "10+", y2_sub: "Masterpieces", render: "RENDER_OBJ: CORE_BLOCK" },
       process: { title: "DIMENSIONS", p1: "VISUALS", p1_sub: "Ground-up Aesthetics", p2: "TERRAIN", p2_sub: "Billion-scale Generations", p3: "LOGIC", p3_sub: "Engine Refactoring", p4: "NARRATIVE", p4_sub: "Immersive Interactions" },
@@ -301,39 +339,39 @@ const resources = {
         download_count_loading: "Loading download count",
         download_count_pending: "Connect Supabase to show downloads",
         view_bedrock: "View All Bedrock Maps",
-        view_java: "View Java Edition",
+        view_java: "View Java Maps / Datapacks",
         stats: { projects: "Content Count", platform: "Main Platform", mode: "Status" },
         status: { live: "Released", wip: "In Development", prototype: "Prototype Rebuild", design: "Design Phase", released_research: "Released / R&D" },
         maps: {
-          eyebrow: "Works / Maps",
+          eyebrow: "Maps / Overview",
           title: "Map Projects",
-          desc: "The homepage remains the entry point, while this page focuses the Fimel map catalogue: released NetEase Bedrock maps, Java Edition plans, and expandable gameplay categories. It keeps the studio's voxel, pixel, and high-contrast language while acting like a content index.",
-          catalog: "Featured Map Catalogue"
+          desc: "A catalogue of Fimel maps, from released NetEase Bedrock projects to Java maps and datapacks currently in production.",
+          catalog: "Map Catalogue"
         },
         bedrock: {
           eyebrow: "Maps / Bedrock",
           title: "NetEase Bedrock Maps",
-          desc: "A focused catalogue of Bedrock maps published on NetEase Resource Center. Each entry keeps its cover, type, downloads, rating, component tags, and external detail link for quick browsing.",
+          desc: "Released NetEase Minecraft Bedrock maps spanning PvP, PvE, RPG, puzzles, and escape experiences. Because access is platform-restricted, each entry provides its cover, gameplay details, and Resource Center link.",
           catalog: "Bedrock Map Library"
         },
         java: {
-          eyebrow: "Maps / Java",
-          title: "Java Edition Maps",
-          desc: "Projects being migrated or redesigned for native Java Edition, emphasizing server logic, datapacks, plugin cooperation, and freer multiplayer experiences.",
+          eyebrow: "Maps / Java & Datapacks",
+          title: "Java Maps / Datapacks",
+          desc: "Java maps and supporting datapacks currently in production, focused on rebuilt gameplay systems, multiplayer logic, quest flows, and server compatibility. Release status will be updated as development progresses.",
           project1_tags: ["Java rebuild", "Infection escape", "Tower teamwork", "Core mechanics"],
           project2_tags: ["Story RPG", "Quest chain", "Custom systems", "Worldbuilding"]
         },
         mods: {
-          eyebrow: "Works / Mods",
-          title: "Mod Development",
-          desc: "Lower-level system expansion for custom mechanics, server-side support, and future standalone mods. This page currently highlights R&D and pre-production directions.",
-          tags: ["System expansion", "Mechanic prototype", "Server integration", "In development"]
+          eyebrow: "Mods / Releases & Experiments",
+          title: "Mods",
+          desc: "Playable mods and mechanic experiments developed by Fimel. Bingo But Don't Do It is available now; future projects will be added according to completion and maintenance status.",
+          tags: ["Gameplay mod", "Mechanic rework", "Fabric", "Released"]
         },
         tools: {
-          eyebrow: "Works / Tools",
+          eyebrow: "Plugins & Tools / Creator Workflow",
           title: "Plugins & Tools",
-          desc: "Scripts, plugins, data processing, and visual helpers distilled from Fimel's map production pipeline, making complex gameplay easier to build, debug, and maintain.",
-          tags: ["Workflow", "Datapack helper", "Plugin tools", "Automation"],
+          desc: "Plugins and utilities developed through Fimel's map-production and technical-art workflow. Minecraft OBJ Cubizer is available now with download, version, and GitHub links.",
+          tags: ["Blockbench plugin", "Model conversion", "Creator workflow", "Released"],
           objCubizer: {
             title: "Minecraft OBJ Cubizer",
             subtitle: "Minecraft OBJ Cubizer",
@@ -354,8 +392,27 @@ const resources = {
   },
   ja: {
     translation: {
-      nav: { about: "我々について", works: "作品", contact: "お問い合わせ", menu: "メニュー", nav_maps: "マップ制作", nav_maps_be: "統合版 / NetEase版", nav_maps_je: "Java版", nav_mods: "MOD", nav_tools: "プラグイン・ツール" },
+      nav: { about: "我々について", works: "マップ作品", contact: "お問い合わせ", menu: "メニュー", nav_maps: "マップ作品", nav_maps_all: "すべてのマップ", nav_maps_be: "統合版 / NetEase版", nav_maps_je: "Java版マップ / データパック", nav_mods: "MOD", nav_tools: "プラグイン・ツール" },
       hero: { gen: "世界を生成中...", crafting: "創造", worlds: "無限", sub: "コマンドで法則を再構築し、ロジックでバニラを刷新する。<br/>トップクラスのMinecraftゲームプレイ開発に専念し、常識を覆すPVP、RPG、謎解きのマップ体験を提供します。", scroll: "スクロール" },
+      home: {
+        studio_label: "MINECRAFT ゲーム＆インタラクティブ・クリエイティブスタジオ",
+        featured_cta: "作品をすぐ見る",
+        current_cta: "制作中の作品を見る",
+        status_java: "Java プロジェクト 2 本を制作中",
+        status_maps: "マップ 8 本を公開",
+        quick_tag: "クイック入口 / START HERE",
+        quick_title: "作品から Fimel を知る",
+        maps_title: "マップ",
+        maps_featured: "海岛逃生：黎明前夕",
+        maps_desc: "代表マップから、公開済みの NetEase 統合版作品と制作中の Java版マップ・データパックへ。",
+        mods_title: "MOD",
+        mods_featured: "Bingo But Don't Do It",
+        mods_desc: "完成・公開済みの、プレイ可能な仕組み、ルール、システム拡張。",
+        tools_title: "プラグイン・ツール",
+        tools_featured: "Minecraft OBJ Cubizer",
+        tools_desc: "公開済みのブロック変換ツールと、制作工程を支える技術実験。",
+        enter: "開く"
+      },
       marq: { pvp: "PVP アリーナ", rpg: "RPG アドベンチャー", puz: "謎解きマップ", vdl: "ボクセルデザイン", jve: "Java版 ネイティブ" },
       about: { tag: "マニフェスト", title: "境界を越え、<br />サンドボックスを再定義する", desc: "Fimel スタジオは2019年に設立されました。初期は主に中国版『Minecraft』（NetEase版）に注力しており、PvP、PvE、RPG、脱出、建築など様々なジャンルのマップ制作を行ってきました。そこでの驚異的なダウンロード数と成功を経て、現在私たちはJava版ネイティブへと活動を広げ、プレイヤーの常識を覆す体験を提供し続けています。", y1: "2019", y1_sub: "設立年", y2: "10+", y2_sub: "総発行作品", render: "コアブロックをレンダリング" },
       process: { title: "次元", p1: "視覚設計", p1_sub: "ゼロからの美学", p2: "地形生成", p2_sub: "何十億ものブロック規模", p3: "機構構築", p3_sub: "システム再構築", p4: "没入体験", p4_sub: "多次元のインタラクション" },
@@ -476,39 +533,39 @@ const resources = {
         download_count_loading: "ダウンロード数を読み込み中",
         download_count_pending: "Supabase接続後に表示",
         view_bedrock: "統合版マップをすべて見る",
-        view_java: "Java版を見る",
+        view_java: "Java版マップ / データパックを見る",
         stats: { projects: "内容数", platform: "主要プラットフォーム", mode: "状態" },
         status: { live: "公開済み", wip: "開発中", prototype: "プロトタイプ再構築", design: "企画設計", released_research: "公開済み / 研究開発" },
         maps: {
-          eyebrow: "作品 / マップ",
+          eyebrow: "マップ作品 / 一覧",
           title: "マップ制作",
-          desc: "ホームページを入口として残し、このページではFimelのマップカタログを集約します。公開済みのNetEase統合版マップ、Java版の企画、展開可能なゲームプレイ分類を、ホームと同じボクセル、ピクセル、高コントラストの表現で整理します。",
-          catalog: "注目マップカタログ"
+          desc: "Fimel が公開・制作しているマップをまとめています。NetEase 統合版の公開作品と、開発中の Java版マップ・データパックを確認できます。",
+          catalog: "マップ一覧"
         },
         bedrock: {
           eyebrow: "マップ / 統合版",
           title: "NetEase統合版マップ",
-          desc: "NetEaseリソースセンターで公開された統合版マップをまとめたページです。各項目にはカバー、タイプ、ダウンロード数、評価、コンポーネントタグ、外部リンクを保持しています。",
+          desc: "NetEase Minecraft リソースセンターで公開済みの統合版マップです。PvP、PvE、RPG、謎解き、脱出などを収録し、各作品からカバー、ゲーム内容、リソースセンターへの入口を確認できます。",
           catalog: "統合版マップライブラリ"
         },
         java: {
-          eyebrow: "マップ / Java",
-          title: "Java版マップ",
-          desc: "Java版ネイティブ向けに移植または再設計しているプロジェクトです。サーバーロジック、データパック、プラグイン連携、より自由なマルチプレイ体験を重視します。",
+          eyebrow: "マップ / Java・データパック",
+          title: "Java版マップ / データパック",
+          desc: "制作中の Java版マップと関連データパックです。ゲームシステムの再構築、マルチプレイロジック、クエスト進行、サーバー対応を中心に開発し、公開状況は進捗に合わせて更新します。",
           project1_tags: ["Java再構築", "感染脱出", "タワー協力", "コア機構"],
           project2_tags: ["ストーリーRPG", "クエストチェーン", "カスタムシステム", "世界観"]
         },
         mods: {
-          eyebrow: "作品 / MOD",
+          eyebrow: "MOD / 公開作品・実験",
           title: "MOD",
-          desc: "カスタム機構、サーバー補助、将来的な独立MODに向けた低レイヤーのシステム拡張です。現在は研究開発と事前制作の方向性を中心に展示しています。",
-          tags: ["システム拡張", "機構プロトタイプ", "サーバー連携", "開発中"]
+          desc: "Fimel が開発したプレイ可能な MOD とゲームメカニクス実験です。現在は Bingo But Don't Do It を公開しており、今後の作品は完成度とメンテナンス状況に応じて追加します。",
+          tags: ["ゲームプレイ MOD", "機構再構築", "Fabric", "公開済み"]
         },
         tools: {
-          eyebrow: "作品 / ツール",
+          eyebrow: "プラグイン・ツール / 制作ワークフロー",
           title: "プラグイン・ツール",
-          desc: "Fimelのマップ制作工程から生まれたスクリプト、プラグイン、データ処理、視覚的な補助ツールです。複雑なゲームプレイの制作、デバッグ、保守を支援します。",
-          tags: ["ワークフロー", "データパック補助", "プラグインツール", "自動化"],
+          desc: "Fimel のマップ制作とテクニカルアート工程から生まれたプラグイン・補助ツールです。Minecraft OBJ Cubizer は公開済みで、ダウンロード、バージョン、GitHub の各入口を用意しています。",
+          tags: ["Blockbench プラグイン", "モデル変換", "制作ワークフロー", "公開済み"],
           objCubizer: {
             title: "Minecraft OBJ キューブ変換ツール",
             subtitle: "Minecraft OBJ Cubizer",

@@ -678,7 +678,13 @@ function ParticleCubes({ isDark }: { isDark: boolean }) {
 function App() {
   const { t, i18n } = useTranslation();
   const mainRef = useRef<HTMLDivElement>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    try {
+      return window.sessionStorage.getItem('fimel_intro_seen') !== '1';
+    } catch {
+      return true;
+    }
+  });
   const [isDark, setIsDark] = useState(false);
   const lenisRef = useRef<Lenis | null>(null);
 
@@ -724,6 +730,7 @@ function App() {
   const siteMeta = contentLocale.startsWith('zh')
     ? {
         bingoCategory: 'Minecraft 1.21.11 · Fabric 模组',
+        bingoSubtitle: '竞技玩法模组',
         bingoDescription: '将“不要做挑战”重构并融入 Bingo 对局：队伍共享生命、对抗词条、特殊事件与可选语音关键词，让竞速目标之外多一层持续博弈。',
         bingoTags: ['Bingo 对局', 'DDI 规则', '356 条词条', '可选语音实验'],
         contactLabels: ['项目合作', '创作者联动', '玩家反馈 / 技术支持'],
@@ -745,9 +752,10 @@ function App() {
       }
     : contentLocale.startsWith('ja')
       ? {
-          bingoCategory: 'Minecraft 1.21.11 · Fabric Mod',
-          bingoDescription: 'Bingo matches reworked with the “Don’t Do It” challenge: shared team lives, opponent objectives, special events, and optional voice-keyword play.',
-          bingoTags: ['Bingo match', 'DDI rules', '356 objectives', 'Optional voice'],
+          bingoCategory: 'Minecraft 1.21.11 · Fabric MOD',
+          bingoSubtitle: '対戦型 Minecraft MOD',
+          bingoDescription: '「やってはいけない」チャレンジを Bingo の対戦ルールとして再構築。チーム共有ライフ、相手チームの禁止目標、特殊イベント、任意の音声キーワード機能によって、スピード勝負に継続的な駆け引きを加えます。',
+          bingoTags: ['Bingo 対戦', 'DDI ルール', '356 種類の目標', '音声機能（任意）'],
           contactLabels: ['プロジェクト協業', 'クリエイター連携', 'プレイヤー / 技術サポート'],
           studio: {
             originTitle: 'ブロックから始まる、記憶に残る体験。',
@@ -767,6 +775,7 @@ function App() {
         }
       : {
           bingoCategory: 'Minecraft 1.21.11 · Fabric Mod',
+          bingoSubtitle: 'Competitive Minecraft Mod',
           bingoDescription: 'A rework of the “Don’t Do It” challenge inside Bingo matches: shared team lives, opposing objectives, special events, and optional voice-keyword play.',
           bingoTags: ['Bingo matches', 'DDI rules', '356 objectives', 'Optional voice'],
           contactLabels: ['Project collaboration', 'Creator collaboration', 'Player feedback / technical support'],
@@ -970,9 +979,19 @@ function App() {
   }, [i18n]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2500);
+    if (!loading) return;
+
+    const timer = setTimeout(() => {
+      try {
+        window.sessionStorage.setItem('fimel_intro_seen', '1');
+      } catch {
+        // Storage may be unavailable in strict privacy modes; the intro can still finish.
+      }
+      setLoading(false);
+    }, 800);
+
     return () => clearTimeout(timer);
-  }, []);
+  }, [loading]);
 
   useEffect(() => {
     if (loading) return;
@@ -1273,7 +1292,7 @@ function App() {
     const modsEntries: ProjectEntry[] = [
       {
         title: 'Bingo × Don\'t Do It',
-        subtitle: 'Competitive Minecraft Mod',
+        subtitle: siteMeta.bingoSubtitle,
         category: siteMeta.bingoCategory,
         status: t('workPages.status.live'),
         desc: siteMeta.bingoDescription,
@@ -1567,7 +1586,7 @@ function App() {
       <div className="noise-overlay"></div>
       <CustomCursor isDark={isDark} />
       
-      <div className={`fixed inset-0 z-50 flex items-center justify-center bg-paper dark:bg-obsidian transition-transform duration-1000 ease-[cubic-bezier(0.7,0,0.3,1)] ${loading ? 'translate-y-0' : '-translate-y-full'}`}>
+      <div className={`fixed inset-0 z-50 flex items-center justify-center bg-paper dark:bg-obsidian transition-transform duration-700 ease-[cubic-bezier(0.7,0,0.3,1)] ${loading ? 'translate-y-0' : '-translate-y-full'}`}>
         <div className="flex flex-col items-center gap-6">
           <div className="relative w-16 h-16 transform rotate-45">
             <div className="absolute inset-0 border-2 border-obsidian/20 dark:border-white/20"></div>
@@ -1577,7 +1596,7 @@ function App() {
         </div>
       </div>
 
-      <div className={`${loading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-1000`}>
+      <div className={`${loading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-700`}>
         
         {/* Minecraft Tooltip */}
         <div 
@@ -1604,29 +1623,31 @@ function App() {
         <HotbarNav scrollProgress={scrollProgress} handleNavClick={handleNavClick} activePage={activePage} />
 
         {/* --- NAV LAYER 1: BASE DIFFERENCE HIGHLIGHTS --- */}
-        <nav className="fixed top-0 left-0 w-full z-40 flex items-center justify-between px-6 py-8 md:px-12 pointer-events-none mix-blend-difference text-white">
-          <div className="pointer-events-auto transition-transform hover:scale-105">
+        <nav aria-hidden="true" className="fixed top-0 left-0 w-full z-40 flex items-center justify-between px-6 py-8 md:px-12 pointer-events-none mix-blend-difference text-white">
+          <div className="pointer-events-none transition-transform">
             <img src={logoPath} alt="FIMEL Logo" className="h-[4.5rem] md:h-24 object-contain invert" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement!.innerHTML = '<span class="text-[1.875rem] font-bold tracking-[0.3em] uppercase">FIMEL.</span>'; }} />
           </div>
-          <div className="hidden md:flex items-center gap-10 text-s tracking-widest uppercase font-mono pointer-events-auto">
+          <div className="hidden xl:flex items-center gap-4 lg:gap-8 text-xs tracking-widest uppercase font-mono pointer-events-none">
               <span className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all rounded-sm">{t('nav.about')}</span>
               
               <div className="py-2">
                 <span className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all inline-block rounded-sm">{t('nav.works')}</span>
               </div>
 
+              <span className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all rounded-sm">{t('nav.nav_mods')}</span>
+              <span className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all rounded-sm">{t('nav.nav_tools')}</span>
               <span className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all rounded-sm">{t('nav.contact')}</span>
           </div>
-          <div className="flex items-center gap-4 md:gap-9 pointer-events-auto">
+          <div className="flex items-center gap-4 md:gap-9 pointer-events-none">
               <div className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all flex items-center gap-2 rounded-sm">
                 <Globe size={18} />
-                <span className="text-xs font-mono hidden md:block">{i18n.language.toUpperCase()}</span>
+                <span className="text-xs font-mono hidden xl:block">{i18n.language.toUpperCase()}</span>
               </div>
-            
-              <button className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all rounded-sm">
+
+              <span className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all rounded-sm">
                 {isDark ? <Sun size={18} /> : <Moon size={18} />}
-              </button>
-              <div className="block md:hidden">
+              </span>
+              <div className="block xl:hidden">
                 <span className="text-xs uppercase font-mono tracking-widest border-b border-white transition-colors py-1">
                   {mobileMenuOpen ? 'CLOSE' : t('nav.menu')}
                 </span>
@@ -1636,40 +1657,32 @@ function App() {
 
         {/* --- NAV LAYER 2: INTERACTION & DROPDOWNS --- */}
         <nav className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 py-8 md:px-12 pointer-events-none">
-          <a href="#hero" onClick={(e) => handleNavClick(e, '#hero')} className="pointer-events-auto h-[4.5rem] md:h-24 w-1 flex-1 max-w-[12rem] outline-none">
-            {/* Transparent Hitbox overlay for Logo */}
+          <a href="#hero" aria-label="Fimel — Home" onClick={(e) => handleNavClick(e, '#hero')} className="hover-target pointer-events-auto outline-none transition-transform hover:scale-105">
+            <img src={logoPath} alt="" aria-hidden="true" className="h-[4.5rem] md:h-24 object-contain opacity-0" />
           </a>
-          <div className="hidden md:flex items-center gap-10 text-s tracking-widest uppercase font-mono pointer-events-none">
-              <a href={WORK_PAGE_HASHES.studio} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.studio)} className="pointer-events-auto px-3 py-1.5 text-transparent select-none outline-none">{t('nav.about')}</a>
-              
+          <div className="hidden xl:flex items-center gap-4 lg:gap-8 text-xs tracking-widest uppercase font-mono pointer-events-none">
+              <a href={WORK_PAGE_HASHES.studio} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.studio)} className="hover-target pointer-events-auto cursor-pointer px-3 py-1.5 text-transparent select-none outline-none rounded-sm hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50">{t('nav.about')}</a>
+
               <div className="relative group py-2 pointer-events-auto">
-                <a href="#works" onClick={(e) => handleNavClick(e, '#works')} className="px-3 py-1.5 inline-block text-transparent select-none outline-none">{t('nav.works')}</a>
+                <a href={WORK_PAGE_HASHES['maps-overview']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-overview'])} className="hover-target cursor-pointer px-3 py-1.5 inline-block text-transparent select-none outline-none rounded-sm hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50">{t('nav.works')}</a>
                 <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-300 z-50 flex flex-col items-center">
-                  <div className="bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-xs whitespace-nowrap overflow-visible">
-                    {/* Maps Group */}
-                    <div className="group/maps relative">
-                      <a href={WORK_PAGE_HASHES['maps-overview']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-overview'])} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors w-full text-left flex justify-between items-center gap-6">
-                        {t('nav.nav_maps')} <span className="text-[10px] opacity-50">▶</span>
-                      </a>
-                      <div className="absolute left-full top-0 opacity-0 pointer-events-none group-hover/maps:opacity-100 group-hover/maps:pointer-events-auto transition-opacity duration-300 bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col">
-                        <a href={WORK_PAGE_HASHES['maps-java']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-java'])} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-b border-obsidian/5 dark:border-white/5 whitespace-nowrap">{t('nav.nav_maps_je')}</a>
-                        <a href={WORK_PAGE_HASHES['maps-bedrock']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-bedrock'])} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left whitespace-nowrap">{t('nav.nav_maps_be')}</a>
-                      </div>
-                    </div>
-                    {/* Mods & Tools */}
-                    <a href={WORK_PAGE_HASHES.mods} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.mods)} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-t border-obsidian/5 dark:border-white/5">{t('nav.nav_mods')}</a>
-                    <a href={WORK_PAGE_HASHES.tools} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.tools)} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-t border-obsidian/5 dark:border-white/5">{t('nav.nav_tools')}</a>
+                  <div className="bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-xs whitespace-nowrap overflow-hidden">
+                    <a href={WORK_PAGE_HASHES['maps-overview']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-overview'])} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left">{t('nav.nav_maps_all')}</a>
+                    <a href={WORK_PAGE_HASHES['maps-java']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-java'])} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-t border-obsidian/5 dark:border-white/5">{t('nav.nav_maps_je')}</a>
+                    <a href={WORK_PAGE_HASHES['maps-bedrock']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-bedrock'])} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-t border-obsidian/5 dark:border-white/5">{t('nav.nav_maps_be')}</a>
                   </div>
                 </div>
               </div>
 
-              <a href="#contact" onClick={(e) => handleNavClick(e, '#contact')} className="pointer-events-auto px-3 py-1.5 text-transparent select-none outline-none">{t('nav.contact')}</a>
+              <a href={WORK_PAGE_HASHES.mods} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.mods)} className="hover-target pointer-events-auto cursor-pointer px-3 py-1.5 text-transparent select-none outline-none rounded-sm hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50">{t('nav.nav_mods')}</a>
+              <a href={WORK_PAGE_HASHES.tools} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.tools)} className="hover-target pointer-events-auto cursor-pointer px-3 py-1.5 text-transparent select-none outline-none rounded-sm hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50">{t('nav.nav_tools')}</a>
+              <a href="#contact" onClick={(e) => handleNavClick(e, '#contact')} className="hover-target pointer-events-auto cursor-pointer px-3 py-1.5 text-transparent select-none outline-none rounded-sm hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50">{t('nav.contact')}</a>
           </div>
           <div className="flex items-center gap-4 md:gap-9 pointer-events-none relative">
               <div className="relative pointer-events-auto">
                 <button onClick={() => setLangMenuOpen(!langMenuOpen)} className="px-3 py-1.5 flex items-center gap-2 text-transparent select-none outline-none">
                   <Globe size={18} className="opacity-0" />
-                  <span className="text-xs font-mono hidden md:block opacity-0">{i18n.language.toUpperCase()}</span>
+                  <span className="text-xs font-mono hidden xl:block opacity-0">{i18n.language.toUpperCase()}</span>
                 </button>
               {langMenuOpen && (
                 <div className="absolute right-0 mt-6 w-48 py-3 bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-lg z-50 [&>button]:px-6 [&>button]:py-3">
@@ -1683,7 +1696,7 @@ function App() {
               <button className="pointer-events-auto px-3 py-1.5 text-transparent select-none outline-none" onClick={() => setIsDark(!isDark)}>
                 <Sun size={18} className="opacity-0" />
               </button>
-            <div className="block md:hidden pointer-events-auto">
+            <div className="block xl:hidden pointer-events-auto">
               <button 
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="text-xs uppercase font-mono tracking-widest border-b border-transparent text-transparent py-1 select-none outline-none"
@@ -1695,52 +1708,85 @@ function App() {
         </nav>
 
         {/* Mobile Navigation Dropdown (Outside the mix-blend-difference nav) */}
-        <div className={`fixed top-[88px] md:top-[120px] left-0 w-full bg-paper/95 dark:bg-[#111]/95 text-obsidian dark:text-white transition-all duration-300 overflow-hidden backdrop-blur-md shadow-2xl z-40 ${mobileMenuOpen ? 'max-h-96 border-b border-obsidian/10 dark:border-white/10' : 'max-h-0'} pointer-events-auto`}>
+        <div className={`fixed top-[136px] md:top-[160px] left-0 w-full bg-paper/95 dark:bg-[#111]/95 text-obsidian dark:text-white transition-all duration-300 overflow-x-hidden overflow-y-auto backdrop-blur-md shadow-2xl z-40 ${mobileMenuOpen ? 'max-h-[calc(100dvh-136px)] md:max-h-[calc(100dvh-160px)] border-b border-obsidian/10 dark:border-white/10' : 'max-h-0'} pointer-events-auto`}>
           <div className="flex flex-col p-6 font-mono text-xs uppercase tracking-widest gap-4">
-            <a href={WORK_PAGE_HASHES.studio} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.studio)} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-2 transition-all rounded-sm">{t('nav.about')}</a>
+            <a href={WORK_PAGE_HASHES.studio} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.studio)} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-2 min-h-11 flex items-center transition-all rounded-sm">{t('nav.about')}</a>
             
             <div className="flex flex-col gap-2">
               <span className="text-gray-500 py-2 px-2">{t('nav.works')}</span>
               <div className="flex flex-col pl-4 gap-3 border-l border-obsidian/10 dark:border-white/10 ml-2">
-                <a href={WORK_PAGE_HASHES['maps-java']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-java'])} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_maps_je')}</a>
-                <a href={WORK_PAGE_HASHES['maps-bedrock']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-bedrock'])} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_maps_be')}</a>
-                <a href={WORK_PAGE_HASHES.mods} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.mods)} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_mods')}</a>
-                <a href={WORK_PAGE_HASHES.tools} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.tools)} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 transition-all rounded-sm">{t('nav.nav_tools')}</a>
+                <a href={WORK_PAGE_HASHES['maps-overview']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-overview'])} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 min-h-11 flex items-center transition-all rounded-sm">{t('nav.nav_maps_all')}</a>
+                <a href={WORK_PAGE_HASHES['maps-java']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-java'])} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 min-h-11 flex items-center transition-all rounded-sm">{t('nav.nav_maps_je')}</a>
+                <a href={WORK_PAGE_HASHES['maps-bedrock']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-bedrock'])} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 min-h-11 flex items-center transition-all rounded-sm">{t('nav.nav_maps_be')}</a>
               </div>
             </div>
 
-            <a href="#contact" onClick={(e) => handleNavClick(e, '#contact')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-2 transition-all rounded-sm">{t('nav.contact')}</a>
+            <a href={WORK_PAGE_HASHES.mods} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.mods)} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-2 min-h-11 flex items-center transition-all rounded-sm">{t('nav.nav_mods')}</a>
+            <a href={WORK_PAGE_HASHES.tools} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.tools)} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-2 min-h-11 flex items-center transition-all rounded-sm">{t('nav.nav_tools')}</a>
+            <a href="#contact" onClick={(e) => handleNavClick(e, '#contact')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-2 min-h-11 flex items-center transition-all rounded-sm">{t('nav.contact')}</a>
           </div>
         </div>
 
         {activePage === 'home' ? (
         <>
-        <section id="hero" className="relative w-full h-screen overflow-hidden flex flex-col justify-center px-6 md:px-16 lg:px-24 bg-paper dark:bg-obsidian transition-colors duration-700">
+        <section id="hero" className="relative w-full min-h-[100svh] overflow-hidden flex flex-col justify-center px-6 py-28 md:px-16 md:py-36 lg:px-24 bg-paper dark:bg-obsidian transition-colors duration-700">
           <div className="parallax-hero absolute inset-[-10%] w-[120%] h-[120%] z-0 opacity-70 pointer-events-none">
             <ParticleCubes isDark={isDark} />
           </div>
           
           <div className="relative z-10 max-w-screen-2xl w-full flex flex-col items-start gap-2 pointer-events-none">
+            <div className="hero-sub pointer-events-auto flex items-center gap-4 mb-3 md:mb-5 font-mono text-[10px] md:text-xs uppercase tracking-[0.22em] text-obsidian/60 dark:text-white/60">
+              <span className="w-8 md:w-12 h-px bg-diamond"></span>
+              {t('home.studio_label')}
+            </div>
             <div className="overflow-visible p-6 -m-6 pointer-events-auto">
-              <h1 className="hero-title pt-4 text-[14vw] lg:text-[11vw] leading-tight font-extrabold tracking-tighter uppercase text-obsidian dark:text-white transition-colors duration-700 pb-4 pr-8">
+              <h1 className="hero-title pt-4 text-[14vw] lg:text-[10vw] leading-[0.9] font-extrabold tracking-tighter uppercase text-obsidian dark:text-white transition-colors duration-700 pb-4 pr-8">
                 {t('hero.crafting')}
               </h1>
             </div>
             <div className="overflow-visible p-6 -m-6 pointer-events-auto">
-              <h1 className="hero-title text-[14vw] lg:text-[11vw] leading-tight font-extrabold tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-amethyst to-diamond lg:ml-[10vw] pb-4 pr-8">
+              <h1 className="hero-title text-[14vw] lg:text-[10vw] leading-[0.9] font-extrabold tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-amethyst to-diamond lg:ml-[10vw] pb-4 pr-8">
                 {t('hero.worlds')}
               </h1>
             </div>
-            
-            <div className="hero-sub mt-12 flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-10 max-w-3xl pointer-events-auto">
+
+            <div className="hero-sub mt-8 flex flex-col md:flex-row items-start md:items-center gap-5 md:gap-10 max-w-3xl pointer-events-auto">
               <div className="w-16 h-[2px] bg-diamond hidden md:block"></div>
-              <p className="text-base md:text-xl font-light tracking-wide text-gray-600 dark:text-gray-400 leading-relaxed font-sans transition-colors duration-700">
+              <p className="text-sm md:text-lg font-light tracking-wide text-gray-600 dark:text-gray-400 leading-relaxed font-sans transition-colors duration-700">
                 <Trans i18nKey="hero.sub" />
               </p>
             </div>
+
+            <div className="hero-sub mt-7 flex flex-col sm:flex-row gap-3 pointer-events-auto w-full sm:w-auto">
+              <a
+                href="#quick-entry"
+                onClick={(e) => handleNavClick(e, '#quick-entry')}
+                className="hover-target group inline-flex min-h-12 items-center justify-between gap-8 bg-obsidian dark:bg-white text-white dark:text-obsidian px-5 py-3 font-mono text-xs uppercase tracking-[0.18em] transition-colors hover:bg-diamond dark:hover:bg-diamond dark:hover:text-white"
+              >
+                {t('home.featured_cta')}
+                <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </a>
+              <a
+                href={WORK_PAGE_HASHES['maps-java']}
+                onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-java'])}
+                className="hover-target group inline-flex min-h-12 items-center justify-between gap-8 border border-obsidian/30 dark:border-white/30 px-5 py-3 font-mono text-xs uppercase tracking-[0.18em] text-obsidian dark:text-white transition-colors hover:border-diamond hover:text-diamond"
+              >
+                {t('home.current_cta')}
+                <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </a>
+            </div>
+
+            <div className="hero-sub mt-6 flex flex-wrap gap-x-5 gap-y-2 pointer-events-auto font-mono text-[10px] md:text-xs uppercase tracking-[0.13em] text-gray-500">
+              {[t('home.status_java'), t('home.status_maps')].map((status) => (
+                <span key={status} className="inline-flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-diamond"></span>
+                  {status}
+                </span>
+              ))}
+            </div>
           </div>
 
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50 hero-sub">
+          <div className="hidden md:flex absolute bottom-8 right-10 flex-col items-center gap-2 opacity-50 hero-sub">
             <span className="text-[10px] tracking-[0.3em] uppercase font-mono rotate-90 mb-6 text-obsidian dark:text-white transition-colors duration-700">{t('hero.scroll')}</span>
             <div className="w-[1px] h-16 bg-gradient-to-b from-obsidian dark:from-white to-transparent transition-colors duration-700"></div>
           </div>
@@ -1772,6 +1818,75 @@ function App() {
             <span>{t('marq.jve')}</span> <Diamond size={20} />
           </div>
         </div>
+
+        <section id="quick-entry" className="scroll-mt-[136px] md:scroll-mt-[160px] py-20 md:py-28 px-6 md:px-16 lg:px-24 bg-[#e5e5e5] dark:bg-[#050505] transition-colors duration-700">
+          <div className="max-w-screen-xl mx-auto">
+            <div className="reveal-up font-mono text-diamond tracking-[0.2em] text-xs md:text-sm flex items-center gap-5 mb-6">
+              <span className="w-10 h-px bg-diamond"></span>
+              {t('home.quick_tag')}
+            </div>
+            <div className="mb-10 md:mb-14">
+              <h2 className="reveal-up max-w-3xl text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-obsidian dark:text-white">
+                {t('home.quick_title')}
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+              <a
+                href={WORK_PAGE_HASHES['maps-overview']}
+                onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-overview'])}
+                className="hover-target reveal-up group relative min-h-[18rem] md:min-h-[27rem] overflow-hidden border border-obsidian/10 dark:border-white/10 bg-obsidian text-white"
+              >
+                <img src={`${basePath}maps/island-escape-before-dawn.png`} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover opacity-70 transition-transform duration-[1200ms] ease-out group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent"></div>
+                <div className="relative z-10 h-full min-h-[18rem] md:min-h-[27rem] flex flex-col justify-end p-6 md:p-8">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/60 mb-3">01 / {t('home.maps_title')}</span>
+                  <h3 className="text-2xl md:text-3xl font-bold mb-3">{t('home.maps_featured')}</h3>
+                  <p className="text-sm leading-relaxed text-white/70 mb-7">{t('home.maps_desc')}</p>
+                  <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em]">
+                    {t('home.enter')} <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  </span>
+                </div>
+              </a>
+
+              <a
+                href={WORK_PAGE_HASHES.mods}
+                onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.mods)}
+                className="hover-target reveal-up group relative min-h-[18rem] md:min-h-[27rem] overflow-hidden border border-obsidian/10 dark:border-white/10 bg-[#07120a] text-white"
+              >
+                <img src={`${basePath}bingo-but-dont-do-it-logo.png`} alt="" loading="lazy" decoding="async" className="absolute inset-x-0 top-5 w-full h-[58%] object-contain p-5 opacity-80 transition-all duration-[1200ms] ease-out group-hover:scale-105 group-hover:opacity-100" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#07120a] via-[#07120a]/80 to-transparent"></div>
+                <div className="relative z-10 h-full min-h-[18rem] md:min-h-[27rem] flex flex-col justify-end p-6 md:p-8">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-300/70 mb-3">02 / {t('home.mods_title')}</span>
+                  <h3 className="text-2xl md:text-3xl font-bold mb-3">{t('home.mods_featured')}</h3>
+                  <p className="text-sm leading-relaxed text-white/70 mb-7">{t('home.mods_desc')}</p>
+                  <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em]">
+                    {t('home.enter')} <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  </span>
+                </div>
+              </a>
+
+              <a
+                href={WORK_PAGE_HASHES.tools}
+                onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.tools)}
+                className="hover-target reveal-up group relative min-h-[18rem] md:min-h-[27rem] overflow-hidden border border-obsidian/10 dark:border-white/10 bg-white dark:bg-[#111] text-obsidian dark:text-white"
+              >
+                <div className="absolute inset-x-0 top-0 h-[60%] flex items-center justify-center bg-[radial-gradient(circle_at_center,rgba(0,210,211,0.15),transparent_66%)]">
+                  <img src={`${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.svg`} alt="" loading="lazy" decoding="async" className="w-[78%] h-[78%] object-contain opacity-85 transition-all duration-[1200ms] ease-out group-hover:scale-105 group-hover:opacity-100" />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/85 to-transparent dark:from-[#111] dark:via-[#111]/85"></div>
+                <div className="relative z-10 h-full min-h-[18rem] md:min-h-[27rem] flex flex-col justify-end p-6 md:p-8">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-diamond mb-3">03 / {t('home.tools_title')}</span>
+                  <h3 className="text-2xl md:text-3xl font-bold mb-3">{t('home.tools_featured')}</h3>
+                  <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400 mb-7">{t('home.tools_desc')}</p>
+                  <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em]">
+                    {t('home.enter')} <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  </span>
+                </div>
+              </a>
+            </div>
+          </div>
+        </section>
 
         <section id="about" className="py-32 md:py-48 px-6 md:px-16 lg:px-24 bg-paper dark:bg-obsidian relative transition-colors duration-700">
           <div className="max-w-screen-xl mx-auto flex flex-col lg:flex-row gap-20">

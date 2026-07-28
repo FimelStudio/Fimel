@@ -1,9 +1,17 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "fimel",
-  "compatibility_date": "2026-07-21",
+  "compatibility_date": "2026-07-29",
+  "keep_vars": true,
+  "main": "./src/worker.ts",
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "not_found_handling": "single-page-application"
+  },
+  "triggers": {
+    "crons": [
+      "17 */8 * * *"
+    ]
   }
 }
