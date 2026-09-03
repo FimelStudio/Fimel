@@ -1,10 +1,9 @@
+/* eslint-disable no-constant-binary-expression */
 import React, { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from "motion/react";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Float, Box, Stars, useTexture } from '@react-three/drei';
-import * as THREE from 'three';
 import { ArrowUpRight, MousePointerClick, Diamond, Sword, Map, Code, Sun, Moon, Globe, Star, Download, MessageCircle, Users, Package, CalendarDays, Search, ArrowLeft, ExternalLink } from 'lucide-react';
 import { useTranslation, Trans } from 'react-i18next';
 import CustomCursor from './components/CustomCursor';
@@ -12,242 +11,8 @@ import HotbarNav from './components/HotbarNav';
 import { useDownloadCounters } from './hooks/useDownloadCounters';
 
 gsap.registerPlugin(ScrollTrigger);
+import { ParticleCubes } from './components/ParticleBackground';
 
-// Preload particle textures so they don't cause Suspense fallbacks on click
-useTexture.preload(`${import.meta.env.BASE_URL}textures/smoke.png`);
-useTexture.preload(`${import.meta.env.BASE_URL}textures/explosion.png`);
-
-// ==========================================
-// 🎲 MINECRAFT BLOCK TEXTURE CONFIGURATION
-// You can add more block types here once you put the images in public/textures/
-// ==========================================
-const BLOCK_TEXTURES = [
-  {
-    id: 'grass',
-    top: 'block_top.png',
-    side: 'block_side.png',
-    bottom: 'dirt.png'
-  },
-  // Example: how to add more blocks later (uncomment and change names when files are ready)
-  {
-    id: 'stone',
-    top: 'stone.png',     // if you have public/textures/stone.png
-    side: 'stone.png',    
-    bottom: 'stone.png'   
-  },
-  {
-    id: 'oak_planks',
-    top: 'oak_planks.png',
-    side: 'oak_planks.png',
-    bottom: 'oak_planks.png'
-  },
-  {
-    id: 'oak_log',
-    top: 'oak_log_top.png',
-    side: 'oak_log.png',
-    bottom: 'oak_log_top.png'
-  },
-  {
-    id: 'diamond_block',
-    top: 'diamond_block.png',
-    side: 'diamond_block.png',
-    bottom: 'diamond_block.png'
-  },
-  {
-    id: 'crafting_table',
-    top: 'crafting_table_top.png',
-    side: 'crafting_table_side.png',
-    bottom: 'oak_planks.png' // using oak planks for bottom since crafting table doesn't have a unique bottom texture
-  },
-  {
-    id: 'dirt',
-    top: 'dirt.png',
-    side: 'dirt.png',
-    bottom: 'dirt.png'
-  },
-  {
-    id: 'sand',
-    top: 'sand.png',
-    side: 'sand.png',
-    bottom: 'sand.png'
-  },
-  {
-    id: 'gravel',
-    top: 'gravel.png',
-    side: 'gravel.png',
-    bottom: 'gravel.png'
-  },
-  {
-    id: 'ice',
-    top: 'ice.png',
-    side: 'ice.png',
-    bottom: 'ice.png'
-  },
-  {
-    id: 'cobblestone',
-    top: 'cobblestone.png',
-    side: 'cobblestone.png',
-    bottom: 'cobblestone.png'
-  },
-  {
-    id: 'emerald_block',
-    top: 'emerald_block.png',
-    side: 'emerald_block.png',
-    bottom: 'emerald_block.png'
-  },
-  {
-    id: 'gold_block',
-    top: 'gold_block.png',
-    side: 'gold_block.png',
-    bottom: 'gold_block.png'
-  },
-  {
-    id: 'redstone_block',
-    top: 'redstone_block.png',
-    side: 'redstone_block.png',
-    bottom: 'redstone_block.png'
-  },
-  {
-    id: 'iron_block',
-    top: 'iron_block.png',
-    side: 'iron_block.png',
-    bottom: 'iron_block.png'
-  },
-  {
-    id: 'obsidian',
-    top: 'obsidian.png',
-    side: 'obsidian.png',
-    bottom: 'obsidian.png'
-  },
-  {
-    id: 'cherry_leaves',
-    top: 'cherry_leaves.png',
-    side: 'cherry_leaves.png',
-    bottom: 'cherry_leaves.png'
-  },
-  {
-    id: 'cactus',
-    top: 'cactus_top.png',
-    side: 'cactus_side.png',
-    bottom: 'cactus_bottom.png'
-  },
-  {
-    id: 'TNT',
-    top: 'TNT_top.png',
-    side: 'TNT_side.png',
-    bottom: 'TNT_bottom.png'
-  }
-];
-
-// ==========================================
-// 💥 TNT PARTICLE EFFECTS
-// ==========================================
-function ExplosionEffect({ position }: { position: [number, number, number] }) {
-  const basePath = import.meta.env.BASE_URL;
-  const texture = useTexture(`${basePath}textures/explosion.png`);
-  
-  React.useMemo(() => {
-    texture.magFilter = THREE.NearestFilter;
-    texture.minFilter = THREE.NearestFilter;
-  }, [texture]);
-
-  const groupRef = useRef<THREE.Group>(null);
-  
-  const particles = React.useMemo(() => {
-    return Array.from({ length: 15 }).map(() => ({
-      velocity: new THREE.Vector3(
-        (Math.random() - 0.5) * 2,
-        (Math.random() - 0.5) * 2,
-        (Math.random() - 0.5) * 2
-      ).normalize().multiplyScalar(Math.random() * 8 + 4),
-      scale: Math.random() * 2.0 + 1.0,
-      lifetime: Math.random() * 0.8 + 0.2,
-      maxLife: 1.0
-    }));
-  }, []);
-
-  useFrame((_, delta) => {
-    if (groupRef.current) {
-      groupRef.current.children.forEach((child, i) => {
-        const p = particles[i];
-        if (p.lifetime > 0) {
-          p.lifetime -= delta;
-          child.position.addScaledVector(p.velocity, delta);
-          const progress = Math.max(0, p.lifetime / p.maxLife);
-          child.scale.setScalar(p.scale * (1 + (1 - progress)));
-          (child as THREE.Sprite).material.opacity = progress;
-        } else {
-          (child as THREE.Sprite).material.opacity = 0;
-        }
-      });
-    }
-  });
-
-  return (
-    <group ref={groupRef} position={position}>
-      {particles.map((_, i) => (
-        <sprite key={i}>
-          <spriteMaterial map={texture} transparent opacity={1} depthWrite={false} />
-        </sprite>
-      ))}
-    </group>
-  );
-}
-
-function SmokeEffect({ position }: { position: [number, number, number] }) {
-  const basePath = import.meta.env.BASE_URL;
-  const texture = useTexture(`${basePath}textures/smoke.png`);
-  
-  React.useMemo(() => {
-    texture.magFilter = THREE.NearestFilter;
-    texture.minFilter = THREE.NearestFilter;
-  }, [texture]);
-  
-  const groupRef = useRef<THREE.Group>(null);
-  
-  const particles = React.useMemo(() => {
-    return Array.from({ length: 8 }).map(() => ({
-      startPos: new THREE.Vector3((Math.random()-0.5), 0.5, (Math.random()-0.5)),
-      velocity: new THREE.Vector3((Math.random()-0.5)*0.5, Math.random() * 1.5 + 1.0, (Math.random()-0.5)*0.5),
-      lifetime: Math.random() * -1.0, // Delay start
-      maxLife: 1.2
-    }));
-  }, []);
-
-  useFrame((_, delta) => {
-    if (groupRef.current) {
-      groupRef.current.children.forEach((child, i) => {
-        const p = particles[i];
-        p.lifetime += delta;
-        if (p.lifetime > p.maxLife) {
-          p.lifetime = 0;
-          p.startPos.set((Math.random()-0.5), 0.5, (Math.random()-0.5));
-          child.position.copy(p.startPos);
-        }
-        
-        if (p.lifetime > 0) {
-          child.position.addScaledVector(p.velocity, delta);
-          const progress = p.lifetime / p.maxLife;
-          const fade = progress < 0.2 ? progress / 0.2 : 1.0 - (progress - 0.2) / 0.8;
-          child.scale.setScalar(0.5 + progress * 1.5);
-          (child as THREE.Sprite).material.opacity = fade * 0.7;
-        } else {
-          (child as THREE.Sprite).material.opacity = 0;
-        }
-      });
-    }
-  });
-
-  return (
-    <group ref={groupRef} position={position}>
-      {particles.map((p, i) => (
-        <sprite key={i} position={p.startPos}>
-          <spriteMaterial map={texture} transparent opacity={0} color="#333333" depthWrite={false} />
-        </sprite>
-      ))}
-    </group>
-  );
-}
 const FEATURED_MAPS = [
   {
     i18nKey: "werewolfFTown",
@@ -390,290 +155,6 @@ const getWorkPageFromHash = (hash: string): WorkPage => {
   return found ? found[0] as WorkContentPage : 'home';
 };
 
-function MinecraftBlock({ cube, isDark }: { cube: any, isDark: boolean }) {
-  const basePath = import.meta.env.BASE_URL;
-  const config = BLOCK_TEXTURES[cube.textureIndex];
-  const isTNT = config.id === 'TNT';
-  
-  const [primed, setPrimed] = useState(false);
-  const [exploded, setExploded] = useState(false);
-  const fuseTime = useRef(0);
-  
-  // Load textures based on the randomly assigned block type
-  const textures = useTexture({
-    mapTop: `${basePath}textures/${config.top}`,
-    mapSide: `${basePath}textures/${config.side}`,
-    mapBottom: `${basePath}textures/${config.bottom}`,
-    // Load optional particle textures here (they will fail silently or console error if missing, but it's fine for placeholders)
-    // Note: If you want to use dedicated sprite particles, it's better to load them separately or inside a separate component.
-  });
-
-  // Make textures pixelated (Minecraft style)
-  React.useMemo(() => {
-    Object.values(textures).forEach((tex) => {
-      tex.magFilter = THREE.NearestFilter;
-      tex.minFilter = THREE.NearestFilter;
-      tex.generateMipmaps = false;
-    });
-  }, [textures]);
-
-  const { mapTop, mapSide, mapBottom } = textures;
-
-  // Box geometry materials array: right, left, top, bottom, front, back
-  const materials = React.useMemo(() => {
-    // Initial color based on initial theme so it doesn't always lerp from white 
-    // when loading in light mode
-    const initColor = new THREE.Color(
-      cube.colorType === 0 
-        ? (isDark ? "#d0d0d0" : "#ffffff") 
-        : cube.colorType === 1 
-          ? (isDark ? "#d8cbe0" : "#ffffff") 
-          : (isDark ? "#cbd8d8" : "#ffffff")
-    );
-    // Grass top texture needs a green biome tint, otherwise it's just grayscale
-    const topColor = config.id === 'grass' ? new THREE.Color("#7cb342").multiply(initColor) : initColor;
-    const sideColor = config.id === 'cherry_leaves' ? new THREE.Color("#ffb4d6").multiply(initColor) : initColor; // optional: cherry leaves tint if they are grayscale
-
-    const commonProps = { 
-      roughness: isDark ? 0.6 : 0.8, 
-      metalness: 0.1,
-      color: initColor
-    };
-    return [
-      new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps, color: sideColor }),
-      new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps, color: sideColor }),
-      new THREE.MeshStandardMaterial({ map: mapTop, ...commonProps, color: topColor }),
-      new THREE.MeshStandardMaterial({ map: mapBottom, ...commonProps }),
-      new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps, color: sideColor }),
-      new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps, color: sideColor }),
-    ];
-    // DO NOT add isDark in dependency array so we don't recreate the array
-    // Wait, wait... Actually, we update the existing object instead.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapSide, mapTop, mapBottom, config.id]); // no isDark here
-
-  const meshRef = useRef<THREE.Mesh>(null);
-  const expandRef = useRef(1);
-
-  useFrame((_, delta) => {
-    if (exploded) return;
-
-    if (meshRef.current) {
-      if (primed) {
-        fuseTime.current += delta;
-        // TNT mechanics: 4 seconds fuse (80 redstone ticks)
-        if (fuseTime.current >= 4) {
-          setExploded(true);
-          setPrimed(false);
-          // 播放爆炸音效
-          const audio = new Audio(`${basePath}sound/Explosion2.ogg`);
-          audio.volume = 0.5;
-          audio.play().catch(() => {});
-          
-          // 可选：在这里可以通过某种方式触发相机震动或物理爆炸（推开其它方块）
-        } else {
-          // 闪烁效果 (越接近爆炸闪得越快)
-          const progress = fuseTime.current / 4;
-          const flashRate = Math.max(2, 10 * progress);
-          const isWhite = Math.sin(fuseTime.current * flashRate * Math.PI) > 0;
-          
-          // 轻微膨胀效果
-          expandRef.current = 1 + (0.15 * progress);
-          meshRef.current.scale.set(expandRef.current, expandRef.current, expandRef.current);
-          
-          const mats = meshRef.current.material;
-          if (Array.isArray(mats)) {
-            mats.forEach((mat: any) => {
-              mat.emissive.set(isWhite ? "#ffffff" : "#000000");
-              mat.emissiveIntensity = isWhite ? 0.6 : 0;
-            });
-          }
-        }
-      } else {
-        const targetColor = new THREE.Color(
-          cube.colorType === 0 
-            ? (isDark ? "#d0d0d0" : "#ffffff") 
-            : cube.colorType === 1 
-              ? (isDark ? "#d8cbe0" : "#ffffff") 
-              : (isDark ? "#cbd8d8" : "#ffffff")
-        );
-        const topTargetColor = config.id === 'grass' ? new THREE.Color("#7cb342").multiply(targetColor) : targetColor;
-        const sideTargetColor = config.id === 'cherry_leaves' ? new THREE.Color("#ffb4d6").multiply(targetColor) : targetColor;
-
-        const targetRoughness = isDark ? 0.6 : 0.8;
-
-        const mats = meshRef.current.material;
-        if (Array.isArray(mats)) {
-          mats.forEach((mat: any, index: number) => {
-            // Apply biome tinting to specific faces smoothly
-            // The bottom (3) usually does not need biome tint unless it's leaves, we just simplify here by applying to all sides/bottom except top
-            const finalColor = index === 2 ? topTargetColor : (index === 3 && config.id !== 'cherry_leaves' ? targetColor : sideTargetColor);
-            
-            mat.color.lerp(finalColor, delta * 3);
-            mat.roughness = THREE.MathUtils.lerp(mat.roughness, targetRoughness, delta * 3);
-            mat.emissive.set("#000000");
-          });
-        }
-      }
-    }
-  });
-
-  const handleClick = (e: any) => {
-    if (isTNT && !primed && !exploded) {
-      e.stopPropagation();
-      setPrimed(true);
-      // 播放点燃音效（嘶嘶声）
-      const audio = new Audio(`${basePath}sound/Fuse.ogg`);
-      audio.volume = 0.5;
-      audio.play().catch(() => {});
-    }
-  };
-
-  // 如果爆炸了，可以不渲染方块，这里可以替换为爆炸粒子效果
-  if (exploded) {
-    return (
-      <Float
-        speed={0}
-        rotationIntensity={0}
-        floatIntensity={0}
-        position={cube.position}
-      >
-        <ExplosionEffect position={[0, 0, 0]} />
-      </Float>
-    );
-  }
-
-  return (
-    <Float
-      speed={primed ? 0 : cube.speed} // 点燃时停止浮动，模拟重力或准备状态
-      rotationIntensity={primed ? 0 : cube.rotationIntensity}
-      floatIntensity={primed ? 0 : cube.floatIntensity}
-      position={cube.position}
-    >
-      {primed && !exploded && <SmokeEffect position={[0, 0, 0]} />}
-      <Box 
-        ref={meshRef} 
-        args={cube.size} 
-        material={materials} 
-        onClick={handleClick}
-        onPointerOver={() => {
-          if (isTNT && !primed && !exploded) document.body.style.cursor = 'pointer';
-        }}
-        onPointerOut={() => {
-          if (isTNT) document.body.style.cursor = 'auto';
-        }}
-      />
-    </Float>
-  );
-}
-
-function SceneLights({ isDark }: { isDark: boolean }) {
-  const ambientRef = useRef<THREE.AmbientLight>(null);
-  const dirLight1Ref = useRef<THREE.DirectionalLight>(null);
-  const dirLight2Ref = useRef<THREE.DirectionalLight>(null);
-
-  // Use refs to store target values for the light to smoothly interpolate
-  // without React overriding them instantly on the next render.
-  useFrame((_, delta) => {
-    const lerpFactor = delta * 3;
-    if (ambientRef.current) {
-      ambientRef.current.intensity = THREE.MathUtils.lerp(ambientRef.current.intensity, isDark ? 0.4 : 0.6, lerpFactor);
-    }
-    if (dirLight1Ref.current) {
-      dirLight1Ref.current.intensity = THREE.MathUtils.lerp(dirLight1Ref.current.intensity, isDark ? 5 : 1.2, lerpFactor);
-      dirLight1Ref.current.color.lerp(new THREE.Color(isDark ? "#9b59b6" : "#ffffff"), lerpFactor);
-    }
-    if (dirLight2Ref.current) {
-      dirLight2Ref.current.intensity = THREE.MathUtils.lerp(dirLight2Ref.current.intensity, isDark ? 5 : 0.6, lerpFactor);
-      dirLight2Ref.current.color.lerp(new THREE.Color(isDark ? "#00d2d3" : "#ffffff"), lerpFactor);
-    }
-  });
-
-  // Remove the isDark dependency from the props so R3F doesn't instantly snap them!
-  // Initialize with the first theme value, then rely on useFrame.
-  const [initIsDark] = useState(isDark);
-
-  return (
-    <>
-      <ambientLight ref={ambientRef} intensity={initIsDark ? 0.4 : 0.6} />
-      <directionalLight ref={dirLight1Ref} position={[10, 10, 10]} intensity={initIsDark ? 5 : 1.2} color={initIsDark ? "#9b59b6" : "#ffffff"} />
-      <directionalLight ref={dirLight2Ref} position={[-10, -10, -10]} intensity={initIsDark ? 5 : 0.6} color={initIsDark ? "#00d2d3" : "#ffffff"} />
-    </>
-  );
-}
-
-function ParticleCubes({ isDark }: { isDark: boolean }) {
-  // Generate random values once to prevent jumping when re-rendering (e.g., language/theme switch)
-  const cubes = React.useMemo(() => {
-    const generated: any[] = [];
-    
-    // Check if it's mobile to adapt the generation volume (phones need tall/narrow boxes)
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    
-    // Significantly increased block count for a dense, immersive feel
-    const count = isMobile ? 65 : 110; 
-    
-    for (let i = 0; i < count; i++) {
-      const textureIndex = i % BLOCK_TEXTURES.length;
-      let finalPos = [0, 0, 0] as [number, number, number];
-
-      // Pure randomized uniform scattering with gentle overlap prevention
-      for (let attempt = 0; attempt < 40; attempt++) {
-        const testPos = [
-          (Math.random() - 0.5) * (isMobile ? 26 : 52), // Ultra-wide X spread for desktop
-          (Math.random() - 0.5) * (isMobile ? 40 : 28), // Taller Y spread
-          (Math.random() - 0.5) * 25 - 5 // Deep Z spread (-17.5 to 7.5) to bring blocks closer to camera
-        ] as [number, number, number];
-
-        let isValid = true;
-        for (const existingCube of generated) {
-          const dx = existingCube.position[0] - testPos[0];
-          const dy = existingCube.position[1] - testPos[1];
-          const dz = existingCube.position[2] - testPos[2];
-          const distSq = dx * dx + dy * dy + dz * dz;
-
-          // Gentle collision: Same blocks must be dist 12 apart, any blocks dist 3 apart
-          const minAllowedDistSq = existingCube.textureIndex === textureIndex ? 12 : 3;
-          if (distSq < minAllowedDistSq) {
-            isValid = false;
-            break;
-          }
-        }
-
-        if (isValid || attempt === 39) {
-          finalPos = testPos;
-          break;
-        }
-      }
-
-      generated.push({
-        speed: Math.random() * 1.5 + 0.5,
-        rotationIntensity: Math.random() * 1.5,
-        floatIntensity: Math.random() * 2,
-        position: finalPos,
-        // Block sizes made slightly bigger overall to reduce empty space
-        size: Array(3).fill(Math.random() * 0.9 + 0.35) as [number, number, number],
-        colorType: i % 3,
-        textureIndex: textureIndex
-      });
-    }
-    return generated;
-  }, []);
-
-  return (
-    <Canvas camera={{ position: [0, 0, 15], fov: 45 }} gl={{ alpha: true, antialias: true }}>
-      <SceneLights isDark={isDark} />
-      
-      {isDark && <Stars radius={50} depth={50} count={2000} factor={4} saturation={0} fade speed={1} />}
-
-      <React.Suspense fallback={null}>
-        {cubes.map((cube, i) => (
-          <MinecraftBlock key={i} cube={cube} isDark={isDark} />
-        ))}
-      </React.Suspense>
-    </Canvas>
-  );
-}
 
 function App() {
   const { t, i18n } = useTranslation();
@@ -694,6 +175,8 @@ function App() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [activePage, setActivePage] = useState<WorkPage>(() => getWorkPageFromHash(window.location.hash));
   const [workSearch, setWorkSearch] = useState('');
+  const [activeTab, setActiveTab] = useState('All');
+  const [visibleCount, setVisibleCount] = useState(6);
   
   const [advancement, setAdvancement] = useState<{ title: string; desc: string; visible: boolean } | null>(null);
   const unlockedAdvancements = useRef<Set<string>>(new Set());
@@ -875,7 +358,7 @@ function App() {
     });
     lenisRef.current = lenis;
 
-    lenis.on('scroll', (e: any) => {
+    lenis.on('scroll', (e: unknown) => {
       ScrollTrigger.update();
       setScrollProgress(e.progress);
     });
@@ -1239,9 +722,21 @@ function App() {
       };
     });
     const query = workSearch.trim().toLocaleLowerCase();
-    const filteredBedrockEntries = query
-      ? bedrockEntries.filter((work) => `${work.title} ${work.subtitle} ${work.category} ${work.genre} ${work.desc} ${work.players} ${work.components.join(' ')}`.toLocaleLowerCase().includes(query))
-      : bedrockEntries;
+    let filteredBedrockEntries = bedrockEntries;
+
+    if (activeTab !== 'All') {
+      filteredBedrockEntries = filteredBedrockEntries.filter((work) => {
+        const lowerGenre = work.genre.toLocaleLowerCase();
+        if (activeTab === 'PvP') return lowerGenre.includes('pvp');
+        if (activeTab === 'RPG') return lowerGenre.includes('rpg');
+        if (activeTab === 'Puzzle') return lowerGenre.includes('解谜') || lowerGenre.includes('puzzle') || lowerGenre.includes('パズル') || lowerGenre.includes('逃生') || lowerGenre.includes('escape') || lowerGenre.includes('脱出');
+        return true;
+      });
+    }
+
+    if (query) {
+      filteredBedrockEntries = filteredBedrockEntries.filter((work) => `${work.title} ${work.subtitle} ${work.category} ${work.genre} ${work.desc} ${work.players} ${work.components.join(' ')}`.toLocaleLowerCase().includes(query));
+    }
 
     type ProjectEntry = {
       title: string;
@@ -1547,12 +1042,61 @@ function App() {
 
             {activePage === 'maps-bedrock' && (
               <div className="space-y-10">
-                {filteredBedrockEntries.length ? (
-                  filteredBedrockEntries.map((work, idx) => renderBedrockCard(work, idx))
-                ) : (
-                  <div className="reveal-up border-y border-obsidian/10 dark:border-white/10 py-16 text-center">
-                    <p className="text-gray-500 font-mono uppercase tracking-[0.2em]">{t('workPages.no_results')}</p>
-                    <button onClick={() => setWorkSearch('')} className="hover-target mt-6 text-diamond font-mono text-xs uppercase tracking-[0.2em]">{t('workPages.clear_search')}</button>
+                <div className="flex flex-wrap gap-3 mb-12">
+                  {['All', 'PvP', 'RPG', 'Puzzle'].map(tab => (
+                    <button
+                      key={tab}
+                      onClick={() => { setActiveTab(tab); setVisibleCount(6); }}
+                      className={`px-5 py-3 font-mono text-xs uppercase tracking-widest border transition-colors ${
+                        activeTab === tab
+                          ? 'bg-obsidian text-white border-obsidian dark:bg-white dark:text-obsidian dark:border-white'
+                          : 'bg-transparent text-obsidian border-obsidian/20 dark:text-white dark:border-white/20 hover:border-obsidian dark:hover:border-white'
+                      }`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+                
+                <div className="space-y-10">
+                  <AnimatePresence mode="popLayout">
+                    {filteredBedrockEntries.length ? (
+                      filteredBedrockEntries.slice(0, visibleCount).map((work, idx) => (
+                        <motion.div
+                          key={work.link}
+                          layout
+                          initial={{ opacity: 0, y: 50, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95, filter: "blur(8px)" }}
+                          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                        >
+                          {renderBedrockCard(work, idx)}
+                        </motion.div>
+                      ))
+                    ) : (
+                      <motion.div
+                        key="no-results"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="reveal-up border-y border-obsidian/10 dark:border-white/10 py-16 text-center"
+                      >
+                        <p className="text-gray-500 font-mono uppercase tracking-[0.2em]">{t('workPages.no_results')}</p>
+                        <button onClick={() => setWorkSearch('')} className="hover-target mt-6 text-diamond font-mono text-xs uppercase tracking-[0.2em]">{t('workPages.clear_search')}</button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {filteredBedrockEntries.length > visibleCount && (
+                  <div className="flex justify-center pt-12">
+                    <button
+                      onClick={() => setVisibleCount(prev => prev + 6)}
+                      className="group flex items-center gap-4 px-8 py-4 font-mono text-xs uppercase tracking-[0.2em] text-obsidian dark:text-white border border-obsidian/20 dark:border-white/20 hover:border-diamond hover:text-diamond transition-colors"
+                    >
+                      {t('workPages.load_more', 'LOAD MORE')}
+                      <span className="w-4 h-4 flex items-center justify-center border border-current rounded-full group-hover:bg-diamond group-hover:text-white transition-all">+</span>
+                    </button>
                   </div>
                 )}
               </div>
@@ -1729,66 +1273,56 @@ function App() {
 
         {activePage === 'home' ? (
         <>
-        <section id="hero" className="relative w-full min-h-[100svh] overflow-hidden flex flex-col justify-center px-6 py-28 md:px-16 md:py-36 lg:px-24 bg-paper dark:bg-obsidian transition-colors duration-700">
+        <section id="hero" className="relative w-full min-h-[100svh] overflow-hidden flex flex-col justify-center px-6 pt-24 pb-20 md:px-16 lg:px-24 bg-paper dark:bg-obsidian transition-colors duration-700">
           <div className="parallax-hero absolute inset-[-10%] w-[120%] h-[120%] z-0 opacity-70 pointer-events-none">
             <ParticleCubes isDark={isDark} />
           </div>
           
-          <div className="relative z-10 max-w-screen-2xl w-full flex flex-col items-start gap-2 pointer-events-none">
-            <div className="hero-sub pointer-events-auto flex items-center gap-4 mb-3 md:mb-5 font-mono text-[10px] md:text-xs uppercase tracking-[0.22em] text-obsidian/60 dark:text-white/60">
+          <div className="relative z-10 max-w-screen-2xl w-full flex flex-col items-start gap-4 pointer-events-none mt-12 md:mt-0">
+            <div className="hero-sub pointer-events-auto flex items-center gap-4 mb-2 font-mono text-[10px] md:text-xs uppercase tracking-[0.22em] text-obsidian/60 dark:text-white/60">
               <span className="w-8 md:w-12 h-px bg-diamond"></span>
               {t('home.studio_label')}
             </div>
-            <div className="overflow-visible p-6 -m-6 pointer-events-auto">
-              <h1 className="hero-title pt-4 text-[14vw] lg:text-[10vw] leading-[0.9] font-extrabold tracking-tighter uppercase text-obsidian dark:text-white transition-colors duration-700 pb-4 pr-8">
+            
+            <div className="overflow-visible pointer-events-auto flex flex-col gap-2">
+              <h1 className="hero-title text-[13vw] lg:text-[9vw] leading-[1] font-extrabold tracking-tighter uppercase text-obsidian dark:text-white transition-colors duration-700">
                 {t('hero.crafting')}
               </h1>
-            </div>
-            <div className="overflow-visible p-6 -m-6 pointer-events-auto">
-              <h1 className="hero-title text-[14vw] lg:text-[10vw] leading-[0.9] font-extrabold tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-amethyst to-diamond lg:ml-[10vw] pb-4 pr-8">
-                {t('hero.worlds')}
+              <h1 className="hero-title text-[13vw] lg:text-[9vw] leading-[1] font-extrabold tracking-tighter uppercase text-obsidian dark:text-white lg:ml-[10vw] transition-colors duration-700 flex gap-4">
+                <span className="italic text-obsidian/40 dark:text-white/40 font-serif">the</span> {t('hero.worlds')}
               </h1>
             </div>
 
-            <div className="hero-sub mt-8 flex flex-col md:flex-row items-start md:items-center gap-5 md:gap-10 max-w-3xl pointer-events-auto">
-              <div className="w-16 h-[2px] bg-diamond hidden md:block"></div>
-              <p className="text-sm md:text-lg font-light tracking-wide text-gray-600 dark:text-gray-400 leading-relaxed font-sans transition-colors duration-700">
+            <div className="hero-sub mt-6 md:mt-8 flex flex-col md:flex-row items-start md:items-center gap-5 md:gap-8 max-w-2xl pointer-events-auto">
+              <p className="text-base md:text-xl font-light tracking-wide text-gray-600 dark:text-gray-300 leading-relaxed font-sans transition-colors duration-700">
                 <Trans i18nKey="hero.sub" />
               </p>
             </div>
 
-            <div className="hero-sub mt-7 flex flex-col sm:flex-row gap-3 pointer-events-auto w-full sm:w-auto">
+            <div className="hero-sub mt-10 flex flex-col sm:flex-row gap-4 pointer-events-auto w-full sm:w-auto">
               <a
                 href="#quick-entry"
                 onClick={(e) => handleNavClick(e, '#quick-entry')}
-                className="hover-target group inline-flex min-h-12 items-center justify-between gap-8 bg-obsidian dark:bg-white text-white dark:text-obsidian px-5 py-3 font-mono text-xs uppercase tracking-[0.18em] transition-colors hover:bg-diamond dark:hover:bg-diamond dark:hover:text-white"
+                className="group relative inline-flex min-h-12 items-center justify-between gap-8 bg-obsidian dark:bg-white text-white dark:text-obsidian px-6 py-4 font-mono text-xs uppercase tracking-[0.18em] transition-all hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl hover:shadow-diamond/20"
               >
-                {t('home.featured_cta')}
-                <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                <span className="relative z-10">{t('home.featured_cta')}</span>
+                <ArrowUpRight className="w-4 h-4 relative z-10 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
+                <div className="absolute inset-0 bg-diamond opacity-0 group-hover:opacity-10 transition-opacity"></div>
               </a>
               <a
                 href={WORK_PAGE_HASHES['maps-java']}
                 onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-java'])}
-                className="hover-target group inline-flex min-h-12 items-center justify-between gap-8 border border-obsidian/30 dark:border-white/30 px-5 py-3 font-mono text-xs uppercase tracking-[0.18em] text-obsidian dark:text-white transition-colors hover:border-diamond hover:text-diamond"
+                className="group inline-flex min-h-12 items-center justify-between gap-8 border border-obsidian/30 dark:border-white/30 bg-transparent backdrop-blur-sm px-6 py-4 font-mono text-xs uppercase tracking-[0.18em] text-obsidian dark:text-white transition-all hover:border-obsidian dark:hover:border-white hover:scale-[1.02] active:scale-[0.98]"
               >
-                {t('home.current_cta')}
-                <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                <span>{t('home.current_cta')}</span>
+                <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
               </a>
-            </div>
-
-            <div className="hero-sub mt-6 flex flex-wrap gap-x-5 gap-y-2 pointer-events-auto font-mono text-[10px] md:text-xs uppercase tracking-[0.13em] text-gray-500">
-              {[t('home.status_java'), t('home.status_maps')].map((status) => (
-                <span key={status} className="inline-flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-diamond"></span>
-                  {status}
-                </span>
-              ))}
             </div>
           </div>
 
-          <div className="hidden md:flex absolute bottom-8 right-10 flex-col items-center gap-2 opacity-50 hero-sub">
-            <span className="text-[10px] tracking-[0.3em] uppercase font-mono rotate-90 mb-6 text-obsidian dark:text-white transition-colors duration-700">{t('hero.scroll')}</span>
-            <div className="w-[1px] h-16 bg-gradient-to-b from-obsidian dark:from-white to-transparent transition-colors duration-700"></div>
+          <div className="hidden md:flex absolute bottom-12 right-12 flex-col items-center gap-2 opacity-60 hero-sub mix-blend-difference pointer-events-none">
+            <span className="text-[10px] tracking-[0.3em] uppercase font-mono rotate-90 mb-8 text-white">{t('hero.scroll')}</span>
+            <div className="w-[1px] h-20 bg-gradient-to-b from-white to-transparent"></div>
           </div>
         </section>
 
@@ -1821,30 +1355,26 @@ function App() {
 
         <section id="quick-entry" className="scroll-mt-[136px] md:scroll-mt-[160px] py-20 md:py-28 px-6 md:px-16 lg:px-24 bg-[#e5e5e5] dark:bg-[#050505] transition-colors duration-700">
           <div className="max-w-screen-xl mx-auto">
-            <div className="reveal-up font-mono text-diamond tracking-[0.2em] text-xs md:text-sm flex items-center gap-5 mb-6">
-              <span className="w-10 h-px bg-diamond"></span>
-              {t('home.quick_tag')}
-            </div>
             <div className="mb-10 md:mb-14">
               <h2 className="reveal-up max-w-3xl text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-obsidian dark:text-white">
                 {t('home.quick_title')}
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
               <a
                 href={WORK_PAGE_HASHES['maps-overview']}
                 onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-overview'])}
-                className="hover-target reveal-up group relative min-h-[18rem] md:min-h-[27rem] overflow-hidden border border-obsidian/10 dark:border-white/10 bg-obsidian text-white"
+                className="hover-target reveal-up group relative min-h-[22rem] md:min-h-[30rem] overflow-hidden border border-obsidian/10 dark:border-white/10 bg-obsidian text-white col-span-1 md:col-span-12 lg:col-span-7 transition-transform duration-500 hover:scale-[1.01]"
               >
                 <img src={`${basePath}maps/island-escape-before-dawn.png`} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover opacity-70 transition-transform duration-[1200ms] ease-out group-hover:scale-105" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent"></div>
-                <div className="relative z-10 h-full min-h-[18rem] md:min-h-[27rem] flex flex-col justify-end p-6 md:p-8">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/60 mb-3">01 / {t('home.maps_title')}</span>
-                  <h3 className="text-2xl md:text-3xl font-bold mb-3">{t('home.maps_featured')}</h3>
-                  <p className="text-sm leading-relaxed text-white/70 mb-7">{t('home.maps_desc')}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+                <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-10">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/60 mb-4">01 / {t('home.maps_title')}</span>
+                  <h3 className="text-3xl md:text-4xl font-bold mb-4">{t('home.maps_featured')}</h3>
+                  <p className="text-base leading-relaxed text-white/70 mb-8 max-w-lg">{t('home.maps_desc')}</p>
                   <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em]">
-                    {t('home.enter')} <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                    {t('home.enter')} <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
                   </span>
                 </div>
               </a>
@@ -1852,16 +1382,16 @@ function App() {
               <a
                 href={WORK_PAGE_HASHES.mods}
                 onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.mods)}
-                className="hover-target reveal-up group relative min-h-[18rem] md:min-h-[27rem] overflow-hidden border border-obsidian/10 dark:border-white/10 bg-[#07120a] text-white"
+                className="hover-target reveal-up group relative min-h-[20rem] md:min-h-[30rem] overflow-hidden border border-obsidian/10 dark:border-white/10 bg-[#07120a] text-white col-span-1 md:col-span-6 lg:col-span-5 transition-transform duration-500 hover:scale-[1.01]"
               >
-                <img src={`${basePath}bingo-but-dont-do-it-logo.png`} alt="" loading="lazy" decoding="async" className="absolute inset-x-0 top-5 w-full h-[58%] object-contain p-5 opacity-80 transition-all duration-[1200ms] ease-out group-hover:scale-105 group-hover:opacity-100" />
+                <img src={`${basePath}bingo-but-dont-do-it-logo.png`} alt="" loading="lazy" decoding="async" className="absolute inset-x-0 top-10 w-full h-[50%] object-contain p-6 opacity-80 transition-all duration-[1200ms] ease-out group-hover:scale-110 group-hover:opacity-100" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#07120a] via-[#07120a]/80 to-transparent"></div>
-                <div className="relative z-10 h-full min-h-[18rem] md:min-h-[27rem] flex flex-col justify-end p-6 md:p-8">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-300/70 mb-3">02 / {t('home.mods_title')}</span>
-                  <h3 className="text-2xl md:text-3xl font-bold mb-3">{t('home.mods_featured')}</h3>
-                  <p className="text-sm leading-relaxed text-white/70 mb-7">{t('home.mods_desc')}</p>
+                <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-10">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-300/70 mb-4">02 / {t('home.mods_title')}</span>
+                  <h3 className="text-2xl md:text-3xl font-bold mb-4">{t('home.mods_featured')}</h3>
+                  <p className="text-base leading-relaxed text-white/70 mb-8 max-w-sm">{t('home.mods_desc')}</p>
                   <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em]">
-                    {t('home.enter')} <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                    {t('home.enter')} <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
                   </span>
                 </div>
               </a>
@@ -1869,18 +1399,18 @@ function App() {
               <a
                 href={WORK_PAGE_HASHES.tools}
                 onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.tools)}
-                className="hover-target reveal-up group relative min-h-[18rem] md:min-h-[27rem] overflow-hidden border border-obsidian/10 dark:border-white/10 bg-white dark:bg-[#111] text-obsidian dark:text-white"
+                className="hover-target reveal-up group relative min-h-[16rem] md:min-h-[22rem] overflow-hidden border border-obsidian/10 dark:border-white/10 bg-white dark:bg-[#111] text-obsidian dark:text-white col-span-1 md:col-span-6 lg:col-span-12 transition-transform duration-500 hover:scale-[1.01]"
               >
-                <div className="absolute inset-x-0 top-0 h-[60%] flex items-center justify-center bg-[radial-gradient(circle_at_center,rgba(0,210,211,0.15),transparent_66%)]">
-                  <img src={`${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.svg`} alt="" loading="lazy" decoding="async" className="w-[78%] h-[78%] object-contain opacity-85 transition-all duration-[1200ms] ease-out group-hover:scale-105 group-hover:opacity-100" />
+                <div className="absolute right-0 top-0 w-1/2 h-full hidden md:flex items-center justify-end pr-12 bg-[radial-gradient(circle_at_center,rgba(0,210,211,0.15),transparent_66%)]">
+                  <img src={`${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.svg`} alt="" loading="lazy" decoding="async" className="w-[60%] h-[60%] object-contain opacity-85 transition-all duration-[1200ms] ease-out group-hover:scale-105 group-hover:opacity-100" />
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/85 to-transparent dark:from-[#111] dark:via-[#111]/85"></div>
-                <div className="relative z-10 h-full min-h-[18rem] md:min-h-[27rem] flex flex-col justify-end p-6 md:p-8">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-diamond mb-3">03 / {t('home.tools_title')}</span>
-                  <h3 className="text-2xl md:text-3xl font-bold mb-3">{t('home.tools_featured')}</h3>
-                  <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400 mb-7">{t('home.tools_desc')}</p>
+                <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-transparent dark:from-[#111] dark:via-[#111]/95 md:w-2/3"></div>
+                <div className="relative z-10 h-full flex flex-col justify-center p-8 md:p-12 w-full md:w-2/3 lg:w-1/2">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-diamond mb-4">03 / {t('home.tools_title')}</span>
+                  <h3 className="text-2xl md:text-4xl font-bold mb-4">{t('home.tools_featured')}</h3>
+                  <p className="text-base leading-relaxed text-gray-600 dark:text-gray-400 mb-8 max-w-md">{t('home.tools_desc')}</p>
                   <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em]">
-                    {t('home.enter')} <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                    {t('home.enter')} <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
                   </span>
                 </div>
               </a>
@@ -1891,10 +1421,6 @@ function App() {
         <section id="about" className="py-32 md:py-48 px-6 md:px-16 lg:px-24 bg-paper dark:bg-obsidian relative transition-colors duration-700">
           <div className="max-w-screen-xl mx-auto flex flex-col lg:flex-row gap-20">
             <div className="w-full lg:w-[55%] space-y-10">
-              <div className="reveal-up font-mono text-amethyst tracking-[0.2em] text-sm flex items-center gap-6">
-                <span className="w-12 h-[1px] bg-amethyst"></span>
-                {t('about.tag')}
-              </div>
               <h2 className="reveal-up text-4xl md:text-5xl lg:text-7xl font-bold leading-[1.1] tracking-tight text-obsidian dark:text-white transition-colors duration-700">
                 <Trans i18nKey="about.title" />
               </h2>
@@ -1951,13 +1477,10 @@ function App() {
           </div>
         </section>
 
-        {false && (
+        {1 === 0 && (
         <section className="py-32 bg-[#e5e5e5] dark:bg-[#050505] px-6 md:px-16 lg:px-24 transition-colors duration-700">
           <div className="max-w-screen-xl mx-auto">
-            <div className="reveal-up font-mono text-diamond tracking-[0.2em] text-sm flex items-center gap-6 mb-20">
-              <span className="w-12 h-[1px] bg-diamond"></span>
-              {t('core.tag')}
-            </div>
+
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-y-16 gap-x-10">
               {[
@@ -1976,10 +1499,6 @@ function App() {
 
             {/* Team Members Section */}
             <div className="mt-32 border-t border-obsidian/10 dark:border-white/10 pt-20 transition-colors duration-700">
-              <div className="reveal-up font-mono text-amethyst tracking-[0.2em] text-sm flex items-center gap-6 mb-16">
-                <span className="w-12 h-[1px] bg-amethyst"></span>
-                {t('team.tag')}
-              </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 {[
@@ -2143,7 +1662,7 @@ function App() {
               </div>
             </div>
 
-            {false && (
+            {1 === 0 && (
             <div className="space-y-48">
               {/* Category: Maps */}
               <div id="works-maps" className="scroll-mt-32">
