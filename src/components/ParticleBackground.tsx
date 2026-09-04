@@ -51,18 +51,7 @@ function ExplosionEffect({ position }: { position: [number, number, number] }) {
 
   const groupRef = useRef<THREE.Group>(null);
   
-  const particles = React.useMemo(() => {
-    return Array.from({ length: 15 }).map(() => ({
-      velocity: new THREE.Vector3(
-        (Math.random() - 0.5) * 2,
-        (Math.random() - 0.5) * 2,
-        (Math.random() - 0.5) * 2
-      ).normalize().multiplyScalar(Math.random() * 8 + 4),
-      scale: Math.random() * 2.0 + 1.0,
-      lifetime: Math.random() * 0.8 + 0.2,
-      maxLife: 1.0
-    }));
-  }, []);
+  const particles = React.useMemo(() => generateExplosionParticles(), []);
 
   useFrame((_, delta) => {
     if (groupRef.current) {
@@ -235,9 +224,11 @@ function MinecraftBlock({ cube, isDark }: { cube: CubeData, isDark: boolean }) {
           
           const mats = meshRef.current.material;
           if (Array.isArray(mats)) {
-            mats.forEach((mat: THREE.MeshStandardMaterial) => {
-              mat.emissive.set(isWhite ? "#ffffff" : "#000000");
-              mat.emissiveIntensity = isWhite ? 0.6 : 0;
+            mats.forEach((mat) => {
+              if (mat instanceof THREE.MeshStandardMaterial) {
+                mat.emissive.set(isWhite ? "#ffffff" : "#000000");
+                mat.emissiveIntensity = isWhite ? 0.6 : 0;
+              }
             });
           }
         }
@@ -256,18 +247,20 @@ function MinecraftBlock({ cube, isDark }: { cube: CubeData, isDark: boolean }) {
 
         const mats = meshRef.current.material;
         if (Array.isArray(mats)) {
-          mats.forEach((mat: THREE.MeshStandardMaterial, index: number) => {
-            const finalColor = index === 2 ? topTargetColor : (index === 3 && config.id !== 'cherry_leaves' ? targetColor : sideTargetColor);
-            mat.color.lerp(finalColor, delta * 3);
-            mat.roughness = THREE.MathUtils.lerp(mat.roughness, targetRoughness, delta * 3);
-            mat.emissive.set("#000000");
+          mats.forEach((mat, index: number) => {
+            if (mat instanceof THREE.MeshStandardMaterial) {
+              const finalColor = index === 2 ? topTargetColor : (index === 3 && config.id !== 'cherry_leaves' ? targetColor : sideTargetColor);
+              mat.color.lerp(finalColor, delta * 3);
+              mat.roughness = THREE.MathUtils.lerp(mat.roughness, targetRoughness, delta * 3);
+              mat.emissive.set("#000000");
+            }
           });
         }
       }
     }
   });
 
-  const handleClick = (e: unknown) => {
+  const handleClick = (e: { stopPropagation: () => void }) => {
     if (isTNT && !primed && !exploded) {
       e.stopPropagation();
       setPrimed(true);
@@ -339,7 +332,7 @@ function SceneLights({ isDark }: { isDark: boolean }) {
 const generateCubes = () => {
   const generated: CubeData[] = [];
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  const count = isMobile ? 65 : 110; 
+  const count = isMobile ? 32 : 100; 
   
   for (let i = 0; i < count; i++) {
     const textureIndex = i % BLOCK_TEXTURES.length;
@@ -347,8 +340,8 @@ const generateCubes = () => {
 
     for (let attempt = 0; attempt < 40; attempt++) {
       const testPos = [
-        (Math.random() - 0.5) * (isMobile ? 26 : 52),
-        (Math.random() - 0.5) * (isMobile ? 40 : 28),
+        (Math.random() - 0.5) * (isMobile ? 24 : 52),
+        (Math.random() - 0.5) * (isMobile ? 36 : 28),
         (Math.random() - 0.5) * 25 - 5
       ] as [number, number, number];
 
@@ -389,9 +382,14 @@ export function ParticleCubes({ isDark }: { isDark: boolean }) {
   const [cubes] = React.useState(generateCubes);
 
   return (
-    <Canvas camera={{ position: [0, 0, 15], fov: 45 }} gl={{ alpha: true, antialias: true }}>
+    <Canvas 
+      camera={{ position: [0, 0, 15], fov: 45 }} 
+      gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
+      dpr={[1, 1.5]}
+      performance={{ min: 0.5 }}
+    >
       <SceneLights isDark={isDark} />
-      {isDark && <Stars radius={50} depth={50} count={2000} factor={4} saturation={0} fade speed={1} />}
+      {isDark && <Stars radius={50} depth={50} count={1200} factor={3} saturation={0} fade speed={1} />}
       <React.Suspense fallback={null}>
         {cubes.map((cube, i) => (
           <MinecraftBlock key={i} cube={cube} isDark={isDark} />

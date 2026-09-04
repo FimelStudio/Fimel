@@ -6,6 +6,28 @@ const resources = {
     translation: {
       nav: { about: "关于我们", works: "地图作品", contact: "联络合作", menu: "菜单", nav_maps: "地图作品", nav_maps_all: "全部地图", nav_maps_be: "基岩版 / 网易版", nav_maps_je: "Java 版地图 / 数据包", nav_mods: "模组 / MODS", nav_tools: "插件与工具" },
       hero: { gen: "世界生成中...", crafting: "构筑", worlds: "无限", sub: "以机制重组法则，用指令重制原版。<br/>专注于顶尖的 Minecraft 玩法构筑，为您提供远超常理的 PVP、RPG 及硬核解密地图游玩体验。", scroll: "向下滑动" },
+      siteMeta: {
+        bingoCategory: 'Minecraft 1.21.11 · Fabric 模组',
+        bingoSubtitle: '竞技玩法模组',
+        bingoDescription: '将“不要做挑战”重构并融入 Bingo 对局：队伍共享生命、对抗词条、特殊事件与可选语音关键词，让竞速目标之外多一层持续博弈。',
+        bingoTags: ['Bingo 对局', 'DDI 规则', '356 条词条', '可选语音实验'],
+        contactLabels: ['项目合作', '创作者联动', '玩家反馈 / 技术支持'],
+        studio: {
+          originTitle: '从方块出发，构筑可被记住的体验。',
+          originBody: 'Fimel 以 Minecraft 内容创作为起点，但我们关心的不只是地图本身：一段玩法如何被理解，一座世界如何被探索，一套系统如何让玩家愿意留下来。',
+          milestones: [
+            { year: '2019', title: 'Fimel 成立', desc: '从 Minecraft 地图、建筑与玩法设计开始。' },
+            { year: '2021—2025', title: '已发布作品持续累积', desc: '网易基岩版地图陆续上线，沉淀 PvP、PvE、RPG、解谜与逃脱体验。' },
+            { year: 'NOW', title: '向 Java 与工具继续生长', desc: 'Java 地图正在制作；桌面插件与可游玩的模组已公开发布。' }
+          ],
+          principles: [
+            { number: '01', title: '玩法先于装饰', desc: '先定义玩家要做什么、为什么继续，再决定世界如何呈现。' },
+            { number: '02', title: '世界也是系统', desc: '建筑、关卡、规则与反馈共同构成可探索的体验。' },
+            { number: '03', title: '技术服务体验', desc: '命令、数据包、红石、模组与工具应让创意更可实现。' },
+            { number: '04', title: '从 Minecraft 继续生长', desc: '保留方块世界的创作根基，也为未来互动作品预留空间。' }
+          ]
+        }
+      },
       home: {
         studio_label: "MINECRAFT 游戏与互动创意工作室",
         featured_cta: "快速浏览作品",
@@ -200,6 +222,28 @@ const resources = {
     translation: {
       nav: { about: "About", works: "Maps", contact: "Contact", menu: "Menu", nav_maps: "Maps", nav_maps_all: "All Maps", nav_maps_be: "Bedrock / NetEase", nav_maps_je: "Java Maps / Datapacks", nav_mods: "Mods", nav_tools: "Tools & Plugins" },
       hero: { gen: "GENERATING WORLD...", crafting: "CRAFTING", worlds: "WORLDS", sub: "Restructuring rules through commands, reinventing vanilla through logic.<br/>Dedicated to top-tier Minecraft gameplay development, delivering mind-blowing PVP, RPG, and hardcore puzzle map experiences.", scroll: "Scroll" },
+      siteMeta: {
+        bingoCategory: 'Minecraft 1.21.11 · Fabric Mod',
+        bingoSubtitle: 'Competitive Minecraft Mod',
+        bingoDescription: 'A rework of the “Don’t Do It” challenge inside Bingo matches: shared team lives, opposing objectives, special events, and optional voice-keyword play.',
+        bingoTags: ['Bingo matches', 'DDI rules', '356 objectives', 'Optional voice'],
+        contactLabels: ['Project collaboration', 'Creator collaboration', 'Player feedback / technical support'],
+        studio: {
+          originTitle: 'Starting with blocks, building experiences worth remembering.',
+          originBody: 'Fimel began with Minecraft creation, but we care about more than maps: how a game is understood, how a world is explored, and how systems invite players to stay.',
+          milestones: [
+            { year: '2019', title: 'Fimel founded', desc: 'Started with Minecraft maps, architecture, and gameplay design.' },
+            { year: '2021—2025', title: 'Released works accumulated', desc: 'NetEase Bedrock maps launched across PvP, PvE, RPG, puzzle, and escape experiences.' },
+            { year: 'NOW', title: 'Growing through Java and tools', desc: 'Java maps are in production; a desktop plugin and a playable mod are publicly available.' }
+          ],
+          principles: [
+            { number: '01', title: 'Gameplay precedes decoration', desc: 'First define what the player will do and why they will continue, then decide how the world is presented.' },
+            { number: '02', title: 'The world is a system', desc: 'Architecture, levels, rules, and feedback together form an explorable experience.' },
+            { number: '03', title: 'Tech serves the experience', desc: 'Commands, datapacks, redstone, mods, and tools should make creativity more achievable.' },
+            { number: '04', title: 'Growing from Minecraft', desc: 'Retaining the creative roots of the voxel world, while leaving room for future interactive works.' }
+          ]
+        }
+      },
       home: {
         studio_label: "MINECRAFT GAME & INTERACTIVE CREATIVE STUDIO",
         featured_cta: "Browse the Work",
@@ -394,6 +438,28 @@ const resources = {
     translation: {
       nav: { about: "我々について", works: "マップ作品", contact: "お問い合わせ", menu: "メニュー", nav_maps: "マップ作品", nav_maps_all: "すべてのマップ", nav_maps_be: "統合版 / NetEase版", nav_maps_je: "Java版マップ / データパック", nav_mods: "MOD", nav_tools: "プラグイン・ツール" },
       hero: { gen: "世界を生成中...", crafting: "創造", worlds: "無限", sub: "コマンドで法則を再構築し、ロジックでバニラを刷新する。<br/>トップクラスのMinecraftゲームプレイ開発に専念し、常識を覆すPVP、RPG、謎解きのマップ体験を提供します。", scroll: "スクロール" },
+      siteMeta: {
+        bingoCategory: 'Minecraft 1.21.11 · Fabric MOD',
+        bingoSubtitle: '対戦型 Minecraft MOD',
+        bingoDescription: '「やってはいけない」チャレンジを Bingo の対戦ルールとして再構築。チーム共有ライフ、相手チームの禁止目標、特殊イベント、任意の音声キーワード機能によって、スピード勝負に継続的な駆け引きを加えます。',
+        bingoTags: ['Bingo 対戦', 'DDI ルール', '356 種類の目標', '音声機能（任意）'],
+        contactLabels: ['プロジェクト協業', 'クリエイター連携', 'プレイヤー / 技術サポート'],
+        studio: {
+          originTitle: 'ブロックから始まる、記憶に残る体験。',
+          originBody: 'Fimel は Minecraft コンテンツ制作から始まりました。私たちが扱うのはマップだけではなく、遊び方、探索される世界、そしてプレイヤーを留めるシステムです。',
+          milestones: [
+            { year: '2019', title: 'Fimel 設立', desc: 'Minecraft のマップ、建築、ゲームプレイデザインから始動。' },
+            { year: '2021—2025', title: '公開作品を継続', desc: 'NetEase Bedrock のマップを公開し、多様なプレイ体験を積み重ねました。' },
+            { year: 'NOW', title: 'Java とツールへ', desc: 'Java マップを制作中。デスクトッププラグインとプレイ可能な MOD を公開中です。' }
+          ],
+          principles: [
+            { number: '01', title: '装飾より先に遊び', desc: 'プレイヤーの行動と継続理由を定義してから、世界を形にします。' },
+            { number: '02', title: '世界もシステム', desc: '建築、レベル、ルール、フィードバックで探索体験を作ります。' },
+            { number: '03', title: '技術は体験のために', desc: 'コマンド、データパック、MOD、ツールで創造を実現します。' },
+            { number: '04', title: 'Minecraft から広がる', desc: 'ブロック世界の根を保ち、次のインタラクティブ作品へ進みます。' }
+          ]
+        }
+      },
       home: {
         studio_label: "MINECRAFT ゲーム＆インタラクティブ・クリエイティブスタジオ",
         featured_cta: "作品をすぐ見る",

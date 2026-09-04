@@ -1,7 +1,8 @@
 {
-  "name": "tempproject",
+  "name": "fimel",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Fimel Studio official website and creative portfolio",
   "type": "module",
   "scripts": {
     "dev": "vite",

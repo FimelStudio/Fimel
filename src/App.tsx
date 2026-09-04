@@ -1,10 +1,9 @@
-/* eslint-disable no-constant-binary-expression */
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from "motion/react";
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
-import { ArrowUpRight, MousePointerClick, Diamond, Sword, Map, Code, Sun, Moon, Globe, Star, Download, MessageCircle, Users, Package, CalendarDays, Search, ArrowLeft, ExternalLink } from 'lucide-react';
+import { ArrowUpRight, Diamond, Sword, Map, Code, Sun, Moon, Globe, Star, Download, MessageCircle, Package, Search, ArrowLeft, ExternalLink } from 'lucide-react';
 import { useTranslation, Trans } from 'react-i18next';
 import CustomCursor from './components/CustomCursor';
 import HotbarNav from './components/HotbarNav';
@@ -12,6 +11,19 @@ import { useDownloadCounters } from './hooks/useDownloadCounters';
 
 gsap.registerPlugin(ScrollTrigger);
 import { ParticleCubes } from './components/ParticleBackground';
+import { Magnetic } from './components/Magnetic';
+import { StickyStack } from './components/StickyStack';
+import { ScrollTextReveal } from './components/ScrollTextReveal';
+import { HeroTitleReveal } from './components/HeroTitleReveal';
+import { TeamHoverRoster } from './components/TeamHoverRoster';
+import { CurtainLoading } from './components/CurtainLoading';
+import { WorldCore3D } from './components/WorldCore3D';
+import { OverlayMenu } from './components/OverlayMenu';
+import { TiltGlareCard } from './components/TiltGlareCard';
+import { DraggableCube } from './components/DraggableCube';
+import { PageTransition } from './components/PageTransition';
+import { InfiniteMarquee } from './components/InfiniteMarquee';
+import { Menu } from 'lucide-react';
 
 const FEATURED_MAPS = [
   {
@@ -170,7 +182,7 @@ function App() {
   const lenisRef = useRef<Lenis | null>(null);
 
   const [langMenuOpen, setLangMenuOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [copiedQQ, setCopiedQQ] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [activePage, setActivePage] = useState<WorkPage>(() => getWorkPageFromHash(window.location.hash));
@@ -208,76 +220,22 @@ function App() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [tooltipContent.visible]);
 
+  interface SiteMetaType {
+    bingoCategory: string;
+    bingoSubtitle: string;
+    bingoDescription: string;
+    bingoTags: string[];
+    contactLabels: string[];
+    studio: {
+      originTitle: string;
+      originBody: string;
+      milestones: { year: string; title: string; desc: string; }[];
+      principles: { number: string; title: string; desc: string; }[];
+    };
+  }
+
   const basePath = import.meta.env.BASE_URL;
-  const contentLocale = i18n.resolvedLanguage || i18n.language;
-  const siteMeta = contentLocale.startsWith('zh')
-    ? {
-        bingoCategory: 'Minecraft 1.21.11 · Fabric 模组',
-        bingoSubtitle: '竞技玩法模组',
-        bingoDescription: '将“不要做挑战”重构并融入 Bingo 对局：队伍共享生命、对抗词条、特殊事件与可选语音关键词，让竞速目标之外多一层持续博弈。',
-        bingoTags: ['Bingo 对局', 'DDI 规则', '356 条词条', '可选语音实验'],
-        contactLabels: ['项目合作', '创作者联动', '玩家反馈 / 技术支持'],
-        studio: {
-          originTitle: '从方块出发，构筑可被记住的体验。',
-          originBody: 'Fimel 以 Minecraft 内容创作为起点，但我们关心的不只是地图本身：一段玩法如何被理解，一座世界如何被探索，一套系统如何让玩家愿意留下来。',
-          milestones: [
-            { year: '2019', title: 'Fimel 成立', desc: '从 Minecraft 地图、建筑与玩法设计开始。' },
-            { year: '2021—2025', title: '已发布作品持续累积', desc: '网易基岩版地图陆续上线，沉淀 PvP、PvE、RPG、解谜与逃脱体验。' },
-            { year: 'NOW', title: '向 Java 与工具继续生长', desc: 'Java 地图正在制作；桌面插件与可游玩的模组已公开发布。' }
-          ],
-          principles: [
-            { number: '01', title: '玩法先于装饰', desc: '先定义玩家要做什么、为什么继续，再决定世界如何呈现。' },
-            { number: '02', title: '世界也是系统', desc: '建筑、关卡、规则与反馈共同构成可探索的体验。' },
-            { number: '03', title: '技术服务体验', desc: '命令、数据包、红石、模组与工具应让创意更可实现。' },
-            { number: '04', title: '从 Minecraft 继续生长', desc: '保留方块世界的创作根基，也为未来互动作品预留空间。' }
-          ]
-        }
-      }
-    : contentLocale.startsWith('ja')
-      ? {
-          bingoCategory: 'Minecraft 1.21.11 · Fabric MOD',
-          bingoSubtitle: '対戦型 Minecraft MOD',
-          bingoDescription: '「やってはいけない」チャレンジを Bingo の対戦ルールとして再構築。チーム共有ライフ、相手チームの禁止目標、特殊イベント、任意の音声キーワード機能によって、スピード勝負に継続的な駆け引きを加えます。',
-          bingoTags: ['Bingo 対戦', 'DDI ルール', '356 種類の目標', '音声機能（任意）'],
-          contactLabels: ['プロジェクト協業', 'クリエイター連携', 'プレイヤー / 技術サポート'],
-          studio: {
-            originTitle: 'ブロックから始まる、記憶に残る体験。',
-            originBody: 'Fimel は Minecraft コンテンツ制作から始まりました。私たちが扱うのはマップだけではなく、遊び方、探索される世界、そしてプレイヤーを留めるシステムです。',
-            milestones: [
-              { year: '2019', title: 'Fimel 設立', desc: 'Minecraft のマップ、建築、ゲームプレイデザインから始動。' },
-              { year: '2021—2025', title: '公開作品を継続', desc: 'NetEase Bedrock のマップを公開し、多様なプレイ体験を積み重ねました。' },
-              { year: 'NOW', title: 'Java とツールへ', desc: 'Java マップを制作中。デスクトッププラグインとプレイ可能な MOD を公開中です。' }
-            ],
-            principles: [
-              { number: '01', title: '装飾より先に遊び', desc: 'プレイヤーの行動と継続理由を定義してから、世界を形にします。' },
-              { number: '02', title: '世界もシステム', desc: '建築、レベル、ルール、フィードバックで探索体験を作ります。' },
-              { number: '03', title: '技術は体験のために', desc: 'コマンド、データパック、MOD、ツールで創造を実現します。' },
-              { number: '04', title: 'Minecraft から広がる', desc: 'ブロック世界の根を保ち、次のインタラクティブ作品へ進みます。' }
-            ]
-          }
-        }
-      : {
-          bingoCategory: 'Minecraft 1.21.11 · Fabric Mod',
-          bingoSubtitle: 'Competitive Minecraft Mod',
-          bingoDescription: 'A rework of the “Don’t Do It” challenge inside Bingo matches: shared team lives, opposing objectives, special events, and optional voice-keyword play.',
-          bingoTags: ['Bingo matches', 'DDI rules', '356 objectives', 'Optional voice'],
-          contactLabels: ['Project collaboration', 'Creator collaboration', 'Player feedback / technical support'],
-          studio: {
-            originTitle: 'Starting with blocks, building experiences worth remembering.',
-            originBody: 'Fimel began with Minecraft creation, but we care about more than maps: how a game is understood, how a world is explored, and how systems invite players to stay.',
-            milestones: [
-              { year: '2019', title: 'Fimel founded', desc: 'Started with Minecraft maps, architecture, and gameplay design.' },
-              { year: '2021—2025', title: 'Released works accumulated', desc: 'NetEase Bedrock maps launched across PvP, PvE, RPG, puzzle, and escape experiences.' },
-              { year: 'NOW', title: 'Growing through Java and tools', desc: 'Java maps are in production; a desktop plugin and a playable mod are publicly available.' }
-            ],
-            principles: [
-              { number: '01', title: 'Play before decoration', desc: 'We define what players do and why they continue before deciding how a world looks.' },
-              { number: '02', title: 'A world is also a system', desc: 'Architecture, level flow, rules, and feedback form an explorable experience together.' },
-              { number: '03', title: 'Technology serves experience', desc: 'Commands, data packs, redstone, mods, and tools make creative ideas possible.' },
-              { number: '04', title: 'Growing from Minecraft', desc: 'We keep our block-world roots while leaving room for future interactive work.' }
-            ]
-          }
-        };
+  const siteMeta = t('siteMeta', { returnObjects: true }) as SiteMetaType;
   const {
     configured: downloadCountersConfigured,
     counts: downloadCounts,
@@ -315,7 +273,7 @@ function App() {
     const syncPageFromHash = () => {
       setActivePage(getWorkPageFromHash(window.location.hash));
       setWorkSearch('');
-      setMobileMenuOpen(false);
+      setMenuOpen(false);
       setLangMenuOpen(false);
     };
 
@@ -358,7 +316,7 @@ function App() {
     });
     lenisRef.current = lenis;
 
-    lenis.on('scroll', (e: unknown) => {
+    lenis.on('scroll', (e: { progress: number }) => {
       ScrollTrigger.update();
       setScrollProgress(e.progress);
     });
@@ -380,7 +338,7 @@ function App() {
     window.history.pushState(null, '', hash);
     setActivePage(page);
     setWorkSearch('');
-    setMobileMenuOpen(false);
+    setMenuOpen(false);
     setLangMenuOpen(false);
     requestAnimationFrame(() => {
       if (lenisRef.current) {
@@ -394,18 +352,23 @@ function App() {
   const scrollHomeTo = (target: string) => {
     requestAnimationFrame(() => {
       window.setTimeout(() => {
+        const isTop = target === '#hero' || target === '';
         if (lenisRef.current) {
-          lenisRef.current.scrollTo(target, { duration: 1.5, easing: (t) => 1 - Math.pow(1 - t, 4) });
+          lenisRef.current.scrollTo(isTop ? 0 : target, { duration: 1.5, easing: (t) => 1 - Math.pow(1 - t, 4) });
         } else {
-          document.querySelector(target)?.scrollIntoView({ behavior: 'smooth' });
+          if (isTop) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else {
+            document.querySelector(target)?.scrollIntoView({ behavior: 'smooth' });
+          }
         }
-      }, 0);
+      }, 100);
     });
   };
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, target: string) => {
     e.preventDefault();
-    setMobileMenuOpen(false);
+    setMenuOpen(false);
     setLangMenuOpen(false);
 
     const targetPage = getWorkPageFromHash(target);
@@ -422,43 +385,68 @@ function App() {
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
-    localStorage.setItem('fimel_user_lang', lng);
+    try {
+      localStorage.setItem('fimel_user_lang', lng);
+    } catch {
+      // Storage may be unavailable in strict privacy modes
+    }
     setLangMenuOpen(false);
-    setMobileMenuOpen(false);
+    setMenuOpen(false);
   };
 
-  // Auto detect IP to switch language on first visit
+  // Sync html lang attribute with current i18n language
   useEffect(() => {
-    const storedLang = localStorage.getItem('fimel_user_lang');
-    if (!storedLang) {
-      // First check IP via a free API
-      fetch('https://ipapi.co/json/')
-        .then(res => res.json())
-        .then(data => {
-          const country = data.country_code;
-          if (['CN', 'TW', 'HK', 'MO', 'SG'].includes(country)) {
-            i18n.changeLanguage('zh');
-          } else if (country === 'JP') {
-            i18n.changeLanguage('ja');
-          } else {
-            i18n.changeLanguage('en');
-          }
-        })
-        .catch(() => {
-          // Fallback to browser language if IP request fails (e.g. adblocker)
-          const browserLang = navigator.language.toLowerCase();
-          if (browserLang.includes('zh')) {
-            i18n.changeLanguage('zh');
-          } else if (browserLang.includes('ja')) {
-            i18n.changeLanguage('ja');
-          } else {
-            i18n.changeLanguage('en');
-          }
-        });
-    } else {
-      // If user had selected a language before, enforce it
-      i18n.changeLanguage(storedLang);
+    const current = i18n.resolvedLanguage || i18n.language || 'zh';
+    document.documentElement.lang = current;
+  }, [i18n.language, i18n.resolvedLanguage]);
+
+  // Auto detect language on first visit with fallback
+  useEffect(() => {
+    let storedLang: string | null;
+    try {
+      storedLang = localStorage.getItem('fimel_user_lang');
+    } catch {
+      storedLang = null;
     }
+
+    if (storedLang) {
+      i18n.changeLanguage(storedLang);
+      return;
+    }
+
+    // Default to browser language immediately
+    const browserLang = (navigator.language || '').toLowerCase();
+    if (browserLang.includes('zh')) {
+      i18n.changeLanguage('zh');
+    } else if (browserLang.includes('ja')) {
+      i18n.changeLanguage('ja');
+    } else {
+      i18n.changeLanguage('en');
+    }
+
+    // Attempt non-blocking geolocation check with strict timeout and error suppression
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+    fetch('https://ipapi.co/json/', { signal: controller.signal })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (!data || !data.country_code) return;
+        const country = data.country_code;
+        if (['CN', 'TW', 'HK', 'MO', 'SG'].includes(country)) {
+          i18n.changeLanguage('zh');
+        } else if (country === 'JP') {
+          i18n.changeLanguage('ja');
+        } else {
+          i18n.changeLanguage('en');
+        }
+      })
+      .catch(() => {
+        // Silently keep browser language default on network error, timeout, or adblock
+      })
+      .finally(() => {
+        clearTimeout(timeoutId);
+      });
   }, [i18n]);
 
   useEffect(() => {
@@ -576,30 +564,34 @@ function App() {
           </div>
         </section>
 
-        <section className="py-24 md:py-32 px-6 md:px-16 lg:px-24 bg-paper dark:bg-obsidian transition-colors duration-700">
+        <div className="py-24 overflow-hidden bg-paper dark:bg-obsidian border-b border-obsidian/10 dark:border-white/10 transition-colors duration-700">
+          <InfiniteMarquee baseVelocity={-2}>
+            <span className="text-[12vw] font-black tracking-tighter text-transparent [-webkit-text-stroke:2px_var(--color-obsidian)] dark:[-webkit-text-stroke:2px_var(--color-paper)]">FIMEL STUDIO </span>
+            <span className="text-[12vw] font-black tracking-tighter text-diamond">CREATIVE </span>
+            <span className="text-[12vw] font-black tracking-tighter text-transparent [-webkit-text-stroke:2px_var(--color-obsidian)] dark:[-webkit-text-stroke:2px_var(--color-paper)]">MINECRAFT </span>
+          </InfiniteMarquee>
+        </div>
+
+        <section className="relative z-20 py-24 md:py-32 px-6 md:px-16 lg:px-24 bg-paper dark:bg-obsidian transition-colors duration-700">
           <div className="max-w-screen-xl mx-auto grid lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-24 items-stretch">
             <div className="reveal-up flex flex-col justify-center py-4">
               <div className="font-mono text-amethyst tracking-[0.2em] text-sm flex items-center gap-6"><span className="w-12 h-px bg-amethyst"></span>STUDIO / ORIGIN</div>
               <h2 className="mt-8 text-4xl md:text-6xl font-black tracking-tighter leading-[0.95] text-obsidian dark:text-white">{siteMeta.studio.originTitle}</h2>
-              <p className="mt-8 max-w-2xl text-lg md:text-xl font-light leading-relaxed text-gray-600 dark:text-gray-400">{siteMeta.studio.originBody}</p>
+              <ScrollTextReveal className="mt-8 max-w-2xl text-lg md:text-xl font-light leading-relaxed text-obsidian dark:text-white">
+                {siteMeta.studio.originBody}
+              </ScrollTextReveal>
               <div className="mt-10 flex flex-wrap gap-3 text-xs font-mono uppercase tracking-[0.15em] text-gray-500"><span className="border border-obsidian/10 dark:border-white/10 px-3 py-2">Minecraft</span><span className="border border-obsidian/10 dark:border-white/10 px-3 py-2">Gameplay</span><span className="border border-obsidian/10 dark:border-white/10 px-3 py-2">World Systems</span></div>
             </div>
             <div className="reveal-up relative min-h-[22rem] overflow-hidden border border-obsidian/10 dark:border-white/10 bg-[#e5e5e5] dark:bg-[#050505] perspective-1000 group">
               <div className="parallax-bg absolute inset-[-15%] w-[130%] h-[130%] opacity-35 dark:opacity-25 bg-repeat image-rendering-pixelated" style={{ backgroundImage: `url(${basePath}textures/stone.png)`, backgroundSize: '96px' }}></div>
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,210,211,0.18),transparent_65%)]"></div>
-              <div className="absolute inset-0 flex items-center justify-center transform-style-3d">
-                <div className="relative w-32 h-32 md:w-44 md:h-44 transform-style-3d animate-[spin-slow_15s_linear_infinite] group-hover:[animation-play-state:paused]">
-                  <div className="absolute inset-0 border-2 border-diamond/70 bg-diamond/10 shadow-[0_0_55px_rgba(0,210,211,0.25)] transform rotate-[22deg]"></div>
-                  <div className="absolute inset-5 border-2 border-amethyst/60 bg-amethyst/10 transform -rotate-[18deg]"></div>
-                  <div className="absolute inset-10 border-2 border-obsidian/30 dark:border-white/50 transform rotate-[45deg]"></div>
-                </div>
-              </div>
+              <WorldCore3D isDark={isDark} />
               <span className="absolute right-5 bottom-5 text-[10px] font-mono uppercase tracking-[0.2em] text-obsidian/35 dark:text-white/35">FIMEL // WORLD_CORE</span>
             </div>
           </div>
         </section>
 
-        <section className="py-24 md:py-32 px-6 md:px-16 lg:px-24 bg-[#e5e5e5] dark:bg-[#050505] transition-colors duration-700">
+        <section className="relative z-20 py-24 md:py-32 px-6 md:px-16 lg:px-24 bg-[#e5e5e5] dark:bg-[#050505] transition-colors duration-700">
           <div className="max-w-screen-xl mx-auto">
             <div className="reveal-up font-mono text-diamond tracking-[0.2em] text-sm flex items-center gap-6 mb-16"><span className="w-12 h-px bg-diamond"></span>{t('core.tag')}</div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -625,26 +617,19 @@ function App() {
             </div>
             <div className="mt-28 border-t border-obsidian/10 dark:border-white/10 pt-16">
               <div className="reveal-up font-mono text-amethyst tracking-[0.2em] text-sm flex items-center gap-6 mb-12"><span className="w-12 h-px bg-amethyst"></span>PROCESS / PRINCIPLES</div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {siteMeta.studio.principles.map((principle) => (
-                  <article key={principle.number} className="reveal-up group min-h-[17rem] p-7 border border-obsidian/10 dark:border-white/10 bg-white/35 dark:bg-black/20 hover:bg-white dark:hover:bg-[#111] transition-colors duration-500">
-                    <p className="font-mono text-sm text-amethyst">{principle.number}</p>
-                    <h2 className="mt-12 text-2xl font-black tracking-tighter leading-none">{principle.title}</h2>
-                    <p className="mt-5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{principle.desc}</p>
+              <StickyStack cards={
+                siteMeta.studio.principles.map((principle) => (
+                  <article key={principle.number} className="w-full h-full p-6 sm:p-12 md:p-24 flex flex-col justify-center">
+                    <p className="font-mono text-lg sm:text-xl md:text-2xl text-amethyst mb-4 sm:mb-8">{principle.number}</p>
+                    <h2 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tighter leading-tight sm:leading-none mb-4 sm:mb-6">{principle.title}</h2>
+                    <p className="text-base sm:text-xl md:text-2xl leading-relaxed text-gray-600 dark:text-gray-400 max-w-3xl">{principle.desc}</p>
                   </article>
-                ))}
-              </div>
+                ))
+              } />
             </div>
             <div className="mt-28 border-t border-obsidian/10 dark:border-white/10 pt-16">
               <div className="reveal-up font-mono text-amethyst tracking-[0.2em] text-sm flex items-center gap-6 mb-12"><span className="w-12 h-px bg-amethyst"></span>{t('team.tag')}</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {team.map((member) => (
-                  <article key={member.name} className="reveal-up group relative p-8 bg-white/40 dark:bg-black/40 border border-obsidian/5 dark:border-white/5 hover:bg-white dark:hover:bg-[#111] transition-colors duration-500 flex flex-col items-center text-center">
-                    <div className="w-20 h-20 rounded-full bg-paper dark:bg-obsidian border border-obsidian/10 dark:border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500"><span className={`text-3xl font-black ${member.color} opacity-50 group-hover:opacity-100 transition-opacity`}>{member.letter}</span></div>
-                    <h2 className="text-xl font-bold mb-2">{member.name}</h2><p className="text-xs uppercase tracking-widest font-mono text-gray-500">{member.role}</p>
-                  </article>
-                ))}
-              </div>
+              <TeamHoverRoster team={team} />
             </div>
           </div>
         </section>
@@ -972,8 +957,13 @@ function App() {
             <ParticleCubes isDark={isDark} />
           </div>
           <div
-            className="absolute right-[-10%] bottom-[-20%] w-[55vw] h-[55vw] max-w-[680px] max-h-[680px] opacity-10 bg-repeat image-rendering-pixelated pointer-events-none"
-            style={{ backgroundImage: `url(${basePath}textures/${pageCopy.texture})`, backgroundSize: '96px' }}
+            className="absolute right-[-10%] bottom-[-20%] w-[55vw] h-[55vw] max-w-[680px] max-h-[680px] opacity-[0.07] dark:opacity-10 bg-repeat image-rendering-pixelated pointer-events-none"
+            style={{ 
+              backgroundImage: `url(${basePath}textures/${pageCopy.texture})`, 
+              backgroundSize: '96px',
+              maskImage: 'radial-gradient(ellipse at bottom right, black 20%, transparent 70%)',
+              WebkitMaskImage: 'radial-gradient(ellipse at bottom right, black 20%, transparent 70%)'
+            }}
           ></div>
           <div className="relative z-10 max-w-screen-2xl w-full">
             <a href="#hero" onClick={(e) => handleNavClick(e, '#hero')} className="hover-target inline-flex items-center gap-3 text-xs uppercase tracking-[0.2em] font-mono text-gray-500 hover:text-obsidian dark:hover:text-white transition-colors mb-12">
@@ -997,7 +987,7 @@ function App() {
           </div>
         </section>
 
-        <section className="px-6 md:px-16 lg:px-24 py-24 md:py-32">
+        <section className="relative z-20 px-6 md:px-16 lg:px-24 py-24 md:py-32 bg-paper dark:bg-obsidian">
           <div className="max-w-screen-2xl mx-auto">
             {(activePage === 'maps-bedrock' || activePage === 'maps-overview') && (
               <div className="reveal-up flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16">
@@ -1130,15 +1120,7 @@ function App() {
       <div className="noise-overlay"></div>
       <CustomCursor isDark={isDark} />
       
-      <div className={`fixed inset-0 z-50 flex items-center justify-center bg-paper dark:bg-obsidian transition-transform duration-700 ease-[cubic-bezier(0.7,0,0.3,1)] ${loading ? 'translate-y-0' : '-translate-y-full'}`}>
-        <div className="flex flex-col items-center gap-6">
-          <div className="relative w-16 h-16 transform rotate-45">
-            <div className="absolute inset-0 border-2 border-obsidian/20 dark:border-white/20"></div>
-            <div className="absolute inset-0 border-2 border-diamond animate-[spin_2s_linear_infinite]"></div>
-          </div>
-          <p className="tracking-[0.4em] text-xs font-mono text-gray-500 animate-pulse">{t('hero.gen')}</p>
-        </div>
-      </div>
+      <CurtainLoading isLoading={loading} />
 
       <div className={`${loading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-700`}>
         
@@ -1166,111 +1148,66 @@ function App() {
         {/* Phase 3 Hotbar Navigation HUD */}
         <HotbarNav scrollProgress={scrollProgress} handleNavClick={handleNavClick} activePage={activePage} />
 
-        {/* --- NAV LAYER 1: BASE DIFFERENCE HIGHLIGHTS --- */}
-        <nav aria-hidden="true" className="fixed top-0 left-0 w-full z-40 flex items-center justify-between px-6 py-8 md:px-12 pointer-events-none mix-blend-difference text-white">
-          <div className="pointer-events-none transition-transform">
-            <img src={logoPath} alt="FIMEL Logo" className="h-[4.5rem] md:h-24 object-contain invert" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement!.innerHTML = '<span class="text-[1.875rem] font-bold tracking-[0.3em] uppercase">FIMEL.</span>'; }} />
-          </div>
-          <div className="hidden xl:flex items-center gap-4 lg:gap-8 text-xs tracking-widest uppercase font-mono pointer-events-none">
-              <span className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all rounded-sm">{t('nav.about')}</span>
-              
-              <div className="py-2">
-                <span className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all inline-block rounded-sm">{t('nav.works')}</span>
-              </div>
-
-              <span className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all rounded-sm">{t('nav.nav_mods')}</span>
-              <span className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all rounded-sm">{t('nav.nav_tools')}</span>
-              <span className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all rounded-sm">{t('nav.contact')}</span>
-          </div>
-          <div className="flex items-center gap-4 md:gap-9 pointer-events-none">
-              <div className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all flex items-center gap-2 rounded-sm">
-                <Globe size={18} />
-                <span className="text-xs font-mono hidden xl:block">{i18n.language.toUpperCase()}</span>
-              </div>
-
-              <span className="hover:outline hover:outline-1 hover:outline-white/50 px-3 py-1.5 transition-all rounded-sm">
-                {isDark ? <Sun size={18} /> : <Moon size={18} />}
-              </span>
-              <div className="block xl:hidden">
-                <span className="text-xs uppercase font-mono tracking-widest border-b border-white transition-colors py-1">
-                  {mobileMenuOpen ? 'CLOSE' : t('nav.menu')}
-                </span>
-              </div>
-          </div>
-        </nav>
-
-        {/* --- NAV LAYER 2: INTERACTION & DROPDOWNS --- */}
-        <nav className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 py-8 md:px-12 pointer-events-none">
-          <a href="#hero" aria-label="Fimel — Home" onClick={(e) => handleNavClick(e, '#hero')} className="hover-target pointer-events-auto outline-none transition-transform hover:scale-105">
-            <img src={logoPath} alt="" aria-hidden="true" className="h-[4.5rem] md:h-24 object-contain opacity-0" />
+        {/* --- BRAND LOGO: TOP LEFT --- */}
+        <div className="fixed top-6 md:top-8 left-5 md:left-12 z-50 mix-blend-difference text-white pointer-events-none">
+          <a href="#hero" aria-label="Fimel — Home" onClick={(e) => handleNavClick(e, '#hero')} className="pointer-events-auto outline-none transition-transform hover:scale-105 inline-block">
+            <img src={logoPath} alt="FIMEL Logo" className="h-10 md:h-14 object-contain invert" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement!.innerHTML = '<span class="text-2xl md:text-3xl font-bold tracking-[0.3em] uppercase">FIMEL.</span>'; }} />
           </a>
-          <div className="hidden xl:flex items-center gap-4 lg:gap-8 text-xs tracking-widest uppercase font-mono pointer-events-none">
-              <a href={WORK_PAGE_HASHES.studio} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.studio)} className="hover-target pointer-events-auto cursor-pointer px-3 py-1.5 text-transparent select-none outline-none rounded-sm hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50">{t('nav.about')}</a>
-
-              <div className="relative group py-2 pointer-events-auto">
-                <a href={WORK_PAGE_HASHES['maps-overview']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-overview'])} className="hover-target cursor-pointer px-3 py-1.5 inline-block text-transparent select-none outline-none rounded-sm hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50">{t('nav.works')}</a>
-                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-300 z-50 flex flex-col items-center">
-                  <div className="bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-xs whitespace-nowrap overflow-hidden">
-                    <a href={WORK_PAGE_HASHES['maps-overview']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-overview'])} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left">{t('nav.nav_maps_all')}</a>
-                    <a href={WORK_PAGE_HASHES['maps-java']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-java'])} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-t border-obsidian/5 dark:border-white/5">{t('nav.nav_maps_je')}</a>
-                    <a href={WORK_PAGE_HASHES['maps-bedrock']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-bedrock'])} className="px-5 py-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-left border-t border-obsidian/5 dark:border-white/5">{t('nav.nav_maps_be')}</a>
-                  </div>
-                </div>
-              </div>
-
-              <a href={WORK_PAGE_HASHES.mods} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.mods)} className="hover-target pointer-events-auto cursor-pointer px-3 py-1.5 text-transparent select-none outline-none rounded-sm hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50">{t('nav.nav_mods')}</a>
-              <a href={WORK_PAGE_HASHES.tools} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.tools)} className="hover-target pointer-events-auto cursor-pointer px-3 py-1.5 text-transparent select-none outline-none rounded-sm hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50">{t('nav.nav_tools')}</a>
-              <a href="#contact" onClick={(e) => handleNavClick(e, '#contact')} className="hover-target pointer-events-auto cursor-pointer px-3 py-1.5 text-transparent select-none outline-none rounded-sm hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50">{t('nav.contact')}</a>
-          </div>
-          <div className="flex items-center gap-4 md:gap-9 pointer-events-none relative">
-              <div className="relative pointer-events-auto">
-                <button onClick={() => setLangMenuOpen(!langMenuOpen)} className="px-3 py-1.5 flex items-center gap-2 text-transparent select-none outline-none">
-                  <Globe size={18} className="opacity-0" />
-                  <span className="text-xs font-mono hidden xl:block opacity-0">{i18n.language.toUpperCase()}</span>
-                </button>
-              {langMenuOpen && (
-                <div className="absolute right-0 mt-6 w-48 py-3 bg-white dark:bg-[#111] text-obsidian dark:text-white rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-lg z-50 [&>button]:px-6 [&>button]:py-3">
-                  <button onClick={() => changeLanguage('zh')} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/10 text-left">中文 (ZH)</button>
-                  <button onClick={() => changeLanguage('en')} className="px-6 py-3 hover:bg-gray-100 dark:hover:bg-white/10 text-left">English (EN)</button>
-                  <button onClick={() => changeLanguage('ja')} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/10 text-left">日本語 (JA)</button>
-                </div>
-              )}
-            </div>
-            
-              <button className="pointer-events-auto px-3 py-1.5 text-transparent select-none outline-none" onClick={() => setIsDark(!isDark)}>
-                <Sun size={18} className="opacity-0" />
-              </button>
-            <div className="block xl:hidden pointer-events-auto">
-              <button 
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="text-xs uppercase font-mono tracking-widest border-b border-transparent text-transparent py-1 select-none outline-none"
-              >
-                {mobileMenuOpen ? 'CLOSE' : t('nav.menu')}
-              </button>
-            </div>
-          </div>
-        </nav>
-
-        {/* Mobile Navigation Dropdown (Outside the mix-blend-difference nav) */}
-        <div className={`fixed top-[136px] md:top-[160px] left-0 w-full bg-paper/95 dark:bg-[#111]/95 text-obsidian dark:text-white transition-all duration-300 overflow-x-hidden overflow-y-auto backdrop-blur-md shadow-2xl z-40 ${mobileMenuOpen ? 'max-h-[calc(100dvh-136px)] md:max-h-[calc(100dvh-160px)] border-b border-obsidian/10 dark:border-white/10' : 'max-h-0'} pointer-events-auto`}>
-          <div className="flex flex-col p-6 font-mono text-xs uppercase tracking-widest gap-4">
-            <a href={WORK_PAGE_HASHES.studio} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.studio)} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-2 min-h-11 flex items-center transition-all rounded-sm">{t('nav.about')}</a>
-            
-            <div className="flex flex-col gap-2">
-              <span className="text-gray-500 py-2 px-2">{t('nav.works')}</span>
-              <div className="flex flex-col pl-4 gap-3 border-l border-obsidian/10 dark:border-white/10 ml-2">
-                <a href={WORK_PAGE_HASHES['maps-overview']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-overview'])} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 min-h-11 flex items-center transition-all rounded-sm">{t('nav.nav_maps_all')}</a>
-                <a href={WORK_PAGE_HASHES['maps-java']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-java'])} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 min-h-11 flex items-center transition-all rounded-sm">{t('nav.nav_maps_je')}</a>
-                <a href={WORK_PAGE_HASHES['maps-bedrock']} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-bedrock'])} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-1 min-h-11 flex items-center transition-all rounded-sm">{t('nav.nav_maps_be')}</a>
-              </div>
-            </div>
-
-            <a href={WORK_PAGE_HASHES.mods} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.mods)} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-2 min-h-11 flex items-center transition-all rounded-sm">{t('nav.nav_mods')}</a>
-            <a href={WORK_PAGE_HASHES.tools} onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.tools)} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-2 min-h-11 flex items-center transition-all rounded-sm">{t('nav.nav_tools')}</a>
-            <a href="#contact" onClick={(e) => handleNavClick(e, '#contact')} className="hover:outline hover:outline-1 hover:outline-obsidian/50 dark:hover:outline-white/50 px-2 py-2 min-h-11 flex items-center transition-all rounded-sm">{t('nav.contact')}</a>
-          </div>
         </div>
 
+        {/* --- FLOATING PILL NAV: TOP RIGHT --- */}
+        <nav className="fixed top-6 md:top-8 right-5 md:right-12 z-50 flex items-center gap-1.5 md:gap-4 bg-white/10 dark:bg-black/10 backdrop-blur-md border border-obsidian/10 dark:border-white/10 rounded-full px-3 py-1.5 md:px-4 md:py-2 text-obsidian dark:text-white shadow-sm transition-all">
+          <div className="relative flex items-center">
+            <button 
+              onClick={() => setLangMenuOpen(!langMenuOpen)} 
+              className="hover-target p-2 rounded-full hover:bg-obsidian/5 dark:hover:bg-white/5 transition-colors outline-none"
+              aria-label="Change Language"
+              data-cursor="LANG"
+            >
+              <Globe size={18} />
+            </button>
+            
+            {langMenuOpen && (
+              <div className="absolute top-full right-0 mt-4 w-32 py-2 bg-white dark:bg-obsidian rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-sm z-50">
+                <button onClick={() => { changeLanguage('zh'); setLangMenuOpen(false); }} className="hover-target px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/10 text-left w-full">中文</button>
+                <button onClick={() => { changeLanguage('en'); setLangMenuOpen(false); }} className="hover-target px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/10 text-left w-full">EN</button>
+                <button onClick={() => { changeLanguage('ja'); setLangMenuOpen(false); }} className="hover-target px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/10 text-left w-full">JA</button>
+              </div>
+            )}
+          </div>
+
+          <button 
+            onClick={() => setIsDark(!isDark)} 
+            className="hover-target p-2 rounded-full hover:bg-obsidian/5 dark:hover:bg-white/5 transition-colors outline-none"
+            aria-label="Toggle Theme"
+            data-cursor="THEME"
+          >
+            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+
+          <div className="w-px h-6 bg-obsidian/20 dark:bg-white/20 mx-1"></div>
+
+          <button 
+            onClick={() => setMenuOpen(true)}
+            className="hover-target flex items-center gap-2 px-3 py-2 rounded-full hover:bg-obsidian/5 dark:hover:bg-white/5 transition-colors font-mono text-xs uppercase tracking-widest outline-none"
+            data-cursor="MENU"
+          >
+            <span className="hidden md:inline">{t('nav.menu')}</span>
+            <Menu size={18} />
+          </button>
+        </nav>
+
+        {/* OVERLAY MENU */}
+        <OverlayMenu 
+          isOpen={menuOpen} 
+          onClose={() => setMenuOpen(false)} 
+          onNavigate={handleNavClick} 
+          changeLanguage={changeLanguage}
+          currentLang={i18n.language}
+        />
+
+        <main className="relative z-10 bg-paper dark:bg-obsidian border-b border-obsidian/5 dark:border-white/5 shadow-[0_15px_40px_rgba(0,0,0,0.06)] dark:shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
+        <PageTransition pageKey={activePage}>
         {activePage === 'home' ? (
         <>
         <section id="hero" className="relative w-full min-h-[100svh] overflow-hidden flex flex-col justify-center px-6 pt-24 pb-20 md:px-16 lg:px-24 bg-paper dark:bg-obsidian transition-colors duration-700">
@@ -1285,12 +1222,12 @@ function App() {
             </div>
             
             <div className="overflow-visible pointer-events-auto flex flex-col gap-2">
-              <h1 className="hero-title text-[13vw] lg:text-[9vw] leading-[1] font-extrabold tracking-tighter uppercase text-obsidian dark:text-white transition-colors duration-700">
+              <HeroTitleReveal delay={0.4} className="hero-title text-[13vw] lg:text-[9vw] leading-[1] font-extrabold tracking-tighter uppercase text-obsidian dark:text-white transition-colors duration-700">
                 {t('hero.crafting')}
-              </h1>
-              <h1 className="hero-title text-[13vw] lg:text-[9vw] leading-[1] font-extrabold tracking-tighter uppercase text-obsidian dark:text-white lg:ml-[10vw] transition-colors duration-700 flex gap-4">
+              </HeroTitleReveal>
+              <HeroTitleReveal delay={0.6} className="hero-title text-[13vw] lg:text-[9vw] leading-[1] font-extrabold tracking-tighter uppercase text-obsidian dark:text-white lg:ml-[10vw] transition-colors duration-700 flex gap-4">
                 <span className="italic text-obsidian/40 dark:text-white/40 font-serif">the</span> {t('hero.worlds')}
-              </h1>
+              </HeroTitleReveal>
             </div>
 
             <div className="hero-sub mt-6 md:mt-8 flex flex-col md:flex-row items-start md:items-center gap-5 md:gap-8 max-w-2xl pointer-events-auto">
@@ -1362,166 +1299,128 @@ function App() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
-              <a
+              <TiltGlareCard
                 href={WORK_PAGE_HASHES['maps-overview']}
                 onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES['maps-overview'])}
-                className="hover-target reveal-up group relative min-h-[22rem] md:min-h-[30rem] overflow-hidden border border-obsidian/10 dark:border-white/10 bg-obsidian text-white col-span-1 md:col-span-12 lg:col-span-7 transition-transform duration-500 hover:scale-[1.01]"
+                className="hover-target reveal-up group relative min-h-[22rem] md:min-h-[30rem] overflow-hidden border border-white/10 bg-obsidian/70 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] text-white col-span-1 md:col-span-12 lg:col-span-7"
               >
                 <img src={`${basePath}maps/island-escape-before-dawn.png`} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover opacity-70 transition-transform duration-[1200ms] ease-out group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
-                <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-10">
+                <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-10 pointer-events-none">
                   <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/60 mb-4">01 / {t('home.maps_title')}</span>
                   <h3 className="text-3xl md:text-4xl font-bold mb-4">{t('home.maps_featured')}</h3>
                   <p className="text-base leading-relaxed text-white/70 mb-8 max-w-lg">{t('home.maps_desc')}</p>
-                  <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em]">
-                    {t('home.enter')} <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
-                  </span>
+                  <div className="pointer-events-auto">
+                    <Magnetic intensity={0.3}>
+                      <span className="inline-flex items-center gap-2 px-6 py-3 border border-white/20 rounded-sm font-mono text-xs uppercase tracking-[0.18em] transition-colors hover:bg-white hover:text-black" data-cursor="EXPLORE">
+                        {t('home.enter')} <ArrowUpRight className="w-4 h-4" />
+                      </span>
+                    </Magnetic>
+                  </div>
                 </div>
-              </a>
+              </TiltGlareCard>
 
-              <a
+              <TiltGlareCard
                 href={WORK_PAGE_HASHES.mods}
                 onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.mods)}
-                className="hover-target reveal-up group relative min-h-[20rem] md:min-h-[30rem] overflow-hidden border border-obsidian/10 dark:border-white/10 bg-[#07120a] text-white col-span-1 md:col-span-6 lg:col-span-5 transition-transform duration-500 hover:scale-[1.01]"
+                className="hover-target reveal-up group relative min-h-[20rem] md:min-h-[30rem] overflow-hidden border border-emerald-500/10 bg-[#07120a]/80 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] text-white col-span-1 md:col-span-6 lg:col-span-5"
               >
                 <img src={`${basePath}bingo-but-dont-do-it-logo.png`} alt="" loading="lazy" decoding="async" className="absolute inset-x-0 top-10 w-full h-[50%] object-contain p-6 opacity-80 transition-all duration-[1200ms] ease-out group-hover:scale-110 group-hover:opacity-100" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#07120a] via-[#07120a]/80 to-transparent"></div>
-                <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-10">
+                <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-10 pointer-events-none">
                   <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-300/70 mb-4">02 / {t('home.mods_title')}</span>
                   <h3 className="text-2xl md:text-3xl font-bold mb-4">{t('home.mods_featured')}</h3>
                   <p className="text-base leading-relaxed text-white/70 mb-8 max-w-sm">{t('home.mods_desc')}</p>
-                  <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em]">
-                    {t('home.enter')} <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
-                  </span>
+                  <div className="pointer-events-auto">
+                    <Magnetic intensity={0.3}>
+                      <span className="inline-flex items-center gap-2 px-6 py-3 border border-white/20 rounded-sm font-mono text-xs uppercase tracking-[0.18em] transition-colors hover:bg-white hover:text-black" data-cursor="EXPLORE">
+                        {t('home.enter')} <ArrowUpRight className="w-4 h-4" />
+                      </span>
+                    </Magnetic>
+                  </div>
                 </div>
-              </a>
+              </TiltGlareCard>
 
-              <a
+              <TiltGlareCard
                 href={WORK_PAGE_HASHES.tools}
                 onClick={(e) => handleNavClick(e, WORK_PAGE_HASHES.tools)}
-                className="hover-target reveal-up group relative min-h-[16rem] md:min-h-[22rem] overflow-hidden border border-obsidian/10 dark:border-white/10 bg-white dark:bg-[#111] text-obsidian dark:text-white col-span-1 md:col-span-6 lg:col-span-12 transition-transform duration-500 hover:scale-[1.01]"
+                className="hover-target reveal-up group relative min-h-[16rem] md:min-h-[22rem] overflow-hidden border border-obsidian/10 dark:border-white/10 bg-white/80 dark:bg-[#111]/80 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] text-obsidian dark:text-white col-span-1 md:col-span-6 lg:col-span-12"
               >
                 <div className="absolute right-0 top-0 w-1/2 h-full hidden md:flex items-center justify-end pr-12 bg-[radial-gradient(circle_at_center,rgba(0,210,211,0.15),transparent_66%)]">
                   <img src={`${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.svg`} alt="" loading="lazy" decoding="async" className="w-[60%] h-[60%] object-contain opacity-85 transition-all duration-[1200ms] ease-out group-hover:scale-105 group-hover:opacity-100" />
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-transparent dark:from-[#111] dark:via-[#111]/95 md:w-2/3"></div>
-                <div className="relative z-10 h-full flex flex-col justify-center p-8 md:p-12 w-full md:w-2/3 lg:w-1/2">
+                <div className="relative z-10 h-full flex flex-col justify-center p-8 md:p-12 w-full md:w-2/3 lg:w-1/2 pointer-events-none">
                   <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-diamond mb-4">03 / {t('home.tools_title')}</span>
                   <h3 className="text-2xl md:text-4xl font-bold mb-4">{t('home.tools_featured')}</h3>
                   <p className="text-base leading-relaxed text-gray-600 dark:text-gray-400 mb-8 max-w-md">{t('home.tools_desc')}</p>
-                  <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em]">
-                    {t('home.enter')} <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
-                  </span>
+                  <div className="pointer-events-auto">
+                    <Magnetic intensity={0.3}>
+                      <span className="inline-flex items-center gap-2 px-6 py-3 border border-obsidian/20 dark:border-white/20 rounded-sm font-mono text-xs uppercase tracking-[0.18em] transition-colors hover:bg-obsidian hover:text-white dark:hover:bg-white dark:hover:text-black" data-cursor="EXPLORE">
+                        {t('home.enter')} <ArrowUpRight className="w-4 h-4" />
+                      </span>
+                    </Magnetic>
+                  </div>
                 </div>
-              </a>
+              </TiltGlareCard>
             </div>
           </div>
         </section>
 
-        <section id="about" className="py-32 md:py-48 px-6 md:px-16 lg:px-24 bg-paper dark:bg-obsidian relative transition-colors duration-700">
-          <div className="max-w-screen-xl mx-auto flex flex-col lg:flex-row gap-20">
-            <div className="w-full lg:w-[55%] space-y-10">
-              <h2 className="reveal-up text-4xl md:text-5xl lg:text-7xl font-bold leading-[1.1] tracking-tight text-obsidian dark:text-white transition-colors duration-700">
-                <Trans i18nKey="about.title" />
-              </h2>
-              <p className="reveal-up text-lg md:text-xl text-gray-600 dark:text-gray-400 font-light leading-relaxed transition-colors duration-700">
-                {t('about.desc')}
-              </p>
-              <div className="reveal-up grid grid-cols-2 gap-12 pt-12 border-t border-obsidian/10 dark:border-white/10 transition-colors duration-700">
-                <div>
-                  <div className="text-5xl font-black text-diamond mb-3">{t('about.y1')}</div>
-                  <div className="text-xs tracking-widest font-mono text-gray-500 uppercase">{t('about.y1_sub')}</div>
-                </div>
-                <div>
-                  <div className="text-5xl font-black text-diamond mb-3">{t('about.y2')}</div>
-                  <div className="text-xs tracking-widest font-mono text-gray-500 uppercase">{t('about.y2_sub')}</div>
-                </div>
-              </div>
-            </div>
+        <section id="about" className="relative px-6 md:px-16 lg:px-24 bg-paper dark:bg-obsidian transition-colors duration-700">
+          <div className="max-w-screen-xl mx-auto flex flex-col lg:flex-row relative">
             
-            <div className="w-full lg:w-[45%] relative h-[60vh] lg:h-auto overflow-hidden rounded-sm group reveal-up bg-[#e5e5e5] dark:bg-[#050505] p-10 flex items-center justify-center transition-colors duration-700 perspective-1000">
+            {/* Mobile Visual (Visible only on small screens) */}
+            <div className="w-full h-[36vh] sm:h-[45vh] lg:hidden relative mt-20 mb-8 overflow-hidden rounded-sm group bg-[#e5e5e5] dark:bg-[#050505] p-4 flex flex-col items-center justify-center perspective-1000 touch-pan-y">
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(155,89,182,0.15),transparent_70%)] opacity-50"></div>
+              <DraggableCube basePath={basePath} />
+              <span className="relative z-20 mt-4 text-[10px] font-mono tracking-widest uppercase text-obsidian/40 dark:text-white/40 select-none pointer-events-none">
+                {t('about.render')}
+              </span>
+            </div>
+
+            {/* Left Column: Scrolling Narrative */}
+            <div className="w-full lg:w-[55%] lg:py-[20vh] pt-16 pb-32 space-y-[15vh] lg:space-y-[35vh]">
+              <div className="min-h-[30vh] lg:min-h-[50vh] flex flex-col justify-center">
+                <h2 className="reveal-up text-5xl md:text-6xl lg:text-8xl font-bold leading-[1.1] tracking-tighter text-obsidian dark:text-white transition-colors duration-700 max-w-lg">
+                  <Trans i18nKey="about.title" />
+                </h2>
+              </div>
               
-              {/* CSS 3D Minecraft Block */}
-              <div className="relative z-10 w-32 h-32 sm:w-48 sm:h-48 transform-style-3d mc-block">
-                
-                {/* Spin and Hover Wrappers to prevent transform conflicts */}
-                <div className="absolute inset-0 transform-style-3d animate-[spin-slow_15s_linear_infinite] group-hover:[animation-play-state:paused]">
-                  <div className="absolute inset-0 transform-style-3d transition-transform duration-[1500ms] ease-out group-hover:[transform:scale3d(1.25,1.25,1.25)_rotateX(15deg)_rotateY(-30deg)]">
-                    
-                    {/* Front */}
-                    <div className="mc-face border-2 border-obsidian/30 dark:border-white/30" 
-                         style={{ transform: "rotateY(0deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/block_side.png')` }}></div>
-                    {/* Back */}
-                    <div className="mc-face border-2 border-obsidian/30 dark:border-white/30" 
-                         style={{ transform: "rotateY(180deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/block_side.png')` }}></div>
-                    {/* Right */}
-                    <div className="mc-face border-2 border-obsidian/30 dark:border-white/30" 
-                         style={{ transform: "rotateY(90deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/block_side.png')` }}></div>
-                    {/* Left */}
-                    <div className="mc-face border-2 border-obsidian/30 dark:border-white/30" 
-                         style={{ transform: "rotateY(-90deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/block_side.png')` }}></div>
-                    {/* Top */}
-                    <div className="mc-face border-2 border-obsidian/30 dark:border-white/30 bg-[#7cbd6b]" 
-                         style={{ transform: "rotateX(90deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/block_top.png')`, backgroundBlendMode: 'multiply' }}></div>
-                    {/* Bottom */}
-                    <div className="mc-face border-2 border-obsidian/30 dark:border-white/30 bg-obsidian/20 dark:bg-obsidian/10" 
-                         style={{ transform: "rotateX(-90deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/dirt.png')` }}></div>
-                  
+              <div className="min-h-[30vh] lg:min-h-[50vh] flex flex-col justify-center">
+                <ScrollTextReveal className="text-2xl md:text-3xl lg:text-4xl text-obsidian dark:text-white font-bold leading-relaxed transition-colors duration-700">
+                  {t('about.desc')}
+                </ScrollTextReveal>
+              </div>
+
+              <div className="min-h-[30vh] lg:min-h-[50vh] flex flex-col justify-center pb-10 lg:pb-[10vh]">
+                <div className="reveal-up grid grid-cols-2 gap-12 lg:gap-20 pt-12 border-t border-obsidian/10 dark:border-white/10 transition-colors duration-700">
+                  <div>
+                    <div className="text-6xl lg:text-7xl font-black text-diamond mb-3 tracking-tighter">{t('about.y1')}</div>
+                    <div className="text-xs md:text-sm tracking-widest font-mono text-gray-500 uppercase">{t('about.y1_sub')}</div>
+                  </div>
+                  <div>
+                    <div className="text-6xl lg:text-7xl font-black text-diamond mb-3 tracking-tighter">{t('about.y2')}</div>
+                    <div className="text-xs md:text-sm tracking-widest font-mono text-gray-500 uppercase">{t('about.y2_sub')}</div>
                   </div>
                 </div>
               </div>
-
-              <div className="absolute bottom-6 right-6 text-xs text-obsidian/30 dark:text-white/20 font-mono transition-colors duration-700">{t('about.render')}</div>
             </div>
-          </div>
-        </section>
-
-        {1 === 0 && (
-        <section className="py-32 bg-[#e5e5e5] dark:bg-[#050505] px-6 md:px-16 lg:px-24 transition-colors duration-700">
-          <div className="max-w-screen-xl mx-auto">
-
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-y-16 gap-x-10">
-              {[
-                { icon: Sword, title: t('core.pvp'), desc: t('core.pvp_d') },
-                { icon: Map, title: t('core.rpg'), desc: t('core.rpg_d') },
-                { icon: Code, title: t('core.puz'), desc: t('core.puz_d') }
-              ].map((item, idx) => (
-                <div key={idx} className="reveal-up group relative p-10 bg-white/40 dark:bg-black/40 border border-obsidian/5 dark:border-white/5 hover:border-obsidian/20 dark:hover:border-white/20 transition-colors duration-700">
-                  <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-diamond via-amethyst to-transparent scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-700"></div>
-                  <item.icon className="w-10 h-10 text-obsidian/30 dark:text-white/30 group-hover:text-obsidian dark:group-hover:text-white transition-colors duration-500 mb-10" strokeWidth={1.5} />
-                  <h3 className="text-2xl font-bold mb-5 tracking-wide text-obsidian dark:text-white">{item.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-400 font-light leading-relaxed text-sm md:text-base transition-colors duration-700">{item.desc}</p>
-                </div>
-              ))}
-            </div>
+            {/* Desktop Pinned Visual */}
+            <div className="hidden lg:flex w-[45%] h-[100vh] sticky top-0 items-center justify-center pl-16">
+              <div className="w-full h-[70vh] relative overflow-hidden rounded-sm group bg-[#e5e5e5] dark:bg-[#050505] p-10 flex items-center justify-center transition-colors duration-700 perspective-1000">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(155,89,182,0.15),transparent_70%)] opacity-50"></div>
+                
+                <DraggableCube basePath={basePath} />
 
-            {/* Team Members Section */}
-            <div className="mt-32 border-t border-obsidian/10 dark:border-white/10 pt-20 transition-colors duration-700">
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                {[
-                  { name: "Ylong", role: t('team.role1'), letter: "Y", color: "text-diamond" },
-                  { name: "TreeHey", role: t('team.role2'), letter: "T", color: "text-amethyst" },
-                  { name: "crystal215", role: t('team.role4'), letter: "水", color: "text-[#00d2d3]" },
-                  { name: "chengzi", role: t('team.role3'), letter: "橙", color: "text-[#ffa500]" }
-                ].map((member, idx) => (
-                  <div key={idx} className="reveal-up group relative p-8 bg-white/40 dark:bg-black/40 border border-obsidian/5 dark:border-white/5 hover:bg-white dark:hover:bg-[#111] transition-colors duration-500 flex flex-col items-center text-center">
-                    <div className="w-20 h-20 rounded-full bg-paper dark:bg-obsidian border border-obsidian/10 dark:border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 overflow-hidden">
-                      {/* You can replace this letter with an actual img tag if you have member avatars */}
-                      <span className={`text-3xl font-black ${member.color} opacity-50 group-hover:opacity-100 transition-opacity`}>{member.letter}</span>
-                    </div>
-                    <h4 className="text-xl font-bold text-obsidian dark:text-white mb-2">{member.name}</h4>
-                    <p className="text-xs uppercase tracking-widest font-mono text-gray-500">{member.role}</p>
-                  </div>
-                ))}
+                <div className="absolute bottom-6 right-6 text-xs text-obsidian/30 dark:text-white/20 font-mono transition-colors duration-700">{t('about.render')}</div>
               </div>
             </div>
-
           </div>
         </section>
-        )}
+
+
 
         <section id="works" className="py-32 md:py-48 px-6 md:px-16 lg:px-24 bg-paper dark:bg-obsidian transition-colors duration-700">
           <div className="max-w-screen-xl mx-auto">
@@ -1662,338 +1561,26 @@ function App() {
               </div>
             </div>
 
-            {1 === 0 && (
-            <div className="space-y-48">
-              {/* Category: Maps */}
-              <div id="works-maps" className="scroll-mt-32">
-                <div className="reveal-up font-mono text-diamond tracking-[0.2em] text-sm flex items-center gap-6 mb-16">
-                  <span className="w-12 h-[1px] bg-diamond"></span>
-                  {t('works.category_maps')}
-                </div>
-                
-                {/* Subcategory: Java Edition */}
-                <div id="works-maps-je" className="scroll-mt-32 mb-16">
-                  <h4 className="reveal-up text-lg font-bold tracking-widest uppercase text-obsidian/50 dark:text-white/50 border-b border-obsidian/10 dark:border-white/10 pb-4 mb-16">
-                    {t('nav.nav_maps_je')}
-                  </h4>
-                  <div className="space-y-32">
-                    {[
-                      { title: t('works.m9_t'), category: t('works.m9_c'), year: "Java", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-[#ff9ff3]", bg: "from-[#ff9ff3]/10", desc: t('works.m9_d'), link: undefined },
-                      { title: t('works.m10_t'), category: t('works.m10_c'), year: "Java", image: `${basePath}placeholder.jpg`, accent: "group-hover:text-diamond", bg: "from-diamond/10", desc: t('works.m10_d'), link: undefined },
-                    ].map((work, idx) => (
-                      <div 
-                        key={`java-${idx}`}
-                        className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center"
-                        onMouseEnter={() => setTooltipContent({ visible: true, title: work.title, category: work.category, desc: work.desc })}
-                        onMouseLeave={() => setTooltipContent({ visible: false, title: '', category: '', desc: '' })}
-                      >
-                        <div className="w-full md:w-1/2 lg:w-[60%] h-[50vh] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700">
-                          <div className="parallax-bg absolute inset-[-20%] w-[140%] h-[140%]">
-                            {work.image && !work.image.includes('placeholder') ? (
-                              <img 
-                                src={work.image} 
-                                alt={work.title} 
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" 
-                              />
-                            ) : (
-                              <div 
-                                className="w-full h-full bg-repeat image-rendering-pixelated group-hover:scale-110 transition-transform duration-[1.5s] ease-out saturate-50 dark:saturate-100 opacity-60 dark:opacity-40"
-                                style={{
-                                  backgroundImage: `url(${basePath}textures/${BLOCK_TEXTURES[((idx + 5) * 3) % BLOCK_TEXTURES.length].top})`,
-                                  backgroundSize: '128px'
-                                }}
-                              ></div>
-                            )}
-                          </div>
-                          <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
-                          <div className="parallax-text absolute inset-0 flex items-center justify-center mix-blend-overlay">
-                             <span className="text-obsidian/20 dark:text-white/20 font-black text-6xl md:text-8xl tracking-tighter transition-colors duration-700">MAP_{idx+9}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="w-full md:w-1/2 lg:w-[40%] flex flex-col justify-center space-y-8">
-                          <div className="text-xs uppercase font-mono tracking-widest text-gray-500 border-b border-obsidian/10 dark:border-white/10 pb-4 flex justify-between transition-colors duration-700">
-                            <span>{work.category}</span>
-                            <span>{work.year}</span>
-                          </div>
-                          <h3 className={`text-4xl md:text-5xl lg:text-7xl font-bold uppercase tracking-tighter transition-colors duration-500 text-obsidian dark:text-white ${work.accent}`}>
-                            {work.title}
-                          </h3>
-                          <p className="text-gray-600 dark:text-gray-400 font-light font-sans max-w-md text-base md:text-lg leading-relaxed transition-colors duration-700">
-                            {work.desc}
-                          </p>
-                          
-                          {work.link ? (
-                            <a href={work.link} target="_blank" rel="noopener noreferrer" className="w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono hover:text-diamond text-gray-500 transition-colors mt-4">
-                              <MousePointerClick className="w-4 h-4" /> {t('works.view')}
-                            </a>
-                          ) : (
-                            <div className="w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono text-gray-500/50 dark:text-gray-500/50 mt-4 cursor-not-allowed" title="Link Coming Soon">
-                              <MousePointerClick className="w-4 h-4" /> {t('works.view')}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Subcategory: Bedrock / NetEase */}
-                <div id="works-maps-be" className="scroll-mt-32 pt-16">
-                  <h4 className="reveal-up text-lg font-bold tracking-widest uppercase text-obsidian/50 dark:text-white/50 border-b border-obsidian/10 dark:border-white/10 pb-4 mb-16">
-                    {t('nav.nav_maps_be')}
-                  </h4>
-                  <div className="space-y-28">
-                    {FEATURED_MAPS.map((work) => {
-                      const title = t(`works.bedrockMaps.${work.i18nKey}.title`);
-                      const subtitle = t(`works.bedrockMaps.${work.i18nKey}.subtitle`);
-                      const category = t(`works.bedrockMaps.${work.i18nKey}.category`);
-                      const genre = t(`works.bedrockMaps.${work.i18nKey}.genre`);
-                      const description = t(`works.bedrockMaps.${work.i18nKey}.desc`);
-                      const players = t(`works.bedrockMaps.${work.i18nKey}.players`);
-                      const components = t(`works.bedrockMaps.${work.i18nKey}.components`, { returnObjects: true }) as string[];
-
-                      return (
-                      <article
-                        key={work.link}
-                        className="reveal-up group relative flex flex-col md:flex-row gap-10 lg:gap-16 items-stretch"
-                        onMouseEnter={() => setTooltipContent({ visible: true, title, category: genre, desc: description })}
-                        onMouseLeave={() => setTooltipContent({ visible: false, title: '', category: '', desc: '' })}
-                      >
-                        <a
-                          href={work.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="hover-target w-full md:w-1/2 lg:w-[58%] min-h-[22rem] md:min-h-[34rem] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700"
-                          aria-label={t('works.open_detail_aria', { title })}
-                        >
-                          <div className="parallax-bg absolute inset-[-18%] w-[136%] h-[136%]">
-                            <img
-                              src={`${basePath}${work.image}`}
-                              alt={title}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out"
-                            />
-                          </div>
-                          <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
-                        </a>
-
-                        <div className="w-full md:w-1/2 lg:w-[42%] flex flex-col justify-center py-2 md:py-6">
-                          <div className="text-xs uppercase font-mono tracking-widest text-gray-500 border-b border-obsidian/10 dark:border-white/10 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 transition-colors duration-700">
-                            <span>{category}</span>
-                            <span>{genre}</span>
-                          </div>
-
-                          <div className="mt-7 space-y-3">
-                            <p className="text-xs font-mono uppercase tracking-[0.25em] text-gray-500">{subtitle}</p>
-                            <h3 className={`text-3xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tighter leading-[0.95] break-words transition-colors duration-500 text-obsidian dark:text-white ${work.accent}`}>
-                              {title}
-                            </h3>
-                          </div>
-
-                          <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-4 text-sm font-mono text-obsidian dark:text-white">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <Download className="w-4 h-4 text-diamond shrink-0" />
-                              <span className="truncate">{t('works.downloads_metric', { downloads: work.downloads })}</span>
-                            </div>
-                            <div className="flex items-center gap-2 min-w-0">
-                              <Star className="w-4 h-4 text-amber-500 shrink-0" />
-                              <span className="truncate">{t('works.rating_metric', { rating: work.rating })}</span>
-                            </div>
-                            <div className="flex items-center gap-2 min-w-0">
-                              <MessageCircle className="w-4 h-4 text-amethyst shrink-0" />
-                              <span className="truncate">{t('works.comments_metric', { comments: work.comments, remarks: work.remarks })}</span>
-                            </div>
-                            <div className="flex items-center gap-2 min-w-0">
-                              <Package className="w-4 h-4 text-gray-500 shrink-0" />
-                              <span className="truncate">{work.size} · {work.version}</span>
-                            </div>
-                            <div className="flex items-center gap-2 min-w-0">
-                              <CalendarDays className="w-4 h-4 text-gray-500 shrink-0" />
-                              <span className="truncate">{t('works.released_metric', { date: work.released })}</span>
-                            </div>
-                            <div className="flex items-center gap-2 min-w-0">
-                              <Users className="w-4 h-4 text-gray-500 shrink-0" />
-                              <span className="truncate">{players}</span>
-                            </div>
-                          </div>
-
-                          <div className="mt-7 flex flex-wrap gap-2">
-                            {components.map((component) => (
-                              <span key={component} className="border border-obsidian/10 dark:border-white/10 px-3 py-2 text-xs text-gray-600 dark:text-gray-300">
-                                {component}
-                              </span>
-                            ))}
-                          </div>
-
-                          <p className="mt-7 text-gray-600 dark:text-gray-400 font-light font-sans max-w-xl text-base md:text-lg leading-relaxed transition-colors duration-700">
-                            {description}
-                          </p>
-
-                          <a
-                            href={work.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hover-target mt-8 w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono text-gray-500 hover:text-obsidian dark:hover:text-white transition-colors"
-                          >
-                            <MousePointerClick className="w-4 h-4" /> {t('works.view')}
-                          </a>
-                        </div>
-                      </article>
-                      );
-                    })}
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Category: Mods */}
-              <div id="works-mods" className="scroll-mt-32">
-                <div className="reveal-up font-mono text-emerald-500 tracking-[0.2em] text-sm flex items-center gap-6 mb-16">
-                  <span className="w-12 h-[1px] bg-emerald-500"></span>
-                  {t('works.category_mods')}
-                </div>
-                <div className="space-y-32">
-                  {[
-                    { title: t('works.mod1_t'), category: t('works.mod1_c'), year: "WIP", image: "", accent: "group-hover:text-emerald-500", bg: "from-emerald-500/10", desc: t('works.mod1_d'), code: "MOD_1" },
-                  ].map((work, idx) => (
-                    <div key={`mod-${idx}`} className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center">
-                      <div className="w-full md:w-1/2 lg:w-[60%] h-[50vh] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700">
-                        <div className="parallax-bg absolute inset-[-20%] w-[140%] h-[140%]">
-                          {work.image && !work.image.includes('placeholder') ? (
-                            <img 
-                              src={work.image} 
-                              alt={work.title} 
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" 
-                            />
-                          ) : (
-                            <div 
-                              className="w-full h-full bg-repeat image-rendering-pixelated group-hover:scale-110 transition-transform duration-[1.5s] ease-out saturate-50 dark:saturate-100 opacity-60 dark:opacity-40"
-                              style={{
-                                backgroundImage: `url(${basePath}textures/${BLOCK_TEXTURES[7 % BLOCK_TEXTURES.length].top})`,
-                                backgroundSize: '128px'
-                              }}
-                            ></div>
-                          )}
-                        </div>
-                        <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
-                        <div className="parallax-text absolute inset-0 flex items-center justify-center mix-blend-overlay">
-                           <span className="text-obsidian/20 dark:text-white/20 font-black text-6xl md:text-8xl tracking-tighter transition-colors duration-700">{work.code}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="w-full md:w-1/2 lg:w-[40%] flex flex-col justify-center space-y-8">
-                        <div className="text-xs uppercase font-mono tracking-widest text-gray-500 border-b border-obsidian/10 dark:border-white/10 pb-4 flex justify-between transition-colors duration-700">
-                          <span>{work.category}</span>
-                          <span>{work.year}</span>
-                        </div>
-                        <h3 className={`text-4xl md:text-5xl lg:text-7xl font-bold uppercase tracking-tighter transition-colors duration-500 text-obsidian dark:text-white ${work.accent}`}>
-                          {work.title}
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-400 font-light font-sans max-w-md text-base md:text-lg leading-relaxed transition-colors duration-700">
-                          {work.desc}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Category: Tools */}
-              <div id="works-tools" className="scroll-mt-32">
-                <div className="reveal-up font-mono text-blue-500 tracking-[0.2em] text-sm flex items-center gap-6 mb-16">
-                  <span className="w-12 h-[1px] bg-blue-500"></span>
-                  {t('works.category_tools')}
-                </div>
-                <div className="space-y-32">
-                  {[
-                    { title: t('workPages.tools.objCubizer.title'), category: t('workPages.tools.objCubizer.category'), year: "v1.4.0", image: `${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.svg`, accent: "group-hover:text-diamond", bg: "from-diamond/10", desc: t('workPages.tools.objCubizer.desc'), code: "OBJ_1", download: `${basePath}plugins/minecraft-obj-cubizer/minecraft_obj_cubizer-1.4.0.zip`, downloadSlug: 'minecraft-obj-cubizer', repo: 'https://github.com/Ylong4004/minecraft_obj_cubizer' },
-                    { title: t('works.tool1_t'), category: t('works.tool1_c'), year: "WIP", image: "", accent: "group-hover:text-blue-500", bg: "from-blue-500/10", desc: t('works.tool1_d'), code: "TOOL_1" },
-                  ].map((work, idx) => (
-                    <div key={`tool-${idx}`} className="reveal-up group relative flex flex-col md:flex-row gap-12 lg:gap-20 items-center">
-                      <div className="w-full md:w-1/2 lg:w-[60%] h-[50vh] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] relative isolate rounded-sm border border-obsidian/5 dark:border-white/5 transition-colors duration-700">
-                        <div className="parallax-bg absolute inset-[-20%] w-[140%] h-[140%]">
-                          {work.image && !work.image.includes('placeholder') ? (
-                            <img 
-                              src={work.image} 
-                              alt={work.title} 
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" 
-                            />
-                          ) : (
-                            <div 
-                              className="w-full h-full bg-repeat image-rendering-pixelated group-hover:scale-110 transition-transform duration-[1.5s] ease-out saturate-50 dark:saturate-100 opacity-60 dark:opacity-40"
-                              style={{
-                                backgroundImage: `url(${basePath}textures/${BLOCK_TEXTURES[17 % BLOCK_TEXTURES.length].top})`,
-                                backgroundSize: '128px'
-                              }}
-                            ></div>
-                          )}
-                        </div>
-                        <div className={`absolute inset-0 bg-gradient-to-br ${work.bg} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply dark:mix-blend-screen`}></div>
-                        <div className="parallax-text absolute inset-0 flex items-center justify-center mix-blend-overlay">
-                           <span className="text-obsidian/20 dark:text-white/20 font-black text-6xl md:text-8xl tracking-tighter transition-colors duration-700">{work.code}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="w-full md:w-1/2 lg:w-[40%] flex flex-col justify-center space-y-8">
-                        <div className="text-xs uppercase font-mono tracking-widest text-gray-500 border-b border-obsidian/10 dark:border-white/10 pb-4 flex justify-between transition-colors duration-700">
-                          <span>{work.category}</span>
-                          <span>{work.year}</span>
-                        </div>
-                        <h3 className={`text-4xl md:text-5xl lg:text-7xl font-bold uppercase tracking-tighter transition-colors duration-500 text-obsidian dark:text-white ${work.accent}`}>
-                          {work.title}
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-400 font-light font-sans max-w-md text-base md:text-lg leading-relaxed transition-colors duration-700">
-                          {work.desc}
-                        </p>
-                        {'downloadSlug' in work && work.downloadSlug && (
-                          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.18em] text-gray-500">
-                            <Download className="w-4 h-4 text-diamond" />
-                            <span>{getDownloadCounterLabel(work.downloadSlug)}</span>
-                          </div>
-                        )}
-                        {(('download' in work && work.download) || ('repo' in work && work.repo)) && (
-                          <div className="flex flex-wrap gap-4">
-                            {'download' in work && work.download && (
-                              <a
-                                href={work.download}
-                                download
-                                onClick={() => {
-                                  if ('downloadSlug' in work && work.downloadSlug) {
-                                    void recordDownload(work.downloadSlug);
-                                  }
-                                }}
-                                className="hover-target w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono text-gray-500 hover:text-obsidian dark:hover:text-white transition-colors"
-                              >
-                                <Download className="w-4 h-4" /> {t('workPages.tools.objCubizer.download')}
-                              </a>
-                            )}
-                            {'repo' in work && work.repo && (
-                              <a
-                                href={work.repo}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="hover-target w-fit flex items-center gap-3 text-xs md:text-sm uppercase tracking-[0.2em] font-mono text-gray-500 hover:text-obsidian dark:hover:text-white transition-colors"
-                              >
-                                <Code className="w-4 h-4" /> {t('workPages.tools.objCubizer.repo')}
-                              </a>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            )}
           </div>
         </section>
 
-        <footer id="contact" className="py-32 px-6 md:px-12 flex flex-col items-center justify-center bg-[#e5e5e5] dark:bg-black border-t border-obsidian/10 dark:border-white/10 relative overflow-hidden transition-colors duration-700">
+        </>
+        ) : (
+          <>
+            {renderWorkPage()}
+          </>
+        )}
+        </PageTransition>
+        </main>
+
+        {/* Spacer for Reveal Footer */}
+        <div className="relative z-0 h-[100svh] w-full pointer-events-none"></div>
+
+        <footer id="contact" className="fixed bottom-0 left-0 w-full h-[100svh] px-6 md:px-12 flex flex-col items-center justify-center bg-[#e5e5e5] dark:bg-black border-t border-obsidian/10 dark:border-white/10 overflow-hidden transition-colors duration-700 z-0">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,210,211,0.05),transparent_60%)] pointer-events-none"></div>
           
-          <div className="z-10 text-center space-y-10 mb-32 max-w-3xl reveal-up">
-            <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-obsidian dark:text-white transition-colors duration-700 leading-tight pb-2">
+          <div className="z-10 text-center space-y-10 mt-auto max-w-3xl pt-32">
+            <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-obsidian dark:text-white transition-colors duration-700 leading-tight pb-2" data-cursor="FIMEL">
               <Trans i18nKey="footer.title" />
             </h2>
             <p className="text-gray-600 dark:text-gray-400 text-lg md:text-xl font-light transition-colors duration-700">
@@ -2004,38 +1591,40 @@ function App() {
                 <span key={label} className="border border-obsidian/10 dark:border-white/10 px-3 py-2">{label}</span>
               ))}
             </div>
-            <a href="mailto:fimel.studio.mc@gmail.com" className="inline-block mt-8 text-2xl md:text-5xl font-light text-obsidian dark:text-white hover:text-diamond dark:hover:text-diamond transition-all duration-300 border-b border-obsidian/20 dark:border-white/20 hover:border-diamond pb-2 hover-target">
-              fimel.studio.mc@gmail.com
-            </a>
+            <div className="mt-8 flex justify-center">
+              <Magnetic intensity={0.4}>
+                <a href="mailto:fimel.studio.mc@gmail.com" className="inline-block text-2xl md:text-5xl font-light text-obsidian dark:text-white hover:text-diamond dark:hover:text-diamond transition-all duration-300 border-b border-obsidian/20 dark:border-white/20 hover:border-diamond pb-2 hover-target px-4 py-2" data-cursor="MAIL">
+                  fimel.studio.mc@gmail.com
+                </a>
+              </Magnetic>
+            </div>
           </div>
 
-          <div className="w-full max-w-screen-2xl border-t border-obsidian/10 dark:border-white/10 pt-10 flex flex-col md:flex-row items-center justify-between gap-8 text-xs text-gray-500 font-mono uppercase tracking-widest z-10 transition-colors duration-700">
+          <div className="w-full max-w-screen-2xl border-t border-obsidian/10 dark:border-white/10 pt-10 mt-auto mb-10 flex flex-col md:flex-row items-center justify-between gap-8 text-xs text-gray-500 font-mono uppercase tracking-widest z-10 transition-colors duration-700">
             <p>{t('footer.copy')}</p>
             <div className="flex gap-8 items-center">
-              <a href="https://x.com/FimelStudio" target="_blank" rel="noopener noreferrer" className="hover:text-obsidian dark:hover:text-white transition-colors hover-target">X / @FimelStudio</a>
-              {/* <a href="#" className="hover:text-obsidian dark:hover:text-white transition-colors">Bilibili</a> */}
-              <button 
-                onClick={handleCopyQQ} 
-                className="hover:text-obsidian dark:hover:text-white transition-colors cursor-pointer hover-target"
-              >
-                {copiedQQ ? "COPIED!" : "QQ Group: 937760015"}
-              </button>
-              {/* <a href="#" className="hover:text-obsidian dark:hover:text-white transition-colors">GitHub</a> */}
+              <Magnetic intensity={0.2}>
+                <a href="https://x.com/FimelStudio" target="_blank" rel="noopener noreferrer" className="hover:text-obsidian dark:hover:text-white transition-colors hover-target px-2 py-1 block">X / @FimelStudio</a>
+              </Magnetic>
+              <Magnetic intensity={0.2}>
+                <button 
+                  onClick={handleCopyQQ} 
+                  className="hover:text-obsidian dark:hover:text-white transition-colors cursor-pointer hover-target px-2 py-1 block"
+                >
+                  {copiedQQ ? "COPIED!" : "QQ Group: 937760015"}
+                </button>
+              </Magnetic>
             </div>
           </div>
           
-          <div className="absolute -bottom-[5%] left-0 w-full text-center pointer-events-none opacity-[0.03] dark:opacity-[0.03] text-black dark:text-white select-none transition-colors duration-700">
+          <div className="absolute -bottom-[5%] left-0 w-full text-center pointer-events-none opacity-[0.015] dark:opacity-[0.015] text-black dark:text-white select-none transition-colors duration-700">
             <span className="text-[25vw] font-black uppercase tracking-tighter leading-none block">FIMEL</span>
           </div>
         </footer>
-        </>
-        ) : (
-          renderWorkPage()
-        )}
 
         {/* Minecraft Advancement Toast */}
         <div 
-          className={`fixed top-4 right-4 z-[100] w-[320px] h-[64px] transition-transform duration-500 ease-in-out pointer-events-none bg-no-repeat bg-center bg-contain image-rendering-pixelated flex items-center px-4`}
+          className="fixed top-24 right-6 md:right-12 z-[100] w-[320px] h-[64px] transition-transform duration-500 ease-in-out pointer-events-none bg-no-repeat bg-center bg-contain image-rendering-pixelated flex items-center px-4"
           style={{ 
             backgroundImage: `url('${basePath}HUD/Toast_advancement.png')`,
             transform: advancement?.visible ? 'translateX(0)' : 'translateX(150%)'
