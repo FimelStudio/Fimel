@@ -1149,9 +1149,9 @@ function App() {
         <HotbarNav scrollProgress={scrollProgress} handleNavClick={handleNavClick} activePage={activePage} />
 
         {/* --- BRAND LOGO: TOP LEFT --- */}
-        <div className="fixed top-6 md:top-8 left-5 md:left-12 z-50 mix-blend-difference text-white pointer-events-none">
+        <div className="fixed top-5 sm:top-6 md:top-8 left-5 md:left-12 z-50 mix-blend-difference text-white pointer-events-none">
           <a href="#hero" aria-label="Fimel — Home" onClick={(e) => handleNavClick(e, '#hero')} className="pointer-events-auto outline-none transition-transform hover:scale-105 inline-block">
-            <img src={logoPath} alt="FIMEL Logo" className="h-10 md:h-14 object-contain invert" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement!.innerHTML = '<span class="text-2xl md:text-3xl font-bold tracking-[0.3em] uppercase">FIMEL.</span>'; }} />
+            <img src={logoPath} alt="FIMEL Logo" className="h-14 sm:h-16 md:h-20 lg:h-24 object-contain invert drop-shadow-sm transition-all" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement!.innerHTML = '<span class="text-2xl sm:text-3xl md:text-4xl font-bold tracking-[0.3em] uppercase">FIMEL.</span>'; }} />
           </a>
         </div>
 
