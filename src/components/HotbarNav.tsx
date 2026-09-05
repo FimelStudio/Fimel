@@ -7,21 +7,26 @@ export default function HotbarNav({ scrollProgress, handleNavClick, activePage }
   const basePath = import.meta.env.BASE_URL;
   const [isOpen, setIsOpen] = useState(false);
   const [activeSlot, setActiveSlot] = useState(0);
+  const [hoveredSlot, setHoveredSlot] = useState<number | null>(null);
 
   const slots = useMemo(() => [
     { id: '#hero', tooltip: 'Respawn (Home)', icon: Home, color: '#FFFF55', page: 'home' },
-    { id: '#/studio', tooltip: t('nav.about'), icon: Info, color: 'white', page: 'studio' },
-    { id: '#/works/maps-java', tooltip: t('nav.nav_maps_je'), icon: Library, color: 'white', page: 'maps-java' },
-    { id: '#/works/maps-bedrock', tooltip: t('nav.nav_maps_be'), icon: Map, color: 'white', page: 'maps-bedrock' },
+    { id: '#quick-entry', tooltip: t('home.featured_cta'), icon: Blocks, color: '#55FFFF', page: 'home' },
+    { id: '#about', tooltip: t('nav.about'), icon: Info, color: 'white', page: 'home' },
+    { id: '#/studio', tooltip: 'Studio', icon: Library, color: 'white', page: 'studio' },
+    { id: '#/works/maps', tooltip: t('nav.nav_maps'), icon: Map, color: 'white', page: 'maps-unified' },
     { id: '#/works/mods', tooltip: t('nav.nav_mods'), icon: Wrench, color: 'white', page: 'mods' },
     { id: '#/works/tools', tooltip: t('nav.nav_tools'), icon: PenTool, color: 'white', page: 'tools' },
-    { id: '#quick-entry', tooltip: t('home.featured_cta'), icon: Blocks, color: '#55FFFF', page: 'home' },
-    { id: '#/works/maps', tooltip: t('nav.works'), icon: Swords, color: '#AAAAAA', page: 'maps-overview' },
+    { id: '#works', tooltip: t('nav.works'), icon: Swords, color: '#AAAAAA', page: 'home' },
     { id: '#contact', tooltip: t('nav.contact'), icon: Mail, color: '#FFFF55', page: 'home' },
   ], [t]);
 
   const activePageSlot = activePage !== 'home' ? slots.findIndex(slot => slot.page === activePage) : -1;
   const visibleActiveSlot = activePageSlot !== -1 ? activePageSlot : activeSlot;
+  
+  // Decide which text to show: hovered slot takes precedence over active slot
+  const displaySlotIndex = hoveredSlot !== null ? hoveredSlot : visibleActiveSlot;
+  const displaySlot = slots[displaySlotIndex];
 
   useEffect(() => {
     if (activePage !== 'home') {
@@ -30,8 +35,8 @@ export default function HotbarNav({ scrollProgress, handleNavClick, activePage }
 
     const homeSections = [
       { id: 'hero', slotIndex: 0 },
-      { id: 'quick-entry', slotIndex: 6 },
-      { id: 'about', slotIndex: 1 },
+      { id: 'quick-entry', slotIndex: 1 },
+      { id: 'about', slotIndex: 2 },
       { id: 'works', slotIndex: 7 },
       { id: 'contact', slotIndex: 8 },
     ];
@@ -83,12 +88,16 @@ export default function HotbarNav({ scrollProgress, handleNavClick, activePage }
           {isOpen ? 'HIDE M-HUD' : 'SHOW M-HUD'}
         </button>
 
-        {/* Active slot name overlay (Text above EXP bar) */}
+        {/* Active/Hover slot name overlay (Text above EXP bar) */}
       <div 
-        className="text-white text-xs md:text-sm font-mono tracking-widest h-5 md:h-6 transition-opacity duration-300 mb-1 md:mb-1.5 pointer-events-none flex items-center"
-        style={{ textShadow: '2px 2px 0px #3f3f3f', color: slots[visibleActiveSlot]?.color || 'white' }}
+        className="text-white text-xs md:text-sm font-mono tracking-widest h-5 md:h-6 transition-colors duration-150 mb-1 md:mb-1.5 pointer-events-none flex items-center"
+        style={{ 
+          textShadow: '2px 2px 0px #3f3f3f', 
+          color: displaySlot?.color || 'white',
+          opacity: hoveredSlot !== null ? 0.8 : 1 // slight fade to distinguish hover
+        }}
       >
-        {slots[visibleActiveSlot]?.tooltip}
+        {displaySlot?.tooltip}
       </div>
         
         {/* MC Experience Bar Scroll Indicator (Embedded above hotbar) */}
@@ -110,6 +119,8 @@ export default function HotbarNav({ scrollProgress, handleNavClick, activePage }
             key={idx}
             href={slot.id}
             onClick={(e) => handleNavClick(e, slot.id)}
+            onMouseEnter={() => setHoveredSlot(idx)}
+            onMouseLeave={() => setHoveredSlot(null)}
             className="flex-1 h-full cursor-pointer hover:bg-white/20 transition-colors flex items-center justify-center relative z-10 group"
           >
             <slot.icon 

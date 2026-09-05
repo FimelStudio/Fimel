@@ -8,20 +8,19 @@ interface OverlayMenuProps {
   onNavigate: (e: React.MouseEvent<HTMLAnchorElement>, hash: string) => void;
   changeLanguage: (lang: string) => void;
   currentLang: string;
+  activePath: string;
 }
 
-export function OverlayMenu({ isOpen, onClose, onNavigate, changeLanguage, currentLang }: OverlayMenuProps) {
+export function OverlayMenu({ isOpen, onClose, onNavigate, changeLanguage, currentLang, activePath }: OverlayMenuProps) {
   const { t } = useTranslation();
 
   const menuItems = [
-    { label: t('workPages.back_home'), hash: '#hero' },
-    { label: t('nav.about'), hash: '#/studio' },
-    { label: t('nav.nav_maps_all'), hash: '#/works/maps' },
-    { label: t('nav.nav_maps_je'), hash: '#/works/maps-java' },
-    { label: t('nav.nav_maps_be'), hash: '#/works/maps-bedrock' },
-    { label: t('nav.nav_mods'), hash: '#/works/mods' },
-    { label: t('nav.nav_tools'), hash: '#/works/tools' },
-    { label: t('nav.contact'), hash: '#contact' }
+    { label: activePath === '/' ? t('nav.home', '主页 / Home') : t('workPages.back_home'), hash: '#hero', match: '/' },
+    { label: t('nav.about'), hash: '#/studio', match: '/studio' },
+    { label: t('nav.nav_maps'), hash: '#/works/maps', match: '/works/maps' },
+    { label: t('nav.nav_mods'), hash: '#/works/mods', match: '/works/mods' },
+    { label: t('nav.nav_tools'), hash: '#/works/tools', match: '/works/tools' },
+    { label: t('nav.contact'), hash: '#contact', match: '/' }
   ];
 
   const langs = ['zh', 'en', 'ja'];
@@ -60,7 +59,9 @@ export function OverlayMenu({ isOpen, onClose, onNavigate, changeLanguage, curre
           <div 
             className="absolute inset-0 opacity-[0.03] pointer-events-none"
             style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+              backgroundSize: '200px',
+              backgroundRepeat: 'repeat'
             }}
           ></div>
 
@@ -79,24 +80,32 @@ export function OverlayMenu({ isOpen, onClose, onNavigate, changeLanguage, curre
 
           {/* Menu Items */}
           <div className="flex-1 flex flex-col justify-center max-w-4xl mx-auto w-full relative z-10 perspective-1000" style={{ gap: 'clamp(0.25rem, 1.5vh, 1.5rem)' }}>
-            {menuItems.map((item, i) => (
-              <motion.div key={item.hash} variants={itemVariants} className="transform-style-3d">
-                <a
-                  href={item.hash}
-                  onClick={(e) => {
-                    onNavigate(e, item.hash);
-                    onClose();
-                  }}
-                  data-cursor="GO"
-                  className="hover-target group inline-flex items-center gap-4 md:gap-6"
-                >
-                  <span className="font-mono text-[10px] md:text-xs text-white/30 tracking-widest w-6 md:w-8">0{i + 1}</span>
-                  <span className="font-black uppercase tracking-tighter hover:text-diamond transition-colors duration-300" style={{ fontSize: 'clamp(1.5rem, 5.5vh, 4rem)', lineHeight: 1.1 }}>
-                    {item.label}
-                  </span>
-                </a>
-              </motion.div>
-            ))}
+            {menuItems.map((item, i) => {
+              const isActive = activePath === item.match && item.hash !== '#contact';
+              return (
+                <motion.div key={item.hash} variants={itemVariants} className="transform-style-3d">
+                  <a
+                    href={item.hash}
+                    onClick={(e) => {
+                      onNavigate(e, item.hash);
+                      onClose();
+                    }}
+                    data-cursor="GO"
+                    className={`hover-target group inline-flex items-center gap-4 md:gap-6 ${isActive ? 'text-diamond' : 'text-white'}`}
+                  >
+                    <span className={`font-mono text-[10px] md:text-xs tracking-widest w-6 md:w-8 ${isActive ? 'text-diamond' : 'text-white/30'}`}>
+                      0{i + 1}
+                    </span>
+                    <span className="font-black uppercase tracking-tighter hover:text-diamond transition-colors duration-300" style={{ fontSize: 'clamp(1.5rem, 5.5vh, 4rem)', lineHeight: 1.1 }}>
+                      {item.label}
+                    </span>
+                    {isActive && (
+                      <span className="w-2 h-2 rounded-full bg-diamond ml-2 hidden md:block"></span>
+                    )}
+                  </a>
+                </motion.div>
+              );
+            })}
           </div>
 
           {/* Footer inside menu */}

@@ -4,7 +4,7 @@ import { initReactI18next } from 'react-i18next';
 const resources = {
   zh: {
     translation: {
-      nav: { about: "关于我们", works: "地图作品", contact: "联络合作", menu: "菜单", nav_maps: "地图作品", nav_maps_all: "全部地图", nav_maps_be: "基岩版 / 网易版", nav_maps_je: "Java 版地图 / 数据包", nav_mods: "模组 / MODS", nav_tools: "插件与工具" },
+      nav: { about: "关于我们", works: "精选展示", contact: "联络合作", menu: "菜单", nav_maps: "地图作品", nav_maps_all: "全部地图", nav_maps_be: "基岩版 / 网易版", nav_maps_je: "Java 版地图 / 数据包", nav_mods: "模组 / MODS", nav_tools: "插件与工具" },
       hero: { gen: "世界生成中...", crafting: "构筑", worlds: "无限", sub: "以机制重组法则，用指令重制原版。<br/>专注于顶尖的 Minecraft 玩法构筑，为您提供远超常理的 PVP、RPG 及硬核解密地图游玩体验。", scroll: "向下滑动" },
       siteMeta: {
         bingoCategory: 'Minecraft 1.21.11 · Fabric 模组',
@@ -220,7 +220,7 @@ const resources = {
   },
   en: {
     translation: {
-      nav: { about: "About", works: "Maps", contact: "Contact", menu: "Menu", nav_maps: "Maps", nav_maps_all: "All Maps", nav_maps_be: "Bedrock / NetEase", nav_maps_je: "Java Maps / Datapacks", nav_mods: "Mods", nav_tools: "Tools & Plugins" },
+      nav: { about: "About", works: "Showcase", contact: "Contact", menu: "Menu", nav_maps: "Maps", nav_maps_all: "All Maps", nav_maps_be: "Bedrock / NetEase", nav_maps_je: "Java Maps / Datapacks", nav_mods: "Mods", nav_tools: "Tools & Plugins" },
       hero: { gen: "GENERATING WORLD...", crafting: "CRAFTING", worlds: "WORLDS", sub: "Restructuring rules through commands, reinventing vanilla through logic.<br/>Dedicated to top-tier Minecraft gameplay development, delivering mind-blowing PVP, RPG, and hardcore puzzle map experiences.", scroll: "Scroll" },
       siteMeta: {
         bingoCategory: 'Minecraft 1.21.11 · Fabric Mod',
@@ -436,7 +436,7 @@ const resources = {
   },
   ja: {
     translation: {
-      nav: { about: "我々について", works: "マップ作品", contact: "お問い合わせ", menu: "メニュー", nav_maps: "マップ作品", nav_maps_all: "すべてのマップ", nav_maps_be: "統合版 / NetEase版", nav_maps_je: "Java版マップ / データパック", nav_mods: "MOD", nav_tools: "プラグイン・ツール" },
+      nav: { about: "我々について", works: "厳選作品", contact: "お問い合わせ", menu: "メニュー", nav_maps: "マップ作品", nav_maps_all: "すべてのマップ", nav_maps_be: "統合版 / NetEase版", nav_maps_je: "Java版マップ / データパック", nav_mods: "MOD", nav_tools: "プラグイン・ツール" },
       hero: { gen: "世界を生成中...", crafting: "創造", worlds: "無限", sub: "コマンドで法則を再構築し、ロジックでバニラを刷新する。<br/>トップクラスのMinecraftゲームプレイ開発に専念し、常識を覆すPVP、RPG、謎解きのマップ体験を提供します。", scroll: "スクロール" },
       siteMeta: {
         bingoCategory: 'Minecraft 1.21.11 · Fabric MOD',

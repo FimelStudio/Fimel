@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface PageTransitionProps {
@@ -20,18 +20,33 @@ const curtainVariants = {
   }
 };
 
-const PageContent: React.FC<{ children: React.ReactNode; isFirstMount: boolean }> = ({ children, isFirstMount }) => {
-  const [isReady, setIsReady] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+let hasMountedOnce = false;
+
+const PageContent = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => {
+  const [isFirstMount] = useState(() => {
+    const isFirst = !hasMountedOnce;
+    hasMountedOnce = true;
+    return isFirst;
+  });
+  
+  const [isReady, setIsReady] = useState(isFirstMount);
 
   useEffect(() => {
+    if (isFirstMount) return;
+    
     let isCancelled = false;
     
-    // Slight delay to allow React/ThreeJS to insert DOM nodes
+    // Slight delay to allow DOM to render
     const initTimer = setTimeout(() => {
-      if (isCancelled || !containerRef.current) return;
+      if (isCancelled) return;
       
-      const images = Array.from(containerRef.current.querySelectorAll('img'));
+      const el = document.getElementById('page-content-wrapper');
+      if (!el) {
+        setIsReady(true);
+        return;
+      }
+      
+      const images = Array.from(el.querySelectorAll('img:not([loading="lazy"])')) as HTMLImageElement[];
       const unresolved = images.filter(img => !img.complete);
       
       if (unresolved.length === 0) {
@@ -61,16 +76,21 @@ const PageContent: React.FC<{ children: React.ReactNode; isFirstMount: boolean }
       clearTimeout(initTimer);
       clearTimeout(fallbackTimer);
     };
-  }, []);
+  }, [isFirstMount]);
 
   return (
-    <>
-      <motion.div
-        ref={containerRef}
-        initial={{ opacity: 0 }}
+    <motion.div
+      ref={ref}
+      className="relative w-full"
+      initial={isFirstMount ? false : "initial"}
+      animate={isReady ? "ready" : "initial"}
+      exit="exit"
+    >
+      <motion.div 
+        id="page-content-wrapper"
+        initial={isFirstMount ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
         className="relative w-full"
       >
         {children}
@@ -80,31 +100,20 @@ const PageContent: React.FC<{ children: React.ReactNode; isFirstMount: boolean }
         <motion.div
           className="fixed inset-0 z-[9999] bg-obsidian pointer-events-none"
           variants={curtainVariants}
-          initial="initial"
-          animate={isReady ? "ready" : "initial"}
-          exit="exit"
         />
       )}
-    </>
+    </motion.div>
   );
-};
+});
 
-let hasMountedOnce = false;
+PageContent.displayName = 'PageContent';
 
 export const PageTransition: React.FC<PageTransitionProps> = ({ pageKey, children }) => {
-  const [isFirstMount] = useState(() => !hasMountedOnce);
-
-  useEffect(() => {
-    hasMountedOnce = true;
-  }, []);
-
   return (
     <AnimatePresence mode="wait">
-      <motion.div key={pageKey} className="relative w-full">
-        <PageContent isFirstMount={isFirstMount}>
-          {children}
-        </PageContent>
-      </motion.div>
+      <PageContent key={pageKey}>
+        {children}
+      </PageContent>
     </AnimatePresence>
   );
 };
