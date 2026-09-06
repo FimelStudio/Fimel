@@ -39,54 +39,60 @@ export const Home: React.FC = () => {
 
   return (
     <>
-      <section id="hero" className="relative w-full min-h-[100svh] overflow-hidden flex flex-col justify-center px-6 pt-24 pb-20 md:px-16 lg:px-24 bg-paper dark:bg-obsidian transition-colors duration-700">
-        <div className="parallax-hero absolute inset-[-10%] w-[120%] h-[120%] z-0 opacity-70 pointer-events-none">
+      <section id="hero" className="relative w-full min-h-[100svh] overflow-hidden flex flex-col justify-center px-6 md:px-12 lg:px-20 bg-paper dark:bg-obsidian transition-colors duration-700 pt-20">
+        <div className="parallax-hero absolute inset-[-10%] w-[120%] h-[120%] z-0 pointer-events-none">
           <ParticleCubes isDark={isDark} />
         </div>
         
-        <div className="relative z-10 max-w-screen-2xl w-full flex flex-col items-start gap-4 pointer-events-none mt-12 md:mt-0">
-          <div className="hero-sub pointer-events-auto flex items-center gap-4 mb-2 font-mono text-[10px] md:text-xs uppercase tracking-[0.22em] text-obsidian/60 dark:text-white/60">
-            <span className="w-8 md:w-12 h-px bg-diamond"></span>
-            {t('home.studio_label')}
-          </div>
+        <div className="w-full max-w-[1600px] mx-auto flex flex-col pointer-events-none">
           
-          <div className="overflow-visible pointer-events-auto flex flex-col gap-2">
-            <HeroTitleReveal delay={0.4} className="hero-title text-[13vw] lg:text-[9vw] leading-[1] font-extrabold tracking-tighter uppercase text-obsidian dark:text-white transition-colors duration-700">
+          {/* Top-Left: "构筑" */}
+          <div className="flex flex-col items-start w-full mix-blend-difference z-10">
+            <div className="hero-sub pointer-events-auto flex items-center gap-4 mb-4 font-mono text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/50">
+              <span className="w-8 md:w-12 h-px bg-diamond"></span>
+              {t('home.studio_label')}
+            </div>
+            <HeroTitleReveal delay={0.4} className="hero-title text-[22vw] lg:text-[18vw] leading-[0.8] font-black tracking-tighter uppercase text-white transition-colors duration-700 -ml-2 md:-ml-4">
               {t('hero.crafting')}
             </HeroTitleReveal>
-            <HeroTitleReveal delay={0.6} className="hero-title text-[13vw] lg:text-[9vw] leading-[1] font-extrabold tracking-tighter uppercase text-obsidian dark:text-white lg:ml-[10vw] transition-colors duration-700 flex gap-4">
-              <span className="italic text-obsidian/40 dark:text-white/40 font-serif">the</span> {t('hero.worlds')}
+          </div>
+
+          {/* Middle: Subtext nested right below "构筑" */}
+          <div className="w-full flex justify-start lg:pl-[2vw] mt-6 md:mt-10 mb-10 md:mb-16 pointer-events-auto z-20">
+             <div className="max-w-md lg:max-w-xl pr-4">
+                <p className="hero-sub text-base md:text-lg font-light tracking-wide text-gray-700 dark:text-gray-300 leading-relaxed font-sans transition-colors duration-700">
+                  <Trans i18nKey="hero.sub" />
+                </p>
+             </div>
+          </div>
+
+          {/* Bottom-Right: "THE 无限" */}
+          <div className="flex flex-col items-end w-full mix-blend-difference z-10 lg:-mt-12">
+            <HeroTitleReveal delay={0.6} className="hero-title text-[22vw] lg:text-[18vw] leading-[0.8] font-black tracking-tighter uppercase text-white transition-colors duration-700 flex items-baseline justify-end gap-3 md:gap-6 -mr-2 md:-mr-4">
+              <span className="italic text-white/50 font-sans font-light text-[7vw] lg:text-[5vw] tracking-normal mb-2 md:mb-4">THE</span> {t('hero.worlds')}
             </HeroTitleReveal>
           </div>
-
-          <div className="hero-sub mt-6 md:mt-8 flex flex-col md:flex-row items-start md:items-center gap-5 md:gap-8 max-w-2xl pointer-events-auto">
-            <p className="text-base md:text-xl font-light tracking-wide text-gray-600 dark:text-gray-300 leading-relaxed font-sans transition-colors duration-700">
-              <Trans i18nKey="hero.sub" />
-            </p>
+          
+          {/* Bottom-Right: CTAs under "无限" */}
+          <div className="w-full flex justify-end mt-8 pointer-events-auto z-20">
+            <div className="hero-sub flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <a
+                href="#quick-entry"
+                className="group relative inline-flex h-12 md:h-14 items-center justify-between gap-6 bg-obsidian dark:bg-white text-white dark:text-obsidian px-8 font-mono text-[10px] md:text-xs uppercase tracking-[0.15em] transition-all hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl hover:shadow-diamond/20"
+              >
+                <span className="relative z-10">{t('home.featured_cta')}</span>
+                <ArrowUpRight className="w-4 h-4 relative z-10 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
+              </a>
+              <Link
+                to="/works/maps"
+                className="group inline-flex h-12 md:h-14 items-center justify-between gap-6 border border-obsidian/30 dark:border-white/30 bg-transparent backdrop-blur-sm px-8 font-mono text-[10px] md:text-xs uppercase tracking-[0.15em] text-obsidian dark:text-white transition-all hover:border-obsidian dark:hover:border-white hover:bg-obsidian/5 dark:hover:bg-white/5 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <span>{t('home.current_cta')}</span>
+                <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
+              </Link>
+            </div>
           </div>
-
-          <div className="hero-sub mt-10 flex flex-col sm:flex-row gap-4 pointer-events-auto w-full sm:w-auto">
-            <a
-              href="#quick-entry"
-              className="group relative inline-flex min-h-12 items-center justify-between gap-8 bg-obsidian dark:bg-white text-white dark:text-obsidian px-6 py-4 font-mono text-xs uppercase tracking-[0.18em] transition-all hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl hover:shadow-diamond/20"
-            >
-              <span className="relative z-10">{t('home.featured_cta')}</span>
-              <ArrowUpRight className="w-4 h-4 relative z-10 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
-              <div className="absolute inset-0 bg-diamond opacity-0 group-hover:opacity-10 transition-opacity"></div>
-            </a>
-            <Link
-              to="/works/maps"
-              className="group inline-flex min-h-12 items-center justify-between gap-8 border border-obsidian/30 dark:border-white/30 bg-transparent backdrop-blur-sm px-6 py-4 font-mono text-xs uppercase tracking-[0.18em] text-obsidian dark:text-white transition-all hover:border-obsidian dark:hover:border-white hover:scale-[1.02] active:scale-[0.98]"
-            >
-              <span>{t('home.current_cta')}</span>
-              <ArrowUpRight className="w-4 h-4 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
-            </Link>
-          </div>
-        </div>
-
-        <div className="hidden md:flex absolute bottom-12 right-12 flex-col items-center gap-2 opacity-60 hero-sub mix-blend-difference pointer-events-none">
-          <span className="text-[10px] tracking-[0.3em] uppercase font-mono rotate-90 mb-8 text-white">{t('hero.scroll')}</span>
-          <div className="w-[1px] h-20 bg-gradient-to-b from-white to-transparent"></div>
+          
         </div>
       </section>
 

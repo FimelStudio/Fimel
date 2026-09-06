@@ -332,30 +332,46 @@ function SceneLights({ isDark }: { isDark: boolean }) {
 const generateCubes = () => {
   const generated: CubeData[] = [];
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  const count = isMobile ? 32 : 100; 
+  const count = isMobile ? 120 : 400; 
   
   for (let i = 0; i < count; i++) {
     const textureIndex = i % BLOCK_TEXTURES.length;
+    
+    // Better scale distribution: 50% small, 35% medium, 15% huge
+    const rand = Math.random();
+    let sizeScale = 1;
+    let isSmall = false;
+    if (rand < 0.5) {
+      sizeScale = Math.random() * 0.3 + 0.2;
+      isSmall = true;
+    } else if (rand < 0.85) {
+      sizeScale = Math.random() * 0.8 + 0.5;
+    } else {
+      sizeScale = Math.random() * 2.0 + 1.2;
+    }
+
     let finalPos = [0, 0, 0] as [number, number, number];
 
     for (let attempt = 0; attempt < 40; attempt++) {
       const testPos = [
-        (Math.random() - 0.5) * (isMobile ? 24 : 52),
-        (Math.random() - 0.5) * (isMobile ? 36 : 28),
-        (Math.random() - 0.5) * 25 - 5
+        (Math.random() - 0.5) * (isMobile ? 35 : 90),
+        (Math.random() - 0.5) * (isMobile ? 50 : 50),
+        (Math.random() - 0.5) * 45 - 5
       ] as [number, number, number];
 
       let isValid = true;
-      for (const existingCube of generated) {
-        const dx = existingCube.position[0] - testPos[0];
-        const dy = existingCube.position[1] - testPos[1];
-        const dz = existingCube.position[2] - testPos[2];
-        const distSq = dx * dx + dy * dy + dz * dz;
+      if (!isSmall) {
+        for (const existingCube of generated) {
+          const dx = existingCube.position[0] - testPos[0];
+          const dy = existingCube.position[1] - testPos[1];
+          const dz = existingCube.position[2] - testPos[2];
+          const distSq = dx * dx + dy * dy + dz * dz;
 
-        const minAllowedDistSq = existingCube.textureIndex === textureIndex ? 12 : 3;
-        if (distSq < minAllowedDistSq) {
-          isValid = false;
-          break;
+          const minAllowedDistSq = existingCube.textureIndex === textureIndex ? 18 : 6;
+          if (distSq < minAllowedDistSq && existingCube.size[0] > 0.5) {
+            isValid = false;
+            break;
+          }
         }
       }
 
@@ -366,11 +382,11 @@ const generateCubes = () => {
     }
 
     generated.push({
-      speed: Math.random() * 1.5 + 0.5,
-      rotationIntensity: Math.random() * 1.5,
-      floatIntensity: Math.random() * 2,
+      speed: Math.random() * 2.0 + 0.2,
+      rotationIntensity: Math.random() * 2.0,
+      floatIntensity: Math.random() * 2.5,
       position: finalPos,
-      size: Array(3).fill(Math.random() * 0.9 + 0.35) as [number, number, number],
+      size: Array(3).fill(sizeScale) as [number, number, number],
       colorType: i % 3,
       textureIndex: textureIndex
     });
@@ -378,16 +394,42 @@ const generateCubes = () => {
   return generated;
 };
 
+function CameraRig() {
+  const isInitial = React.useRef(true);
+
+  useFrame((state, delta) => {
+    if (isInitial.current) {
+      // Start the camera far right, high up, and zoomed out to create a dramatic "drop-in" spatial slide
+      state.camera.position.set(25, 20, 40);
+      isInitial.current = false;
+    }
+
+    // Exponential smoothing (lerp) automatically creates a beautiful ease-out sliding effect
+    // as it travels from the extreme starting position to the mouse-driven target position.
+    const targetX = state.pointer.x * 4;
+    const targetY = state.pointer.y * 4;
+
+    state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, targetX, delta * 1.2);
+    state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, delta * 1.2);
+    state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, 15, delta * 1.2);
+    
+    state.camera.lookAt(0, 0, 0);
+  });
+  return null;
+}
+
 export function ParticleCubes({ isDark }: { isDark: boolean }) {
   const [cubes] = React.useState(generateCubes);
 
   return (
     <Canvas 
       camera={{ position: [0, 0, 15], fov: 45 }} 
-      gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
+      gl={{ alpha: false, antialias: true, powerPreference: 'high-performance' }}
       dpr={[1, 1.5]}
       performance={{ min: 0.5 }}
     >
+      <color attach="background" args={[isDark ? '#0a0a0a' : '#f4f4f5']} />
+      <CameraRig />
       <SceneLights isDark={isDark} />
       {isDark && <Stars radius={50} depth={50} count={1200} factor={3} saturation={0} fade speed={1} />}
       <React.Suspense fallback={null}>
