@@ -193,7 +193,11 @@ const resources = {
           eyebrow: "模组 / 已发布与实验",
           title: "模组",
           desc: "收录 Fimel 开发的可游玩模组与机制实验。当前可体验项目为 Bingo But Don't Do It，后续项目会按完成度和维护状态加入。",
-          tags: ["玩法模组", "机制重构", "Fabric", "已发布"]
+          tags: ["玩法模组", "机制重构", "Fabric", "已发布"],
+          download_latest: "下载",
+          download_loading: "正在获取最新版",
+          download_fallback: "打开 Releases 页面",
+          download_error: "暂时无法自动获取最新版，请点击按钮前往 Releases 页面下载。"
         },
         tools: {
           eyebrow: "插件与工具 / 创作工作流",
@@ -409,7 +413,11 @@ const resources = {
           eyebrow: "Mods / Releases & Experiments",
           title: "Mods",
           desc: "Playable mods and mechanic experiments developed by Fimel. Bingo But Don't Do It is available now; future projects will be added according to completion and maintenance status.",
-          tags: ["Gameplay mod", "Mechanic rework", "Fabric", "Released"]
+          tags: ["Gameplay mod", "Mechanic rework", "Fabric", "Released"],
+          download_latest: "Download Latest Release",
+          download_loading: "Finding Latest Release",
+          download_fallback: "Open Releases Page",
+          download_error: "The latest release could not be retrieved automatically. Use the button to download it from the Releases page."
         },
         tools: {
           eyebrow: "Plugins & Tools / Creator Workflow",
@@ -625,7 +633,11 @@ const resources = {
           eyebrow: "MOD / 公開作品・実験",
           title: "MOD",
           desc: "Fimel が開発したプレイ可能な MOD とゲームメカニクス実験です。現在は Bingo But Don't Do It を公開しており、今後の作品は完成度とメンテナンス状況に応じて追加します。",
-          tags: ["ゲームプレイ MOD", "機構再構築", "Fabric", "公開済み"]
+          tags: ["ゲームプレイ MOD", "機構再構築", "Fabric", "公開済み"],
+          download_latest: "最新版をダウンロード",
+          download_loading: "最新版を取得中",
+          download_fallback: "Releases ページを開く",
+          download_error: "最新版を自動取得できませんでした。ボタンから Releases ページを開いてダウンロードしてください。"
         },
         tools: {
           eyebrow: "プラグイン・ツール / 制作ワークフロー",

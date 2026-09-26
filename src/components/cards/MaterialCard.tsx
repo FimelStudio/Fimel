@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Download, Code } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { ProjectEntry } from '../../hooks/useWorksData';
@@ -35,6 +35,56 @@ const TexturePanel = ({ texture, code, image, title, basePath }: { texture: stri
 
 export const MaterialCard: React.FC<MaterialCardProps> = ({ work, idx, basePath, downloadLabel, onDownload }) => {
   const { t } = useTranslation();
+  const [releaseDownloadState, setReleaseDownloadState] = useState<'idle' | 'loading' | 'error'>('idle');
+
+  const downloadLatestRelease = async () => {
+    if (!work.latestReleaseRepo || releaseDownloadState === 'loading') return;
+
+    if (releaseDownloadState === 'error') {
+      window.location.assign(work.releasePage ?? `https://github.com/${work.latestReleaseRepo}/releases`);
+      return;
+    }
+
+    setReleaseDownloadState('loading');
+
+    try {
+      const response = await fetch(`https://api.github.com/repos/${work.latestReleaseRepo}/releases/latest`, {
+        headers: {
+          Accept: 'application/vnd.github+json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`GitHub release request failed with HTTP ${response.status}`);
+      }
+
+      const release = await response.json() as {
+        assets?: Array<{
+          name?: string;
+          state?: string;
+          content_type?: string;
+          browser_download_url?: string;
+        }>;
+      };
+
+      const releaseAsset = release.assets?.find((asset) =>
+        asset.state === 'uploaded' &&
+        Boolean(asset.browser_download_url) &&
+        (asset.content_type === 'application/java-archive' || asset.name?.toLowerCase().endsWith('.jar')) &&
+        !/(sources|javadoc|dev)/i.test(asset.name ?? ''),
+      );
+
+      if (!releaseAsset?.browser_download_url) {
+        throw new Error('The latest GitHub release does not contain a downloadable JAR asset.');
+      }
+
+      setReleaseDownloadState('idle');
+      window.location.assign(releaseAsset.browser_download_url);
+    } catch (error) {
+      console.warn('Unable to download the latest GitHub release:', error);
+      setReleaseDownloadState('error');
+    }
+  };
 
   return (
     <article className="reveal-up group grid md:grid-cols-[1.1fr_0.9fr] gap-8 md:gap-12 items-stretch">
@@ -67,7 +117,7 @@ export const MaterialCard: React.FC<MaterialCardProps> = ({ work, idx, basePath,
             <span>{downloadLabel}</span>
           </div>
         )}
-        {(work.download || work.repo) && (
+        {(work.download || work.latestReleaseRepo || work.repo) && (
           <div className="mt-8 flex flex-wrap gap-3">
             {work.download && (
               <a
@@ -83,6 +133,23 @@ export const MaterialCard: React.FC<MaterialCardProps> = ({ work, idx, basePath,
                 <Download className="w-4 h-4" /> {t('workPages.tools.objCubizer.download')}
               </a>
             )}
+            {work.latestReleaseRepo && (
+              <button
+                type="button"
+                onClick={downloadLatestRelease}
+                disabled={releaseDownloadState === 'loading'}
+                aria-busy={releaseDownloadState === 'loading'}
+                className="hover-target w-fit min-h-12 flex items-center gap-3 border border-obsidian dark:border-white px-5 py-4 text-xs uppercase tracking-[0.2em] font-mono hover:text-diamond hover:border-diamond disabled:cursor-wait disabled:opacity-60 transition-colors"
+                aria-describedby={releaseDownloadState === 'error' ? `release-download-error-${idx}` : undefined}
+              >
+                <Download className={`w-4 h-4 ${releaseDownloadState === 'loading' ? 'animate-pulse' : ''}`} />
+                {releaseDownloadState === 'loading'
+                  ? t('workPages.mods.download_loading')
+                  : releaseDownloadState === 'error'
+                    ? t('workPages.mods.download_fallback')
+                    : t('workPages.mods.download_latest')}
+              </button>
+            )}
             {work.repo && (
               <a
                 href={work.repo}
@@ -94,6 +161,11 @@ export const MaterialCard: React.FC<MaterialCardProps> = ({ work, idx, basePath,
               </a>
             )}
           </div>
+        )}
+        {work.latestReleaseRepo && releaseDownloadState === 'error' && (
+          <p id={`release-download-error-${idx}`} role="status" className="mt-3 text-xs font-mono text-amber-600 dark:text-amber-400">
+            {t('workPages.mods.download_error')}
+          </p>
         )}
       </div>
     </article>

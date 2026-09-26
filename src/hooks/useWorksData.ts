@@ -151,6 +151,8 @@ export type ProjectEntry = {
   image?: string;
   download?: string;
   downloadSlug?: string;
+  latestReleaseRepo?: string;
+  releasePage?: string;
   repo?: string;
   version?: string;
   author?: string;
@@ -230,7 +232,9 @@ export function useWorksData() {
       image: bingoLogo,
       accent: 'group-hover:text-emerald-500',
       tags: siteMeta.bingoTags,
-      repo: 'https://github.com/Ylong4004/bingo-but-dont-do-it'
+      latestReleaseRepo: 'FimelStudio/bingo-but-dont-do-it',
+      releasePage: 'https://github.com/FimelStudio/bingo-but-dont-do-it/releases',
+      repo: 'https://github.com/FimelStudio/bingo-but-dont-do-it'
     }
   ];
 
