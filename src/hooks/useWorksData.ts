@@ -153,6 +153,8 @@ export type ProjectEntry = {
   downloadSlug?: string;
   latestReleaseRepo?: string;
   releasePage?: string;
+  fallbackDownload?: string;
+  fallbackFileName?: string;
   repo?: string;
   version?: string;
   author?: string;
@@ -197,6 +199,7 @@ export function useWorksData() {
   const objCubizerLogo = `${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.svg`;
   const objCubizerRepo = 'https://github.com/Ylong4004/minecraft_obj_cubizer';
   const bingoLogo = `${basePath}bingo-but-dont-do-it-logo.png`;
+  const bingoFallbackDownload = `${basePath}mods/bingo-but-dont-do-it-1.21.11-v1.0.jar`;
 
   const javaEntries: ProjectEntry[] = [
     {
@@ -234,6 +237,8 @@ export function useWorksData() {
       tags: siteMeta.bingoTags,
       latestReleaseRepo: 'FimelStudio/bingo-but-dont-do-it',
       releasePage: 'https://github.com/FimelStudio/bingo-but-dont-do-it/releases',
+      fallbackDownload: bingoFallbackDownload,
+      fallbackFileName: 'bingo-but-dont-do-it-1.21.11-v1.0.jar',
       repo: 'https://github.com/FimelStudio/bingo-but-dont-do-it'
     }
   ];

@@ -11,6 +11,16 @@ interface MaterialCardProps {
   onDownload?: (slug: string) => void;
 }
 
+const triggerFileDownload = (url: string, fileName?: string) => {
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  if (fileName) anchor.download = fileName;
+  anchor.style.display = 'none';
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+};
+
 const TexturePanel = ({ texture, code, image, title, basePath }: { texture: string, code: string, image?: string, title?: string, basePath: string }) => (
   <div className="relative min-h-[18rem] md:min-h-[24rem] overflow-hidden bg-[#e0e0e0] dark:bg-[#0a0a0a] border border-obsidian/5 dark:border-white/5 rounded-sm isolate">
     {image ? (
@@ -82,6 +92,13 @@ export const MaterialCard: React.FC<MaterialCardProps> = ({ work, idx, basePath,
       window.location.assign(releaseAsset.browser_download_url);
     } catch (error) {
       console.warn('Unable to download the latest GitHub release:', error);
+
+      if (work.fallbackDownload) {
+        setReleaseDownloadState('idle');
+        triggerFileDownload(work.fallbackDownload, work.fallbackFileName);
+        return;
+      }
+
       setReleaseDownloadState('error');
     }
   };

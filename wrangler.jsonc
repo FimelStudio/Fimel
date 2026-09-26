@@ -7,7 +7,10 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
+    "run_worker_first": [
+      "/mods/bingo-but-dont-do-it-1.21.11-v1.0.jar"
+    ]
   },
   "triggers": {
     "crons": [
