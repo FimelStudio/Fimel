@@ -9,7 +9,7 @@ const resources = {
       siteMeta: {
         bingoCategory: 'Minecraft 1.21.11 · Fabric 模组',
         bingoSubtitle: '竞技玩法模组',
-        bingoDescription: '将“不要做挑战”重构并融入 Bingo 对局：队伍共享生命、对抗词条、特殊事件与可选语音关键词，让竞速目标之外多一层持续博弈。',
+        bingoDescription: '将“不要做挑战”融入 Bingo 对局中，兼有队伍共享生命、对抗词条、特殊事件与可选语音关键词多种玩法。目前仅有1.21.11版本，后续将持续更新至最新版本。',
         bingoTags: ['Bingo 对局', 'DDI 规则', '356 条词条', '可选语音实验'],
         contactLabels: ['项目合作', '创作者联动', '玩家反馈 / 技术支持'],
         studio: {
