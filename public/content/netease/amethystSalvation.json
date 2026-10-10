@@ -1,0 +1,46 @@
+{
+  "i18nKey": "amethystSalvation",
+  "sourceUrl": "https://resource-minecraft.h5.163.com/#/detail?id=4672593901126936215",
+  "sourceEndpoint": "https://g79apigatewayobt.nie.netease.com/h5/pe-item-detail-v2",
+  "sourceRequest": {
+    "item_id": "4672593901126936215",
+    "channel_id": 5
+  },
+  "sourceField": "entity.info",
+  "accessedDate": "2026-10-10",
+  "sourceLanguage": "zh-CN",
+  "title": "【闯关rpg】紫晶幻域",
+  "storeItemId": "4672593901126936215",
+  "unverifiedVersionFields": {
+    "mod_version": "2.11"
+  },
+  "author": "KCINE",
+  "authorRole": "storefront publisher; see creditedAuthors and original description for creators",
+  "creditedAuthors": [
+    "水晶",
+    "橙子",
+    "小宇"
+  ],
+  "publishedAt": "2024-07-01T11:44:52.000Z",
+  "updatedAt": "2024-09-20T02:46:57.000Z",
+  "publishedDate": "2024-07-01",
+  "updatedDate": "2024-09-20",
+  "dateTimezone": "Asia/Shanghai",
+  "publishedUnixSeconds": 1719834292,
+  "updatedUnixSeconds": 1726800417,
+  "descriptionMarkdown": "content/netease/amethystSalvation.md",
+  "originalDescriptionHtml": "<p>地图名:【闯关类rpg】紫晶幻域：救世光源</p><p>作者：水晶 橙子 小宇</p><p>免费</p><p>简介：</p><p>&nbsp;在一个遥远的幻想世界中，曾经和平的大陆突然被黑暗力量笼罩。黑暗势力的首领，一位名叫阿玛格罗斯的邪恶巫师，使用强大的紫水晶魔法将大陆中的亡灵召唤了出来并为他所用，在这么危险的世界中，主角团们将会如何击败黑暗势力呢....</p><p><br></p><p>你将出生在这片充满统治的大陆</p><p>你需要选择趁手的职业在今后的冒险中这起到了至关重要的作用</p><p>选完职业之后你就正式来到这片充满邪恶势力的大陆</p><p>你将从初始村庄开始冒险打败大路上存在的黑恶势力</p><p>在战斗的同时你们还需要购买道具和升级装备为战斗更强大的敌人做出准备</p><p>我相信你已经准备好了，快和你的伙伴们踏上这危险的旅程吧</p><p>特别提示：本图生物数量较多，联机或设备不佳容易导致卡顿，属正常现象</p>",
+  "originalEmbeddedImageUrls": [],
+  "snapshotStats": {
+    "downloads": 14126,
+    "rating": 4.7,
+    "comments": 99,
+    "ratingsCount": 202
+  },
+  "conversionNotes": [
+    "Quill font sizes, colors and blank spacer paragraphs were removed; original HTML is retained above.",
+    "Original embedded images were not downloaded or inserted into the Markdown.",
+    "Wording, historical contacts and credited names are retained from the source.",
+    "Published and updated dates reflect API create_time and refresh_time, not an inferred release history."
+  ]
+}

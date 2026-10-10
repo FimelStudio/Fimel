@@ -19,8 +19,8 @@ export type BedrockEntry = {
 export const FEATURED_MAPS: BedrockEntry[] = [
   {
     i18nKey: "werewolfFTown",
-    downloads: "427,397",
-    rating: "3.9",
+    downloads: "430,994",
+    rating: "4.1",
     comments: "78",
     remarks: "176",
     size: "183 KB",
@@ -109,7 +109,7 @@ export const FEATURED_MAPS: BedrockEntry[] = [
   },
   {
     i18nKey: "islandEscapeBeforeDawn",
-    downloads: "39,520",
+    downloads: "39,810",
     rating: "4.2",
     comments: "15",
     remarks: "39",
@@ -124,7 +124,7 @@ export const FEATURED_MAPS: BedrockEntry[] = [
   },
   {
     i18nKey: "amethystSalvation",
-    downloads: "13,523",
+    downloads: "14,126",
     rating: "4.7",
     comments: "90",
     remarks: "192",
@@ -226,7 +226,7 @@ export function useWorksData() {
 
   const modsEntries: ProjectEntry[] = [
     {
-      title: 'Bingo × Don\'t Do It',
+      title: 'Bingo But Don\'t Do It',
       subtitle: siteMeta.bingoSubtitle,
       category: siteMeta.bingoCategory,
       status: t('workPages.status.live'),

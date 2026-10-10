@@ -1,5 +1,5 @@
-import React, { useState, useEffect, forwardRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { forwardRef } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 
 interface PageTransitionProps {
   pageKey: string;
@@ -11,94 +11,38 @@ const curtainVariants = {
   ready: { 
     scaleY: 0, 
     transformOrigin: "top",
-    transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] as const } 
+    transition: { duration: 0.35, ease: [0.76, 0, 0.24, 1] as const }
   },
   exit: { 
     scaleY: 1, 
     transformOrigin: "bottom",
-    transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] as const } 
+    transition: { duration: 0.25, ease: [0.76, 0, 0.24, 1] as const }
   }
 };
 
-let hasMountedOnce = false;
-
-const PageContent = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => {
-  const [isFirstMount] = useState(() => {
-    const isFirst = !hasMountedOnce;
-    hasMountedOnce = true;
-    return isFirst;
-  });
-  
-  const [isReady, setIsReady] = useState(isFirstMount);
-
-  useEffect(() => {
-    if (isFirstMount) return;
-    
-    let isCancelled = false;
-    
-    // Slight delay to allow DOM to render
-    const initTimer = setTimeout(() => {
-      if (isCancelled) return;
-      
-      const el = document.getElementById('page-content-wrapper');
-      if (!el) {
-        setIsReady(true);
-        return;
-      }
-      
-      const images = Array.from(el.querySelectorAll('img:not([loading="lazy"])')) as HTMLImageElement[];
-      const unresolved = images.filter(img => !img.complete);
-      
-      if (unresolved.length === 0) {
-        setIsReady(true);
-        return;
-      }
-      
-      let loaded = 0;
-      const onImageLoad = () => {
-        if (isCancelled) return;
-        loaded++;
-        if (loaded === unresolved.length) setIsReady(true);
-      };
-      
-      unresolved.forEach(img => {
-        img.addEventListener('load', onImageLoad, { once: true });
-        img.addEventListener('error', onImageLoad, { once: true });
-      });
-    }, 50);
-
-    const fallbackTimer = setTimeout(() => {
-      if (!isCancelled) setIsReady(true);
-    }, 1500);
-
-    return () => {
-      isCancelled = true;
-      clearTimeout(initTimer);
-      clearTimeout(fallbackTimer);
-    };
-  }, [isFirstMount]);
-
+const PageContent = forwardRef<HTMLDivElement, { children: React.ReactNode; reducedMotion: boolean }>(({ children, reducedMotion }, ref) => {
   return (
     <motion.div
       ref={ref}
       className="relative w-full"
-      initial={isFirstMount ? false : "initial"}
-      animate={isReady ? "ready" : "initial"}
-      exit="exit"
+      initial={reducedMotion ? false : "initial"}
+      animate="ready"
+      exit={reducedMotion ? undefined : "exit"}
     >
       <motion.div 
         id="page-content-wrapper"
-        initial={isFirstMount ? false : { opacity: 0 }}
+        initial={reducedMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
+        transition={{ duration: reducedMotion ? 0 : 0.2 }}
         className="relative w-full"
       >
         {children}
       </motion.div>
       
-      {!isFirstMount && (
+      {!reducedMotion && (
         <motion.div
-          className="fixed inset-0 z-[9999] bg-obsidian pointer-events-none"
+          aria-hidden="true"
+          className="fixed inset-0 z-[9999] bg-paper dark:bg-canvas pointer-events-none"
           variants={curtainVariants}
         />
       )}
@@ -109,9 +53,10 @@ const PageContent = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({
 PageContent.displayName = 'PageContent';
 
 export const PageTransition: React.FC<PageTransitionProps> = ({ pageKey, children }) => {
+  const reducedMotion = Boolean(useReducedMotion());
   return (
-    <AnimatePresence mode="wait">
-      <PageContent key={pageKey}>
+    <AnimatePresence mode="wait" initial={false}>
+      <PageContent key={pageKey} reducedMotion={reducedMotion}>
         {children}
       </PageContent>
     </AnimatePresence>

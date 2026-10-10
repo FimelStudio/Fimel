@@ -8,7 +8,7 @@ export function StickyStack({ cards }: { cards: React.ReactNode[] }) {
         return (
           <div
             key={i}
-            className="stack-card sticky min-h-[50vh] flex items-center justify-center bg-paper dark:bg-obsidian border border-obsidian/10 dark:border-white/10 shadow-xl"
+            className="stack-card sticky min-h-[50vh] flex items-center justify-center bg-paper dark:bg-canvas border border-obsidian/10 dark:border-line shadow-xl"
             style={{ 
               top: `${topOffset}vh`, 
               zIndex: i + 1

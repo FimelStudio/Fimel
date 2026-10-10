@@ -32,14 +32,16 @@ jobs:
           cache: 'npm' # 如果你使用的是 pnpm 或 yarn，请改为对应包管理器
       - name: Install dependencies
         run: npm ci # 如果使用 yarn则是 yarn install，pnpm 则是 pnpm i
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v4
       - name: Build
         run: npm run build
         env:
+          VITE_BASE_PATH: ${{ steps.pages.outputs.base_path }}/
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

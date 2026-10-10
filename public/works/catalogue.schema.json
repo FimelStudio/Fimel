@@ -1,0 +1,249 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Fimel Work Catalogue",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "projects"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/project"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "localizedText": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "object",
+          "properties": {
+            "zh": {
+              "type": "string",
+              "minLength": 1
+            },
+            "en": {
+              "type": "string",
+              "minLength": 1
+            },
+            "ja": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "minProperties": 1,
+          "additionalProperties": false
+        }
+      ]
+    },
+    "project": {
+      "type": "object",
+      "required": [
+        "slug",
+        "type",
+        "title",
+        "image",
+        "status",
+        "platform",
+        "creators",
+        "content",
+        "tags"
+      ],
+      "properties": {
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "type": {
+          "enum": [
+            "bedrock",
+            "java",
+            "tools",
+            "mods"
+          ]
+        },
+        "title": {
+          "$ref": "#/$defs/localizedText"
+        },
+        "summary": {
+          "$ref": "#/$defs/localizedText"
+        },
+        "translations": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "summary": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "tags": {
+          "type": "array",
+          "maxItems": 4,
+          "uniqueItems": true,
+          "description": "Explicit genre/purpose IDs from src/content/project-tags.json. Leave empty when the genre is not verified.",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        },
+        "image": {
+          "type": "string",
+          "minLength": 1
+        },
+        "imageFit": {
+          "enum": [
+            "cover",
+            "contain"
+          ]
+        },
+        "status": {
+          "enum": [
+            "released",
+            "development",
+            "planned"
+          ]
+        },
+        "platform": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "creators": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "url": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "published": {
+          "type": "string",
+          "format": "date"
+        },
+        "updated": {
+          "type": "string",
+          "format": "date"
+        },
+        "version": {
+          "type": "string"
+        },
+        "size": {
+          "type": "string"
+        },
+        "downloads": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rating": {
+          "type": "string"
+        },
+        "store": {
+          "type": "string",
+          "format": "uri"
+        },
+        "repository": {
+          "type": "string",
+          "format": "uri"
+        },
+        "issues": {
+          "type": "string",
+          "format": "uri"
+        },
+        "download": {
+          "type": "string"
+        },
+        "downloadSlug": {
+          "type": "string"
+        },
+        "latestReleaseRepo": {
+          "type": "string",
+          "pattern": "^[^/]+/[^/]+$"
+        },
+        "releasePage": {
+          "type": "string",
+          "format": "uri"
+        },
+        "fallbackDownload": {
+          "type": "string"
+        },
+        "fallbackFileName": {
+          "type": "string"
+        },
+        "content": {
+          "type": "object",
+          "required": [
+            "description",
+            "changelog",
+            "versions"
+          ],
+          "properties": {
+            "description": {
+              "$ref": "#/$defs/localizedText"
+            },
+            "changelog": {
+              "$ref": "#/$defs/localizedText"
+            },
+            "versions": {
+              "$ref": "#/$defs/localizedText"
+            }
+          },
+          "additionalProperties": false
+        },
+        "source": {
+          "type": "object",
+          "required": [
+            "label",
+            "url"
+          ],
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "retrieved": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

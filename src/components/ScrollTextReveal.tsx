@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion, MotionValue } from "motion/react";
 
 export function ScrollTextReveal({ children, className }: { children: string, className?: string }) {
@@ -12,11 +12,13 @@ export function ScrollTextReveal({ children, className }: { children: string, cl
 
   // Tokenize the string: group english letters/numbers into words, keep everything else as single chars.
   // This prevents English words from breaking in the middle, while allowing Chinese to wrap naturally.
-  const tokens = Array.from((children || "").matchAll(/([a-zA-Z0-9]+|[^a-zA-Z0-9])/g)).map(m => m[0]);
+  const tokens = useMemo(() => Array.from((children || "").matchAll(/([a-zA-Z0-9]+|[^a-zA-Z0-9])/g)).map(m => m[0]), [children]);
   let totalChars = 0;
   tokens.forEach(t => totalChars += t.length);
 
   let charIndex = 0;
+
+  if (reduce) return <p ref={ref} className={className}>{children}</p>;
 
   return (
     <p ref={ref} className={className}>
@@ -32,7 +34,7 @@ export function ScrollTextReveal({ children, className }: { children: string, cl
           <span key={tokenIdx} className="inline-block">
             {Array.from(token).map((char, charIdx) => {
               const start = charIndex / totalChars;
-              const end = start + (3 / totalChars);
+              const end = Math.min(1, start + (3 / totalChars));
               charIndex++;
               return (
                 <Char 

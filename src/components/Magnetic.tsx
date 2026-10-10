@@ -1,5 +1,6 @@
 import { useRef, type ReactElement } from "react";
-import { motion, useMotionValue, useSpring } from "motion/react";
+import { motion, useMotionValue, useSpring, useReducedMotion } from "motion/react";
+import { useFinePointer } from '../hooks/useAnimationActivity';
 
 interface MagneticProps {
   children: ReactElement;
@@ -13,6 +14,10 @@ export function Magnetic({
   intensity = 0.2
 }: MagneticProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const bounds = useRef<DOMRect | null>(null);
+  const reducedMotion = useReducedMotion();
+  const finePointer = useFinePointer();
+  const enabled = finePointer && !reducedMotion;
   
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -21,9 +26,9 @@ export function Magnetic({
   const springY = useSpring(y, springOptions);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ref.current) return;
+    if (!enabled || !bounds.current) return;
     const { clientX, clientY } = e;
-    const { height, width, left, top } = ref.current.getBoundingClientRect();
+    const { height, width, left, top } = bounds.current;
     const middleX = clientX - (left + width / 2);
     const middleY = clientY - (top + height / 2);
     x.set(middleX * intensity);
@@ -33,10 +38,11 @@ export function Magnetic({
   const handleMouseLeave = () => {
     x.set(0);
     y.set(0);
+    bounds.current = null;
   };
 
   const handleMouseEnter = () => {
-    // optional logic
+    if (enabled) bounds.current = ref.current?.getBoundingClientRect() ?? null;
   };
 
   return (
@@ -45,7 +51,7 @@ export function Magnetic({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onMouseEnter={handleMouseEnter}
-      style={{ x: springX, y: springY }}
+      style={{ x: enabled ? springX : 0, y: enabled ? springY : 0 }}
       className="inline-block"
     >
       {children}

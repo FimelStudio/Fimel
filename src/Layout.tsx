@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Outlet, useLocation, useNavigate, Link } from 'react-router-dom';
-import { useTranslation, Trans } from 'react-i18next';
-import { Globe, Sun, Moon, Menu } from 'lucide-react';
+import React, { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { Link, NavLink, Outlet, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Globe, Moon, Sun } from 'lucide-react';
+import { useReducedMotion } from 'motion/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
@@ -9,329 +10,334 @@ import Lenis from 'lenis';
 import CustomCursor from './components/CustomCursor';
 import HotbarNav from './components/HotbarNav';
 import { CurtainLoading } from './components/CurtainLoading';
-import { OverlayMenu } from './components/OverlayMenu';
 import { PageTransition } from './components/PageTransition';
-import { Magnetic } from './components/Magnetic';
-import { useWorksData } from './hooks/useWorksData';
 
 gsap.registerPlugin(ScrollTrigger);
+
+type HudHandle = { updateProgress: (progress: number) => void };
+type HudProps = {
+  activePage: string;
+  handleNavClick: (event: React.MouseEvent<HTMLAnchorElement>, target: string) => void;
+};
+
+// Scroll updates stay in the optional Minecraft HUD instead of rerendering every page.
+const ScrollProgressHud = memo(forwardRef<HudHandle, HudProps>(({ activePage, handleNavClick }, ref) => {
+  const [progress, setProgress] = useState(0);
+  const lastProgress = useRef(0);
+
+  useImperativeHandle(ref, () => ({
+    updateProgress(nextProgress) {
+      const next = Math.max(0, Math.min(1, nextProgress));
+      if (Math.abs(next - lastProgress.current) < 0.005 && next !== 0 && next !== 1) return;
+      if (next === lastProgress.current) return;
+      lastProgress.current = next;
+      setProgress(next);
+    },
+  }), []);
+
+  return <HotbarNav scrollProgress={progress} handleNavClick={handleNavClick} activePage={activePage} />;
+}));
+ScrollProgressHud.displayName = 'ScrollProgressHud';
+
+type RouteState = { scrollTo?: string } | null;
 
 export const Layout: React.FC = () => {
   const { t, i18n } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
-  const { siteMeta } = useWorksData();
+  const navigationType = useNavigationType();
+  const reducedMotion = useReducedMotion();
   const basePath = import.meta.env.BASE_URL;
-  const logoPath = `${basePath}Fimel%20logo.png`;
-
-  const mainRef = useRef<HTMLDivElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
+  const languageRef = useRef<HTMLDivElement>(null);
   const lenisRef = useRef<Lenis | null>(null);
+  const hudRef = useRef<HudHandle>(null);
+  const advancementTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const advancementUnlocked = useRef(false);
+  const scrollPositions = useRef(new Map<string, number>());
+  const currentScrollPosition = useRef(0);
+  const previousPath = useRef<string | null>(null);
 
   const [loading, setLoading] = useState(() => {
     try {
-      return window.sessionStorage.getItem('fimel_intro_seen') !== '1';
+      return !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        && window.sessionStorage.getItem('fimel_intro_seen') !== '1';
     } catch {
-      return true;
+      return false;
     }
   });
-
-  const [isDark, setIsDark] = useState(false);
-  const [langMenuOpen, setLangMenuOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [copiedQQ, setCopiedQQ] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
-
-  const [advancement, setAdvancement] = useState<{ title: string; desc: string; visible: boolean } | null>(null);
-  const unlockedAdvancements = useRef<Set<string>>(new Set());
-
-  // Wait for curtain to finish if loading
-  useEffect(() => {
-    if (loading) {
-      const timer = setTimeout(() => {
-        setLoading(false);
-        try { window.sessionStorage.setItem('fimel_intro_seen', '1'); } catch { /* ignore */ }
-      }, 3500);
-      return () => clearTimeout(timer);
+  const [isDark, setIsDark] = useState(() => {
+    try {
+      const saved = window.localStorage.getItem('fimel_theme');
+      return saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    } catch {
+      return false;
     }
+  });
+  const [logoFailed, setLogoFailed] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [advancementVisible, setAdvancementVisible] = useState(false);
+
+  useEffect(() => {
+    if (!loading) return;
+    const timer = setTimeout(() => {
+      setLoading(false);
+      try { window.sessionStorage.setItem('fimel_intro_seen', '1'); } catch { /* Storage may be disabled. */ }
+    }, 850);
+    return () => clearTimeout(timer);
   }, [loading]);
 
   useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    document.documentElement.classList.toggle('dark', isDark);
+    document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+    try { window.localStorage.setItem('fimel_theme', isDark ? 'dark' : 'light'); } catch { /* Storage may be disabled. */ }
   }, [isDark]);
 
   useEffect(() => {
-    const current = i18n.resolvedLanguage || i18n.language || 'zh';
-    document.documentElement.lang = current;
+    document.documentElement.lang = i18n.resolvedLanguage || i18n.language || 'zh';
   }, [i18n.language, i18n.resolvedLanguage]);
 
-  // Lenis smooth scroll setup
   useEffect(() => {
+    if (!langMenuOpen) return;
+    const closeOutside = (event: PointerEvent) => {
+      if (!languageRef.current?.contains(event.target as Node)) setLangMenuOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setLangMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', closeOutside);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOutside);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [langMenuOpen]);
+
+  const updateScrollProgress = useCallback((progress: number) => {
+    currentScrollPosition.current = window.scrollY;
+    hudRef.current?.updateProgress(progress);
+    if (progress > 0.1 && !advancementUnlocked.current) {
+      advancementUnlocked.current = true;
+      setAdvancementVisible(true);
+      advancementTimer.current = setTimeout(() => setAdvancementVisible(false), 4000);
+    }
+  }, []);
+
+  useEffect(() => () => {
+    if (advancementTimer.current) clearTimeout(advancementTimer.current);
+  }, []);
+
+  useEffect(() => {
+    if (loading) return;
+    const useNativeScroll = reducedMotion || !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (useNativeScroll) {
+      const progressTrigger = ScrollTrigger.create({
+        start: 0,
+        end: 'max',
+        onUpdate: (self) => updateScrollProgress(self.progress),
+      });
+      return () => progressTrigger.kill();
+    }
+
     const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      duration: 0.9,
+      easing: (value) => Math.min(1, 1.001 - Math.pow(2, -10 * value)),
+      smoothWheel: true,
+      syncTouch: false,
       wheelMultiplier: 1,
     });
     lenisRef.current = lenis;
-
-    lenis.on('scroll', (e: { progress: number }) => {
+    const onScroll = () => {
       ScrollTrigger.update();
-      setScrollProgress(e.progress);
-    });
-    
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000);
-    });
-    gsap.ticker.lagSmoothing(0);
+      updateScrollProgress(lenis.progress);
+    };
+    const tick = (time: number) => lenis.raf(time * 1000);
+    lenis.on('scroll', onScroll);
+    gsap.ticker.add(tick);
 
     return () => {
+      gsap.ticker.remove(tick);
+      lenis.off('scroll', onScroll);
       lenis.destroy();
-      gsap.ticker.remove((time) => {
-        lenis.raf(time * 1000);
-      });
+      lenisRef.current = null;
     };
+  }, [loading, reducedMotion, updateScrollProgress]);
+
+  useEffect(() => {
+    const previousRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = 'manual';
+    return () => { window.history.scrollRestoration = previousRestoration; };
   }, []);
 
-  // Minecraft Advancement
+  // Save by history entry so returning from a project restores the works list.
   useEffect(() => {
-    if (scrollProgress > 0.1 && !unlockedAdvancements.current.has('first_steps')) {
-      unlockedAdvancements.current.add('first_steps');
-      setAdvancement({
-        title: "Advancement Made!",
-        desc: "First Steps",
-        visible: true
-      });
-      setTimeout(() => {
-        setAdvancement(prev => prev ? { ...prev, visible: false } : null);
-      }, 4000);
-    }
-  }, [scrollProgress]);
-
-  // Route change resets scroll
-  useEffect(() => {
-    if (location.state && (location.state as any).scrollTo) {
-      const target = (location.state as any).scrollTo;
-      // Give time for page transition to complete
-      setTimeout(() => {
-        if (lenisRef.current) {
-          lenisRef.current.scrollTo(target === '#hero' ? 0 : target, { duration: 1.5 });
-        } else {
-          document.querySelector(target)?.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 600);
-      
-      // Clear state to prevent re-triggering
-      window.history.replaceState({}, '');
-    } else {
-      if (lenisRef.current) {
-        lenisRef.current.scrollTo(0, { immediate: true });
-      } else {
-        window.scrollTo(0, 0);
+    const entryKey = location.key;
+    const positions = scrollPositions.current;
+    return () => {
+      positions.set(entryKey, currentScrollPosition.current);
+      if (positions.size > 50) {
+        const oldest = positions.keys().next().value;
+        if (oldest) positions.delete(oldest);
       }
+    };
+  }, [location.key]);
+
+  useEffect(() => {
+    const routeState = location.state as RouteState;
+    const anchor = routeState?.scrollTo || location.hash;
+    const samePage = previousPath.current === location.pathname;
+    previousPath.current = location.pathname;
+    if (samePage && !anchor && navigationType !== 'POP') return;
+
+    const savedPosition = navigationType === 'POP' ? scrollPositions.current.get(location.key) ?? 0 : 0;
+    let observer: MutationObserver | null = null;
+    let resizeObserver: ResizeObserver | null = null;
+    let complete = false;
+    const scrollToTarget = () => {
+      const target = anchor && anchor !== '#hero' ? document.getElementById(anchor.replace(/^#/, '')) : null;
+      if (anchor && anchor !== '#hero' && !target) return;
+      const position = target ? target.getBoundingClientRect().top + window.scrollY - 112 : savedPosition;
+      if (lenisRef.current) {
+        lenisRef.current.scrollTo(Math.max(0, position), { immediate: true });
+      } else {
+        window.scrollTo({ top: Math.max(0, position), behavior: 'instant' });
+      }
+      if (target || document.documentElement.scrollHeight - window.innerHeight >= savedPosition) {
+        complete = true;
+        observer?.disconnect();
+        resizeObserver?.disconnect();
+      }
+    };
+    const frame = requestAnimationFrame(scrollToTarget);
+    if (mainRef.current) {
+      observer = new MutationObserver(() => { if (!complete) scrollToTarget(); });
+      observer.observe(mainRef.current, { childList: true, subtree: true });
+      resizeObserver = new ResizeObserver(() => { if (!complete) scrollToTarget(); });
+      resizeObserver.observe(mainRef.current);
     }
-  }, [location.pathname, location.state]);
+    const timeout = setTimeout(() => {
+      observer?.disconnect();
+      resizeObserver?.disconnect();
+      ScrollTrigger.refresh();
+    }, 1200);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(timeout);
+      observer?.disconnect();
+      resizeObserver?.disconnect();
+    };
+  }, [location.hash, location.key, location.pathname, location.state, navigationType]);
 
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-    try { localStorage.setItem('fimel_user_lang', lng); } catch { /* ignore */ }
-    setLangMenuOpen(false);
-    setMenuOpen(false);
-  };
-
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, target: string) => {
-    e.preventDefault();
-    setMenuOpen(false);
-    
-    if (target.startsWith('#/')) {
-      const route = target.replace('#', '');
-      navigate(route);
+  const handleNavClick = useCallback((event: React.MouseEvent<HTMLAnchorElement>, target: string) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    event.preventDefault();
+    if (target === '#contact') {
+      navigate('/studio', { state: { scrollTo: '#contact' } });
+    } else if (target === '#about') {
+      navigate('/studio');
+    } else if (target.startsWith('#/')) {
+      navigate(target.slice(1));
     } else if (target.startsWith('#')) {
-      // Home anchor link
       if (location.pathname !== '/') {
         navigate('/', { state: { scrollTo: target } });
       } else {
-        if (lenisRef.current) {
-          lenisRef.current.scrollTo(target === '#hero' ? 0 : target, { duration: 1.5 });
-        } else {
-          document.querySelector(target)?.scrollIntoView({ behavior: 'smooth' });
-        }
+        const element = document.getElementById(target.slice(1));
+        if (lenisRef.current) lenisRef.current.scrollTo(target === '#hero' ? 0 : element || 0, { offset: -104 });
+        else if (element) element.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth' });
       }
     } else {
-      // Normal route
       navigate(target);
     }
+  }, [location.pathname, navigate, reducedMotion]);
+
+  const changeLanguage = (language: string) => {
+    void i18n.changeLanguage(language);
+    try { window.localStorage.setItem('fimel_user_lang', language); } catch { /* Storage may be disabled. */ }
+    setLangMenuOpen(false);
   };
 
-  const handleCopyQQ = () => {
-    navigator.clipboard.writeText("937760015");
-    setCopiedQQ(true);
-    setTimeout(() => setCopiedQQ(false), 2000);
-  };
-
-  // Convert legacy activePage for HotbarNav
-  const getActivePageForNav = () => {
-    if (location.pathname === '/studio') return 'studio';
-    if (location.pathname === '/works/maps') return 'maps-unified';
-    if (location.pathname === '/works/mods') return 'mods';
-    if (location.pathname === '/works/tools') return 'tools';
-    return 'home';
-  };
+  const navigation = [
+    { to: '/', label: t('nav.home'), end: true },
+    { to: '/works', label: t('nav.works'), end: false },
+    { to: '/studio', label: t('nav.about'), end: false },
+  ];
+  const activePage = location.pathname.startsWith('/works') ? 'works' : location.pathname === '/studio' ? 'studio' : 'home';
 
   return (
-    <div ref={mainRef} className="w-full font-sans transition-colors duration-700 selection:bg-diamond selection:text-white dark:selection:text-obsidian">
-      <div className="noise-overlay"></div>
+    <div className="w-full font-sans transition-colors duration-500 selection:bg-diamond selection:text-obsidian">
+      <a href="#main-content" onClick={(event) => {
+        event.preventDefault();
+        mainRef.current?.focus();
+      }} className="fixed top-2 left-4 z-[100] -translate-y-20 bg-surface border border-diamond px-4 py-3 text-content focus:translate-y-0">
+        {t('nav.skip_content')}
+      </a>
+      <div className="noise-overlay" />
       <CustomCursor isDark={isDark} />
       <CurtainLoading isLoading={loading} />
 
-      <div className={`${loading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-700`}>
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        <HotbarNav scrollProgress={scrollProgress} handleNavClick={handleNavClick as any} activePage={getActivePageForNav() as any} />
-
-        {/* --- BRAND LOGO: TOP LEFT --- */}
-        <div className="fixed top-5 sm:top-6 md:top-8 left-5 md:left-12 z-50 mix-blend-difference text-white pointer-events-none">
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          <Link to="/" aria-label="Fimel — Home" onClick={(e) => { e.preventDefault(); handleNavClick(e as any, '#hero'); }} className="pointer-events-auto outline-none transition-transform hover:scale-105 inline-block">
-            <img src={logoPath} alt="FIMEL Logo" className="h-14 sm:h-16 md:h-20 lg:h-24 object-contain invert drop-shadow-sm transition-all" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement!.innerHTML = '<span class="text-2xl sm:text-3xl md:text-4xl font-bold tracking-[0.3em] uppercase">FIMEL.</span>'; }} />
-          </Link>
-        </div>
-
-        {/* --- FLOATING PILL NAV: TOP RIGHT --- */}
-        <nav className="fixed top-6 md:top-8 right-5 md:right-12 z-50 flex items-center gap-1.5 md:gap-4 bg-white/10 dark:bg-black/10 backdrop-blur-md border border-obsidian/10 dark:border-white/10 rounded-full px-3 py-1.5 md:px-4 md:py-2 text-obsidian dark:text-white shadow-sm transition-all">
-          <div className="relative flex items-center">
-            <button 
-              onClick={() => setLangMenuOpen(!langMenuOpen)} 
-              className="hover-target p-2 rounded-full hover:bg-obsidian/5 dark:hover:bg-white/5 transition-colors outline-none"
-              aria-label="Change Language"
-              title={i18n.language === 'zh' ? '切换语言' : 'Language'}
-              data-cursor="LANG"
-            >
-              <Globe size={18} />
-            </button>
-            
-            {langMenuOpen && (
-              <div className="absolute top-full right-0 mt-4 w-32 py-2 bg-white dark:bg-obsidian rounded shadow-xl border border-obsidian/10 dark:border-white/10 flex flex-col font-mono text-sm z-50">
-                <button onClick={() => changeLanguage('zh')} className="hover-target px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/10 text-left w-full">中文</button>
-                <button onClick={() => changeLanguage('en')} className="hover-target px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/10 text-left w-full">EN</button>
-                <button onClick={() => changeLanguage('ja')} className="hover-target px-4 py-2 hover:bg-gray-100 dark:hover:bg-white/10 text-left w-full">JA</button>
-              </div>
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-canvas/95 text-content transition-colors duration-300">
+        <div className="mx-auto grid max-w-[1600px] grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1 px-4 py-2 md:min-h-[72px] md:grid-cols-[auto_1fr_auto] md:px-8 md:py-0 lg:px-12">
+          <Link to="/" aria-label={`Fimel / ${t('nav.home')}`} className="hover-target order-1 inline-flex items-center outline-offset-4 transition-transform hover:scale-[1.03] focus-visible:outline-2 focus-visible:outline-diamond">
+            {logoFailed ? <span className="text-2xl font-black tracking-tight">FIMEL.</span> : (
+              <img src={`${basePath}Fimel%20logo.png`} alt="Fimel" width="104" height="44" className="h-10 w-[95px] object-contain object-left dark:invert md:h-11 md:w-[104px]" onError={() => setLogoFailed(true)} />
             )}
-          </div>
+          </Link>
 
-          <button 
-            onClick={() => setIsDark(!isDark)} 
-            className="hover-target p-2 rounded-full hover:bg-obsidian/5 dark:hover:bg-white/5 transition-colors outline-none"
-            aria-label="Toggle Theme"
-            title={isDark ? (i18n.language === 'zh' ? '切换至亮色' : 'Light Mode') : (i18n.language === 'zh' ? '切换至暗色' : 'Dark Mode')}
-            data-cursor="THEME"
-          >
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
+          <nav aria-label={t('nav.primary')} className="order-3 col-span-2 flex items-center justify-center gap-1 md:order-2 md:col-span-1 md:gap-2">
+            {navigation.map(({ to, label, end }) => (
+              <NavLink key={to} to={to} end={end} className={({ isActive }) => `hover-target relative inline-flex min-h-11 items-center justify-center whitespace-nowrap px-3 text-[13px] font-bold outline-offset-2 transition-colors focus-visible:outline-2 focus-visible:outline-diamond sm:px-5 sm:text-sm md:px-6 ${isActive ? 'text-content after:absolute after:bottom-1 after:left-3 after:right-3 after:h-0.5 after:bg-diamond' : 'text-content-muted hover:text-content'}`}>
+                {label}
+              </NavLink>
+            ))}
+          </nav>
 
-          <div className="w-px h-6 bg-obsidian/20 dark:bg-white/20 mx-1"></div>
-
-          <button 
-            onClick={() => setMenuOpen(true)}
-            className="hover-target flex items-center gap-2 px-3 py-2 rounded-full hover:bg-obsidian/5 dark:hover:bg-white/5 transition-colors font-mono text-xs uppercase tracking-widest outline-none"
-            data-cursor="MENU"
-          >
-            <span className="hidden md:inline">{t('nav.menu')}</span>
-            <Menu size={18} />
-          </button>
-        </nav>
-
-        {/* OVERLAY MENU */}
-        <OverlayMenu 
-          isOpen={menuOpen} 
-          onClose={() => setMenuOpen(false)} 
-          onNavigate={(e, path) => {
-            // Remap overlay menu paths to actual react-router routes
-            if (path.startsWith('#/')) {
-              path = path.replace('#', '');
-            }
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            handleNavClick(e as any, path);
-          }} 
-          changeLanguage={changeLanguage}
-          currentLang={i18n.language}
-          activePath={location.pathname}
-        />
-
-        <main className="relative z-10 bg-paper dark:bg-obsidian border-b border-obsidian/5 dark:border-white/5 shadow-[0_15px_40px_rgba(0,0,0,0.06)] dark:shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
-          <PageTransition pageKey={location.pathname}>
-            <Outlet context={{ isDark, basePath }} />
-          </PageTransition>
-        </main>
-
-        {/* Spacer for Reveal Footer */}
-        <div id="contact" className="relative z-0 h-[100svh] w-full pointer-events-none"></div>
-
-        <footer className="fixed bottom-0 left-0 w-full h-[100svh] px-6 md:px-12 flex flex-col items-center justify-center bg-[#e5e5e5] dark:bg-black border-t border-obsidian/10 dark:border-white/10 overflow-hidden transition-colors duration-700 z-0">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(0,210,211,0.05),transparent_60%)] pointer-events-none"></div>
-          
-          <div className="z-10 text-center space-y-10 mt-auto max-w-3xl pt-32">
-            <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-obsidian dark:text-white transition-colors duration-700 leading-tight pb-2" data-cursor="FIMEL">
-              <Trans i18nKey="footer.title" />
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 text-lg md:text-xl font-light transition-colors duration-700">
-              <Trans i18nKey="footer.desc" />
-            </p>
-            <div className="flex flex-wrap justify-center gap-3 text-[10px] md:text-xs font-mono uppercase tracking-[0.16em] text-gray-500">
-              {siteMeta.contactLabels.map((label: string) => (
-                <span key={label} className="border border-obsidian/10 dark:border-white/10 px-3 py-2">{label}</span>
-              ))}
+          <div className="order-2 flex items-center gap-1 justify-self-end md:order-3">
+            <div ref={languageRef} className="relative">
+              <button onClick={() => setLangMenuOpen((open) => !open)} aria-label={`${t('nav.language')} (${(i18n.resolvedLanguage || i18n.language || 'zh').split('-')[0].toUpperCase()})`} aria-expanded={langMenuOpen} aria-controls="language-options" className="hover-target flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-2 outline-offset-2 transition-colors hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-diamond">
+                <Globe size={17} strokeWidth={1.8} />
+                <span className="font-mono text-[11px] uppercase">{(i18n.resolvedLanguage || i18n.language || 'zh').split('-')[0]}</span>
+              </button>
+              {langMenuOpen && (
+                <div id="language-options" className="absolute right-0 top-full mt-2 w-32 border border-line bg-surface p-1 text-sm shadow-lg">
+                  {[{ code: 'zh', label: '中文' }, { code: 'en', label: 'English' }, { code: 'ja', label: '日本語' }].map(({ code, label }) => (
+                    <button key={code} onClick={() => changeLanguage(code)} lang={code} aria-pressed={i18n.resolvedLanguage?.startsWith(code)} className="hover-target block min-h-11 w-full px-3 text-left outline-offset-0 transition-colors aria-pressed:bg-surface-raised hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-diamond">
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="mt-8 flex justify-center">
-              <Magnetic intensity={0.4}>
-                <a href="mailto:fimel.studio.mc@gmail.com" className="inline-block text-2xl md:text-5xl font-light text-obsidian dark:text-white hover:text-diamond dark:hover:text-diamond transition-all duration-300 border-b border-obsidian/20 dark:border-white/20 hover:border-diamond pb-2 hover-target px-4 py-2" data-cursor="MAIL">
-                  fimel.studio.mc@gmail.com
-                </a>
-              </Magnetic>
-            </div>
-          </div>
-
-          <div className="w-full max-w-screen-2xl border-t border-obsidian/10 dark:border-white/10 pt-10 mt-auto mb-10 flex flex-col md:flex-row items-center justify-between gap-8 text-xs text-gray-500 font-mono uppercase tracking-widest z-10 transition-colors duration-700">
-            <p>{t('footer.copy')}</p>
-            <div className="flex gap-8 items-center">
-              <Magnetic intensity={0.2}>
-                <a href="https://x.com/FimelStudio" target="_blank" rel="noopener noreferrer" className="hover:text-obsidian dark:hover:text-white transition-colors hover-target px-2 py-1 block">X / @FimelStudio</a>
-              </Magnetic>
-              <Magnetic intensity={0.2}>
-                <button 
-                  onClick={handleCopyQQ} 
-                  className="hover:text-obsidian dark:hover:text-white transition-colors cursor-pointer hover-target px-2 py-1 block"
-                >
-                  {copiedQQ ? "COPIED!" : "QQ Group: 937760015"}
-                </button>
-              </Magnetic>
-            </div>
-          </div>
-          
-          <div className="absolute -bottom-[5%] left-0 w-full text-center pointer-events-none opacity-[0.015] dark:opacity-[0.015] text-black dark:text-white select-none transition-colors duration-700">
-            <span className="text-[25vw] font-black uppercase tracking-tighter leading-none block">FIMEL</span>
-          </div>
-        </footer>
-
-        {/* Minecraft Advancement Toast */}
-        <div 
-          className="fixed top-24 md:top-28 right-6 md:right-12 z-[100] w-[320px] h-[64px] transition-transform duration-500 ease-in-out pointer-events-none bg-no-repeat bg-center bg-contain image-rendering-pixelated flex items-center px-4"
-          style={{ 
-            backgroundImage: `url('${basePath}HUD/Toast_advancement.png')`,
-            transform: advancement?.visible ? 'translateX(0)' : 'translateX(150%)'
-          }}
-        >
-          <div className="flex flex-col ml-[68px] justify-center mt-1">
-            <span className="text-[#FFFF55] font-['Minecraftia',monospace] text-[13px] leading-[1.2] tracking-wide" style={{ textShadow: '2px 2px 0px #3f3f3f' }}>
-              {advancement?.title}
-            </span>
-            <span className="text-white font-['Minecraftia',monospace] text-[13px] leading-[1.2] tracking-wide" style={{ textShadow: '2px 2px 0px #3f3f3f' }}>
-              {advancement?.desc}
-            </span>
+            <button onClick={() => setIsDark((dark) => !dark)} aria-label={t(isDark ? 'nav.theme_light' : 'nav.theme_dark')} title={t(isDark ? 'nav.theme_light' : 'nav.theme_dark')} aria-pressed={isDark} className="hover-target flex min-h-11 min-w-11 items-center justify-center outline-offset-2 transition-colors hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-diamond">
+              {isDark ? <Sun size={18} strokeWidth={1.8} /> : <Moon size={18} strokeWidth={1.8} />}
+            </button>
           </div>
         </div>
+      </header>
 
+      <ScrollProgressHud ref={hudRef} activePage={activePage} handleNavClick={handleNavClick} />
+
+      <main ref={mainRef} id="main-content" tabIndex={-1} className="relative z-10 min-h-[70dvh] bg-canvas text-content outline-none">
+        <PageTransition pageKey={location.pathname}>
+          <Outlet context={{ isDark, basePath }} />
+        </PageTransition>
+      </main>
+
+      <footer className="relative border-t border-line bg-canvas px-6 py-9 text-content md:px-12">
+        <div className="mx-auto flex max-w-[1400px] flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <p className="text-xs leading-relaxed text-content-muted">{t('footer.copy')}</p>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs">
+            {navigation.map(({ to, label }) => <Link key={to} to={to} className="hover-target inline-flex min-h-10 items-center hover:text-diamond focus-visible:outline-2 focus-visible:outline-diamond">{label}</Link>)}
+            <Link to="/studio" state={{ scrollTo: '#contact' }} className="hover-target inline-flex min-h-10 items-center hover:text-diamond focus-visible:outline-2 focus-visible:outline-diamond">{t('nav.contact')}</Link>
+            <a href="https://discord.gg/X9aVJJVvA" target="_blank" rel="noopener noreferrer" className="hover-target inline-flex min-h-10 items-center hover:text-diamond focus-visible:outline-2 focus-visible:outline-diamond">Discord</a>
+          </div>
+        </div>
+      </footer>
+
+      <div className="pointer-events-none fixed right-2 top-28 z-[100] flex h-[64px] w-[min(320px,calc(100vw-16px))] items-center bg-contain bg-center bg-no-repeat px-4 transition-transform duration-500 motion-reduce:transition-none md:right-8 md:top-24 image-rendering-pixelated" style={{ backgroundImage: `url('${basePath}HUD/Toast_advancement.png')`, transform: advancementVisible ? 'translateX(0)' : 'translateX(150%)' }} aria-hidden="true">
+        <div className="ml-[68px] mt-1 flex flex-col justify-center font-['Minecraftia',monospace] text-[13px] leading-[1.2] tracking-wide" style={{ textShadow: '2px 2px 0 #3f3f3f' }}>
+          <span className="text-[#FFFF55]">Advancement Made!</span>
+          <span className="text-white">First Steps</span>
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,202 @@
+# 网站内容维护说明
+
+作品页使用静态 JSON 目录和 Markdown 正文。新增一个作品时，准备一条目录记录、封面和三个页签的正文即可，不需要复制页面组件，也不需要增加路由。
+
+## 修改主页文案
+
+主要编辑 `src/i18n.ts` 中 `resources.zh.translation` 的对应字段。英文和日文分别在同一文件的 `en.translation`、`ja.translation` 中，中文修改后建议同步。
+
+| 页面内容 | 文案位置 |
+| --- | --- |
+| 首屏大标题 | `hero.crafting`、`hero.worlds` |
+| 首屏介绍 | `hero.sub` |
+| 工作室定位、首屏按钮 | `home.studio_label`、`home.featured_cta`、`home.current_cta` |
+| 作品快速入口标题与介绍 | `home.quick_title`、`home.maps_*`、`home.mods_*`、`home.tools_*` |
+| 滚动文字带 | `marq.pvp`、`marq.rpg`、`marq.puz`、`marq.vdl`、`marq.jve` |
+| 工作室介绍与统计说明 | `about.title`、`about.desc`、`about.y1*`、`about.y2*` |
+| 首页精选作品标题与 Java 项目简介 | `works.title`、`works.category_*`、`works.m9_*`、`works.m10_*` |
+| 网易地图名称与短简介 | `works.bedrockMaps.<作品键>` |
+| 首页 Bingo 简介 | `home.mods_desc` |
+| 首页方块转换器简介 | `home.tools_desc` |
+
+布局与文案的调用位置在 `src/pages/Home.tsx`。搜索页面中出现的 `t('字段名')` 或 `i18nKey="字段名"`，即可找到对应翻译。通过 `Trans` 渲染的标题与介绍可以使用现有的 `<br/>` 换行；普通 `t()` 字段不要加入 HTML。
+
+`about.*` 同时用于「关于我们」页面，修改会影响两处。首页少量装饰性英文仍在 `Home.tsx` 中。如果想改变首页精选作品的选择、顺序或排版，再编辑这个组件。作品目录中的 Bingo 简介仍在 `siteMeta.bingoDescription`，转换器简介在 `workPages.tools.objCubizer.desc`；目录标签不再使用旧的 `siteMeta.bingoTags` 或功能清单，见下方玩法分类说明。
+
+## 明亮与暗色主题
+
+配色集中在 `src/index.css` 的 `@theme` 和 `.dark` 中。`canvas` 是页面底色，`surface` 是内容面板，`surface-raised` 是按钮／标签等次级表面，`content`／`content-muted` 是文字，`line` 是边框。明亮模式保留原有纸白背景；暗色采用 GitHub 风格的蓝灰背景和表面层级，保留 Fimel 的青色与紫晶色。
+
+顶部主题按钮会记住选择；首次访问跟随系统主题。`index.html` 在应用加载前恢复主题，避免暗色刷新时闪出白底。新增组件优先使用这些语义颜色，不要再写一个新的纯黑面板。
+
+## 团队头像
+
+四位成员的 Minecraft 头像保存在 `public/team/`，在「关于我们」的团队列表中使用。`YYYlong.png` 对应 Ylong，`TreeHey.png` 对应 TreeHey，`crystal215.png` 对应 crystal215，`chengzi_bucheng.png` 对应 chengzi。
+
+如需更换头像，可以替换对应 PNG，或修改 `src/pages/Studio.tsx` 的 `team` 数组中的 `avatar`。路径必须保留 `basePath` 前缀，兼容 Cloudflare 根域名和 GitHub Pages 子目录；不要在页面中引用本机桌面路径。显示保留像素边缘并预留正方形尺寸，加载失败会回退到成员字母。
+
+## 新增作品
+
+1. 在 `public/works/catalogue.json` 的 `projects` 数组中增加记录，保持 `schemaVersion: 1`。不要修改现有作品的 `slug`，它是分享链接的一部分。
+2. 把封面放到 `public/maps/`、`public/works/<slug>/` 或其他明确目录。
+3. 创建概述、更新日志、版本三个 Markdown 文件，并在 `content` 中填写路径。
+4. 运行 `npm run build`，根据目录和资源校验报错修正内容，然后在预览中检查三个页签。
+5. 提交到 GitHub，由已有的部署流程更新网站。
+
+以下是完整、合法的目录格式示例。实际追加时只把 `projects` 内的一条记录放入现有数组，并创建示例引用的三个正文文件。封面使用当前已有的材质文件，仅用于说明格式，正式作品应换成自己的封面。
+
+```json
+{
+  "schemaVersion": 1,
+  "projects": [
+    {
+      "slug": "my-new-map",
+      "type": "java",
+      "title": {
+        "zh": "我的新地图",
+        "en": "My New Map",
+        "ja": "新しいマップ"
+      },
+      "summary": {
+        "zh": "一句话介绍玩法和玩家要完成的目标。",
+        "en": "A short introduction to the gameplay.",
+        "ja": "ゲームプレイの短い紹介。"
+      },
+      "tags": ["puzzle", "co-op"],
+      "image": "textures/diamond_block.png",
+      "imageFit": "cover",
+      "status": "development",
+      "platform": ["Minecraft Java"],
+      "creators": [
+        {
+          "name": "Fimel Studio",
+          "url": "https://github.com/FimelStudio"
+        }
+      ],
+      "content": {
+        "description": {
+          "zh": "works/my-new-map/description.zh.md"
+        },
+        "changelog": {
+          "zh": "works/my-new-map/changelog.zh.md"
+        },
+        "versions": {
+          "zh": "works/my-new-map/versions.zh.md"
+        }
+      }
+    }
+  ]
+}
+```
+
+`type` 只使用以下四种值：
+
+| 值 | 显示分类 |
+| --- | --- |
+| `bedrock` | 网易基岩版地图 |
+| `java` | Java 版地图／数据包 |
+| `tools` | 插件与工具 |
+| `mods` | 模组 |
+
+`status` 使用 `released`（已发布）、`development`（制作中）、`planned`（企划）。`slug` 使用小写英文字母、数字和短横线，必须唯一。
+
+可选字段包括 `published`、`updated`、`version`、`size`、`repository`、`issues`、`store`、`download` 等。只有已经核实的发布日期或更新时间才填写 `YYYY-MM-DD`。未发布作品的版本号和日期直接省略，不要填写今天的日期或虚构版本。版本 Markdown 可以明确写「尚未发布，暂无可下载版本」。
+
+新增条目会自动进入作品目录和详情页，但不会自动成为首页精选。首页保留人工精选，避免新增历史项目后主页继续增长。
+
+## 多语言与旧翻译键
+
+`title`、`summary` 可以是一个字符串，也可以是包含 `zh`、`en`、`ja` 的对象。新增作品优先直接在 JSON 中填写这些内容。
+
+`tags` 是明确填写的玩法／用途分类 ID 数组，最多 4 个，不再复用简介或功能清单。名称及中英日翻译统一维护在 `src/content/project-tags.json`，例如 `pvp`、`pve`、`asymmetric`、`rpg`、`adventure`、`puzzle`、`parkour`、`escape`、`co-op`；工具使用 `modeling`、`conversion`、`development`、`creator-tools` 等用途类别。音乐制作内容可使用 `music`（音乐），象棋与飞行棋使用 `board-game`（棋类），并结合 `strategy` 等真实玩法标签。列表、详情和搜索共用这一套分类，搜索也支持其他语言的分类名称。
+
+玩法分类参考 [Atland](https://atland.icu/browse) 和 [MinecraftMaps](https://www.minecraftmaps.com/)，项目是否使用某类则根据其真实说明判断。不要因为 RPG 地图有一小段跑酷就把跑酷当主要标签，不要因为模组双方有不同词条就归为非对称竞技。资料不够时用空数组 `[]`，例如当前《通电2》，不编造类型。新增通用类别时，只需在标签词典中增加 ID 和三种语言名称，构建校验会检查引用是否正确。
+
+现有条目有 `translations` 字段，用于继续复用 `src/i18n.ts` 的翻译，例如：
+
+```json
+{
+  "translations": {
+    "title": "works.bedrockMaps.werewolfFTown.title",
+    "summary": "works.bedrockMaps.werewolfFTown.desc"
+  }
+}
+```
+
+配置了对应 `translations` 键时，该键的翻译优先于 JSON 的直接文字。如果修改 JSON 名称后界面没有变化，请检查这里；可以继续修改原翻译，也可以删除对应键并改用 JSON 的多语言对象。
+
+三个正文页签同样支持语言路径。例如：
+
+```json
+{
+  "description": {
+    "zh": "works/my-new-map/description.zh.md",
+    "en": "works/my-new-map/description.en.md",
+    "ja": "works/my-new-map/description.ja.md"
+  }
+}
+```
+
+只提供中文也可运行，其他语言会显示现有中文正文并提示翻译尚未提供。不要把中文路径复制成 `en` 或 `ja` 来假装已经翻译。
+
+## 编写 Markdown
+
+概述适合放玩法、规则、兼容版本、游玩说明、截图和原始项目入口；更新日志按真实版本记录改动；版本页放兼容信息、文件名、下载入口和维护状态。没有可核实的内容时保持简短说明即可。
+
+支持标题、段落、列表、引用、代码块、链接和表格。原始 HTML 不会渲染，不要依赖 HTML 排版、脚本或嵌入式管理界面。
+
+Markdown 中的相对图片与链接以该 Markdown 文件所在目录解析。例如，正文是 `public/works/my-new-map/description.zh.md`，图片在 `public/maps/my-new-map-cover.png`，可写：
+
+```markdown
+## 核心玩法
+
+这里填写真实玩法说明。
+
+![地图封面](../../maps/my-new-map-cover.png)
+
+[浏览其他 Java 作品](#/works?type=java)
+```
+
+JSON 中的 `image`、`download` 和 Markdown 路径都相对于 `public/`，不要写 `public/` 前缀，也不要硬编码 `/Fimel/`。前端通过 Vite 的 `BASE_URL` 拼接站点部署目录。完整的 `https://...` 外部链接也可以使用。Markdown 中优先用相对文件路径，避免以 `/maps/` 这类域名根路径引用图片，从而兼容 GitHub Pages 仓库子目录。
+
+作品目录和正文会按需请求，正文切换后在当前浏览会话中缓存。修改后重新部署并刷新页面查看，不需要把所有 Markdown 导入首页 JavaScript。
+
+## 网易基岩版作品来源
+
+作品目录现有 26 条，其中网易基岩版分类有 21 条：原有 8 张地图，以及补充的 12 张地图和 1 个音乐制作命令包。命令包按工作室要求放在网易版分类，以分发入口归类，标签使用 `music`、`creator-tools`；不要因为它是命令包就自动迁移到「插件与工具」。
+
+21 条作品均通过提供的原商店链接核实说明。原有 8 条转存到 `public/content/netease/<作品键>.md`，新增 13 条使用 `<slug>.md`。对应 `.json` 保存原始说明、来源、署名和核实快照，供维护人员查证；页面使用 Markdown，不会每次浏览都请求网易接口。
+
+`catalogue.json` 的 `store` 是「前往网易商店」按钮入口，`source` 记录说明来源。商店入口可能受网易平台或客户端限制，不能把它写成直接下载地址。新链接保留 `uid`、`id`，删除无用的 `channel=netease.taptap_cps_dev` 参数；不要删除真正的资源 ID。
+
+新增 13 张封面保存在 `public/maps/netease/<资源ID>.webp`，来自公开详情的原始封面，经过等比缩放和 WebP 编码，无裁切或生成内容。每张 544 × 544，总计 535,922 字节；来源和转换信息保存于 `.json` 的 `cover`。原商店说明内嵌及画廊截图没有抓取，之后取得可以公开使用的图片再补入正文。不要用一个作品的封面代替其他作品。
+
+原商店说明中的旧 QQ、旧联系方式和作者署名属于历史内容。不要将这些历史联系方式自动覆盖到工作室当前统一联系方式。当前站点联系方式维护在 `src/pages/Studio.tsx`，联系分类文案在 `src/content/messages.ts` 的 `studioContact` 中，由 `src/i18n.ts` 引入。
+
+详细来源、日期、作者署名与公开数据的边界见 [网易内容来源说明](./netease-content-sources.md)。接口的 `mod_version` 和 `res_version` 暂存为 `unverifiedVersionFields`，其语义尚未核实；不要据此填写目录里的作品 `version`，也不要当作 Minecraft 兼容版本。音乐制作命令包正文明确标注 `0.0.4`、更新日期 `2021-06-06`，狼人小镇正文明确标注 `2.0`，这些有正文依据的版本可以填写。
+
+旧城迷行原说明中的日志是 v2.0，不能因接口 `mod_version` 为 `2.2` 就将日志改标为 v2.2。狼人小镇 2.0 的真实日志保存在 `public/works/werewolf-town-assassination/changelog.md`，但其准确发布日期未公开。其他没有公开日志的作品不要生成虚构记录；商店 `create_time`、`refresh_time` 也不构成完整版本发布历史。目录里的下载量和评分属于历史快照，更新时同时保留来源和核实时间。
+
+中国象棋原文提示游戏更新后所需实体被删除、无法游玩，目录及详情中的兼容性警告不能在润色时删除。「已发布」表示历史发布状态，不代表仍在维护或当前可用。`developer_name` 是发布账户，只有原文明确署名时才可当作作者；没有个人署名的作品保留来源记录中的空署名数组，不猜测个人作者。历史组织介绍、旧招募内容也不能替换 Fimel 当前品牌介绍。
+
+## 下载与部署路径
+
+Bingo 的 `latestReleaseRepo` 指向 `FimelStudio/bingo-but-dont-do-it`。下载按钮会优先请求最新正式发布的 GitHub 版本，并选择发布资源中的 JAR；请求超时、失败或没有可用 JAR 时，再下载 `fallbackDownload` 指向的本地文件。
+
+保留 `public/mods/bingo-but-dont-do-it-1.21.11-v1.0.jar`。构建脚本会准备 Cloudflare 静态资源分片，Worker 在同一下载地址按顺序流式返回完整 JAR；用户不需要手动合并。不要只改目录里的备用文件名而忘记同步 `scripts/prepare-bingo-download.mjs` 和 `src/worker.ts` 中的相关路径。构建目录保留完整文件，Cloudflare 的资源忽略清单仅排除它的直接静态上传。
+
+站点仍使用 HashRouter。独立域名根目录的路径是 `/#/works`，详情页例如 `/#/works/bingo-but-dont-do-it?tab=versions`。分享这个完整链接可以直接进入对应页签；刷新时只请求站点根页面，因此兼容 GitHub Pages 的静态路由。
+
+Cloudflare 独立域名默认使用 Vite `base: '/'`，不需要设置 `VITE_BASE_PATH`。GitHub Pages 工作流会读取 `configure-pages` 的 `base_path`，为该次构建自动设置 `VITE_BASE_PATH`（例如 `/Fimel/`），访问路径变为 `/Fimel/#/works`。本地测试子目录部署时也可以设置这个环境变量。作品内容中的资源路径无需随着域名改变。
+
+本次内容维护方式不包含发布操作。构建与部署仍由既有 GitHub 或 Cloudflare 流程执行，维护人员应先检查本地预览再提交。
+
+## 是否需要开发者管理模式
+
+当前 JSON 和 Markdown 都可以在本地编辑，也可以使用 GitHub 网页编辑文件、预览 Markdown、提交修改。它适合目前的项目数量，文件历史可追溯，Cloudflare 与 GitHub Pages 共用同一份内容，不需要维护另一套后台。
+
+纯 GitHub Pages 页面不能直接把浏览器中的修改写回仓库。一个只有隐藏按钮或前端密码的「管理员模式」也不能提供可靠的写入权限。
+
+如果未来需要真正的后台，可增加 Cloudflare Worker 管理接口、账户身份验证和服务端权限检查，再由服务端使用受限的 GitHub 凭证提交 JSON 与 Markdown，或改用独立内容存储。GitHub Pages 仍可作为公开前端，但后台请求必须发往有服务端能力的接口。
+
+GitHub 写入凭证只能放在服务端密钥中，不能放进 JSON、网页代码或 `VITE_` 环境变量。后台还需要处理编辑冲突、图片上传、内容预览和发布流程。当前实现先使用仓库编辑方式，已经支持逐个增加项目及三个正文页签；以后增加后台时，可以继续复用现有目录字段和详情页模板。

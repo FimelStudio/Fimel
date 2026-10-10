@@ -1,13 +1,17 @@
-import { useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Edges, Float } from '@react-three/drei';
 import * as THREE from 'three';
+import { useAnimationActivity } from '../hooks/useAnimationActivity';
+import { SceneReady } from './SceneReady';
+import { useSceneFailureGuard, type SceneLifecycleProps } from './sceneLifecycle';
 
-function CoreGeometry({ isDark }: { isDark: boolean }) {
+function CoreGeometry({ isDark, reducedMotion }: { isDark: boolean; reducedMotion: boolean }) {
   const group = useRef<THREE.Group>(null);
   
   // 跟随鼠标产生微小的磁性偏转
   useFrame((state) => {
+    if (reducedMotion) return;
     if (group.current) {
       const targetX = state.pointer.y * 0.5;
       const targetY = state.pointer.x * 0.5;
@@ -16,13 +20,13 @@ function CoreGeometry({ isDark }: { isDark: boolean }) {
     }
   });
 
-  const lineColor = isDark ? '#ffffff' : '#0a0a0a';
+  const lineColor = isDark ? '#f0f6fc' : '#0a0a0a';
   const diamondColor = '#00d2d3';
   const amethystColor = '#9b59b6';
 
   return (
     <group ref={group}>
-      <Float speed={2} rotationIntensity={1.5} floatIntensity={1.5}>
+      <Float speed={reducedMotion ? 0 : 2} rotationIntensity={reducedMotion ? 0 : 1.5} floatIntensity={reducedMotion ? 0 : 1.5}>
         {/* 外层结构：代表 Minecraft 的基础方块系统 */}
         <mesh>
           <boxGeometry args={[3, 3, 3]} />
@@ -48,12 +52,21 @@ function CoreGeometry({ isDark }: { isDark: boolean }) {
   );
 }
 
-export function WorldCore3D({ isDark }: { isDark: boolean }) {
+export function WorldCore3D({ isDark, onReady, onUnavailable }: { isDark: boolean } & SceneLifecycleProps) {
+  const container = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
+  const { active, reducedMotion, constrained } = useAnimationActivity(container);
+  useSceneFailureGuard(container, onUnavailable);
+  const markReady = useCallback(() => {
+    setReady(true);
+    onReady?.();
+  }, [onReady]);
   return (
-    <div className="absolute inset-0 z-10 w-full h-full cursor-crosshair">
-      <Canvas camera={{ position: [0, 0, 8], fov: 45 }} gl={{ antialias: true }}>
+    <div ref={container} className="absolute inset-0 z-10 w-full h-full cursor-crosshair pointer-events-auto" aria-hidden="true">
+      <Canvas camera={{ position: [0, 0, 8], fov: 45 }} gl={{ antialias: !constrained }} dpr={constrained ? 1 : [1, 1.5]} frameloop={active && ready && !reducedMotion ? 'always' : 'demand'}>
         <ambientLight intensity={1} />
-        <CoreGeometry isDark={isDark} />
+        <CoreGeometry isDark={isDark} reducedMotion={reducedMotion} />
+        <SceneReady onReady={markReady} />
       </Canvas>
     </div>
   );

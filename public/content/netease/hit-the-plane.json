@@ -1,0 +1,58 @@
+{
+  "sourceUrl": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4646050867772266368",
+  "sourceEndpoint": "https://g79apigatewayobt.nie.netease.com/h5/pe-item-detail-v2",
+  "sourceRequest": {
+    "item_id": "4646050867772266368",
+    "channel_id": 5
+  },
+  "sourceField": "entity.info",
+  "accessedDate": "2026-10-10",
+  "sourceLanguage": "zh-CN",
+  "title": "Hit the plane",
+  "storeItemId": "4646050867772266368",
+  "storefrontPublisher": "KCINE",
+  "creditedAuthors": [
+    "KCINE"
+  ],
+  "unverifiedVersionFields": {
+    "mod_version": "1.21",
+    "res_version": 6
+  },
+  "publishedAt": "2021-04-30T13:03:54.000Z",
+  "updatedAt": "2021-08-13T04:42:21.000Z",
+  "publishedDate": "2021-04-30",
+  "updatedDate": "2021-08-13",
+  "dateTimezone": "Asia/Shanghai",
+  "publishedUnixSeconds": 1619787834,
+  "updatedUnixSeconds": 1628829741,
+  "resourceSizeBytes": 265825,
+  "descriptionMarkdown": "content/netease/hit-the-plane.md",
+  "originalDescriptionHtml": "<p><strong class=\"ql-size-large\">作者:KCINE</strong></p><p><span class=\"ql-size-large\">&lt;Hit the plane&gt;</span></p><p><span class=\"ql-size-large\">打灰机小游戏</span></p><p><span class=\"ql-size-large\">双人对战更多乐趣</span></p><p><span class=\"ql-size-large\">设置有观战台，嘲讽功能，管理区</span></p><p><span class=\"ql-size-large\">=========================================</span></p><p><strong class=\"ql-size-large\" style=\"color: orange;\"><u>游戏玩法</u></strong></p><p><strong class=\"ql-size-large\" style=\"color: orange;\"><u>双人对战</u></strong></p><p><strong class=\"ql-size-large\" style=\"color: orange;\">两名玩家各自摆放4架自己的飞机（雪球放置飞机，钓鱼竿选择方向）</strong></p><p><strong class=\"ql-size-large\" style=\"color: orange;\">摆放完毕后，游戏正式开始</strong></p><p><strong class=\"ql-size-large\" style=\"color: orange;\">此时玩家手里只有钓鱼竿，并且轮到本回合的玩家脚下出现闪烁的金块</strong></p><p><strong class=\"ql-size-large\" style=\"color: orange;\">金块所在的坐标便是你要轰炸对方的坐标</strong></p><p><strong class=\"ql-size-large\" style=\"color: orange;\">使用钓鱼竿进行轰炸</strong></p><p><strong class=\"ql-size-large\" style=\"color: orange;\">若返回一个黑色的方块，则代表此坐标为空气（没有飞机的格子）</strong></p><p><strong class=\"ql-size-large\" style=\"color: orange;\">若返回一个白色方块，则代表此坐标为机身部位</strong></p><p><strong class=\"ql-size-large\" style=\"color: orange;\">若返回一个红色或者黄色的格子，则代表此坐标为机头，也就是说，你打爆了敌人的一架飞机</strong></p><p><strong class=\"ql-size-large\" style=\"color: orange;\">打爆四架对方的飞机即可获胜</strong></p><p><strong class=\"ql-size-large\" style=\"color: orange;\">========================================</strong></p><p><em class=\"ql-size-large\" style=\"color: red;\">注意事项！！！</em></p><p><em class=\"ql-size-large\" style=\"color: red;\">管理区控制重置游戏，创造才可以进入！</em></p><p><em class=\"ql-size-large\" style=\"color: red;\">所有按钮都要靠近按才有用！！！</em></p><p><span class=\"ql-size-large\">了解更多关于我们抑或想加入我们，请加入群聊（qq）：</span><strong class=\"ql-size-large\"><em>1060796710</em></strong></p><p><strong class=\"ql-size-large\"><em>若有bug及改进之处，请联系作者哦</em></strong></p><p><br></p><p><span class=\"ql-size-large\">如果喜欢我们的作品，别忘了给一个好评哦</span></p><p><span class=\"ql-size-large\">Fimel Studio交流群</span>937760015<span class=\"ql-size-large\">/1060796710</span></p><p><span class=\"ql-size-large\">Fimel Studio也在火热招贤纳士啦，我们热烈欢迎有经验有技术的指令人员，建筑人员，addons制作者，视频剪辑以及宣传人才加入我们，加群就可以审核啦</span></p><p><br></p><p><img src=\"https://x19.fp.ps.netease.com/file/604dc3248b742702f2d6be98YQD6BU1p03\"><img src=\"https://x19.fp.ps.netease.com/file/604dc3202786fd365c917167DflFpaet03\"></p>",
+  "originalEmbeddedImageUrls": [
+    "https://x19.fp.ps.netease.com/file/604dc3248b742702f2d6be98YQD6BU1p03",
+    "https://x19.fp.ps.netease.com/file/604dc3202786fd365c917167DflFpaet03"
+  ],
+  "cover": {
+    "sourceUrl": "https://x19.fp.ps.netease.com/file/6056e8eb143cfa5e2bf79c00QwOJ3EGu03",
+    "sourceBytes": 398616,
+    "sourceWidth": 1000,
+    "sourceHeight": 1000,
+    "localPath": "maps/netease/4646050867772266368.webp",
+    "width": 544,
+    "height": 544,
+    "bytes": 21570,
+    "processing": "Proportional resize and WebP encoding only; no cropping or generated content."
+  },
+  "snapshotStats": {
+    "downloads": 7379,
+    "rating": 4.05,
+    "comments": 14
+  },
+  "conversionNotes": [
+    "Original wording and credited names are retained; Quill font/color styling and empty spacer paragraphs are removed.",
+    "Embedded and gallery images were not downloaded or included.",
+    "Publisher is not assumed to be an individual creator. Where no creator is credited, the catalogue uses the studio attribution supplied by the user.",
+    "mod_version and res_version semantics are unverified and are not presented as work versions.",
+    "Dates reflect storefront create_time and refresh_time, not a complete release history."
+  ]
+}

@@ -7,8 +7,30 @@
   --color-paper: #f4f4f5;
   --color-amethyst: #9b59b6;
   --color-diamond: #00d2d3;
+  --color-canvas: #f4f4f5;
+  --color-surface: #ffffff;
+  --color-surface-raised: #eaeef2;
+  --color-content: #1f2328;
+  --color-content-muted: #59636e;
+  --color-line: #d1d9e0;
+  --color-link: #0969da;
+  --color-brand: #007d7e;
   --font-sans: "Geist Sans", "Geist", "Microsoft YaHei", sans-serif;
   --animate-marquee: marquee 25s linear infinite;
+}
+
+:root { color-scheme: light; }
+
+.dark {
+  color-scheme: dark;
+  --color-canvas: #0d1117;
+  --color-surface: #151b23;
+  --color-surface-raised: #212830;
+  --color-content: #f0f6fc;
+  --color-content-muted: #9198a1;
+  --color-line: #3d444d;
+  --color-link: #4493f8;
+  --color-brand: #00d2d3;
 }
 
 @keyframes marquee {
@@ -50,7 +72,7 @@
 
 @layer base {
   body {
-    @apply bg-paper text-obsidian dark:bg-obsidian dark:text-white overflow-x-hidden antialiased transition-colors duration-700;
+    @apply bg-canvas text-content overflow-x-hidden antialiased transition-colors duration-700;
   }
 }
 
@@ -64,7 +86,7 @@
   z-index: 9990;
   opacity: 0.05;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  animation: noise-shift 0.2s infinite steps(2);
+  /* Fixed grain keeps the material finish without continuous full-screen repaints. */
 }
 
 @keyframes noise-shift {
@@ -77,17 +99,52 @@
   opacity: 0.03;
 }
 
+.work-search::-webkit-search-cancel-button { display: none; }
+
+.project-markdown { color: var(--color-content); font-size: 1rem; line-height: 1.85; overflow-wrap: anywhere; }
+.project-markdown > :first-child { margin-top: 0; }
+.project-markdown h1, .project-markdown h2, .project-markdown h3, .project-markdown h4 { color: var(--color-content); font-weight: 750; line-height: 1.3; margin: 2rem 0 1rem; letter-spacing: -.025em; }
+.project-markdown h1 { font-size: 1.75rem; }
+.project-markdown h2 { font-size: 1.4rem; }
+.project-markdown h3 { font-size: 1.15rem; }
+.project-markdown p, .project-markdown ul, .project-markdown ol { margin: 1rem 0; }
+.project-markdown ul, .project-markdown ol { padding-left: 1.5rem; }
+.project-markdown ul { list-style: disc; }
+.project-markdown ol { list-style: decimal; }
+.project-markdown li { padding-left: .2rem; margin: .35rem 0; }
+.project-markdown strong { color: var(--color-content); font-weight: 650; }
+.project-markdown a { color: var(--color-link); text-decoration: underline; text-underline-offset: 3px; }
+.project-markdown a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.project-markdown code { font-family: monospace; font-size: .88em; padding: .15em .35em; background: var(--color-surface-raised); color: var(--color-content); border-radius: 2px; }
+.project-markdown pre { overflow-x: auto; padding: 1.25rem; background: var(--color-surface); border: 1px solid var(--color-line); border-radius: 2px; margin: 1.5rem 0; }
+.project-markdown pre code { padding: 0; background: transparent; }
+.project-markdown blockquote { color: var(--color-content-muted); border-left: 2px solid var(--color-line); padding-left: 1.25rem; margin: 1.5rem 0; }
+.project-markdown img { display: block; max-width: 100%; height: auto; margin: 1.5rem 0; border-radius: 2px; }
+.markdown-table-scroll { max-width: 100%; overflow-x: auto; margin: 1.5rem 0; }
+.project-markdown table { border-collapse: collapse; width: 100%; min-width: 540px; font-size: .875rem; }
+.project-markdown th, .project-markdown td { padding: .8rem 1rem; border-bottom: 1px solid var(--color-line); text-align: left; vertical-align: top; }
+.project-markdown th { font-weight: 650; color: var(--color-content); background: var(--color-surface); }
+.project-markdown tbody tr:nth-child(2n) { background: var(--color-surface); }
+
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .noise-overlay { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
 /* Custom Hide Scrollbar but keep functionality */
 ::-webkit-scrollbar {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  @apply bg-gray-200 dark:bg-black;
+  @apply bg-canvas;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-400 dark:bg-[#333];
+  @apply bg-line;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-500 dark:bg-[#555];
+  @apply bg-content-muted;
 }

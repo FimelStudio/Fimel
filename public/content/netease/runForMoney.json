@@ -1,0 +1,44 @@
+{
+  "i18nKey": "runForMoney",
+  "sourceUrl": "https://resource-minecraft.h5.163.com/#/detail?id=4653059746050819814",
+  "sourceEndpoint": "https://g79apigatewayobt.nie.netease.com/h5/pe-item-detail-v2",
+  "sourceRequest": {
+    "item_id": "4653059746050819814",
+    "channel_id": 5
+  },
+  "sourceField": "entity.info",
+  "accessedDate": "2026-10-10",
+  "sourceLanguage": "zh-CN",
+  "title": "逃走中",
+  "storeItemId": "4653059746050819814",
+  "unverifiedVersionFields": {
+    "mod_version": "2.0"
+  },
+  "author": "KCINE",
+  "authorRole": "storefront publisher; see creditedAuthors and original description for creators",
+  "creditedAuthors": [],
+  "publishedAt": "2022-01-28T06:10:29.000Z",
+  "updatedAt": "2022-01-30T02:59:22.000Z",
+  "publishedDate": "2022-01-28",
+  "updatedDate": "2022-01-30",
+  "dateTimezone": "Asia/Shanghai",
+  "publishedUnixSeconds": 1643350229,
+  "updatedUnixSeconds": 1643511562,
+  "descriptionMarkdown": "content/netease/runForMoney.md",
+  "originalDescriptionHtml": "<p>游戏:逃走中</p><p>每隔一段时间有随机一个人变成被猎杀目标，其他人都是猎人，猎人无敌，且有刀，猎人击杀目标可以让目标直接出局，目标要活过一分半，可以开箱子找道具，活过一段时间换人当目标，几轮追杀结束后pvp，活到最后的人获胜</p><p><img src=\"https://x19.fp.ps.netease.com/file/61ef8817271e676e6184cf49rMXQmLP204\"></p>",
+  "originalEmbeddedImageUrls": [
+    "https://x19.fp.ps.netease.com/file/61ef8817271e676e6184cf49rMXQmLP204"
+  ],
+  "snapshotStats": {
+    "downloads": 18013,
+    "rating": 4.3,
+    "comments": 29,
+    "ratingsCount": 40
+  },
+  "conversionNotes": [
+    "Quill font sizes, colors and blank spacer paragraphs were removed; original HTML is retained above.",
+    "Original embedded images were not downloaded or inserted into the Markdown.",
+    "Wording, historical contacts and credited names are retained from the source.",
+    "Published and updated dates reflect API create_time and refresh_time, not an inferred release history."
+  ]
+}

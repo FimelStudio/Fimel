@@ -1,0 +1,57 @@
+{
+  "sourceUrl": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648788016015567149",
+  "sourceEndpoint": "https://g79apigatewayobt.nie.netease.com/h5/pe-item-detail-v2",
+  "sourceRequest": {
+    "item_id": "4648788016015567149",
+    "channel_id": 5
+  },
+  "sourceField": "entity.info",
+  "accessedDate": "2026-10-10",
+  "sourceLanguage": "zh-CN",
+  "title": "暗影刺客[小游戏]",
+  "storeItemId": "4648788016015567149",
+  "storefrontPublisher": "KCINE",
+  "creditedAuthors": [
+    "水晶215"
+  ],
+  "unverifiedVersionFields": {
+    "mod_version": "1.23",
+    "res_version": 5
+  },
+  "publishedAt": "2021-08-07T10:48:56.000Z",
+  "updatedAt": "2021-08-07T10:48:56.000Z",
+  "publishedDate": "2021-08-07",
+  "updatedDate": "2021-08-07",
+  "dateTimezone": "Asia/Shanghai",
+  "publishedUnixSeconds": 1628333336,
+  "updatedUnixSeconds": 1628333336,
+  "resourceSizeBytes": 553265,
+  "descriptionMarkdown": "content/netease/shadow-assassin.md",
+  "originalDescriptionHtml": "<p>小游戏&nbsp;暗影刺客</p><p>作者 水晶215</p><p>下面是游戏玩法，游玩前请仔细阅读</p><p>一.获胜条件：第一个把末影水晶带到黄金台上的玩家获胜</p><p>二.游戏过程：选择好地图开始游戏后玩家进入游戏地图，有10秒准备时间，随后游戏正式开始</p><p>游戏每隔一段时间会给所有玩家3块金锭，游戏内有商店，踩下踏板即可用金锭购买物品（最后会介绍物品）&nbsp;&nbsp;击杀其他玩家可以获得他们身上的物品，被击杀的玩家复活后会有20秒时间不能打人</p><p>游戏有白天和夜晚，每隔一段时间白天夜晚会切换。白天所有人都只有木剑，而到了夜晚，会随机有一个人成为刺客，他会获得铁剑，同时其他人会失去木剑</p><p>三.物品介绍</p><p>1.制作末影水晶道具：7玻璃，1恶魂之泪，1末影之眼&nbsp;</p><p>四.物品价格及部分道具介绍</p><p>1.玻璃：2金锭2个</p><p>2.恶魂之泪：4金锭1个</p><p>3.末影之眼：6金锭1个</p><p>4.道具忍法潜行（雪球）：扔雪球可以让自己隐身并加速5秒</p><p>5.无敌星（下界之星）：把下界之星扔出背包即可让自己无敌10秒</p><p>&nbsp;6.身份抢夺（限树林）：把基岩扔出背包可以把暗影刺客的剑抢过来，但若之前的暗影刺客死亡，则道具无法生效</p><p>7.视线遮挡（限雪原）：把屏障扔出背包后可以让全场人失明并缓速，并清除自己身上的所有效果</p><p>8.魔杖（限城堡）：把木棍扔出背包后可以让一定范围内的人受到较高伤害，同时自己回满血</p><p>9.烈焰魔杖（限城堡）：把烈焰棒扔出背包后可以让全场人被雷击中，同时自己获得抗火1分钟</p><p><img src=\"https://x19.fp.ps.netease.com/file/60f106a196dee40db8b9a1d7dN96Bpl603\"></p>",
+  "originalEmbeddedImageUrls": [
+    "https://x19.fp.ps.netease.com/file/60f106a196dee40db8b9a1d7dN96Bpl603"
+  ],
+  "cover": {
+    "sourceUrl": "https://x19.fp.ps.netease.com/file/60f0eb68a7f25268a0dfea04zFm6BB8x03",
+    "sourceBytes": 1277989,
+    "sourceWidth": 1000,
+    "sourceHeight": 1000,
+    "localPath": "maps/netease/4648788016015567149.webp",
+    "width": 544,
+    "height": 544,
+    "bytes": 56418,
+    "processing": "Proportional resize and WebP encoding only; no cropping or generated content."
+  },
+  "snapshotStats": {
+    "downloads": 22616,
+    "rating": 4.63,
+    "comments": 8
+  },
+  "conversionNotes": [
+    "Original wording and credited names are retained; Quill font/color styling and empty spacer paragraphs are removed.",
+    "Embedded and gallery images were not downloaded or included.",
+    "Publisher is not assumed to be an individual creator. Where no creator is credited, the catalogue uses the studio attribution supplied by the user.",
+    "mod_version and res_version semantics are unverified and are not presented as work versions.",
+    "Dates reflect storefront create_time and refresh_time, not a complete release history."
+  ]
+}

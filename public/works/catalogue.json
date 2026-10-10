@@ -1,0 +1,1236 @@
+{
+  "$schema": "./catalogue.schema.json",
+  "schemaVersion": 1,
+  "projects": [
+    {
+      "slug": "bingo-but-dont-do-it",
+      "type": "mods",
+      "title": "Bingo But Don't Do It",
+      "translations": {
+        "summary": "siteMeta.bingoDescription"
+      },
+      "image": "bingo-but-dont-do-it-logo.png",
+      "imageFit": "contain",
+      "status": "released",
+      "platform": [
+        "Minecraft Java 1.21.11",
+        "Fabric"
+      ],
+      "creators": [
+        {
+          "name": "Fimel Studio",
+          "url": "https://github.com/FimelStudio"
+        }
+      ],
+      "published": "2026-09-26",
+      "updated": "2026-09-26",
+      "version": "1.0",
+      "size": "56.9 MiB",
+      "repository": "https://github.com/FimelStudio/bingo-but-dont-do-it",
+      "issues": "https://github.com/FimelStudio/bingo-but-dont-do-it/issues",
+      "latestReleaseRepo": "FimelStudio/bingo-but-dont-do-it",
+      "releasePage": "https://github.com/FimelStudio/bingo-but-dont-do-it/releases",
+      "fallbackDownload": "mods/bingo-but-dont-do-it-1.21.11-v1.0.jar",
+      "fallbackFileName": "bingo-but-dont-do-it-1.21.11-v1.0.jar",
+      "content": {
+        "description": {
+          "zh": "works/bingo-but-dont-do-it/description.zh.md",
+          "en": "works/bingo-but-dont-do-it/description.en.md",
+          "ja": "works/bingo-but-dont-do-it/description.ja.md"
+        },
+        "changelog": {
+          "zh": "works/bingo-but-dont-do-it/changelog.md",
+          "en": "works/bingo-but-dont-do-it/changelog.en.md",
+          "ja": "works/bingo-but-dont-do-it/changelog.ja.md"
+        },
+        "versions": {
+          "zh": "works/bingo-but-dont-do-it/versions.md",
+          "en": "works/bingo-but-dont-do-it/versions.en.md",
+          "ja": "works/bingo-but-dont-do-it/versions.ja.md"
+        }
+      },
+      "tags": [
+        "minigame",
+        "strategy",
+        "co-op"
+      ]
+    },
+    {
+      "slug": "minecraft-obj-cubizer",
+      "type": "tools",
+      "title": "Minecraft OBJ Cubizer",
+      "translations": {
+        "title": "workPages.tools.objCubizer.title",
+        "summary": "workPages.tools.objCubizer.desc"
+      },
+      "image": "plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.svg",
+      "imageFit": "contain",
+      "status": "released",
+      "platform": [
+        "Blockbench Desktop ≥ 4.8.0",
+        "Minecraft Java Block / Item"
+      ],
+      "creators": [
+        {
+          "name": "Ylong",
+          "url": "https://github.com/Ylong4004"
+        }
+      ],
+      "published": "2026-05-16",
+      "updated": "2026-05-19",
+      "version": "1.4.0",
+      "size": "52.5 KB",
+      "repository": "https://github.com/Ylong4004/minecraft_obj_cubizer",
+      "issues": "https://github.com/Ylong4004/minecraft_obj_cubizer/issues",
+      "download": "plugins/minecraft-obj-cubizer/minecraft_obj_cubizer-1.4.0.zip",
+      "downloadSlug": "minecraft-obj-cubizer",
+      "content": {
+        "description": {
+          "zh": "plugins/minecraft-obj-cubizer/minecraft_obj_cubizer/about.md",
+          "en": "works/minecraft-obj-cubizer/description.en.md",
+          "ja": "works/minecraft-obj-cubizer/description.ja.md"
+        },
+        "changelog": {
+          "zh": "works/minecraft-obj-cubizer/changelog.md"
+        },
+        "versions": {
+          "zh": "works/minecraft-obj-cubizer/versions.md"
+        }
+      },
+      "tags": [
+        "modeling",
+        "conversion",
+        "creator-tools"
+      ]
+    },
+    {
+      "slug": "island-escape-before-dawn",
+      "type": "bedrock",
+      "title": "海岛逃生--黎明前夕",
+      "translations": {
+        "title": "works.bedrockMaps.islandEscapeBeforeDawn.title",
+        "summary": "works.bedrockMaps.islandEscapeBeforeDawn.desc"
+      },
+      "image": "maps/island-escape-before-dawn.png",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "初风sky_"
+        },
+        {
+          "name": "歪浪YL"
+        },
+        {
+          "name": "_橙子不成_"
+        },
+        {
+          "name": "水晶215"
+        }
+      ],
+      "published": "2025-02-16",
+      "updated": "2025-02-16",
+      "size": "18.3 MiB",
+      "downloads": 39810,
+      "rating": "4.2",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?id=4677793220493990518",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?id=4677793220493990518",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/islandEscapeBeforeDawn.md"
+        },
+        "changelog": {
+          "zh": "works/island-escape-before-dawn/changelog.md"
+        },
+        "versions": {
+          "zh": "works/island-escape-before-dawn/versions.md"
+        }
+      },
+      "tags": [
+        "pvp",
+        "asymmetric",
+        "co-op",
+        "escape"
+      ]
+    },
+    {
+      "slug": "amethyst-salvation",
+      "type": "bedrock",
+      "title": "紫晶幻域：救世光源",
+      "translations": {
+        "title": "works.bedrockMaps.amethystSalvation.title",
+        "summary": "works.bedrockMaps.amethystSalvation.desc"
+      },
+      "image": "maps/amethyst-salvation.png",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "水晶"
+        },
+        {
+          "name": "橙子"
+        },
+        {
+          "name": "小宇"
+        }
+      ],
+      "published": "2024-07-01",
+      "updated": "2024-09-20",
+      "size": "3.7 MiB",
+      "downloads": 14126,
+      "rating": "4.7",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?id=4672593901126936215",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?id=4672593901126936215",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/amethystSalvation.md"
+        },
+        "changelog": {
+          "zh": "works/amethyst-salvation/changelog.md"
+        },
+        "versions": {
+          "zh": "works/amethyst-salvation/versions.md"
+        }
+      },
+      "tags": [
+        "pve",
+        "rpg",
+        "adventure"
+      ]
+    },
+    {
+      "slug": "hunger-games-old-city",
+      "type": "bedrock",
+      "title": "饥饿游戏：旧城迷行",
+      "translations": {
+        "title": "works.bedrockMaps.hungerGamesOldCity.title",
+        "summary": "works.bedrockMaps.hungerGamesOldCity.desc"
+      },
+      "image": "maps/hunger-games-old-city.png",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "E建"
+        }
+      ],
+      "published": "2022-08-09",
+      "updated": "2022-08-28",
+      "size": "11.7 MiB",
+      "downloads": 97784,
+      "rating": "4.4",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?id=4657291854883079467",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?id=4657291854883079467",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/hungerGamesOldCity.md"
+        },
+        "changelog": {
+          "zh": "content/netease/hungerGamesOldCity.changelog.md"
+        },
+        "versions": {
+          "zh": "works/hunger-games-old-city/versions.md"
+        }
+      },
+      "tags": [
+        "pvp",
+        "battle-royale",
+        "multiplayer"
+      ]
+    },
+    {
+      "slug": "power-on-2-snow-crisis",
+      "type": "bedrock",
+      "title": "通电2雪域危机",
+      "translations": {
+        "title": "works.bedrockMaps.powerOn2SnowCrisis.title",
+        "summary": "works.bedrockMaps.powerOn2SnowCrisis.desc"
+      },
+      "image": "maps/power-on-2-snow-crisis.png",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "建造老E"
+        },
+        {
+          "name": "水晶215"
+        }
+      ],
+      "published": "2022-06-02",
+      "updated": "2022-06-02",
+      "size": "6.8 MiB",
+      "downloads": 22915,
+      "rating": "4.75",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?id=4655644384723477429",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?id=4655644384723477429",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/powerOn2SnowCrisis.md"
+        },
+        "changelog": {
+          "zh": "works/power-on-2-snow-crisis/changelog.md"
+        },
+        "versions": {
+          "zh": "works/power-on-2-snow-crisis/versions.md"
+        }
+      },
+      "tags": []
+    },
+    {
+      "slug": "run-for-money",
+      "type": "bedrock",
+      "title": "逃走中",
+      "translations": {
+        "title": "works.bedrockMaps.runForMoney.title",
+        "summary": "works.bedrockMaps.runForMoney.desc"
+      },
+      "image": "maps/run-for-money.png",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "Fimel Studio"
+        }
+      ],
+      "published": "2022-01-28",
+      "updated": "2022-01-30",
+      "size": "564 KiB",
+      "downloads": 18013,
+      "rating": "4.3",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?id=4653059746050819814",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?id=4653059746050819814",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/runForMoney.md"
+        },
+        "changelog": {
+          "zh": "works/run-for-money/changelog.md"
+        },
+        "versions": {
+          "zh": "works/run-for-money/versions.md"
+        }
+      },
+      "tags": [
+        "pvp",
+        "asymmetric",
+        "chase"
+      ]
+    },
+    {
+      "slug": "abyss-sky-pit",
+      "type": "bedrock",
+      "title": "ABYSS天坑",
+      "translations": {
+        "title": "works.bedrockMaps.abyssSkyPit.title",
+        "summary": "works.bedrockMaps.abyssSkyPit.desc"
+      },
+      "image": "maps/abyss-sky-pit.png",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "鸣凤吖"
+        },
+        {
+          "name": "SuperCuter"
+        },
+        {
+          "name": "BAI_ONLY"
+        }
+      ],
+      "published": "2021-09-03",
+      "updated": "2021-09-03",
+      "size": "3.8 MiB",
+      "downloads": 2031,
+      "rating": "4.3",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?id=4649770038789663060",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?id=4649770038789663060",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/abyssSkyPit.md"
+        },
+        "changelog": {
+          "zh": "works/abyss-sky-pit/changelog.md"
+        },
+        "versions": {
+          "zh": "works/abyss-sky-pit/versions.md"
+        }
+      },
+      "tags": [
+        "pvp",
+        "minigame"
+      ]
+    },
+    {
+      "slug": "fml-sky-nature-arena",
+      "type": "bedrock",
+      "title": "FML空生自然竞技场职业大乱斗",
+      "translations": {
+        "title": "works.bedrockMaps.fmlSkyNatureArena.title",
+        "summary": "works.bedrockMaps.fmlSkyNatureArena.desc"
+      },
+      "image": "maps/fml-sky-nature-arena.png",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "FIMEL工作室全体成员"
+        },
+        {
+          "name": "SuperCuter(Violetce)"
+        }
+      ],
+      "published": "2021-04-02",
+      "updated": "2021-07-14",
+      "size": "1.1 MiB",
+      "downloads": 33465,
+      "rating": "4.6",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?id=4646359448597896554",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?id=4646359448597896554",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/fmlSkyNatureArena.md"
+        },
+        "changelog": {
+          "zh": "works/fml-sky-nature-arena/changelog.md"
+        },
+        "versions": {
+          "zh": "works/fml-sky-nature-arena/versions.md"
+        }
+      },
+      "tags": [
+        "pvp",
+        "minigame"
+      ]
+    },
+    {
+      "slug": "werewolf-f-town",
+      "type": "bedrock",
+      "title": "狼人杀-F小镇",
+      "translations": {
+        "title": "works.bedrockMaps.werewolfFTown.title",
+        "summary": "works.bedrockMaps.werewolfFTown.desc"
+      },
+      "image": "maps/werewolf-f-town.png",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "FIMEL STUDIO"
+        }
+      ],
+      "published": "2021-07-12",
+      "updated": "2021-07-12",
+      "size": "183 KiB",
+      "downloads": 430994,
+      "rating": "4.1",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?id=4648588173337957318",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?id=4648588173337957318",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/werewolfFTown.md"
+        },
+        "changelog": {
+          "zh": "works/werewolf-f-town/changelog.md"
+        },
+        "versions": {
+          "zh": "works/werewolf-f-town/versions.md"
+        }
+      },
+      "tags": [
+        "pvp",
+        "asymmetric",
+        "social-deduction"
+      ]
+    },
+    {
+      "slug": "island-escape-java",
+      "type": "java",
+      "title": "海岛逃生：黎明前夕 (Java版)",
+      "translations": {
+        "title": "works.m9_t",
+        "summary": "works.m9_d"
+      },
+      "image": "textures/ice.png",
+      "status": "development",
+      "platform": [
+        "Minecraft Java"
+      ],
+      "creators": [
+        {
+          "name": "Fimel Studio"
+        }
+      ],
+      "content": {
+        "description": {
+          "zh": "works/island-escape-java/description.md"
+        },
+        "changelog": {
+          "zh": "works/island-escape-java/changelog.md"
+        },
+        "versions": {
+          "zh": "works/island-escape-java/versions.md"
+        }
+      },
+      "tags": [
+        "co-op",
+        "tower-defense",
+        "escape"
+      ]
+    },
+    {
+      "slug": "spoiler-rpg",
+      "type": "java",
+      "title": "剧透过多的RPG：最终的敌人是勇者的父亲",
+      "translations": {
+        "title": "works.m10_t",
+        "summary": "works.m10_d"
+      },
+      "image": "maps/spoilers-rpg.jpg",
+      "status": "development",
+      "platform": [
+        "Minecraft Java"
+      ],
+      "creators": [
+        {
+          "name": "Fimel Studio"
+        }
+      ],
+      "content": {
+        "description": {
+          "zh": "works/spoiler-rpg/description.md"
+        },
+        "changelog": {
+          "zh": "works/spoiler-rpg/changelog.md"
+        },
+        "versions": {
+          "zh": "works/spoiler-rpg/versions.md"
+        }
+      },
+      "tags": [
+        "rpg",
+        "story",
+        "adventure"
+      ]
+    },
+    {
+      "slug": "production-toolchain",
+      "type": "tools",
+      "title": "开发工具链",
+      "translations": {
+        "title": "works.tool1_t",
+        "summary": "works.tool1_d"
+      },
+      "image": "textures/iron_block.png",
+      "status": "development",
+      "platform": [
+        "Minecraft",
+        "Creator workflows"
+      ],
+      "creators": [
+        {
+          "name": "Fimel Studio"
+        }
+      ],
+      "content": {
+        "description": {
+          "zh": "works/production-toolchain/description.md"
+        },
+        "changelog": {
+          "zh": "works/production-toolchain/changelog.md"
+        },
+        "versions": {
+          "zh": "works/production-toolchain/versions.md"
+        }
+      },
+      "tags": [
+        "development",
+        "creator-tools"
+      ]
+    },
+    {
+      "slug": "music-command-pack",
+      "type": "bedrock",
+      "title": "我的世界音乐制作命令包",
+      "summary": {
+        "zh": "面向指令师与音乐创作者的 Cinemusicedit 命令包，支持九个八度、16 种音色、和弦及多声道播放。",
+        "en": "Cinemusicedit is a command pack for music creators, with nine octaves, 16 timbres, chords and multichannel playback.",
+        "ja": "Cinemusicedit は音楽制作者向けのコマンドパック。9 オクターブ、16 種類の音色、和音、マルチチャンネル再生に対応します。"
+      },
+      "image": "maps/netease/4646512948266854981.webp",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "Fimel Studio"
+        }
+      ],
+      "published": "2021-04-17",
+      "updated": "2021-07-10",
+      "version": "0.0.4",
+      "size": "1.1 MiB",
+      "downloads": 17971,
+      "rating": "4.6",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4646512948266854981",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4646512948266854981",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/music-command-pack.md"
+        },
+        "changelog": {
+          "zh": "works/music-command-pack/changelog.md"
+        },
+        "versions": {
+          "zh": "works/music-command-pack/versions.md"
+        }
+      },
+      "tags": [
+        "music",
+        "creator-tools"
+      ]
+    },
+    {
+      "slug": "es-atrium-showdown",
+      "type": "bedrock",
+      "title": "［ES］中庭决战-职业对抗",
+      "summary": {
+        "zh": "12 种不可重复的职业同场对抗，击败其他玩家成为最后的战士；支持观战与草丛隐身。",
+        "en": "Choose one of 12 unique classes and fight to be the last player standing, with spectating and concealment in tall grass.",
+        "ja": "重複できない 12 の職業から選び、最後の一人を目指す対戦マップ。観戦と草むらでの隠密に対応します。"
+      },
+      "image": "maps/netease/4649725567306540590.webp",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "水晶215"
+        },
+        {
+          "name": "建造老e"
+        }
+      ],
+      "published": "2021-08-30",
+      "updated": "2021-08-30",
+      "size": "252 KiB",
+      "downloads": 16317,
+      "rating": "3.6",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4649725567306540590",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4649725567306540590",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/es-atrium-showdown.md"
+        },
+        "changelog": {
+          "zh": "works/es-atrium-showdown/changelog.md"
+        },
+        "versions": {
+          "zh": "works/es-atrium-showdown/versions.md"
+        }
+      },
+      "tags": [
+        "pvp",
+        "battle-royale",
+        "minigame",
+        "multiplayer"
+      ]
+    },
+    {
+      "slug": "ej-qingbo-survival",
+      "type": "bedrock",
+      "title": "［Ej］生存家园-青泊庄",
+      "summary": {
+        "zh": "建造老e制作的生存家园，包含港口、造船厂、种植区和海滨等区域，支持多人联机、昼夜更替与保留物品栏。",
+        "en": "A survival settlement by 建造老e with a harbor, shipyard, farms and seaside areas. Supports multiplayer, day/night cycles and keep inventory.",
+        "ja": "建造老e が制作したサバイバル拠点。港、造船所、農園、海岸などがあり、マルチプレイ、昼夜サイクル、持ち物保持に対応します。"
+      },
+      "image": "maps/netease/4649651119622229329.webp",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "建造老e"
+        }
+      ],
+      "published": "2021-08-27",
+      "updated": "2021-08-27",
+      "size": "10.7 MiB",
+      "downloads": 26298,
+      "rating": "4.62",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4649651119622229329",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4649651119622229329",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/ej-qingbo-survival.md"
+        },
+        "changelog": {
+          "zh": "works/ej-qingbo-survival/changelog.md"
+        },
+        "versions": {
+          "zh": "works/ej-qingbo-survival/versions.md"
+        }
+      },
+      "tags": [
+        "survival",
+        "building",
+        "multiplayer"
+      ]
+    },
+    {
+      "slug": "hit-the-plane",
+      "type": "bedrock",
+      "title": "Hit the plane",
+      "summary": {
+        "zh": "双人回合制打飞机小游戏：各自布置四架飞机，根据轰炸结果寻找并击毁对方全部飞机；设有观战台。",
+        "en": "A two-player, turn-based guessing game. Place four planes, interpret bombing results and destroy your opponent’s fleet. Includes a spectator area.",
+        "ja": "2 人用のターン制ミニゲーム。4 機を配置し、攻撃結果から相手の位置を推理して全機撃破を目指します。観戦エリアもあります。"
+      },
+      "image": "maps/netease/4646050867772266368.webp",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "KCINE"
+        }
+      ],
+      "published": "2021-04-30",
+      "updated": "2021-08-13",
+      "size": "260 KiB",
+      "downloads": 7379,
+      "rating": "4.05",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4646050867772266368",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4646050867772266368",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/hit-the-plane.md"
+        },
+        "changelog": {
+          "zh": "works/hit-the-plane/changelog.md"
+        },
+        "versions": {
+          "zh": "works/hit-the-plane/versions.md"
+        }
+      },
+      "tags": [
+        "pvp",
+        "strategy",
+        "minigame",
+        "multiplayer"
+      ]
+    },
+    {
+      "slug": "chinese-chess-cb",
+      "type": "bedrock",
+      "title": "中国象棋[CB]",
+      "summary": {
+        "zh": "兼容性待确认：原商店说明曾提示更新后无法游玩。以命令实现的双人中国象棋，支持多人观战。",
+        "en": "Compatibility unverified: the original listing warns that an update removed required entities. Command-driven Chinese chess for two players, with spectators.",
+        "ja": "互換性は未確認です。原掲載文では更新後に遊べなくなったと案内されています。コマンドで実装した 2 人用の中国将棋で、複数人の観戦に対応します。"
+      },
+      "image": "maps/netease/4647154283526030957.webp",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "KCINE"
+        }
+      ],
+      "published": "2021-06-05",
+      "updated": "2021-07-19",
+      "size": "280 KiB",
+      "downloads": 51528,
+      "rating": "3.2",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4647154283526030957",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4647154283526030957",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/chinese-chess-cb.md"
+        },
+        "changelog": {
+          "zh": "works/chinese-chess-cb/changelog.md"
+        },
+        "versions": {
+          "zh": "works/chinese-chess-cb/versions.md"
+        }
+      },
+      "tags": [
+        "board-game",
+        "strategy",
+        "pvp",
+        "multiplayer"
+      ]
+    },
+    {
+      "slug": "aeroplane-chess-cb",
+      "type": "bedrock",
+      "title": "飞行棋[CB]",
+      "summary": {
+        "zh": "在 Minecraft 中还原经典飞行棋，可加入 AI 机器人对战，也可设置全机器人对局；采用 5、6 点起飞等调整规则。",
+        "en": "Aeroplane chess in Minecraft, with optional AI opponents and all-bot matches. Uses adjusted rules, including takeoff on a roll of five or six.",
+        "ja": "Minecraft で遊ぶ飛行棋。AI の参加や全員 AI の対局も可能。5・6 で離陸するなど、一部ルールを調整しています。"
+      },
+      "image": "maps/netease/4648967044809257014.webp",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "KCINE"
+        }
+      ],
+      "published": "2021-07-29",
+      "updated": "2021-07-29",
+      "size": "156 KiB",
+      "downloads": 38402,
+      "rating": "3.83",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648967044809257014",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648967044809257014",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/aeroplane-chess-cb.md"
+        },
+        "changelog": {
+          "zh": "works/aeroplane-chess-cb/changelog.md"
+        },
+        "versions": {
+          "zh": "works/aeroplane-chess-cb/versions.md"
+        }
+      },
+      "tags": [
+        "board-game",
+        "strategy",
+        "minigame"
+      ]
+    },
+    {
+      "slug": "power-duel",
+      "type": "bedrock",
+      "title": "通电对决",
+      "summary": {
+        "zh": "高楼中的攻守阵营对抗：守护者修复电路、合成末影水晶，杀手与潜伏内鬼则要阻止并击败他们。",
+        "en": "Attackers and defenders clash inside a tower. Defenders repair circuits and craft an End Crystal while a killer and hidden infiltrator try to stop them.",
+        "ja": "高層ビルで攻守の陣営が対決。守護者は回路を修理してエンドクリスタルを作り、殺し屋と潜伏者はそれを阻止します。"
+      },
+      "image": "maps/netease/4649240382612267969.webp",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "建造老e"
+        },
+        {
+          "name": "水晶215"
+        }
+      ],
+      "published": "2021-08-07",
+      "updated": "2021-08-13",
+      "size": "236 KiB",
+      "downloads": 6198,
+      "rating": "4.63",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4649240382612267969",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4649240382612267969",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/power-duel.md"
+        },
+        "changelog": {
+          "zh": "works/power-duel/changelog.md"
+        },
+        "versions": {
+          "zh": "works/power-duel/versions.md"
+        }
+      },
+      "tags": [
+        "pvp",
+        "asymmetric",
+        "social-deduction",
+        "multiplayer"
+      ]
+    },
+    {
+      "slug": "battle-for-kade",
+      "type": "bedrock",
+      "title": "决战，卡得！",
+      "summary": {
+        "zh": "三国联合进攻卡得的奇幻题材地图，由玩家带领联军完成决战；原说明建议四人以上游玩。",
+        "en": "Lead the allied forces of three kingdoms in a fantasy battle for Kade. The original listing recommends at least four players.",
+        "ja": "三国の連合軍を率いてカ得との決戦に挑むファンタジーマップ。原掲載文では 4 人以上でのプレイを推奨しています。"
+      },
+      "image": "maps/netease/4648994215119378218.webp",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "建造老e"
+        }
+      ],
+      "published": "2021-08-07",
+      "updated": "2021-08-13",
+      "size": "6.9 MiB",
+      "downloads": 15630,
+      "rating": "4.85",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648994215119378218",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648994215119378218",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/battle-for-kade.md"
+        },
+        "changelog": {
+          "zh": "works/battle-for-kade/changelog.md"
+        },
+        "versions": {
+          "zh": "works/battle-for-kade/versions.md"
+        }
+      },
+      "tags": [
+        "adventure",
+        "story",
+        "multiplayer"
+      ]
+    },
+    {
+      "slug": "werewolf-modern-city",
+      "type": "bedrock",
+      "title": "狼人杀现代城市",
+      "summary": {
+        "zh": "狼人和人类在现代城市展开对抗，昼夜切换影响武器与技能；包含狼人、预言家、女巫、守卫等职业。",
+        "en": "Werewolves and humans face off in a modern city. Day/night cycles change weapons and abilities for roles such as seer, witch and guard.",
+        "ja": "現代都市で人狼と人間が対決。昼夜によって武器や能力が変わり、人狼、占い師、魔女、守衛などの役職があります。"
+      },
+      "image": "maps/netease/4648967718332648481.webp",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "水晶215"
+        },
+        {
+          "name": "建造老e"
+        }
+      ],
+      "published": "2021-08-07",
+      "updated": "2021-08-13",
+      "size": "11.8 MiB",
+      "downloads": 184545,
+      "rating": "3.9",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648967718332648481",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648967718332648481",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/werewolf-modern-city.md"
+        },
+        "changelog": {
+          "zh": "works/werewolf-modern-city/changelog.md"
+        },
+        "versions": {
+          "zh": "works/werewolf-modern-city/versions.md"
+        }
+      },
+      "tags": [
+        "pvp",
+        "asymmetric",
+        "social-deduction",
+        "multiplayer"
+      ]
+    },
+    {
+      "slug": "shadow-assassin",
+      "type": "bedrock",
+      "title": "暗影刺客[小游戏]",
+      "summary": {
+        "zh": "收集材料制作末影水晶，并抢先送到黄金台；夜晚随机出现刺客，玩家通过商店道具争夺胜利。",
+        "en": "Gather materials, craft an End Crystal and deliver it to the golden platform first. A random assassin appears at night; shop items help you compete.",
+        "ja": "素材を集めてエンドクリスタルを作り、最初に金の台へ届ければ勝利。夜にはランダムな暗殺者が現れ、ショップの道具で競い合います。"
+      },
+      "image": "maps/netease/4648788016015567149.webp",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "水晶215"
+        }
+      ],
+      "published": "2021-08-07",
+      "updated": "2021-08-07",
+      "size": "540 KiB",
+      "downloads": 22616,
+      "rating": "4.63",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648788016015567149",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648788016015567149",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/shadow-assassin.md"
+        },
+        "changelog": {
+          "zh": "works/shadow-assassin/changelog.md"
+        },
+        "versions": {
+          "zh": "works/shadow-assassin/versions.md"
+        }
+      },
+      "tags": [
+        "pvp",
+        "asymmetric",
+        "minigame",
+        "multiplayer"
+      ]
+    },
+    {
+      "slug": "mountain-town",
+      "type": "bedrock",
+      "title": "山野小镇",
+      "summary": {
+        "zh": "来到夏尔镇扮演领主，在守护家园与进攻掠夺者之间作出选择；探索高地、王室和集市。",
+        "en": "Become the lord of 夏尔镇. Explore its highlands, royal grounds and market, then choose between peaceful rule and attacking the pillagers.",
+        "ja": "夏尔镇の領主として、高地、王室、集市を探索。平和に町を治めるか、略奪者の拠点を攻めるかを選びます。"
+      },
+      "image": "maps/netease/4648775938384483560.webp",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "建筑老e"
+        },
+        {
+          "name": "水晶215"
+        }
+      ],
+      "published": "2021-08-08",
+      "updated": "2021-08-08",
+      "size": "6.6 MiB",
+      "downloads": 27625,
+      "rating": "4.77",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648775938384483560",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648775938384483560",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/mountain-town.md"
+        },
+        "changelog": {
+          "zh": "works/mountain-town/changelog.md"
+        },
+        "versions": {
+          "zh": "works/mountain-town/versions.md"
+        }
+      },
+      "tags": [
+        "rpg",
+        "adventure",
+        "story",
+        "pve"
+      ]
+    },
+    {
+      "slug": "murder-mystery-planet",
+      "type": "bedrock",
+      "title": "密室杀手星球版",
+      "summary": {
+        "zh": "在经典密室杀手玩法上增加多种职业：警长、预言家、牧师等角色各有技能，杀手和内鬼则暗中出击。",
+        "en": "A class-based take on Murder Mystery, with sheriff, seer, priest and other roles facing a killer and hidden accomplice.",
+        "ja": "密室殺人ゲームに多数の役職を追加。保安官、占い師、牧師などが能力を使い、殺し屋と内通者が暗躍します。"
+      },
+      "image": "maps/netease/4649193987275973018.webp",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "水晶215"
+        }
+      ],
+      "published": "2021-08-10",
+      "updated": "2021-08-20",
+      "size": "654 KiB",
+      "downloads": 85190,
+      "rating": "1",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4649193987275973018",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4649193987275973018",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/murder-mystery-planet.md"
+        },
+        "changelog": {
+          "zh": "works/murder-mystery-planet/changelog.md"
+        },
+        "versions": {
+          "zh": "works/murder-mystery-planet/versions.md"
+        }
+      },
+      "tags": [
+        "pvp",
+        "asymmetric",
+        "social-deduction",
+        "minigame"
+      ]
+    },
+    {
+      "slug": "werewolf-town-assassination",
+      "type": "bedrock",
+      "title": "狼人小镇刺杀行动2.0",
+      "summary": {
+        "zh": "守护者制作末影水晶，杀手与隐藏身份的狼人展开阻击；通过昼夜切换、传送和商店物资争夺胜利。",
+        "en": "Guardians race to craft an End Crystal while a killer and hidden werewolf oppose them. Day/night changes, teleporting and shop supplies shape the match.",
+        "ja": "守護者がエンドクリスタルの完成を目指し、殺し屋と正体を隠した人狼が阻止。昼夜、テレポート、ショップの物資が勝敗を左右します。"
+      },
+      "image": "maps/netease/4649390432729817156.webp",
+      "status": "released",
+      "platform": [
+        "Minecraft 中国版 · Bedrock"
+      ],
+      "creators": [
+        {
+          "name": "Fimel Studio"
+        }
+      ],
+      "published": "2021-08-13",
+      "updated": "2022-01-25",
+      "version": "2.0",
+      "size": "902 KiB",
+      "downloads": 48111,
+      "rating": "4.4",
+      "store": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4649390432729817156",
+      "source": {
+        "label": "网易 Minecraft 资源中心",
+        "url": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4649390432729817156",
+        "retrieved": "2026-10-10"
+      },
+      "content": {
+        "description": {
+          "zh": "content/netease/werewolf-town-assassination.md"
+        },
+        "changelog": {
+          "zh": "works/werewolf-town-assassination/changelog.md"
+        },
+        "versions": {
+          "zh": "works/werewolf-town-assassination/versions.md"
+        }
+      },
+      "tags": [
+        "pvp",
+        "asymmetric",
+        "social-deduction",
+        "multiplayer"
+      ]
+    }
+  ]
+}
+

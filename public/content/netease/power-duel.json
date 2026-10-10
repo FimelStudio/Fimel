@@ -1,0 +1,58 @@
+{
+  "sourceUrl": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4649240382612267969",
+  "sourceEndpoint": "https://g79apigatewayobt.nie.netease.com/h5/pe-item-detail-v2",
+  "sourceRequest": {
+    "item_id": "4649240382612267969",
+    "channel_id": 5
+  },
+  "sourceField": "entity.info",
+  "accessedDate": "2026-10-10",
+  "sourceLanguage": "zh-CN",
+  "title": "通电对决",
+  "storeItemId": "4649240382612267969",
+  "storefrontPublisher": "KCINE",
+  "creditedAuthors": [
+    "建造老e",
+    "水晶215"
+  ],
+  "unverifiedVersionFields": {
+    "mod_version": "1.23",
+    "res_version": 3
+  },
+  "publishedAt": "2021-08-07T10:47:57.000Z",
+  "updatedAt": "2021-08-13T04:34:12.000Z",
+  "publishedDate": "2021-08-07",
+  "updatedDate": "2021-08-13",
+  "dateTimezone": "Asia/Shanghai",
+  "publishedUnixSeconds": 1628333277,
+  "updatedUnixSeconds": 1628829252,
+  "resourceSizeBytes": 241160,
+  "descriptionMarkdown": "content/netease/power-duel.md",
+  "originalDescriptionHtml": "<p>地图：通电对决</p><p>地图介绍：2045的某一天，E国最大的高楼大门背恐怖分子强行关闭，楼内的警卫，职员，博士，工程师，将于歹徒展开激烈的搏斗</p><p>据知情人士报道：歹徒方分为杀手以及潜伏职员内部多年的内鬼上帝似乎偏向了守护大楼的守护者，将对随机一人给予不死图腾。</p><p>角色介绍：</p><p>守护者阵营：(目标：制作出末影水晶或剿灭进攻方)</p><p>博士：伤害药水x1、治疗药水x1(博士是最熟悉水晶的人，开局获得制作绿宝石的玻璃x7)</p><p>工程师：(工程师是大楼建造者，没人比他更熟悉大楼及电路)开局获得喷溅水瓶x1，可快速修理电路在一楼控制室，二楼董事办公室，四楼国宾厅各有一个传送锚点。</p><p><br></p><p>警卫：(前特战队员攻防兼备)开局获得盾x1</p><p>弓箭x3</p><p>职员：(公司的最底层，干啥啥不行，逃跑第一名)开局获得雪球x1投掷后短暂影身以及加速</p><p><br></p><p>进攻方阵营：(目标在阻止防守方合成末影水晶的同时，剿灭所有防守方)</p><p>杀手：(20年的特工经验，最后误入歧途)开局获得杀手刀x1使用后短暂定身反胃两刀秒人(60岁的老人，这把刀陪伴了他30年虽然老化严重，但伤害依旧)鸡蛋x1使用后原地爆炸进攻全体免疫此伤害(从特工基地顺走的)进入控制室会报警</p><p><br></p><p>内鬼：(在公司基层潜伏3年，只为等这一天)在职员的基础上还拥有一把一次性剑一刀秒进入控制室不会报警</p><p><br></p><p>注：游戏内所有玩家死亡后会全员播报且掉落所有装备。</p><p>地图介绍：一楼楼梯道口有控制室按下最里面的按钮即可使大楼停电一分钟(进攻方免疫)工程师可修复，一楼走廊，二楼警务处门口，三楼楼梯道均设有商店，可购买箭，药水，合成水晶的材料。</p><p>内鬼五人以上解锁</p><p><br></p><p>注：本地图地图及玩法为建造老e，水晶215原创玩法，如有玩法借鉴，请联系作者！！！</p><p>Fimel Studio出品</p><p><img src=\"https://x19.fp.ps.netease.com/file/610bd87596dee49fe6997de6RN2cICH203\"></p>",
+  "originalEmbeddedImageUrls": [
+    "https://x19.fp.ps.netease.com/file/610bd87596dee49fe6997de6RN2cICH203"
+  ],
+  "cover": {
+    "sourceUrl": "https://x19.fp.ps.netease.com/file/610be396143cfa7b6272b7cbf2AvbJYd03",
+    "sourceBytes": 787497,
+    "sourceWidth": 1000,
+    "sourceHeight": 1000,
+    "localPath": "maps/netease/4649240382612267969.webp",
+    "width": 544,
+    "height": 544,
+    "bytes": 35184,
+    "processing": "Proportional resize and WebP encoding only; no cropping or generated content."
+  },
+  "snapshotStats": {
+    "downloads": 6198,
+    "rating": 4.63,
+    "comments": 16
+  },
+  "conversionNotes": [
+    "Original wording and credited names are retained; Quill font/color styling and empty spacer paragraphs are removed.",
+    "Embedded and gallery images were not downloaded or included.",
+    "Publisher is not assumed to be an individual creator. Where no creator is credited, the catalogue uses the studio attribution supplied by the user.",
+    "mod_version and res_version semantics are unverified and are not presented as work versions.",
+    "Dates reflect storefront create_time and refresh_time, not a complete release history."
+  ]
+}

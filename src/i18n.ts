@@ -1,11 +1,13 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { contentMessages } from './content/messages';
 
 const resources = {
   zh: {
     translation: {
-      nav: { about: "关于我们", works: "精选展示", contact: "联络合作", menu: "菜单", nav_maps: "地图作品", nav_maps_all: "全部地图", nav_maps_be: "基岩版 / 网易版", nav_maps_je: "Java 版地图 / 数据包", nav_mods: "模组 / MODS", nav_tools: "插件与工具" },
-      hero: { gen: "世界生成中...", crafting: "构筑", worlds: "无限", sub: "以机制重组法则，用指令重制原版。<br/>专注于顶尖的 Minecraft 玩法构筑，为您提供远超常理的 PVP、RPG 及硬核解密地图游玩体验。", scroll: "向下滑动" },
+      ...contentMessages.zh,
+      nav: { home: "主页", about: "关于我们", works: "作品", primary: "主导航", language: "切换语言", theme_light: "切换至亮色", theme_dark: "切换至暗色", skip_content: "跳转到内容", contact: "联络合作", menu: "菜单", nav_maps: "地图作品", nav_maps_all: "全部地图", nav_maps_be: "基岩版 / 网易版", nav_maps_je: "Java 版地图 / 数据包", nav_mods: "模组 / MODS", nav_tools: "插件与工具" },
+      hero: { gen: "世界生成中...", crafting: "构筑", worlds: "无限", sub: "期盼在 MC 中玩到任何游戏", scroll: "向下滑动" },
       siteMeta: {
         bingoCategory: 'Minecraft 1.21.11 · Fabric 模组',
         bingoSubtitle: '竞技玩法模组',
@@ -13,56 +15,47 @@ const resources = {
         bingoTags: ['Bingo 对局', 'DDI 规则', '356 条词条', '可选语音实验'],
         contactLabels: ['项目合作', '创作者联动', '玩家反馈 / 技术支持'],
         studio: {
-          originTitle: '从方块出发，构筑可被记住的体验。',
-          originBody: 'Fimel 以 Minecraft 内容创作为起点，但我们关心的不只是地图本身：一段玩法如何被理解，一座世界如何被探索，一套系统如何让玩家愿意留下来。',
-          milestones: [
-            { year: '2019', title: 'Fimel 成立', desc: '从 Minecraft 地图、建筑与玩法设计开始。' },
-            { year: '2021—2025', title: '已发布作品持续累积', desc: '网易基岩版地图陆续上线，沉淀 PvP、PvE、RPG、解谜与逃脱体验。' },
-            { year: 'NOW', title: '向 Java 与工具继续生长', desc: 'Java 地图正在制作；桌面插件与可游玩的模组已公开发布。' }
-          ],
-          principles: [
-            { number: '01', title: '玩法先于装饰', desc: '先定义玩家要做什么、为什么继续，再决定世界如何呈现。' },
-            { number: '02', title: '世界也是系统', desc: '建筑、关卡、规则与反馈共同构成可探索的体验。' },
-            { number: '03', title: '技术服务体验', desc: '命令、数据包、红石、模组与工具应让创意更可实现。' },
-            { number: '04', title: '从 Minecraft 继续生长', desc: '保留方块世界的创作根基，也为未来互动作品预留空间。' }
-          ]
+          originTitle: "正在制作与已经发布",
+          originBody: "21 项网易基岩版作品已发布，包括地图与音乐制作命令包；两个 Java 版地图正在制作。Bingo But Don't Do It 和 Minecraft OBJ Cubizer 已开放下载。之后，我们也想尝试 Minecraft 之外的游戏和互动作品。",
+          milestones: [],
+          principles: []
         }
       },
       home: {
-        studio_label: "MINECRAFT 游戏与互动创意工作室",
-        featured_cta: "快速浏览作品",
-        current_cta: "查看正在制作",
-        status_java: "2 个 Java 项目在制",
-        status_maps: "8 张地图已发布",
-        quick_tag: "快速入口 / START HERE",
-        quick_title: "从这里进入 Fimel 的作品",
+        studio_label: "Minecraft 创作工作室",
+        featured_cta: "浏览作品",
+        current_cta: "Java 项目",
+        status_java: "2 个 Java 项目制作中",
+        status_maps: "21 项网易作品已发布",
+        quick_tag: "作品",
+        quick_title: "地图、模组和创作工具",
         maps_title: "地图作品",
         maps_featured: "海岛逃生：黎明前夕",
-        maps_desc: "从代表地图开始，浏览已发布的网易基岩版作品，以及正在制作的 Java 版地图与数据包。",
+        maps_desc: "网易基岩版地图已发布，Java 版地图正在制作。",
         mods_title: "模组",
         mods_featured: "Bingo But Don't Do It",
-        mods_desc: "已完成并可继续体验的机制、规则与系统扩展。",
+        mods_desc: "在 Bingo 对局里躲开禁止目标，支持队伍共享生命和特殊事件。",
         tools_title: "插件与工具",
         tools_featured: "Minecraft OBJ Cubizer",
-        tools_desc: "已发布的方块转换器，以及服务创作者工作流的技术实验。",
-        enter: "进入"
+        tools_desc: "把建筑 OBJ 或结构文件转换成可编辑的 Blockbench 方块模型。",
+        enter: "查看"
       },
-      marq: { pvp: "PVP 竞技场", rpg: "RPG 沉浸冒险", puz: "硬核解密", vdl: "体素视觉设计", jve: "Java 原生架构" },
-      about: { tag: "工作室宣言", title: "打破传统边界，<br />重塑沙盒交互。", desc: "Fimel 工作室成立于 2019 年。由于起初专注于中国版 Minecraft（网易版），我们在 PvP、PvE、RPG、逃生及建筑等众多类型上均有建树，并取得了众多现象级的下载成绩与玩家口碑。如今团队正同时进军 Java 原生端，在各大神仙服与平台不断刷新玩家的体验认知。", y1: "2019", y1_sub: "创立年份", y2: "10+", y2_sub: "总发行佳作", render: "核心方块载入完毕" },
-      process: { title: "构筑维度", p1: "视觉设计", p1_sub: "从零开始的美学构筑", p2: "原生地形", p2_sub: "亿万级方块尺度演算", p3: "机制编程", p3_sub: "底层引擎逻辑重构", p4: "交互叙事", p4_sub: "多维沉浸感知设计" },
-      core: { tag: "核心领域", pvp: "PvP & PvE 战斗", pvp_d: "涵盖极快判定的技能对抗与职业平衡设计，以及硬核的 PvE 生存玩法与地貌探索。", rpg: "RPG & 剧情逃生", rpg_d: "打造庞大的箱庭世界观、定制模型细节，并融合沉浸式剧情叙事与极具挑战的密室逃脱。", puz: "体素建筑 & 机制", puz_d: "从零构筑震撼视觉的史诗建筑，结合原生红石与高阶数据包重构底层逻辑。" },
+      marq: { pvp: "PvP / PvE", rpg: "RPG 冒险", puz: "解谜与逃生", vdl: "地图建筑", jve: "模组与工具" },
+      about: { tag: "关于 Fimel", title: "原神，<br />启动。", desc: "Fimel 成立于 2019 年，从 Minecraft 地图制作开始。现在，我们也在制作模组和创作者工具。", y1: "2019", y1_sub: "成立年份", y2: "21", y2_sub: "已发布网易作品", render: "拖动方块试试" },
+      process: { title: "制作内容", p1: "场景设计", p1_sub: "建筑、模型与环境", p2: "地形制作", p2_sub: "地图与探索路线", p3: "玩法逻辑", p3_sub: "命令、红石与数据包", p4: "任务与剧情", p4_sub: "关卡流程与故事" },
+      core: { tag: "我们擅长什么", pvp: "对战与生存玩法", pvp_d: "设计职业、技能和对局规则，制作 PvP 对抗与 PvE 合作玩法。", rpg: "冒险、解谜与逃生", rpg_d: "制作剧情、任务与关卡，把探索、解谜和逃生串成完整的游玩流程。", puz: "建筑与游戏逻辑", puz_d: "制作场景和建筑，用命令、红石与数据包实现玩法，也开发模组和工具。" },
       team: { 
-        tag: "核心团队", 
+        tag: "团队成员",
         role1: "创始人 / 策划 / 建筑", 
         role2: "主程序 / 逻辑机制", 
         role3: "视觉设计 / 美术", 
         role4: "关卡交互 / 环境构建" 
       },
       works: {
-        title: "入选<br/>作品", inquire: "获取游玩授权", 
-        category_maps: "地图作品 / MAPS",
-        category_mods: "模组 / MODS",
-        category_tools: "插件与工具 / TOOLS & PLUGINS",
+        title: "精选<br/>作品", inquire: "联系工作室",
+        category_maps: "地图作品",
+        category_mods: "模组",
+        category_tools: "插件与工具",
         m1_t: "狼人杀：F小镇", m1_c: "狼人杀 PvP", m1_d: "网易版现象级角色扮演与推理生存地图。",
         m2_t: "饥饿游戏：旧城迷行", m2_c: "PvP 竞技", m2_d: "基于旧城废墟的冒险与杀戮。",
         m3_t: "ABYSS天坑", m3_c: "Hypixel系 PvP", m3_d: "跌落深渊，在黑暗与绝望中寻找生机。",
@@ -71,12 +64,12 @@ const resources = {
         m6_t: "通电2：雪域危机", m6_c: "非对称对战游戏风", m6_d: "深入破败的极地科考站，重启发电机，面对未知的寒冬与硬核逻辑谜题。",
         m7_t: "海岛逃生：黎明前夕", m7_c: "感染/塔防 PvP", m7_d: "具有复杂的建筑结构的遗世孤岛，在绝境中发掘不为人知的惊天秘密。",
         m8_t: "紫晶幻域：救世光源", m8_c: "剧情驱动 RPG", m8_d: "结合宏大沉浸叙事与定制化模型构建史诗级世界观的独立大型作品。",
-        m9_t: "海岛逃生：黎明前夕 (Java版)", m9_c: "感染/塔防 PvP", m9_d: "经典孤岛生存玩法的 Java 核心重构版，包含全新机制设计。",
-        m10_t: "剧透太多的RPG", m10_c: "沉浸式 RPG", m10_d: "致敬/授权自 KSB 工作室的同名作品改编，宏大的 Java 版叙事 RPG 企划。",
+        m9_t: "海岛逃生：黎明前夕 (Java版)", m9_c: "感染/塔防 PvP", m9_d: "感染逃生与塔防玩法的 Java 版地图，目前正在制作。",
+        m10_t: "剧透过多的RPG：最终的敌人是勇者的父亲", m10_c: "沉浸式 RPG", m10_d: "剧情和任务驱动的 Java 版 RPG，目前正在制作。",
         mod1_t: "未定模组项目", mod1_c: "系统扩充", mod1_d: "更多硬核引擎拓展与独立模组正在研发中，敬请期待。",
         tool1_t: "开发工具链", tool1_c: "工作流集", tool1_d: "基于数据包与插件架构定制的可视化开发辅助与优化脚本框架。",
         view: "查看详情",
-        open_detail_aria: "查看 {{title}} 的网易资源中心详情",
+        open_detail_aria: "查看 {{title}} 的作品详情",
         downloads_metric: "{{downloads}} 下载",
         rating_metric: "{{rating}} 评分",
         comments_metric: "{{comments}} 评论 / {{remarks}} 评价",
@@ -96,7 +89,7 @@ const resources = {
             subtitle: "Hunger Games: Old City",
             category: "网易基岩版地图",
             genre: "生存竞技 / PvP",
-            desc: "旧城废墟中的自由混战。玩家选择天赋后分散出生，通过 TNT 获取物资，并利用铁砧、工作台、特殊区域与道具争夺最终胜利。",
+            desc: "旧城中的自由混战。玩家选择天赋后分散出生，通过 TNT 获取物资，并利用铁砧、工作台、特殊区域与道具争夺最终胜利。",
             players: "多人乱斗",
             components: ["12 种天赋", "TNT 物资", "特殊地区", "死斗玩法"]
           },
@@ -105,7 +98,7 @@ const resources = {
             subtitle: "Abyss Sky Pit",
             category: "网易基岩版地图",
             genre: "乱斗 PvP / 1v1",
-            desc: "以多人乱斗 PvP 为主，也提供纯净 1v1 对战。强化弓箭、雪球破坏、击杀连播与方块皮肤系统让战局持续变化。",
+            desc: "以多人乱斗 PvP 为主，也提供纯净 1v1 对战。强化弓箭、使方块变得易碎的雪球、击杀连播与方块皮肤系统让战局持续变化。",
             players: "多人 / 1v1",
             components: ["强化远程武器", "技能系统", "连杀播报", "方块皮肤"]
           },
@@ -131,17 +124,17 @@ const resources = {
             title: "通电2雪域危机",
             subtitle: "Power On 2: Snow Crisis",
             category: "网易基岩版地图",
-            genre: "非对称解谜生存",
-            desc: "《通电》最终章。玩家深入破败极地科考站，在严寒环境中重启发电机，并破解围绕设施展开的逻辑谜题。",
-            players: "多人协作",
-            components: ["发电机重启", "极地科考站", "逻辑谜题", "生存闯关"]
+            genre: "通电系列最终章",
+            desc: "《通电》最终章，由建造老E与水晶215制作。具体玩法与规则在地图内说明。",
+            players: "详见地图内说明",
+            components: ["通电系列", "最终章", "地图内玩法说明"]
           },
           islandEscapeBeforeDawn: {
             title: "海岛逃生--黎明前夕",
             subtitle: "Island Escape: Before Dawn",
             category: "网易基岩版地图",
             genre: "感染逃生 / 阵营对抗",
-            desc: "4-8 人逃生地图。人类阵营需要修复岛上五座信号塔并等待直升机撤离，感染者则要阻止修复并扩散感染。",
+            desc: "4-8 人逃生地图。人类阵营修复信号塔，使信号进度达到 100% 后等待直升机撤离，感染者则要阻止修复并扩散感染。",
             players: "4-8 人",
             components: ["人类/感染者阵营", "五座信号塔", "职业协作", "直升机撤离"]
           },
@@ -224,8 +217,9 @@ const resources = {
   },
   en: {
     translation: {
-      nav: { about: "About", works: "Showcase", contact: "Contact", menu: "Menu", nav_maps: "Maps", nav_maps_all: "All Maps", nav_maps_be: "Bedrock / NetEase", nav_maps_je: "Java Maps / Datapacks", nav_mods: "Mods", nav_tools: "Tools & Plugins" },
-      hero: { gen: "GENERATING WORLD...", crafting: "CRAFTING", worlds: "WORLDS", sub: "Restructuring rules through commands, reinventing vanilla through logic.<br/>Dedicated to top-tier Minecraft gameplay development, delivering mind-blowing PVP, RPG, and hardcore puzzle map experiences.", scroll: "Scroll" },
+      ...contentMessages.en,
+      nav: { home: "Home", about: "About", works: "Works", primary: "Main navigation", language: "Change language", theme_light: "Use light theme", theme_dark: "Use dark theme", skip_content: "Skip to content", contact: "Contact", menu: "Menu", nav_maps: "Maps", nav_maps_all: "All Maps", nav_maps_be: "Bedrock / NetEase", nav_maps_je: "Java Maps / Datapacks", nav_mods: "Mods", nav_tools: "Tools & Plugins" },
+      hero: { gen: "GENERATING WORLD...", crafting: "CRAFTING", worlds: "WORLDS", sub: "We make Minecraft maps, mods and tools for creators.", scroll: "Scroll" },
       siteMeta: {
         bingoCategory: 'Minecraft 1.21.11 · Fabric Mod',
         bingoSubtitle: 'Competitive Minecraft Mod',
@@ -233,56 +227,47 @@ const resources = {
         bingoTags: ['Bingo matches', 'DDI rules', '356 objectives', 'Optional voice'],
         contactLabels: ['Project collaboration', 'Creator collaboration', 'Player feedback / technical support'],
         studio: {
-          originTitle: 'Starting with blocks, building experiences worth remembering.',
-          originBody: 'Fimel began with Minecraft creation, but we care about more than maps: how a game is understood, how a world is explored, and how systems invite players to stay.',
-          milestones: [
-            { year: '2019', title: 'Fimel founded', desc: 'Started with Minecraft maps, architecture, and gameplay design.' },
-            { year: '2021—2025', title: 'Released works accumulated', desc: 'NetEase Bedrock maps launched across PvP, PvE, RPG, puzzle, and escape experiences.' },
-            { year: 'NOW', title: 'Growing through Java and tools', desc: 'Java maps are in production; a desktop plugin and a playable mod are publicly available.' }
-          ],
-          principles: [
-            { number: '01', title: 'Gameplay precedes decoration', desc: 'First define what the player will do and why they will continue, then decide how the world is presented.' },
-            { number: '02', title: 'The world is a system', desc: 'Architecture, levels, rules, and feedback together form an explorable experience.' },
-            { number: '03', title: 'Tech serves the experience', desc: 'Commands, datapacks, redstone, mods, and tools should make creativity more achievable.' },
-            { number: '04', title: 'Growing from Minecraft', desc: 'Retaining the creative roots of the voxel world, while leaving room for future interactive works.' }
-          ]
+          originTitle: "Released works and current projects",
+          originBody: "21 NetEase Bedrock works are released, including maps and a music command pack; two Java maps are in development. Bingo But Don't Do It and Minecraft OBJ Cubizer are available to download. We also hope to explore games and interactive projects beyond Minecraft.",
+          milestones: [],
+          principles: []
         }
       },
       home: {
-        studio_label: "MINECRAFT GAME & INTERACTIVE CREATIVE STUDIO",
-        featured_cta: "Browse the Work",
-        current_cta: "See What's In Production",
-        status_java: "2 Java projects in production",
-        status_maps: "8 maps released",
-        quick_tag: "QUICK ENTRY / START HERE",
-        quick_title: "Discover Fimel through our work",
+        studio_label: "Minecraft creative studio",
+        featured_cta: "Browse works",
+        current_cta: "Java projects",
+        status_java: "2 Java projects in development",
+        status_maps: "21 NetEase works released",
+        quick_tag: "Works",
+        quick_title: "Maps, mods and creator tools",
         maps_title: "Maps",
         maps_featured: "Island Escape: Before Dawn",
-        maps_desc: "Start with a signature map, then explore released NetEase Bedrock work and Java maps and datapacks in production.",
+        maps_desc: "Released NetEase Bedrock maps and Java maps in development.",
         mods_title: "Mods",
         mods_featured: "Bingo But Don't Do It",
-        mods_desc: "A completed, playable expansion of Minecraft mechanics, rules, and systems.",
+        mods_desc: "Avoid forbidden objectives in Bingo matches, with shared team lives and special events.",
         tools_title: "Plugins & Tools",
         tools_featured: "Minecraft OBJ Cubizer",
-        tools_desc: "A released block-conversion tool and technical experiments for creator workflows.",
-        enter: "Enter"
+        tools_desc: "Convert building OBJ exports or structure files into editable Blockbench cube models.",
+        enter: "View"
       },
-      marq: { pvp: "PvP Arenas", rpg: "RPG Adventures", puz: "Puzzle Maps", vdl: "Voxel Design", jve: "Minecraft Java Edition" },
-      about: { tag: "STUDIO MANIFESTO", title: "Breaking limits,<br />Reshaping sandbox.", desc: "Fimel Studio was established in 2019. Having initially focused on the Chinese edition of Minecraft (NetEase Edition), our works span PvP, PvE, RPG, escaping, and building maps. After phenomenal success and millions of downloads there, we are now pushing the boundaries of Java Edition gameplay across various platforms.", y1: "2019", y1_sub: "Est. Year", y2: "10+", y2_sub: "Masterpieces", render: "RENDER_OBJ: CORE_BLOCK" },
-      process: { title: "DIMENSIONS", p1: "VISUALS", p1_sub: "Ground-up Aesthetics", p2: "TERRAIN", p2_sub: "Billion-scale Generations", p3: "LOGIC", p3_sub: "Engine Refactoring", p4: "NARRATIVE", p4_sub: "Immersive Interactions" },
-      core: { tag: "CORE EXPERTISE", pvp: "PvP & PvE Combat", pvp_d: "Covers high-speed competitive combat, class balance design, and hardcore PvE survival with landscape exploration.", rpg: "RPG & Escapes", rpg_d: "Crafting massive sandbox worlds, custom model details, immersive narratives, and highly challenging escape rooms.", puz: "Architecture & Logic", puz_d: "Building epic, visually stunning structures from scratch while refactoring engine logic via redstone and advanced datapacks." },
+      marq: { pvp: "PvP / PvE", rpg: "RPG adventures", puz: "Puzzles & escapes", vdl: "Map building", jve: "Mods & tools" },
+      about: { tag: "About Fimel", title: "Maps and mods.<br />Tools for creators.", desc: "Fimel was founded in 2019, starting with Minecraft maps. We now make mods and tools for creators as well.", y1: "2019", y1_sub: "Founded", y2: "21", y2_sub: "NetEase works released", render: "Try dragging the cube" },
+      process: { title: "What we make", p1: "Scene design", p1_sub: "Buildings, models and environments", p2: "Terrain", p2_sub: "Maps and exploration routes", p3: "Game logic", p3_sub: "Commands, redstone and data packs", p4: "Quests & stories", p4_sub: "Level progression and narrative" },
+      core: { tag: "What we do", pvp: "Combat & survival", pvp_d: "We design classes, skills and match rules for competitive PvP and cooperative PvE.", rpg: "Adventure, puzzles & escapes", rpg_d: "We build stories, quests and levels that connect exploration, puzzles and escape challenges.", puz: "Building & game logic", puz_d: "We create scenes and buildings, implement gameplay with commands, redstone and data packs, and develop mods and tools." },
       team: { 
-        tag: "CORE TEAM", 
+        tag: "Team",
         role1: "Founder / Game Designer", 
         role2: "Lead Programmer / Logic", 
         role3: "Visual & Art Director", 
         role4: "Level & Env Designer" 
       },
       works: {
-        title: "Selected<br/>Works", inquire: "Inquire For Access", 
-        category_maps: "Map Projects / MAPS",
-        category_mods: "Mod Development / MODS",
-        category_tools: "Plugins & Tools / TOOLS",
+        title: "Selected<br/>works", inquire: "Contact Fimel",
+        category_maps: "Maps",
+        category_mods: "Mods",
+        category_tools: "Plugins & Tools",
         m1_t: "WEREWOLF: F-TOWN", m1_c: "Werewolf PvP", m1_d: "A phenomenal werewolf-style survival map on NetEase Edition.",
         m2_t: "HUNGER GAMES: OLD CITY", m2_c: "Battle Royale PvP", m2_d: "Adrenaline-pumping survival game set in ruined cityscapes.",
         m3_t: "ABYSS", m3_c: "Hypixel-style PvP", m3_d: "Fall into the abyss and seek survival in darkness and despair.",
@@ -291,12 +276,12 @@ const resources = {
         m6_t: "POWER ON 2: SNOW CRISIS", m6_c: "Asymmetrical PvP", m6_d: "Delve into a ruined polar station, restart the generators to survive.",
         m7_t: "ISLAND ESCAPE: BEFORE DAWN", m7_c: "Infection/Tower PvP", m7_d: "A solitary island with complex structures. Discover hidden secrets.",
         m8_t: "AMETHYST: SALVATION", m8_c: "Story-driven RPG", m8_d: "Our first large-scale RPG project. Combines grand narratives with custom models.",
-        m9_t: "ISLAND ESCAPE: BEFORE DAWN (Java Ed.)", m9_c: "Infection/Tower PvP", m9_d: "A Java Edition remake of the classic island survival game, featuring rebuilt complex systems.",
-        m10_t: "TOO MANY SPOILERS RPG", m10_c: "Immersive RPG", m10_d: "An immersive narrative RPG in Java Edition, based on the original work by KSB Studio.",
+        m9_t: "ISLAND ESCAPE: BEFORE DAWN (Java Ed.)", m9_c: "Infection/Tower PvP", m9_d: "A Java map built around infection escape and tower-defense gameplay. In development.",
+        m10_t: "TOO MANY SPOILERS RPG", m10_c: "Immersive RPG", m10_d: "A Java RPG built around stories and quests. In development.",
         mod1_t: "Untitled Mod Project", mod1_c: "System Expansion", mod1_d: "More hardcore engine expansions & standalone mods are in development.",
         tool1_t: "Dev Toolchain", tool1_c: "Workflow Set", tool1_d: "Custom visual dev helpers and optimization scripts based on datapacks & plugins.",
         view: "View Details",
-        open_detail_aria: "Open {{title}} on NetEase Resource Center",
+        open_detail_aria: "View project details for {{title}}",
         downloads_metric: "{{downloads}} downloads",
         rating_metric: "{{rating}} rating",
         comments_metric: "{{comments}} comments / {{remarks}} reviews",
@@ -307,7 +292,7 @@ const resources = {
             subtitle: "Werewolf: F-Town",
             category: "NetEase Bedrock Map",
             genre: "Werewolf PvP / Deduction Survival",
-            desc: "Players are randomly assigned as detective, werewolf, or villager. Werewolves hunt everyone down, the detective uses a bow to identify threats, and villagers collect resources to buy arrows and fight back.",
+            desc: "Players are randomly assigned as detective, werewolf, or villager. Werewolves hunt the detective and villagers, the detective uses a bow to identify threats, and villagers collect resources to buy arrows and fight back.",
             players: "Multiplayer deduction",
             components: ["Random roles", "Detective bow", "Coin shop", "Werewolf team"]
           },
@@ -316,7 +301,7 @@ const resources = {
             subtitle: "Hunger Games: Old City",
             category: "NetEase Bedrock Map",
             genre: "Survival Battle / PvP",
-            desc: "A free-for-all survival battle in a ruined old city. Choose a talent, spawn apart, gather loot through TNT, and use crafting stations, special zones, and items to fight for the final win.",
+            desc: "A free-for-all survival battle in an old city. Choose a talent, spawn apart, gather loot through TNT, and use crafting stations, special zones, and items to fight for the final win.",
             players: "Multiplayer brawl",
             components: ["12 talents", "TNT loot", "Special zones", "Deathmatch mode"]
           },
@@ -325,7 +310,7 @@ const resources = {
             subtitle: "Abyss Sky Pit",
             category: "NetEase Bedrock Map",
             genre: "Brawl PvP / 1v1",
-            desc: "A PvP arena focused on multiplayer brawls with a clean 1v1 mode as well. Enhanced bows, block-breaking snowballs, kill streak broadcasts, and block skins keep each match shifting.",
+            desc: "A PvP arena focused on multiplayer brawls with a clean 1v1 mode as well. Enhanced bows, snowballs that make blocks brittle, kill streak broadcasts, and block skins keep each match shifting.",
             players: "Multiplayer / 1v1",
             components: ["Enhanced ranged weapons", "Skill system", "Kill streak calls", "Block skins"]
           },
@@ -351,17 +336,17 @@ const resources = {
             title: "Power On 2: Snow Crisis",
             subtitle: "Power On 2: Snow Crisis",
             category: "NetEase Bedrock Map",
-            genre: "Asymmetric Puzzle Survival",
-            desc: "The final chapter of Power On. Players enter a ruined polar research station, restart generators in the cold, and solve logic puzzles built around the facility.",
-            players: "Co-op multiplayer",
-            components: ["Generator restart", "Polar station", "Logic puzzles", "Survival stages"]
+            genre: "Power On finale",
+            desc: "The final chapter of Power On, created by 建造老E and 水晶215. Gameplay and rules are explained inside the map.",
+            players: "See in-map instructions",
+            components: ["Power On series", "Final chapter", "In-map instructions"]
           },
           islandEscapeBeforeDawn: {
             title: "Island Escape: Before Dawn",
             subtitle: "Island Escape: Before Dawn",
             category: "NetEase Bedrock Map",
             genre: "Infection Escape / Team Clash",
-            desc: "A 4-8 player escape map. Humans repair five signal towers and wait for helicopter extraction, while the infected team blocks repairs and spreads infection.",
+            desc: "A 4-8 player escape map. Humans repair signal towers until signal progress reaches 100% and wait for helicopter extraction, while the infected team blocks repairs and spreads infection.",
             players: "4-8 players",
             components: ["Human / infected teams", "Five signal towers", "Class teamwork", "Helicopter extraction"]
           },
@@ -444,8 +429,9 @@ const resources = {
   },
   ja: {
     translation: {
-      nav: { about: "我々について", works: "厳選作品", contact: "お問い合わせ", menu: "メニュー", nav_maps: "マップ作品", nav_maps_all: "すべてのマップ", nav_maps_be: "統合版 / NetEase版", nav_maps_je: "Java版マップ / データパック", nav_mods: "MOD", nav_tools: "プラグイン・ツール" },
-      hero: { gen: "世界を生成中...", crafting: "創造", worlds: "無限", sub: "コマンドで法則を再構築し、ロジックでバニラを刷新する。<br/>トップクラスのMinecraftゲームプレイ開発に専念し、常識を覆すPVP、RPG、謎解きのマップ体験を提供します。", scroll: "スクロール" },
+      ...contentMessages.ja,
+      nav: { home: "ホーム", about: "私たちについて", works: "作品", primary: "メインナビゲーション", language: "言語を変更", theme_light: "ライトテーマに変更", theme_dark: "ダークテーマに変更", skip_content: "コンテンツへ移動", contact: "お問い合わせ", menu: "メニュー", nav_maps: "マップ作品", nav_maps_all: "すべてのマップ", nav_maps_be: "統合版 / NetEase版", nav_maps_je: "Java版マップ / データパック", nav_mods: "MOD", nav_tools: "プラグイン・ツール" },
+      hero: { gen: "世界を生成中...", crafting: "創造", worlds: "無限", sub: "Minecraft のマップ、MOD、クリエイター向けツールを制作しています。", scroll: "スクロール" },
       siteMeta: {
         bingoCategory: 'Minecraft 1.21.11 · Fabric MOD',
         bingoSubtitle: '対戦型 Minecraft MOD',
@@ -453,56 +439,47 @@ const resources = {
         bingoTags: ['Bingo 対戦', 'DDI ルール', '356 種類の目標', '音声機能（任意）'],
         contactLabels: ['プロジェクト協業', 'クリエイター連携', 'プレイヤー / 技術サポート'],
         studio: {
-          originTitle: 'ブロックから始まる、記憶に残る体験。',
-          originBody: 'Fimel は Minecraft コンテンツ制作から始まりました。私たちが扱うのはマップだけではなく、遊び方、探索される世界、そしてプレイヤーを留めるシステムです。',
-          milestones: [
-            { year: '2019', title: 'Fimel 設立', desc: 'Minecraft のマップ、建築、ゲームプレイデザインから始動。' },
-            { year: '2021—2025', title: '公開作品を継続', desc: 'NetEase Bedrock のマップを公開し、多様なプレイ体験を積み重ねました。' },
-            { year: 'NOW', title: 'Java とツールへ', desc: 'Java マップを制作中。デスクトッププラグインとプレイ可能な MOD を公開中です。' }
-          ],
-          principles: [
-            { number: '01', title: '装飾より先に遊び', desc: 'プレイヤーの行動と継続理由を定義してから、世界を形にします。' },
-            { number: '02', title: '世界もシステム', desc: '建築、レベル、ルール、フィードバックで探索体験を作ります。' },
-            { number: '03', title: '技術は体験のために', desc: 'コマンド、データパック、MOD、ツールで創造を実現します。' },
-            { number: '04', title: 'Minecraft から広がる', desc: 'ブロック世界の根を保ち、次のインタラクティブ作品へ進みます。' }
-          ]
+          originTitle: "公開済みの作品と制作中のマップ",
+          originBody: "マップと音楽制作コマンドパックを含む NetEase 統合版作品 21 本を公開し、Java 版マップ 2 本を制作しています。Bingo But Don't Do It と Minecraft OBJ Cubizer はダウンロードできます。今後は Minecraft 以外のゲームやインタラクティブな作品にも挑戦したいと考えています。",
+          milestones: [],
+          principles: []
         }
       },
       home: {
-        studio_label: "MINECRAFT ゲーム＆インタラクティブ・クリエイティブスタジオ",
-        featured_cta: "作品をすぐ見る",
-        current_cta: "制作中の作品を見る",
-        status_java: "Java プロジェクト 2 本を制作中",
-        status_maps: "マップ 8 本を公開",
-        quick_tag: "クイック入口 / START HERE",
-        quick_title: "作品から Fimel を知る",
+        studio_label: "Minecraft 制作スタジオ",
+        featured_cta: "作品を見る",
+        current_cta: "Java 作品",
+        status_java: "Java 作品 2 本を制作中",
+        status_maps: "NetEase 作品 21 本を公開",
+        quick_tag: "作品",
+        quick_title: "マップ、MOD、制作ツール",
         maps_title: "マップ",
         maps_featured: "海岛逃生：黎明前夕",
-        maps_desc: "代表マップから、公開済みの NetEase 統合版作品と制作中の Java版マップ・データパックへ。",
+        maps_desc: "NetEase 統合版マップは公開済み、Java 版マップは制作中です。",
         mods_title: "MOD",
         mods_featured: "Bingo But Don't Do It",
-        mods_desc: "完成・公開済みの、プレイ可能な仕組み、ルール、システム拡張。",
+        mods_desc: "Bingo 対戦で禁止目標を避けるルール。チーム共有ライフや特殊イベントにも対応。",
         tools_title: "プラグイン・ツール",
         tools_featured: "Minecraft OBJ Cubizer",
-        tools_desc: "公開済みのブロック変換ツールと、制作工程を支える技術実験。",
-        enter: "開く"
+        tools_desc: "建築 OBJ や構造ファイルを、編集可能な Blockbench のブロックモデルに変換。",
+        enter: "見る"
       },
-      marq: { pvp: "PVP アリーナ", rpg: "RPG アドベンチャー", puz: "謎解きマップ", vdl: "ボクセルデザイン", jve: "Java版 ネイティブ" },
-      about: { tag: "マニフェスト", title: "境界を越え、<br />サンドボックスを再定義する", desc: "Fimel スタジオは2019年に設立されました。初期は主に中国版『Minecraft』（NetEase版）に注力しており、PvP、PvE、RPG、脱出、建築など様々なジャンルのマップ制作を行ってきました。そこでの驚異的なダウンロード数と成功を経て、現在私たちはJava版ネイティブへと活動を広げ、プレイヤーの常識を覆す体験を提供し続けています。", y1: "2019", y1_sub: "設立年", y2: "10+", y2_sub: "総発行作品", render: "コアブロックをレンダリング" },
-      process: { title: "次元", p1: "視覚設計", p1_sub: "ゼロからの美学", p2: "地形生成", p2_sub: "何十億ものブロック規模", p3: "機構構築", p3_sub: "システム再構築", p4: "没入体験", p4_sub: "多次元のインタラクション" },
-      core: { tag: "専門分野", pvp: "PvP & PvE 戦闘", pvp_d: "極めて高速な判定のスキル対人戦や職業バランス設計、およびハードコアなPvEサバイバルと地形探索。", rpg: "RPG & ストーリー脱出", rpg_d: "壮大な箱庭世界感とカスタムモデルの細部を作り込み、没入感のあるストーリーテリングと高難易度の密室脱出を融合。", puz: "ボクセル建築 & 機構", puz_d: "視覚を圧倒する壮大な建築をゼロから構築し、バニラのレッドストーンと高度なデータパックを組み合わせて既存ロジックを再構築。" },
+      marq: { pvp: "PvP / PvE", rpg: "RPG アドベンチャー", puz: "謎解き・脱出", vdl: "マップ建築", jve: "MOD・ツール" },
+      about: { tag: "Fimel について", title: "マップと MOD、<br />制作を支えるツール。", desc: "Fimel は 2019 年に設立され、Minecraft のマップ制作から活動を始めました。現在は MOD やクリエイター向けツールも制作しています。", y1: "2019", y1_sub: "設立年", y2: "21", y2_sub: "公開済みの NetEase 作品", render: "ブロックをドラッグしてみよう" },
+      process: { title: "制作内容", p1: "シーン設計", p1_sub: "建築・モデル・環境", p2: "地形制作", p2_sub: "マップと探索ルート", p3: "ゲームロジック", p3_sub: "コマンド・レッドストーン・データパック", p4: "クエストと物語", p4_sub: "ステージ進行とストーリー" },
+      core: { tag: "得意なこと", pvp: "対戦とサバイバル", pvp_d: "職業、スキル、対戦ルールを設計し、PvP 対戦や協力型 PvE を制作します。", rpg: "冒険・謎解き・脱出", rpg_d: "物語、クエスト、ステージを制作し、探索や謎解き、脱出を一連の遊びにつなげます。", puz: "建築とゲームロジック", puz_d: "シーンや建築をつくり、コマンド、レッドストーン、データパックで遊びを実装します。MOD とツールも開発します。" },
       team: { 
-        tag: "コアチーム", 
+        tag: "メンバー",
         role1: "創設者 / プランナー", 
         role2: "リードプログラマー", 
         role3: "アートディレクター", 
         role4: "レベルデザイナー" 
       },
       works: { 
-        title: "これまでの<br/>代表作", inquire: "アクセス申請", 
-        category_maps: "マップ制作 / MAPS",
-        category_mods: "MODS",
-        category_tools: "プラグイン・ツール / TOOLS",
+        title: "ピックアップ<br/>作品", inquire: "Fimel に問い合わせる",
+        category_maps: "マップ",
+        category_mods: "MOD",
+        category_tools: "プラグイン・ツール",
         m1_t: "狼人殺 F小镇", m1_c: "人狼風 PvP", m1_d: "10万+DL。NetEase版での傑作人狼風サバイバルマップ。",
         m2_t: "饥饿游戏：旧城迷行", m2_c: "サバイバル PvP", m2_d: "5万+DL。廃墟となった旧市街での極限サバイバル。",
         m3_t: "ABYSS天坑", m3_c: "Hypixel系 PvP", m3_d: "1千+DL。深淵に落ち、暗闇の中で生存を探求する傑作。",
@@ -511,12 +488,12 @@ const resources = {
         m6_t: "通電2：雪域危機", m6_c: "非対称対戦ゲーム風", m6_d: "1万+DL。極地基地に潜入し、発電機を再起動する。",
         m7_t: "海岛逃生：黎明前夕", m7_c: "感染/タワー修復 PvP", m7_d: "1万+DL。隔絶された島での絶望と秘密の探索。",
         m8_t: "紫晶幻域：救世光源", m8_c: "ストーリー重視 RPG", m8_d: "1万+DL。壮大な物語とカスタムモデルの初の大規模RPG。",
-        m9_t: "海岛逃生：黎明前夕 (Java版)", m9_c: "感染/タワー修復 PvP", m9_d: "クラシックな孤島サバイバルゲームのJava版リメイク。より複雑なシステムを再構築。",
-        m10_t: "ネタバレが多すぎるRPG", m10_c: "ストーリー RPG", m10_d: "KSBスタジオの原作に基づいた、Java版没入型ストーリーRPG。",
+        m9_t: "海岛逃生：黎明前夕 (Java版)", m9_c: "感染/タワー修復 PvP", m9_d: "感染からの脱出とタワーディフェンスを中心にした Java 版マップ。現在制作中です。",
+        m10_t: "ネタバレが多すぎるRPG", m10_c: "ストーリー RPG", m10_d: "物語とクエストを中心にした Java 版 RPG。現在制作中です。",
         mod1_t: "未定のMODプロジェク", mod1_c: "システム拡張", mod1_d: "さらにハードコアなエンジン拡張と独立したMODが開発中です。ご期待ください。",
         tool1_t: "開発ツールチェーン", tool1_c: "ワークフロー", tool1_d: "データパックとプラグインアーキテクチャに基づく、カスタムな視覚的開発支援と最適化スクリプトフレームワーク。",
         view: "詳細を見る",
-        open_detail_aria: "NetEaseリソースセンターで{{title}}を開く",
+        open_detail_aria: "{{title}}の作品詳細を見る",
         downloads_metric: "{{downloads}} ダウンロード",
         rating_metric: "{{rating}} 評価",
         comments_metric: "{{comments}} コメント / {{remarks}} レビュー",
@@ -536,7 +513,7 @@ const resources = {
             subtitle: "Hunger Games: Old City",
             category: "NetEase統合版マップ",
             genre: "サバイバル競技 / PvP",
-            desc: "廃墟となった旧市街でのサバイバル乱戦です。才能を選んで分散スポーンし、TNTで物資を集め、金床、作業台、特殊エリア、アイテムを活用して勝利を目指します。",
+            desc: "旧市街でのサバイバル乱戦です。才能を選んで分散スポーンし、TNTで物資を集め、金床、作業台、特殊エリア、アイテムを活用して勝利を目指します。",
             players: "多人数乱闘",
             components: ["12種類の才能", "TNT物資", "特殊エリア", "デスマッチ"]
           },
@@ -545,7 +522,7 @@ const resources = {
             subtitle: "Abyss Sky Pit",
             category: "NetEase統合版マップ",
             genre: "乱闘 PvP / 1v1",
-            desc: "多人数乱闘PvPを中心に、純粋な1v1対戦にも対応したマップです。強化された弓、ブロックを壊せる雪玉、連続キル演出、ブロックスキンが戦況を変化させます。",
+            desc: "多人数乱闘PvPを中心に、純粋な1v1対戦にも対応したマップです。強化された弓、ブロックを壊れやすくする雪玉、連続キル演出、ブロックスキンが戦況を変化させます。",
             players: "多人数 / 1v1",
             components: ["強化遠距離武器", "スキルシステム", "連続キル通知", "ブロックスキン"]
           },
@@ -571,17 +548,17 @@ const resources = {
             title: "通電2：雪域危機",
             subtitle: "Power On 2: Snow Crisis",
             category: "NetEase統合版マップ",
-            genre: "非対称パズルサバイバル",
-            desc: "『通電』シリーズの最終章です。荒廃した極地研究施設に入り、厳寒の中で発電機を再起動し、施設をめぐるロジックパズルを解きます。",
-            players: "多人数協力",
-            components: ["発電機再起動", "極地研究施設", "ロジックパズル", "サバイバル攻略"]
+            genre: "通電シリーズ最終章",
+            desc: "建造老Eと水晶215が制作した『通電』シリーズの最終章です。遊び方とルールはマップ内で説明されています。",
+            players: "マップ内の説明を参照",
+            components: ["通電シリーズ", "最終章", "マップ内の説明"]
           },
           islandEscapeBeforeDawn: {
             title: "海島脱出：夜明け前",
             subtitle: "Island Escape: Before Dawn",
             category: "NetEase統合版マップ",
             genre: "感染脱出 / 陣営対抗",
-            desc: "4〜8人向けの脱出マップです。人間陣営は島の5つの信号塔を修理してヘリの救助を待ち、感染者陣営は修理を妨害して感染を広げます。",
+            desc: "4〜8人向けの脱出マップです。人間陣営は信号塔を修理して信号の進捗を100%にし、ヘリの救助を待ちます。感染者陣営は修理を妨害して感染を広げます。",
             players: "4〜8人",
             components: ["人間/感染者陣営", "5つの信号塔", "職業協力", "ヘリ撤収"]
           },
@@ -664,9 +641,16 @@ const resources = {
   }
 };
 
+const savedLanguage = (() => {
+  try {
+    const value = localStorage.getItem('fimel_user_lang');
+    return value && ['zh', 'en', 'ja'].includes(value) ? value : 'zh';
+  } catch { return 'zh'; }
+})();
+
 i18n.use(initReactI18next).init({
   resources,
-  lng: 'zh',
+  lng: savedLanguage,
   fallbackLng: 'en',
   interpolation: { escapeValue: false }
 });

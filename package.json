@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build && node scripts/prepare-bingo-download.mjs",
+    "build": "node scripts/validate-content.mjs && tsc -b && vite build && node scripts/prepare-bingo-download.mjs",
+    "check:content": "node scripts/validate-content.mjs",
+    "test:e2e": "playwright test",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -23,11 +25,14 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-i18next": "^17.0.7",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.18.3",
+    "remark-gfm": "^4.0.1",
     "three": "^0.184.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.0",
     "@tailwindcss/postcss": "^4.3.0",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",

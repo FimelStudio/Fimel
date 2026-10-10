@@ -1,8 +1,10 @@
-/* eslint-disable */
-import React, { useRef, useState } from 'react';
-import { useFrame, Canvas } from '@react-three/fiber';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useFrame, Canvas, useThree } from '@react-three/fiber';
 import { Float, Box, Stars, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
+import { useAnimationActivity } from '../hooks/useAnimationActivity';
+import { SceneReady } from './SceneReady';
+import { useSceneFailureGuard, type SceneLifecycleProps } from './sceneLifecycle';
 
 const BLOCK_TEXTURES = [
   { id: 'grass', top: 'block_top.png', side: 'block_side.png', bottom: 'dirt.png' },
@@ -26,6 +28,13 @@ const BLOCK_TEXTURES = [
   { id: 'TNT', top: 'TNT_top.png', side: 'TNT_side.png', bottom: 'TNT_bottom.png' }
 ];
 
+function configurePixelTexture(texture: THREE.Texture) {
+  texture.magFilter = THREE.NearestFilter;
+  texture.minFilter = THREE.NearestFilter;
+  texture.generateMipmaps = false;
+  texture.needsUpdate = true;
+}
+
 const generateExplosionParticles = () => {
   return Array.from({ length: 15 }).map(() => ({
     velocity: new THREE.Vector3(
@@ -39,25 +48,28 @@ const generateExplosionParticles = () => {
   }));
 };
 
-function ExplosionEffect({ position }: { position: [number, number, number] }) {
+function ExplosionEffect({ position, onComplete }: { position: [number, number, number]; onComplete: () => void }) {
   const basePath = import.meta.env.BASE_URL;
   const texture = useTexture(`${basePath}textures/explosion.png`);
   
   React.useEffect(() => {
-    texture.magFilter = THREE.NearestFilter;
-    texture.minFilter = THREE.NearestFilter;
-    texture.needsUpdate = true;
+    configurePixelTexture(texture);
   }, [texture]);
 
   const groupRef = useRef<THREE.Group>(null);
+  const finished = useRef(false);
   
   const particles = React.useMemo(() => generateExplosionParticles(), []);
 
   useFrame((_, delta) => {
+    if (finished.current) return;
+    delta = Math.min(delta, 0.05);
+    let remaining = false;
     if (groupRef.current) {
       groupRef.current.children.forEach((child, i) => {
         const p = particles[i];
         if (p.lifetime > 0) {
+          remaining = true;
           p.lifetime -= delta;
           child.position.addScaledVector(p.velocity, delta);
           const progress = Math.max(0, p.lifetime / p.maxLife);
@@ -67,6 +79,10 @@ function ExplosionEffect({ position }: { position: [number, number, number] }) {
           (child as THREE.Sprite).material.opacity = 0;
         }
       });
+      if (!remaining) {
+        finished.current = true;
+        onComplete();
+      }
     }
   });
 
@@ -95,9 +111,7 @@ function SmokeEffect({ position }: { position: [number, number, number] }) {
   const texture = useTexture(`${basePath}textures/smoke.png`);
   
   React.useEffect(() => {
-    texture.magFilter = THREE.NearestFilter;
-    texture.minFilter = THREE.NearestFilter;
-    texture.needsUpdate = true;
+    configurePixelTexture(texture);
   }, [texture]);
   
   const groupRef = useRef<THREE.Group>(null);
@@ -148,14 +162,18 @@ export interface CubeData {
   textureIndex: number;
 }
 
-function MinecraftBlock({ cube, isDark }: { cube: CubeData, isDark: boolean }) {
+function MinecraftBlock({ cube, isDark, reducedMotion }: { cube: CubeData, isDark: boolean, reducedMotion: boolean }) {
   const basePath = import.meta.env.BASE_URL;
+  const canvas = useThree(state => state.gl.domElement);
   const config = BLOCK_TEXTURES[cube.textureIndex];
   const isTNT = config.id === 'TNT';
   
   const [primed, setPrimed] = useState(false);
   const [exploded, setExploded] = useState(false);
+  const [explosionFinished, setExplosionFinished] = useState(false);
   const fuseTime = useRef(0);
+
+  useEffect(() => () => { canvas.style.removeProperty('cursor'); }, [canvas]);
   
   const textures = useTexture({
     mapTop: `${basePath}textures/${config.top}`,
@@ -163,13 +181,9 @@ function MinecraftBlock({ cube, isDark }: { cube: CubeData, isDark: boolean }) {
     mapBottom: `${basePath}textures/${config.bottom}`,
   });
 
-  React.useMemo(() => {
-    Object.values(textures).forEach((tex) => {
-      tex.magFilter = THREE.NearestFilter;
-      tex.minFilter = THREE.NearestFilter;
-      tex.generateMipmaps = false;
-    });
-  }, [textures, cube.colorType, isDark]);
+  React.useEffect(() => {
+    Object.values(textures).forEach(configurePixelTexture);
+  }, [textures]);
 
   const { mapTop, mapSide, mapBottom } = textures;
 
@@ -197,13 +211,16 @@ function MinecraftBlock({ cube, isDark }: { cube: CubeData, isDark: boolean }) {
       new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps, color: sideColor }),
       new THREE.MeshStandardMaterial({ map: mapSide, ...commonProps, color: sideColor }),
     ];
-  }, [mapSide, mapTop, mapBottom, config.id]);
+  }, [mapSide, mapTop, mapBottom, config.id, cube.colorType, isDark]);
+
+  useEffect(() => () => materials.forEach(material => material.dispose()), [materials]);
 
   const meshRef = useRef<THREE.Mesh>(null);
   const expandRef = useRef(1);
 
   useFrame((_, delta) => {
     if (exploded) return;
+    delta = Math.min(delta, 0.05);
 
     if (meshRef.current) {
       if (primed) {
@@ -232,30 +249,6 @@ function MinecraftBlock({ cube, isDark }: { cube: CubeData, isDark: boolean }) {
             });
           }
         }
-      } else {
-        const targetColor = new THREE.Color(
-          cube.colorType === 0 
-            ? (isDark ? "#d0d0d0" : "#ffffff") 
-            : cube.colorType === 1 
-              ? (isDark ? "#d8cbe0" : "#ffffff") 
-              : (isDark ? "#cbd8d8" : "#ffffff")
-        );
-        const topTargetColor = config.id === 'grass' ? new THREE.Color("#7cb342").multiply(targetColor) : targetColor;
-        const sideTargetColor = config.id === 'cherry_leaves' ? new THREE.Color("#ffb4d6").multiply(targetColor) : targetColor;
-
-        const targetRoughness = isDark ? 0.6 : 0.8;
-
-        const mats = meshRef.current.material;
-        if (Array.isArray(mats)) {
-          mats.forEach((mat, index: number) => {
-            if (mat instanceof THREE.MeshStandardMaterial) {
-              const finalColor = index === 2 ? topTargetColor : (index === 3 && config.id !== 'cherry_leaves' ? targetColor : sideTargetColor);
-              mat.color.lerp(finalColor, delta * 3);
-              mat.roughness = THREE.MathUtils.lerp(mat.roughness, targetRoughness, delta * 3);
-              mat.emissive.set("#000000");
-            }
-          });
-        }
       }
     }
   });
@@ -263,6 +256,11 @@ function MinecraftBlock({ cube, isDark }: { cube: CubeData, isDark: boolean }) {
   const handleClick = (e: { stopPropagation: () => void }) => {
     if (isTNT && !primed && !exploded) {
       e.stopPropagation();
+      canvas.style.removeProperty('cursor');
+      if (reducedMotion) {
+        setExploded(true);
+        return;
+      }
       setPrimed(true);
       const audio = new Audio(`${basePath}sound/Fuse.ogg`);
       audio.volume = 0.5;
@@ -271,18 +269,19 @@ function MinecraftBlock({ cube, isDark }: { cube: CubeData, isDark: boolean }) {
   };
 
   if (exploded) {
+    if (reducedMotion || explosionFinished) return null;
     return (
       <Float speed={0} rotationIntensity={0} floatIntensity={0} position={cube.position}>
-        <ExplosionEffect position={[0, 0, 0]} />
+        <ExplosionEffect position={[0, 0, 0]} onComplete={() => setExplosionFinished(true)} />
       </Float>
     );
   }
 
   return (
     <Float
-      speed={primed ? 0 : cube.speed}
-      rotationIntensity={primed ? 0 : cube.rotationIntensity}
-      floatIntensity={primed ? 0 : cube.floatIntensity}
+      speed={primed || reducedMotion ? 0 : cube.speed}
+      rotationIntensity={primed || reducedMotion ? 0 : cube.rotationIntensity}
+      floatIntensity={primed || reducedMotion ? 0 : cube.floatIntensity}
       position={cube.position}
     >
       {primed && !exploded && <SmokeEffect position={[0, 0, 0]} />}
@@ -291,30 +290,130 @@ function MinecraftBlock({ cube, isDark }: { cube: CubeData, isDark: boolean }) {
         args={cube.size} 
         material={materials} 
         onClick={handleClick}
-        onPointerOver={() => { if (isTNT && !primed && !exploded) document.body.style.cursor = 'pointer'; }}
-        onPointerOut={() => { if (isTNT) document.body.style.cursor = 'auto'; }}
+        onPointerOver={() => { if (isTNT && !primed && !exploded) canvas.style.setProperty('cursor', 'pointer'); }}
+        onPointerOut={() => { if (isTNT) canvas.style.removeProperty('cursor'); }}
       />
     </Float>
   );
 }
 
-function SceneLights({ isDark }: { isDark: boolean }) {
+const DARK_TINTS = ['#d0d0d0', '#d8cbe0', '#cbd8d8'];
+const ignoreDecorativeRaycast = () => {};
+
+// One instanced mesh per texture replaces hundreds of six-face mesh draw calls.
+// TNT stays separate so its fuse, smoke, click handling, and explosion still work.
+function InstancedBlocks({ cubes, textureIndex, isDark, reducedMotion }: {
+  cubes: CubeData[];
+  textureIndex: number;
+  isDark: boolean;
+  reducedMotion: boolean;
+}) {
+  const mesh = useRef<THREE.InstancedMesh>(null);
+  const basePath = import.meta.env.BASE_URL;
+  const config = BLOCK_TEXTURES[textureIndex];
+  const textures = useTexture([
+    `${basePath}textures/${config.side}`,
+    `${basePath}textures/${config.top}`,
+    `${basePath}textures/${config.bottom}`,
+  ]);
+  const [side, top, bottom] = textures;
+  const invalidate = useThree(state => state.invalidate);
+  const elapsed = useRef(0);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+  const phases = useMemo(() => cubes.map((_, index) => index * 2.399963), [cubes]);
+  const colors = useMemo(() => cubes.map(cube => new THREE.Color(DARK_TINTS[cube.colorType])), [cubes]);
+  const targetColors = useMemo(() => DARK_TINTS.map(color => new THREE.Color(isDark ? color : '#ffffff')), [isDark]);
+  const materials = useMemo(() => {
+    const props = { roughness: 0.8, metalness: 0.1 };
+    const sideMaterial = new THREE.MeshStandardMaterial({
+      ...props, map: side, color: config.id === 'cherry_leaves' ? '#ffb4d6' : '#ffffff',
+    });
+    const topMaterial = new THREE.MeshStandardMaterial({
+      ...props, map: top, color: config.id === 'grass' ? '#7cb342' : '#ffffff',
+    });
+    const bottomMaterial = new THREE.MeshStandardMaterial({ ...props, map: bottom });
+    return [sideMaterial, sideMaterial, topMaterial, bottomMaterial, sideMaterial, sideMaterial];
+  }, [side, top, bottom, config.id]);
+
+  useEffect(() => {
+    textures.forEach(texture => {
+      texture.magFilter = THREE.NearestFilter;
+      texture.minFilter = THREE.NearestFilter;
+      texture.generateMipmaps = false;
+      texture.needsUpdate = true;
+    });
+  }, [textures]);
+
+  useEffect(() => () => new Set(materials).forEach(material => material.dispose()), [materials]);
+
+  useEffect(() => {
+    const current = mesh.current;
+    if (!current) return;
+    current.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    cubes.forEach((cube, index) => {
+      dummy.position.set(...cube.position);
+      dummy.rotation.set(0, 0, 0);
+      dummy.scale.set(...cube.size);
+      dummy.updateMatrix();
+      current.setMatrixAt(index, dummy.matrix);
+      colors[index].copy(targetColors[cube.colorType]);
+      current.setColorAt(index, colors[index]);
+    });
+    current.instanceMatrix.needsUpdate = true;
+    if (current.instanceColor) current.instanceColor.needsUpdate = true;
+    current.computeBoundingSphere();
+    // Float adds less than one world unit; expand once instead of recalculating each frame.
+    if (current.boundingSphere) current.boundingSphere.radius += 1;
+    materials.forEach(material => { material.roughness = isDark ? 0.6 : 0.8; });
+    invalidate();
+  }, [cubes, colors, dummy, targetColors, materials, isDark, invalidate]);
+
+  useFrame((_, delta) => {
+    if (!mesh.current || reducedMotion) return;
+    elapsed.current += Math.min(delta, 0.05);
+    const current = mesh.current;
+    cubes.forEach((cube, index) => {
+      const time = phases[index] + elapsed.current * cube.speed;
+      dummy.position.set(...cube.position);
+      dummy.position.y += Math.sin(time / 4) * cube.floatIntensity / 10;
+      dummy.rotation.set(
+        Math.cos(time / 4) * cube.rotationIntensity / 8,
+        Math.sin(time / 4) * cube.rotationIntensity / 8,
+        Math.sin(time / 4) * cube.rotationIntensity / 20,
+      );
+      dummy.scale.set(...cube.size);
+      dummy.updateMatrix();
+      current.setMatrixAt(index, dummy.matrix);
+    });
+    current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={mesh} args={[undefined, undefined, cubes.length]} material={materials} raycast={ignoreDecorativeRaycast}>
+      <boxGeometry args={[1, 1, 1]} />
+    </instancedMesh>
+  );
+}
+
+function SceneLights({ isDark, reducedMotion }: { isDark: boolean; reducedMotion: boolean }) {
   const ambientRef = useRef<THREE.AmbientLight>(null);
   const dirLight1Ref = useRef<THREE.DirectionalLight>(null);
   const dirLight2Ref = useRef<THREE.DirectionalLight>(null);
+  const firstColor = useMemo(() => new THREE.Color(isDark ? '#9b59b6' : '#ffffff'), [isDark]);
+  const secondColor = useMemo(() => new THREE.Color(isDark ? '#00d2d3' : '#ffffff'), [isDark]);
 
   useFrame((_, delta) => {
-    const lerpFactor = delta * 3;
+    const lerpFactor = reducedMotion ? 1 : Math.min(delta * 3, 1);
     if (ambientRef.current) {
       ambientRef.current.intensity = THREE.MathUtils.lerp(ambientRef.current.intensity, isDark ? 0.4 : 0.6, lerpFactor);
     }
     if (dirLight1Ref.current) {
       dirLight1Ref.current.intensity = THREE.MathUtils.lerp(dirLight1Ref.current.intensity, isDark ? 5 : 1.2, lerpFactor);
-      dirLight1Ref.current.color.lerp(new THREE.Color(isDark ? "#9b59b6" : "#ffffff"), lerpFactor);
+      dirLight1Ref.current.color.lerp(firstColor, lerpFactor);
     }
     if (dirLight2Ref.current) {
       dirLight2Ref.current.intensity = THREE.MathUtils.lerp(dirLight2Ref.current.intensity, isDark ? 5 : 0.6, lerpFactor);
-      dirLight2Ref.current.color.lerp(new THREE.Color(isDark ? "#00d2d3" : "#ffffff"), lerpFactor);
+      dirLight2Ref.current.color.lerp(secondColor, lerpFactor);
     }
   });
 
@@ -332,14 +431,17 @@ function SceneLights({ isDark }: { isDark: boolean }) {
 const generateCubes = () => {
   const generated: CubeData[] = [];
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  const count = isMobile ? 120 : 400; 
+  const device = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+  const constrained = Boolean(device.connection?.saveData) || device.hardwareConcurrency <= 4 ||
+    Boolean(device.deviceMemory && device.deviceMemory <= 4);
+  const count = isMobile ? (constrained ? 60 : 120) : (constrained ? 180 : 400);
   
   for (let i = 0; i < count; i++) {
     const textureIndex = i % BLOCK_TEXTURES.length;
     
     // Better scale distribution: 50% small, 35% medium, 15% huge
     const rand = Math.random();
-    let sizeScale = 1;
+    let sizeScale: number;
     let isSmall = false;
     if (rand < 0.5) {
       sizeScale = Math.random() * 0.3 + 0.2;
@@ -394,10 +496,12 @@ const generateCubes = () => {
   return generated;
 };
 
-function CameraRig() {
+function CameraRig({ reducedMotion }: { reducedMotion: boolean }) {
   const isInitial = React.useRef(true);
 
   useFrame((state, delta) => {
+    if (reducedMotion) return;
+    delta = Math.min(delta, 0.05);
     if (isInitial.current) {
       // Start the camera far right, high up, and zoomed out to create a dramatic "drop-in" spatial slide
       state.camera.position.set(25, 20, 40);
@@ -418,25 +522,42 @@ function CameraRig() {
   return null;
 }
 
-export function ParticleCubes({ isDark }: { isDark: boolean }) {
+export function ParticleCubes({ isDark, onReady, onUnavailable }: { isDark: boolean } & SceneLifecycleProps) {
   const [cubes] = React.useState(generateCubes);
+  const [assetsReady, setAssetsReady] = useState(false);
+  const container = useRef<HTMLDivElement>(null);
+  const { active, reducedMotion, constrained } = useAnimationActivity(container);
+  useSceneFailureGuard(container, onUnavailable);
+  const markReady = useCallback(() => {
+    setAssetsReady(true);
+    onReady?.();
+  }, [onReady]);
+  const groups = useMemo(() => BLOCK_TEXTURES.map((config, textureIndex) => ({
+    config,
+    textureIndex,
+    cubes: cubes.filter(cube => cube.textureIndex === textureIndex),
+  })), [cubes]);
 
   return (
+    <div ref={container} className="w-full h-full pointer-events-auto" aria-hidden="true">
     <Canvas 
       camera={{ position: [0, 0, 15], fov: 45 }} 
-      gl={{ alpha: false, antialias: true, powerPreference: 'high-performance' }}
-      dpr={[1, 1.5]}
+      gl={{ alpha: false, antialias: !constrained, powerPreference: constrained ? 'low-power' : 'high-performance' }}
+      frameloop={active && assetsReady && !reducedMotion ? 'always' : 'demand'}
+      dpr={constrained ? 1 : [1, 1.5]}
       performance={{ min: 0.5 }}
     >
-      <color attach="background" args={[isDark ? '#0a0a0a' : '#f4f4f5']} />
-      <CameraRig />
-      <SceneLights isDark={isDark} />
-      {isDark && <Stars radius={50} depth={50} count={1200} factor={3} saturation={0} fade speed={1} />}
+      <color attach="background" args={[isDark ? '#0d1117' : '#f4f4f5']} />
+      <CameraRig reducedMotion={reducedMotion} />
+      <SceneLights isDark={isDark} reducedMotion={reducedMotion} />
+      {isDark && <Stars radius={50} depth={50} count={constrained ? 400 : 1200} factor={3} saturation={0} fade speed={reducedMotion ? 0 : 1} />}
       <React.Suspense fallback={null}>
-        {cubes.map((cube, i) => (
-          <MinecraftBlock key={i} cube={cube} isDark={isDark} />
-        ))}
+        {groups.map(({ config, textureIndex, cubes: groupCubes }) => config.id === 'TNT'
+          ? groupCubes.map((cube, index) => <MinecraftBlock key={`TNT-${index}`} cube={cube} isDark={isDark} reducedMotion={reducedMotion} />)
+          : <InstancedBlocks key={config.id} cubes={groupCubes} textureIndex={textureIndex} isDark={isDark} reducedMotion={reducedMotion} />)}
+        <SceneReady onReady={markReady} />
       </React.Suspense>
     </Canvas>
+    </div>
   );
 }

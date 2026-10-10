@@ -1,5 +1,6 @@
 import React, { type MouseEvent, useRef, useState } from 'react';
-import { motion, useSpring, useTransform, useMotionValue } from 'motion/react';
+import { motion, useSpring, useTransform, useMotionValue, useReducedMotion } from 'motion/react';
+import { useFinePointer } from '../hooks/useAnimationActivity';
 
 interface TiltGlareCardProps {
   children: React.ReactNode;
@@ -11,6 +12,10 @@ interface TiltGlareCardProps {
 export function TiltGlareCard({ children, className = '', onClick, href }: TiltGlareCardProps) {
   const ref = useRef<HTMLAnchorElement>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const bounds = useRef<DOMRect | null>(null);
+  const reducedMotion = useReducedMotion();
+  const finePointer = useFinePointer();
+  const enableTilt = finePointer && !reducedMotion;
 
   // Motion values for pointer coordinates
   const x = useMotionValue(0);
@@ -25,12 +30,12 @@ export function TiltGlareCard({ children, className = '', onClick, href }: TiltG
   const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-5deg", "5deg"]);
 
   // Map mouse coordinates to glare background position
-  const glareX = useTransform(mouseXSpring, [-0.5, 0.5], ["100%", "0%"]);
-  const glareY = useTransform(mouseYSpring, [-0.5, 0.5], ["100%", "0%"]);
+  const glareX = useTransform(mouseXSpring, [-0.5, 0.5], ["0%", "-50%"]);
+  const glareY = useTransform(mouseYSpring, [-0.5, 0.5], ["0%", "-50%"]);
 
   const handleMouseMove = (e: MouseEvent<HTMLAnchorElement>) => {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
+    if (!enableTilt || !bounds.current) return;
+    const rect = bounds.current;
     const width = rect.width;
     const height = rect.height;
     // Normalize coordinates between -0.5 and 0.5
@@ -41,11 +46,14 @@ export function TiltGlareCard({ children, className = '', onClick, href }: TiltG
   };
 
   const handleMouseEnter = () => {
+    if (!enableTilt) return;
+    bounds.current = ref.current?.getBoundingClientRect() ?? null;
     setIsHovered(true);
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
+    bounds.current = null;
     // Reset to center
     x.set(0);
     y.set(0);
@@ -60,8 +68,8 @@ export function TiltGlareCard({ children, className = '', onClick, href }: TiltG
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{
-        rotateX,
-        rotateY,
+        rotateX: enableTilt ? rotateX : 0,
+        rotateY: enableTilt ? rotateY : 0,
         transformStyle: "preserve-3d",
       }}
       className={`relative block perspective-1000 ${className}`}
@@ -70,21 +78,22 @@ export function TiltGlareCard({ children, className = '', onClick, href }: TiltG
       <motion.div
         className="absolute inset-0 z-20 pointer-events-none rounded-[inherit]"
         style={{
-          background: "radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, transparent 60%)",
-          left: glareX,
-          top: glareY,
+          background: "radial-gradient(circle at center, rgba(240,246,252,0.15) 0%, transparent 60%)",
+          x: glareX,
+          y: glareY,
+          left: 0,
+          top: 0,
           width: "200%",
           height: "200%",
-          transform: "translate(-50%, -50%)",
-          opacity: isHovered ? 1 : 0,
-          transition: "opacity 0.4s ease"
+          opacity: enableTilt && isHovered ? 1 : 0,
+          transition: reducedMotion ? 'none' : "opacity 0.4s ease"
         }}
       />
       
       {/* Inner content wrapper for scale effect on hover */}
       <div 
         className="relative w-full h-full transform-style-3d transition-transform duration-500 rounded-[inherit]"
-        style={{ transform: isHovered ? "translateZ(10px)" : "translateZ(0)" }}
+        style={{ transform: enableTilt && isHovered ? "translateZ(10px)" : "translateZ(0)" }}
       >
         {children}
       </div>

@@ -1,0 +1,47 @@
+{
+  "i18nKey": "powerOn2SnowCrisis",
+  "sourceUrl": "https://resource-minecraft.h5.163.com/#/detail?id=4655644384723477429",
+  "sourceEndpoint": "https://g79apigatewayobt.nie.netease.com/h5/pe-item-detail-v2",
+  "sourceRequest": {
+    "item_id": "4655644384723477429",
+    "channel_id": 5
+  },
+  "sourceField": "entity.info",
+  "accessedDate": "2026-10-10",
+  "sourceLanguage": "zh-CN",
+  "title": "通电2雪域危机",
+  "storeItemId": "4655644384723477429",
+  "unverifiedVersionFields": {
+    "mod_version": "2.1"
+  },
+  "author": "KCINE",
+  "authorRole": "storefront publisher; see creditedAuthors and original description for creators",
+  "creditedAuthors": [
+    "建造老E",
+    "水晶215"
+  ],
+  "publishedAt": "2022-06-02T13:36:07.000Z",
+  "updatedAt": "2022-06-02T13:36:07.000Z",
+  "publishedDate": "2022-06-02",
+  "updatedDate": "2022-06-02",
+  "dateTimezone": "Asia/Shanghai",
+  "publishedUnixSeconds": 1654176967,
+  "updatedUnixSeconds": 1654176967,
+  "descriptionMarkdown": "content/netease/powerOn2SnowCrisis.md",
+  "originalDescriptionHtml": "<p>通电最终章，为你呈上</p><p>具体玩法详见地图内</p><p>作者：建造老E&nbsp;水晶215</p><p><br></p><p>本次新地图建筑精美，游戏玩法创新，快来体验吧</p><p><br></p><p><br></p><p><img src=\"https://x19.fp.ps.netease.com/file/6289966b6d30e90bd0038e4bHBKKVXUt04\"></p>",
+  "originalEmbeddedImageUrls": [
+    "https://x19.fp.ps.netease.com/file/6289966b6d30e90bd0038e4bHBKKVXUt04"
+  ],
+  "snapshotStats": {
+    "downloads": 22915,
+    "rating": 4.75,
+    "comments": 16,
+    "ratingsCount": 64
+  },
+  "conversionNotes": [
+    "Quill font sizes, colors and blank spacer paragraphs were removed; original HTML is retained above.",
+    "Original embedded images were not downloaded or inserted into the Markdown.",
+    "Wording, historical contacts and credited names are retained from the source.",
+    "Published and updated dates reflect API create_time and refresh_time, not an inferred release history."
+  ]
+}

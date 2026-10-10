@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 
 export function CurtainLoading({ isLoading }: { isLoading: boolean }) {
   const [progress, setProgress] = useState(0);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     if (isLoading) {
@@ -23,10 +24,10 @@ export function CurtainLoading({ isLoading }: { isLoading: boolean }) {
     <AnimatePresence>
       {isLoading && (
         <motion.div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-paper dark:bg-obsidian"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-paper dark:bg-canvas pointer-events-none"
           initial={{ y: 0 }}
-          exit={{ y: "-100%" }}
-          transition={{ duration: 1.2, ease: [0.7, 0, 0.1, 1] as const }} // Cinematic curtain raise
+          exit={reducedMotion ? { opacity: 0 } : { y: "-100%" }}
+          transition={{ duration: reducedMotion ? 0 : 0.45, ease: [0.7, 0, 0.1, 1] as const }}
         >
           {/* Subtle noise/texture overlay for the curtain */}
           <div 
@@ -38,18 +39,18 @@ export function CurtainLoading({ isLoading }: { isLoading: boolean }) {
           
           <div className="relative flex flex-col items-center overflow-hidden">
             <motion.div
-              initial={{ y: "100%", opacity: 0 }}
+              initial={reducedMotion ? false : { y: "100%", opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] as const }}
-              className="font-mono text-7xl md:text-9xl font-black text-obsidian dark:text-white mix-blend-difference"
+              transition={{ duration: reducedMotion ? 0 : 0.6, ease: [0.16, 1, 0.3, 1] as const }}
+              className="font-mono text-7xl md:text-9xl font-black text-obsidian dark:text-content"
             >
               {Math.min(progress, 100)}%
             </motion.div>
           </div>
           
           <motion.div 
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 text-xs font-mono uppercase tracking-[0.3em] text-gray-500"
+            className="absolute bottom-10 left-1/2 -translate-x-1/2 text-xs font-mono uppercase tracking-[0.3em] text-gray-500 dark:text-content-muted"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

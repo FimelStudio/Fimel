@@ -1,0 +1,57 @@
+{
+  "sourceUrl": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648994215119378218",
+  "sourceEndpoint": "https://g79apigatewayobt.nie.netease.com/h5/pe-item-detail-v2",
+  "sourceRequest": {
+    "item_id": "4648994215119378218",
+    "channel_id": 5
+  },
+  "sourceField": "entity.info",
+  "accessedDate": "2026-10-10",
+  "sourceLanguage": "zh-CN",
+  "title": "决战，卡得！",
+  "storeItemId": "4648994215119378218",
+  "storefrontPublisher": "KCINE",
+  "creditedAuthors": [
+    "建造老e"
+  ],
+  "unverifiedVersionFields": {
+    "mod_version": "1.23",
+    "res_version": 4
+  },
+  "publishedAt": "2021-08-07T10:48:27.000Z",
+  "updatedAt": "2021-08-13T04:50:45.000Z",
+  "publishedDate": "2021-08-07",
+  "updatedDate": "2021-08-13",
+  "dateTimezone": "Asia/Shanghai",
+  "publishedUnixSeconds": 1628333307,
+  "updatedUnixSeconds": 1628830245,
+  "resourceSizeBytes": 7213718,
+  "descriptionMarkdown": "content/netease/battle-for-kade.md",
+  "originalDescriptionHtml": "<p><span class=\"ql-size-large\">地图：决战，卡得！</span></p><p><span class=\"ql-size-large\">作者：建造老e</span></p><p><span class=\"ql-size-large\">公元1500年，夏尔王室，人类王室，精灵王室三国联合攻打卡得，今日乃决战之日，就让你来带领三国战胜卡得吧。(本游戏建议4人以上游玩)</span></p><p><br></p><p><br></p><p><br></p><p><span class=\"ql-size-large\">﻿</span></p><p><img src=\"https://x19.fp.ps.netease.com/file/60fd35ab6f04944a06674fc2GoDBvPu603\"></p><p>Fimel Studio出品</p><p>交流群1060796710/937760015</p>",
+  "originalEmbeddedImageUrls": [
+    "https://x19.fp.ps.netease.com/file/60fd35ab6f04944a06674fc2GoDBvPu603"
+  ],
+  "cover": {
+    "sourceUrl": "https://x19.fp.ps.netease.com/file/60fd354a5e602721e1eb0666BhvoCUue03",
+    "sourceBytes": 1276583,
+    "sourceWidth": 1000,
+    "sourceHeight": 1000,
+    "localPath": "maps/netease/4648994215119378218.webp",
+    "width": 544,
+    "height": 544,
+    "bytes": 58898,
+    "processing": "Proportional resize and WebP encoding only; no cropping or generated content."
+  },
+  "snapshotStats": {
+    "downloads": 15630,
+    "rating": 4.85,
+    "comments": 5
+  },
+  "conversionNotes": [
+    "Original wording and credited names are retained; Quill font/color styling and empty spacer paragraphs are removed.",
+    "Embedded and gallery images were not downloaded or included.",
+    "Publisher is not assumed to be an individual creator. Where no creator is credited, the catalogue uses the studio attribution supplied by the user.",
+    "mod_version and res_version semantics are unverified and are not presented as work versions.",
+    "Dates reflect storefront create_time and refresh_time, not a complete release history."
+  ]
+}
