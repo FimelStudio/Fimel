@@ -143,7 +143,7 @@ export const Home: React.FC = () => {
                 onClick={(e) => openCategory(e, '/works?type=bedrock')}
                 className="hover-target reveal-up group relative min-h-[22rem] md:min-h-[30rem] overflow-hidden border border-white/10 bg-obsidian/70 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] text-white col-span-1 md:col-span-12 lg:col-span-7"
               >
-                <img src={`${basePath}maps/island-escape-before-dawn.png`} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover opacity-70 transition-transform duration-[1200ms] ease-out group-hover:scale-105" />
+                <img src={`${basePath}assets/images/works/island-escape-before-dawn/cover.png`} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover opacity-70 transition-transform duration-[1200ms] ease-out group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
                 <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-10 pointer-events-none">
                   <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/60 mb-4">{t('home.maps_title')}</span>
@@ -164,7 +164,7 @@ export const Home: React.FC = () => {
                 onClick={(e) => openCategory(e, '/works?type=mods')}
                 className="hover-target reveal-up group relative min-h-[20rem] md:min-h-[30rem] overflow-hidden border border-emerald-500/10 bg-[#07120a]/80 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] text-white col-span-1 md:col-span-6 lg:col-span-5"
               >
-                <img src={`${basePath}bingo-but-dont-do-it-logo.png`} alt="" loading="lazy" decoding="async" className="absolute inset-x-0 top-10 w-full h-[50%] object-contain p-6 opacity-80 transition-all duration-[1200ms] ease-out group-hover:scale-110 group-hover:opacity-100" />
+                <img src={`${basePath}assets/images/works/bingo-but-dont-do-it/cover.png`} alt="" loading="lazy" decoding="async" className="absolute inset-x-0 top-10 w-full h-[50%] object-contain p-6 opacity-80 transition-all duration-[1200ms] ease-out group-hover:scale-110 group-hover:opacity-100" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#07120a] via-[#07120a]/80 to-transparent"></div>
                 <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-10 pointer-events-none">
                   <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-300/70 mb-4">{t('home.mods_title')}</span>
@@ -186,7 +186,7 @@ export const Home: React.FC = () => {
                 className="hover-target reveal-up group relative min-h-[16rem] md:min-h-[22rem] overflow-hidden border border-obsidian/10 dark:border-line bg-white/80 dark:bg-surface/80 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] text-obsidian dark:text-content col-span-1 md:col-span-6 lg:col-span-12"
               >
                 <div className="absolute right-0 top-0 w-1/2 h-full hidden md:flex items-center justify-end pr-12 bg-[radial-gradient(circle_at_center,rgba(0,210,211,0.15),transparent_66%)]">
-                  <img src={`${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.svg`} alt="" loading="lazy" decoding="async" className="w-[60%] h-[60%] object-contain opacity-85 transition-all duration-[1200ms] ease-out group-hover:scale-105 group-hover:opacity-100" />
+                  <img src={`${basePath}assets/images/works/minecraft-obj-cubizer/cover.svg`} alt="" loading="lazy" decoding="async" className="w-[60%] h-[60%] object-contain opacity-85 transition-all duration-[1200ms] ease-out group-hover:scale-105 group-hover:opacity-100" />
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-transparent dark:from-surface dark:via-surface/95 md:w-2/3"></div>
                 <div className="relative z-10 h-full flex flex-col justify-center p-8 md:p-12 w-full md:w-2/3 lg:w-1/2 pointer-events-none">
@@ -203,6 +203,10 @@ export const Home: React.FC = () => {
                 </div>
               </TiltGlareCard>
             </div>
+          <div className="mt-7 flex flex-wrap gap-x-7 gap-y-2 font-mono text-sm text-obsidian dark:text-content">
+            <Link to="/works?type=java" className="hover-target inline-flex min-h-11 items-center gap-2 hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">{t('nav.nav_maps_je')} <ArrowUpRight aria-hidden className="h-4 w-4" /></Link>
+            <Link to="/works?type=datapacks" className="hover-target inline-flex min-h-11 items-center gap-2 hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">{t('nav.nav_datapacks')} <ArrowUpRight aria-hidden className="h-4 w-4" /></Link>
+          </div>
         </div>
       </section>
 
@@ -288,7 +292,7 @@ export const Home: React.FC = () => {
                   { slug: 'spoiler-rpg', title: t('works.m10_t'), category: t('works.m10_c'), desc: t('works.m10_d'), texture: 'diamond_block.png', accent: 'hover:border-diamond hover:text-brand' }
                 ].map((work) => (
                   <Link key={work.title} to={`/works/${work.slug}`} className={`hover-target group relative min-h-[18rem] overflow-hidden border border-obsidian/10 dark:border-line p-6 flex flex-col justify-end transition-colors duration-500 ${work.accent}`}>
-                    <div className="parallax-bg absolute inset-[-18%] w-[136%] h-[136%] opacity-30 dark:opacity-40 bg-repeat image-rendering-pixelated group-hover:scale-110 transition-transform duration-[1.5s] ease-out" style={{ backgroundImage: `url(${basePath}textures/${work.texture})`, backgroundSize: '112px' }}></div>
+                    <div className="parallax-bg absolute inset-[-18%] w-[136%] h-[136%] opacity-30 dark:opacity-40 bg-repeat image-rendering-pixelated group-hover:scale-110 transition-transform duration-[1.5s] ease-out" style={{ backgroundImage: `url(${basePath}assets/textures/minecraft/${work.texture})`, backgroundSize: '112px' }}></div>
                     <div className="relative z-10">
                       <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-gray-600 dark:text-content-muted">{work.category}</p>
                       <h4 className="mt-3 text-2xl md:text-3xl font-bold uppercase tracking-tighter leading-none">{work.title}</h4>
@@ -316,7 +320,7 @@ export const Home: React.FC = () => {
               {[bedrockEntries[6], bedrockEntries[7], bedrockEntries[0]].map((work) => {
                 return (
                   <article key={work.link} className="reveal-up group relative min-h-[30rem] overflow-hidden bg-[#e0e0e0] dark:bg-canvas border border-obsidian/5 dark:border-line/70" onMouseEnter={() => setTooltipContent({ visible: true, title: work.title, category: work.category, desc: work.desc })} onMouseLeave={() => setTooltipContent({ visible: false, title: '', category: '', desc: '' })}>
-                    <Link to={`/works/${work.image.replace('maps/', '').replace('.png', '')}`} className="hover-target absolute inset-0">
+                    <Link to={`/works/${work.slug}`} className="hover-target absolute inset-0">
                       <div className="parallax-bg absolute inset-[-18%] w-[136%] h-[136%]">
                         <img src={`${basePath}${work.image}`} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" />
                       </div>
@@ -354,7 +358,7 @@ export const Home: React.FC = () => {
               <div className="max-w-4xl">
                 <Link to="/works/minecraft-obj-cubizer" className="hover-target reveal-up group relative min-h-[22rem] overflow-hidden p-7 md:p-10 border border-obsidian/10 dark:border-line flex flex-col justify-end bg-[#e5e5e5] dark:bg-surface">
                   <div className="parallax-bg absolute inset-[-15%] w-[130%] h-[130%] opacity-20 dark:opacity-30 group-hover:scale-110 transition-transform duration-[1.5s] ease-out flex items-center justify-center p-10">
-                    <img src={`${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.svg`} alt="Minecraft OBJ Cubizer" className="w-full h-full max-w-md object-contain opacity-90" />
+                    <img src={`${basePath}assets/images/works/minecraft-obj-cubizer/cover.svg`} alt="Minecraft OBJ Cubizer" className="w-full h-full max-w-md object-contain opacity-90" />
                   </div>
                   <div className="relative z-10">
                     <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-gray-600 dark:text-content-muted">{t('workPages.tools.objCubizer.category')} · {t('catalogue.live')}</p>
@@ -375,7 +379,7 @@ export const Home: React.FC = () => {
                 </Link>
               </div>
               <Link to="/works/bingo-but-dont-do-it" className="hover-target reveal-up group relative block min-h-[18rem] overflow-hidden p-7 md:p-10 border border-obsidian/10 dark:border-line bg-[#07120a]">
-                <img src={`${basePath}bingo-but-dont-do-it-logo.png`} alt={t('home.mods_featured')} className="parallax-bg absolute inset-[-10%] w-[120%] h-[120%] object-contain p-8 md:p-12 opacity-55 group-hover:opacity-80 group-hover:scale-105 transition-all duration-[1.2s] ease-out" />
+                <img src={`${basePath}assets/images/works/bingo-but-dont-do-it/cover.png`} alt={t('home.mods_featured')} className="parallax-bg absolute inset-[-10%] w-[120%] h-[120%] object-contain p-8 md:p-12 opacity-55 group-hover:opacity-80 group-hover:scale-105 transition-all duration-[1.2s] ease-out" />
                 <div className="absolute inset-0 bg-gradient-to-r from-[#07120a] via-[#07120a]/55 to-transparent"></div>
                 <div className="relative z-10 max-w-xl pt-24">
                   <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-300">{siteMeta.bingoCategory} · {t('workPages.status.live')}</p>
@@ -397,7 +401,7 @@ export const Home: React.FC = () => {
           opacity: tooltipContent.visible ? 1 : 0,
           borderStyle: 'solid',
           borderWidth: '8px',
-          borderImageSource: `url(${basePath}HUD/Tooltip_background.png)`,
+          borderImageSource: `url(${basePath}assets/images/ui/minecraft/Tooltip_background.png)`,
           borderImageSlice: '6 fill',
           borderImageRepeat: 'stretch',
           textShadow: '2px 2px 0px #3f3f3f',

@@ -1,0 +1,95 @@
+{
+  "i18nKey": "werewolfFTown",
+  "sourceUrl": "https://resource-minecraft.h5.163.com/#/detail?id=4648588173337957318",
+  "sourceEndpoint": "https://g79apigatewayobt.nie.netease.com/h5/pe-item-detail-v2",
+  "sourceRequest": {
+    "item_id": "4648588173337957318",
+    "channel_id": 5
+  },
+  "sourceField": "entity.info",
+  "accessedDate": "2026-10-10",
+  "sourceLanguage": "zh-CN",
+  "title": "狼人杀-F小镇",
+  "storeItemId": "4648588173337957318",
+  "unverifiedVersionFields": {
+    "mod_version": "1.23"
+  },
+  "author": "KCINE",
+  "authorRole": "storefront publisher; see creditedAuthors and original description for creators",
+  "creditedAuthors": [
+    "FIMEL STUDIO"
+  ],
+  "publishedAt": "2021-07-12T06:04:03.000Z",
+  "updatedAt": "2021-07-12T06:04:03.000Z",
+  "publishedDate": "2021-07-12",
+  "updatedDate": "2021-07-12",
+  "dateTimezone": "Asia/Shanghai",
+  "publishedUnixSeconds": 1626069843,
+  "updatedUnixSeconds": 1626069843,
+  "descriptionMarkdown": "works/werewolf-f-town/description.zh.md",
+  "originalDescriptionHtml": "<p>狼人杀-F小镇</p><p>FIMEL STUDIO工作室出品</p><p>玩法：开局随机分配侦探，狼人和平民，狼人要去gan侦探和平民全部gan完获胜</p><p>侦探开局有弓，找出狼人进行击杀，平民可以捡钱买箭来反击狼人</p><p>感谢你的游玩</p><p><img src=\"https://x19.fp.ps.netease.com/file/60e502177f9d2a35f1f08587Ow1cN9gw03\"></p>",
+  "originalEmbeddedImageUrls": [
+    "https://x19.fp.ps.netease.com/file/60e502177f9d2a35f1f08587Ow1cN9gw03"
+  ],
+  "snapshotStats": {
+    "downloads": 430994,
+    "rating": 4.1,
+    "comments": 87,
+    "ratingsCount": 188
+  },
+  "conversionNotes": [
+    "Quill font sizes, colors and blank spacer paragraphs were removed; original HTML is retained above.",
+    "Original embedded images were not downloaded or inserted into the Markdown.",
+    "Wording, historical contacts and credited names are retained from the source.",
+    "Published and updated dates reflect API create_time and refresh_time, not an inferred release history."
+  ],
+  "gallery": {
+    "retrieved": "2026-10-11",
+    "sourceField": "entity.pic_url_list",
+    "images": [
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/60e501768b742752dba7f7bdQC0uYpJS03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/werewolf-f-town/gallery-01.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 72330,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 673852,
+        "originalSha256": "e1fd4db0f4b87f3d950b061d6ec7fd4e495b8ef107f32fe74bcee9953bf0a9f5",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/60e5017e8b74274c0847d3afEoSKUW0w03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/werewolf-f-town/gallery-02.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 68780,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 713412,
+        "originalSha256": "14cd408ac1a5d1f30ce58c6de783c2f502abb4c71ed5fef6d3470a404a6454c0",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/60e5018a143cfa4f7d6d658bD6FcxKsm03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/werewolf-f-town/gallery-03.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 47676,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 516851,
+        "originalSha256": "9508eb43868bafa8f425d0f8759c6655b81734f329c518a37fb050835a14f7a5",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      }
+    ],
+    "failures": []
+  }
+}

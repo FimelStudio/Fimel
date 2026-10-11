@@ -9,7 +9,7 @@
       "translations": {
         "summary": "siteMeta.bingoDescription"
       },
-      "image": "bingo-but-dont-do-it-logo.png",
+      "image": "assets/images/works/bingo-but-dont-do-it/cover.png",
       "imageFit": "contain",
       "status": "released",
       "platform": [
@@ -63,7 +63,7 @@
         "title": "workPages.tools.objCubizer.title",
         "summary": "workPages.tools.objCubizer.desc"
       },
-      "image": "plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.svg",
+      "image": "assets/images/works/minecraft-obj-cubizer/cover.svg",
       "imageFit": "contain",
       "status": "released",
       "platform": [
@@ -86,7 +86,7 @@
       "downloadSlug": "minecraft-obj-cubizer",
       "content": {
         "description": {
-          "zh": "plugins/minecraft-obj-cubizer/minecraft_obj_cubizer/about.md",
+          "zh": "works/minecraft-obj-cubizer/description.zh.md",
           "en": "works/minecraft-obj-cubizer/description.en.md",
           "ja": "works/minecraft-obj-cubizer/description.ja.md"
         },
@@ -111,7 +111,7 @@
         "title": "works.bedrockMaps.islandEscapeBeforeDawn.title",
         "summary": "works.bedrockMaps.islandEscapeBeforeDawn.desc"
       },
-      "image": "maps/island-escape-before-dawn.png",
+      "image": "assets/images/works/island-escape-before-dawn/cover.png",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -143,7 +143,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/islandEscapeBeforeDawn.md"
+          "zh": "works/island-escape-before-dawn/description.zh.md"
         },
         "changelog": {
           "zh": "works/island-escape-before-dawn/changelog.md"
@@ -167,7 +167,7 @@
         "title": "works.bedrockMaps.amethystSalvation.title",
         "summary": "works.bedrockMaps.amethystSalvation.desc"
       },
-      "image": "maps/amethyst-salvation.png",
+      "image": "assets/images/works/amethyst-salvation/cover.png",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -196,7 +196,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/amethystSalvation.md"
+          "zh": "works/amethyst-salvation/description.zh.md"
         },
         "changelog": {
           "zh": "works/amethyst-salvation/changelog.md"
@@ -219,7 +219,7 @@
         "title": "works.bedrockMaps.hungerGamesOldCity.title",
         "summary": "works.bedrockMaps.hungerGamesOldCity.desc"
       },
-      "image": "maps/hunger-games-old-city.png",
+      "image": "assets/images/works/hunger-games-old-city/cover.png",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -242,10 +242,10 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/hungerGamesOldCity.md"
+          "zh": "works/hunger-games-old-city/description.zh.md"
         },
         "changelog": {
-          "zh": "content/netease/hungerGamesOldCity.changelog.md"
+          "zh": "works/hunger-games-old-city/changelog.zh.md"
         },
         "versions": {
           "zh": "works/hunger-games-old-city/versions.md"
@@ -265,7 +265,7 @@
         "title": "works.bedrockMaps.powerOn2SnowCrisis.title",
         "summary": "works.bedrockMaps.powerOn2SnowCrisis.desc"
       },
-      "image": "maps/power-on-2-snow-crisis.png",
+      "image": "assets/images/works/power-on-2-snow-crisis/cover.png",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -291,7 +291,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/powerOn2SnowCrisis.md"
+          "zh": "works/power-on-2-snow-crisis/description.zh.md"
         },
         "changelog": {
           "zh": "works/power-on-2-snow-crisis/changelog.md"
@@ -310,7 +310,7 @@
         "title": "works.bedrockMaps.runForMoney.title",
         "summary": "works.bedrockMaps.runForMoney.desc"
       },
-      "image": "maps/run-for-money.png",
+      "image": "assets/images/works/run-for-money/cover.png",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -333,7 +333,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/runForMoney.md"
+          "zh": "works/run-for-money/description.zh.md"
         },
         "changelog": {
           "zh": "works/run-for-money/changelog.md"
@@ -356,7 +356,7 @@
         "title": "works.bedrockMaps.abyssSkyPit.title",
         "summary": "works.bedrockMaps.abyssSkyPit.desc"
       },
-      "image": "maps/abyss-sky-pit.png",
+      "image": "assets/images/works/abyss-sky-pit/cover.png",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -385,7 +385,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/abyssSkyPit.md"
+          "zh": "works/abyss-sky-pit/description.zh.md"
         },
         "changelog": {
           "zh": "works/abyss-sky-pit/changelog.md"
@@ -407,7 +407,7 @@
         "title": "works.bedrockMaps.fmlSkyNatureArena.title",
         "summary": "works.bedrockMaps.fmlSkyNatureArena.desc"
       },
-      "image": "maps/fml-sky-nature-arena.png",
+      "image": "assets/images/works/fml-sky-nature-arena/cover.png",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -433,7 +433,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/fmlSkyNatureArena.md"
+          "zh": "works/fml-sky-nature-arena/description.zh.md"
         },
         "changelog": {
           "zh": "works/fml-sky-nature-arena/changelog.md"
@@ -455,7 +455,7 @@
         "title": "works.bedrockMaps.werewolfFTown.title",
         "summary": "works.bedrockMaps.werewolfFTown.desc"
       },
-      "image": "maps/werewolf-f-town.png",
+      "image": "assets/images/works/werewolf-f-town/cover.png",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -478,7 +478,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/werewolfFTown.md"
+          "zh": "works/werewolf-f-town/description.zh.md"
         },
         "changelog": {
           "zh": "works/werewolf-f-town/changelog.md"
@@ -501,7 +501,7 @@
         "title": "works.m9_t",
         "summary": "works.m9_d"
       },
-      "image": "textures/ice.png",
+      "image": "assets/textures/minecraft/ice.png",
       "status": "development",
       "platform": [
         "Minecraft Java"
@@ -536,7 +536,7 @@
         "title": "works.m10_t",
         "summary": "works.m10_d"
       },
-      "image": "maps/spoilers-rpg.jpg",
+      "image": "assets/images/works/spoiler-rpg/cover.jpg",
       "status": "development",
       "platform": [
         "Minecraft Java"
@@ -564,6 +564,53 @@
       ]
     },
     {
+      "slug": "fimel-card",
+      "type": "datapacks",
+      "title": {
+        "zh": "Fimel Card 卡牌桌游数据包",
+        "en": "Fimel Card: Card & Tabletop Data Pack",
+        "ja": "Fimel Card カード・ボードゲーム用データパック"
+      },
+      "summary": {
+        "zh": "Minecraft Java 版的卡牌桌游数据包，目前正在制作，暂未发布。",
+        "en": "A card and tabletop data pack for Minecraft Java Edition. In development; not released yet.",
+        "ja": "Minecraft Java 版向けのカード・ボードゲーム用データパック。現在制作中で、まだ公開されていません。"
+      },
+      "image": "assets/images/works/fimel-card/cover.png",
+      "imageFit": "contain",
+      "status": "development",
+      "platform": [
+        "Minecraft Java"
+      ],
+      "creators": [
+        {
+          "name": "Fimel Studio",
+          "url": "https://github.com/FimelStudio"
+        }
+      ],
+      "repository": "https://github.com/FimelStudio/fimelcard-dp",
+      "content": {
+        "description": {
+          "zh": "works/fimel-card/description.zh.md",
+          "en": "works/fimel-card/description.en.md",
+          "ja": "works/fimel-card/description.ja.md"
+        },
+        "changelog": {
+          "zh": "works/fimel-card/changelog.zh.md",
+          "en": "works/fimel-card/changelog.en.md",
+          "ja": "works/fimel-card/changelog.ja.md"
+        },
+        "versions": {
+          "zh": "works/fimel-card/versions.zh.md",
+          "en": "works/fimel-card/versions.en.md",
+          "ja": "works/fimel-card/versions.ja.md"
+        }
+      },
+      "tags": [
+        "board-game"
+      ]
+    },
+    {
       "slug": "production-toolchain",
       "type": "tools",
       "title": "开发工具链",
@@ -571,7 +618,7 @@
         "title": "works.tool1_t",
         "summary": "works.tool1_d"
       },
-      "image": "textures/iron_block.png",
+      "image": "assets/textures/minecraft/iron_block.png",
       "status": "development",
       "platform": [
         "Minecraft",
@@ -607,7 +654,7 @@
         "en": "Cinemusicedit is a command pack for music creators, with nine octaves, 16 timbres, chords and multichannel playback.",
         "ja": "Cinemusicedit は音楽制作者向けのコマンドパック。9 オクターブ、16 種類の音色、和音、マルチチャンネル再生に対応します。"
       },
-      "image": "maps/netease/4646512948266854981.webp",
+      "image": "assets/images/works/music-command-pack/cover.webp",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -631,7 +678,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/music-command-pack.md"
+          "zh": "works/music-command-pack/description.zh.md"
         },
         "changelog": {
           "zh": "works/music-command-pack/changelog.md"
@@ -654,7 +701,7 @@
         "en": "Choose one of 12 unique classes and fight to be the last player standing, with spectating and concealment in tall grass.",
         "ja": "重複できない 12 の職業から選び、最後の一人を目指す対戦マップ。観戦と草むらでの隠密に対応します。"
       },
-      "image": "maps/netease/4649725567306540590.webp",
+      "image": "assets/images/works/es-atrium-showdown/cover.webp",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -680,7 +727,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/es-atrium-showdown.md"
+          "zh": "works/es-atrium-showdown/description.zh.md"
         },
         "changelog": {
           "zh": "works/es-atrium-showdown/changelog.md"
@@ -705,7 +752,7 @@
         "en": "A survival settlement by 建造老e with a harbor, shipyard, farms and seaside areas. Supports multiplayer, day/night cycles and keep inventory.",
         "ja": "建造老e が制作したサバイバル拠点。港、造船所、農園、海岸などがあり、マルチプレイ、昼夜サイクル、持ち物保持に対応します。"
       },
-      "image": "maps/netease/4649651119622229329.webp",
+      "image": "assets/images/works/ej-qingbo-survival/cover.webp",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -728,7 +775,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/ej-qingbo-survival.md"
+          "zh": "works/ej-qingbo-survival/description.zh.md"
         },
         "changelog": {
           "zh": "works/ej-qingbo-survival/changelog.md"
@@ -752,7 +799,7 @@
         "en": "A two-player, turn-based guessing game. Place four planes, interpret bombing results and destroy your opponent’s fleet. Includes a spectator area.",
         "ja": "2 人用のターン制ミニゲーム。4 機を配置し、攻撃結果から相手の位置を推理して全機撃破を目指します。観戦エリアもあります。"
       },
-      "image": "maps/netease/4646050867772266368.webp",
+      "image": "assets/images/works/hit-the-plane/cover.webp",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -775,7 +822,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/hit-the-plane.md"
+          "zh": "works/hit-the-plane/description.zh.md"
         },
         "changelog": {
           "zh": "works/hit-the-plane/changelog.md"
@@ -800,7 +847,7 @@
         "en": "Compatibility unverified: the original listing warns that an update removed required entities. Command-driven Chinese chess for two players, with spectators.",
         "ja": "互換性は未確認です。原掲載文では更新後に遊べなくなったと案内されています。コマンドで実装した 2 人用の中国将棋で、複数人の観戦に対応します。"
       },
-      "image": "maps/netease/4647154283526030957.webp",
+      "image": "assets/images/works/chinese-chess-cb/cover.webp",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -823,7 +870,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/chinese-chess-cb.md"
+          "zh": "works/chinese-chess-cb/description.zh.md"
         },
         "changelog": {
           "zh": "works/chinese-chess-cb/changelog.md"
@@ -848,7 +895,7 @@
         "en": "Aeroplane chess in Minecraft, with optional AI opponents and all-bot matches. Uses adjusted rules, including takeoff on a roll of five or six.",
         "ja": "Minecraft で遊ぶ飛行棋。AI の参加や全員 AI の対局も可能。5・6 で離陸するなど、一部ルールを調整しています。"
       },
-      "image": "maps/netease/4648967044809257014.webp",
+      "image": "assets/images/works/aeroplane-chess-cb/cover.webp",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -871,7 +918,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/aeroplane-chess-cb.md"
+          "zh": "works/aeroplane-chess-cb/description.zh.md"
         },
         "changelog": {
           "zh": "works/aeroplane-chess-cb/changelog.md"
@@ -895,7 +942,7 @@
         "en": "Attackers and defenders clash inside a tower. Defenders repair circuits and craft an End Crystal while a killer and hidden infiltrator try to stop them.",
         "ja": "高層ビルで攻守の陣営が対決。守護者は回路を修理してエンドクリスタルを作り、殺し屋と潜伏者はそれを阻止します。"
       },
-      "image": "maps/netease/4649240382612267969.webp",
+      "image": "assets/images/works/power-duel/cover.webp",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -921,7 +968,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/power-duel.md"
+          "zh": "works/power-duel/description.zh.md"
         },
         "changelog": {
           "zh": "works/power-duel/changelog.md"
@@ -946,7 +993,7 @@
         "en": "Lead the allied forces of three kingdoms in a fantasy battle for Kade. The original listing recommends at least four players.",
         "ja": "三国の連合軍を率いてカ得との決戦に挑むファンタジーマップ。原掲載文では 4 人以上でのプレイを推奨しています。"
       },
-      "image": "maps/netease/4648994215119378218.webp",
+      "image": "assets/images/works/battle-for-kade/cover.webp",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -969,7 +1016,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/battle-for-kade.md"
+          "zh": "works/battle-for-kade/description.zh.md"
         },
         "changelog": {
           "zh": "works/battle-for-kade/changelog.md"
@@ -993,7 +1040,7 @@
         "en": "Werewolves and humans face off in a modern city. Day/night cycles change weapons and abilities for roles such as seer, witch and guard.",
         "ja": "現代都市で人狼と人間が対決。昼夜によって武器や能力が変わり、人狼、占い師、魔女、守衛などの役職があります。"
       },
-      "image": "maps/netease/4648967718332648481.webp",
+      "image": "assets/images/works/werewolf-modern-city/cover.webp",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -1019,7 +1066,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/werewolf-modern-city.md"
+          "zh": "works/werewolf-modern-city/description.zh.md"
         },
         "changelog": {
           "zh": "works/werewolf-modern-city/changelog.md"
@@ -1044,7 +1091,7 @@
         "en": "Gather materials, craft an End Crystal and deliver it to the golden platform first. A random assassin appears at night; shop items help you compete.",
         "ja": "素材を集めてエンドクリスタルを作り、最初に金の台へ届ければ勝利。夜にはランダムな暗殺者が現れ、ショップの道具で競い合います。"
       },
-      "image": "maps/netease/4648788016015567149.webp",
+      "image": "assets/images/works/shadow-assassin/cover.webp",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -1067,7 +1114,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/shadow-assassin.md"
+          "zh": "works/shadow-assassin/description.zh.md"
         },
         "changelog": {
           "zh": "works/shadow-assassin/changelog.md"
@@ -1092,7 +1139,7 @@
         "en": "Become the lord of 夏尔镇. Explore its highlands, royal grounds and market, then choose between peaceful rule and attacking the pillagers.",
         "ja": "夏尔镇の領主として、高地、王室、集市を探索。平和に町を治めるか、略奪者の拠点を攻めるかを選びます。"
       },
-      "image": "maps/netease/4648775938384483560.webp",
+      "image": "assets/images/works/mountain-town/cover.webp",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -1118,7 +1165,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/mountain-town.md"
+          "zh": "works/mountain-town/description.zh.md"
         },
         "changelog": {
           "zh": "works/mountain-town/changelog.md"
@@ -1143,7 +1190,7 @@
         "en": "A class-based take on Murder Mystery, with sheriff, seer, priest and other roles facing a killer and hidden accomplice.",
         "ja": "密室殺人ゲームに多数の役職を追加。保安官、占い師、牧師などが能力を使い、殺し屋と内通者が暗躍します。"
       },
-      "image": "maps/netease/4649193987275973018.webp",
+      "image": "assets/images/works/murder-mystery-planet/cover.webp",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -1166,7 +1213,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/murder-mystery-planet.md"
+          "zh": "works/murder-mystery-planet/description.zh.md"
         },
         "changelog": {
           "zh": "works/murder-mystery-planet/changelog.md"
@@ -1191,7 +1238,7 @@
         "en": "Guardians race to craft an End Crystal while a killer and hidden werewolf oppose them. Day/night changes, teleporting and shop supplies shape the match.",
         "ja": "守護者がエンドクリスタルの完成を目指し、殺し屋と正体を隠した人狼が阻止。昼夜、テレポート、ショップの物資が勝敗を左右します。"
       },
-      "image": "maps/netease/4649390432729817156.webp",
+      "image": "assets/images/works/werewolf-town-assassination/cover.webp",
       "status": "released",
       "platform": [
         "Minecraft 中国版 · Bedrock"
@@ -1215,7 +1262,7 @@
       },
       "content": {
         "description": {
-          "zh": "content/netease/werewolf-town-assassination.md"
+          "zh": "works/werewolf-town-assassination/description.zh.md"
         },
         "changelog": {
           "zh": "works/werewolf-town-assassination/changelog.md"
@@ -1233,4 +1280,3 @@
     }
   ]
 }
-

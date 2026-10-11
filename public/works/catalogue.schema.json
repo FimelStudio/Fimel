@@ -71,6 +71,7 @@
           "enum": [
             "bedrock",
             "java",
+            "datapacks",
             "tools",
             "mods"
           ]

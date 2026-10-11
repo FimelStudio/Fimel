@@ -50,7 +50,7 @@ const generateExplosionParticles = () => {
 
 function ExplosionEffect({ position, onComplete }: { position: [number, number, number]; onComplete: () => void }) {
   const basePath = import.meta.env.BASE_URL;
-  const texture = useTexture(`${basePath}textures/explosion.png`);
+  const texture = useTexture(`${basePath}assets/textures/minecraft/explosion.png`);
   
   React.useEffect(() => {
     configurePixelTexture(texture);
@@ -108,7 +108,7 @@ const generateSmokeParticles = () => {
 
 function SmokeEffect({ position }: { position: [number, number, number] }) {
   const basePath = import.meta.env.BASE_URL;
-  const texture = useTexture(`${basePath}textures/smoke.png`);
+  const texture = useTexture(`${basePath}assets/textures/minecraft/smoke.png`);
   
   React.useEffect(() => {
     configurePixelTexture(texture);
@@ -176,9 +176,9 @@ function MinecraftBlock({ cube, isDark, reducedMotion }: { cube: CubeData, isDar
   useEffect(() => () => { canvas.style.removeProperty('cursor'); }, [canvas]);
   
   const textures = useTexture({
-    mapTop: `${basePath}textures/${config.top}`,
-    mapSide: `${basePath}textures/${config.side}`,
-    mapBottom: `${basePath}textures/${config.bottom}`,
+    mapTop: `${basePath}assets/textures/minecraft/${config.top}`,
+    mapSide: `${basePath}assets/textures/minecraft/${config.side}`,
+    mapBottom: `${basePath}assets/textures/minecraft/${config.bottom}`,
   });
 
   React.useEffect(() => {
@@ -228,7 +228,7 @@ function MinecraftBlock({ cube, isDark, reducedMotion }: { cube: CubeData, isDar
         if (fuseTime.current >= 4) {
           setExploded(true);
           setPrimed(false);
-          const audio = new Audio(`${basePath}sound/Explosion2.ogg`);
+          const audio = new Audio(`${basePath}assets/audio/minecraft/Explosion2.ogg`);
           audio.volume = 0.5;
           audio.play().catch(() => {});
         } else {
@@ -262,7 +262,7 @@ function MinecraftBlock({ cube, isDark, reducedMotion }: { cube: CubeData, isDar
         return;
       }
       setPrimed(true);
-      const audio = new Audio(`${basePath}sound/Fuse.ogg`);
+      const audio = new Audio(`${basePath}assets/audio/minecraft/Fuse.ogg`);
       audio.volume = 0.5;
       audio.play().catch(() => {});
     }
@@ -312,9 +312,9 @@ function InstancedBlocks({ cubes, textureIndex, isDark, reducedMotion }: {
   const basePath = import.meta.env.BASE_URL;
   const config = BLOCK_TEXTURES[textureIndex];
   const textures = useTexture([
-    `${basePath}textures/${config.side}`,
-    `${basePath}textures/${config.top}`,
-    `${basePath}textures/${config.bottom}`,
+    `${basePath}assets/textures/minecraft/${config.side}`,
+    `${basePath}assets/textures/minecraft/${config.top}`,
+    `${basePath}assets/textures/minecraft/${config.bottom}`,
   ]);
   const [side, top, bottom] = textures;
   const invalidate = useThree(state => state.invalidate);

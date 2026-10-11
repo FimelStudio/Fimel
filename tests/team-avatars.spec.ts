@@ -19,7 +19,7 @@ test('all four member portraits use their own pixel PNGs in both desktop themes'
   await page.goto('/#/studio');
   await expect(page.locator('[data-team-member]')).toHaveCount(4);
   for (const member of members) {
-    const response = await request.get(`/team/${member.filename}`);
+    const response = await request.get(`/assets/images/team/${member.filename}`);
     expect(response.status()).toBe(200);
     expect(response.headers()['content-type']).toContain('image/png');
     const bytes = await response.body();
@@ -33,7 +33,7 @@ test('all four member portraits use their own pixel PNGs in both desktop themes'
       const row = page.locator(`[data-team-member="${member.name}"]`);
       await row.scrollIntoViewIfNeeded();
       const image = row.getByRole('img', { name: member.name, exact: true });
-      await expect(image).toHaveAttribute('src', `/team/${member.filename}`);
+      await expect(image).toHaveAttribute('src', `/assets/images/team/${member.filename}`);
       await expect(image).toHaveAttribute('loading', 'lazy');
       await expect.poll(() => image.evaluate(element => (element as HTMLImageElement).naturalWidth)).toBe(64);
       const dimensions = await image.evaluate(element => {
@@ -105,7 +105,7 @@ test('320px team rows keep names, translated roles and avatars within the row in
 });
 
 test('one unavailable portrait falls back to its letter without hiding the team', async ({ page }) => {
-  await page.route('**/team/TreeHey.png', route => route.fulfill({ status: 404, body: 'Not found' }));
+  await page.route('**/assets/images/team/TreeHey.png', route => route.fulfill({ status: 404, body: 'Not found' }));
   await page.goto('/#/studio');
   const failedRow = page.locator('[data-team-member="TreeHey"]');
   await failedRow.scrollIntoViewIfNeeded();

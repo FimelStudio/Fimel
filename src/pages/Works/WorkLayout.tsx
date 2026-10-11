@@ -65,7 +65,7 @@ export const WorkLayout: React.FC<WorkLayoutProps> = ({ page, isDark, basePath, 
         <div
           className="absolute right-[-10%] bottom-[-20%] w-[55vw] h-[55vw] max-w-[680px] max-h-[680px] opacity-[0.07] dark:opacity-10 bg-repeat image-rendering-pixelated pointer-events-none"
           style={{ 
-            backgroundImage: `url(${basePath}textures/${pageCopy.texture})`, 
+            backgroundImage: `url(${basePath}assets/textures/minecraft/${pageCopy.texture})`,
             backgroundSize: '96px',
             maskImage: 'radial-gradient(ellipse at bottom right, black 20%, transparent 70%)',
             WebkitMaskImage: 'radial-gradient(ellipse at bottom right, black 20%, transparent 70%)'

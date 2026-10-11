@@ -1,0 +1,105 @@
+{
+  "sourceUrl": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4649390432729817156",
+  "sourceEndpoint": "https://g79apigatewayobt.nie.netease.com/h5/pe-item-detail-v2",
+  "sourceRequest": {
+    "item_id": "4649390432729817156",
+    "channel_id": 5
+  },
+  "sourceField": "entity.info",
+  "accessedDate": "2026-10-10",
+  "sourceLanguage": "zh-CN",
+  "title": "狼人小镇刺杀行动2.0",
+  "storeItemId": "4649390432729817156",
+  "storefrontPublisher": "KCINE",
+  "creditedAuthors": [],
+  "descriptionVersion": "2.0",
+  "unverifiedVersionFields": {
+    "mod_version": "1.23",
+    "res_version": 5
+  },
+  "publishedAt": "2021-08-13T04:41:42.000Z",
+  "updatedAt": "2022-01-25T04:24:36.000Z",
+  "publishedDate": "2021-08-13",
+  "updatedDate": "2022-01-25",
+  "dateTimezone": "Asia/Shanghai",
+  "publishedUnixSeconds": 1628829702,
+  "updatedUnixSeconds": 1643084676,
+  "resourceSizeBytes": 923293,
+  "descriptionMarkdown": "works/werewolf-town-assassination/description.zh.md",
+  "originalDescriptionHtml": "<p>狼人小镇刺杀行动2.0更新后游戏简介：</p><p>(2.0保留原来角色)</p><p>角色介绍：</p><p>守护者阵营：(目标：制作出末影水晶或剿灭进攻方)</p><p>药师：伤害药水x1、恢复药水x1</p><p>祭司：开局获得经验瓶x1，可快速召唤太阳，地图中有他专用的传送锚点。</p><p>锦衣卫：开局获得盾x1</p><p>弓箭x3</p><p>忍者：开局获得雪球x1投掷后短暂隐身以及加速</p><p>进攻方阵营：(目标在阻止守护者合成末影水晶的同时，剿灭所有守护者)</p><p>杀手：开局身份暴露，获得杀手刀x1使用后短暂缓慢，两刀秒人，每隔一段时间获得水瓶，扔出可发射追踪弹并短暂加速</p><p>狼人：开局身份不会暴露，去祭夜坛召唤夜晚，可以让所有守护者失明一段时间，狼人进入狼人形态，获得铁斧，手持铁斧还能加速</p><p>注：游戏内所有玩家死亡后会全员播报且掉落所有装备。</p><p>地图介绍：小镇后方祭夜坛，按下按钮召唤夜晚，还能让守护者短暂失明(进攻方免疫失明)祭司可召唤太阳，小镇设有3个商店，收集绿宝石可购买箭，药水，合成水晶的材料。</p><p>2.0平衡调整：</p><p>1在原来的基础上修复了下水道苟分点，并在水塘放置屏障。</p><p>2调整了祭司的传送技能：3点循环传送→3点单向传送不互通。</p><p>2.0细节优化</p><p>1为了给玩家更好的地图效果，在王府内添加了灯笼以及光源。</p><p>2添加了图书馆的内饰。</p><p>3面馆新增前往2楼的通道。</p><p>4出生点细节改善，使其更加美观。</p><p>2.0观战系统</p><p>1新增了观战的系统，避免玩家在出局或者等待过程中过于乏味，玩家可以在出生点按按钮传送。</p><p><br></p><p><img src=\"https://x19.fp.ps.netease.com/file/6114d3a8143cfa2318d7c6d6G8c2lORx03\"></p><p>如果喜欢我们的作品，别忘了给一个好评哦</p><p>Fimel Studio交流群937760015/1060796710</p><p>Fimel Studio也在火热招贤纳士啦，我们热烈欢迎有经验有技术的指令人员，建筑人员，addons制作者，视频剪辑以及宣传人才加入我们，加群就可以审核啦</p>",
+  "originalEmbeddedImageUrls": [
+    "https://x19.fp.ps.netease.com/file/6114d3a8143cfa2318d7c6d6G8c2lORx03"
+  ],
+  "cover": {
+    "sourceUrl": "https://x19.fp.ps.netease.com/file/6114d379a7f25251d6ebb391JN1NL5wM03",
+    "sourceBytes": 993339,
+    "sourceWidth": 1000,
+    "sourceHeight": 1000,
+    "localPath": "assets/images/works/werewolf-town-assassination/cover.webp",
+    "width": 544,
+    "height": 544,
+    "bytes": 50796,
+    "processing": "Proportional resize and WebP encoding only; no cropping or generated content."
+  },
+  "snapshotStats": {
+    "downloads": 48111,
+    "rating": 4.4,
+    "comments": 32
+  },
+  "conversionNotes": [
+    "Original wording and credited names are retained; Quill font/color styling and empty spacer paragraphs are removed.",
+    "Embedded and gallery images were not downloaded or included.",
+    "Publisher is not assumed to be an individual creator. Where no creator is credited, the catalogue uses the studio attribution supplied by the user.",
+    "mod_version and res_version semantics are unverified and are not presented as work versions.",
+    "Dates reflect storefront create_time and refresh_time, not a complete release history."
+  ],
+  "gallery": {
+    "retrieved": "2026-10-11",
+    "sourceField": "entity.pic_url_list",
+    "images": [
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/6114d383a7f25218a909a825LyfbteCZ03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/werewolf-town-assassination/gallery-01.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 118156,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 839919,
+        "originalSha256": "218dfa8f868ee2776e463830bd89e5dd00966821beb3cd1bde6bcb1b1a7c8d88",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/6114d38ca7f2520369d92fa9eW262j9O03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/werewolf-town-assassination/gallery-02.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 70492,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 638547,
+        "originalSha256": "27a6e9c1de8dcedfd27bc12a85eeead8b7bd35e44f31acf9e6afdaa0557e222d",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/6114d3a92786fd3bac94f21dJP0cPuod03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/werewolf-town-assassination/gallery-03.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 85228,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 699043,
+        "originalSha256": "40b878b2aa3951a650a106fd069f55bb7fcf48e166004f875f58b400a4122566",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      }
+    ],
+    "failures": []
+  }
+}

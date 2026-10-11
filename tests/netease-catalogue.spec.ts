@@ -29,11 +29,13 @@ test('all supplied NetEase resources have clean source links, local covers and r
     expect(project.source.retrieved).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(project.image).not.toMatch(/^https?:/);
     expect(project.image).not.toContain('textures/');
+    expect(project.image).toMatch(new RegExp(`^assets/images/works/${project.slug}/cover\\.`));
     const cover = await request.get(`/${project.image}`);
     expect(cover.ok()).toBe(true);
     expect(cover.headers()['content-type']).toMatch(/^image\//);
     expect((await cover.body()).byteLength).toBeGreaterThan(500);
     const description = await request.get(`/${project.content.description.zh}`);
+    expect(project.content.description.zh).toBe(`works/${project.slug}/description.zh.md`);
     expect(description.ok()).toBe(true);
     const markdown = await description.text();
     expect(markdown.trim().length).toBeGreaterThan(40);
@@ -55,6 +57,11 @@ test('an imported project can be searched, opened, refreshed and visited without
   await row.click();
   await expect(page.getByRole('heading', { level: 1 })).toContainText('中庭决战');
   await expect(page.locator('.project-markdown')).toBeVisible();
+  const gallery = page.getByRole('region', { name: '作品图片', exact: true });
+  await gallery.scrollIntoViewIfNeeded();
+  await expect(gallery.locator('.project-gallery-slide')).toHaveCount(3);
+  await expect(gallery.locator('.project-gallery-slide[data-active="true"] img')).toHaveAttribute('src', new RegExp(`/assets/images/works/${project.slug}/gallery-01\\.webp$`));
+  await expect.poll(() => gallery.locator('.project-gallery-slide[data-active="true"] img').evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
   await expect(page.getByRole('link', { name: '前往网易资源中心' })).toHaveAttribute('href', project.store);
   await expect.poll(() => page.locator(`header img[src$="${project.image}"]`).evaluate((image) => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
   await page.reload();

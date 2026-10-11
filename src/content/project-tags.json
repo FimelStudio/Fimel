@@ -10,7 +10,7 @@
   "escape": { "zh": "逃生", "en": "Escape", "ja": "脱出" },
   "battle-royale": { "zh": "大逃杀", "en": "Battle Royale", "ja": "バトルロイヤル" },
   "minigame": { "zh": "小游戏", "en": "Minigame", "ja": "ミニゲーム" },
-  "board-game": { "zh": "棋类", "en": "Board Game", "ja": "ボードゲーム" },
+  "board-game": { "zh": "桌游", "en": "Board Game", "ja": "ボードゲーム" },
   "strategy": { "zh": "策略", "en": "Strategy", "ja": "ストラテジー" },
   "chase": { "zh": "追逐", "en": "Chase", "ja": "追跡" },
   "social-deduction": { "zh": "社交推理", "en": "Social Deduction", "ja": "人狼・推理" },

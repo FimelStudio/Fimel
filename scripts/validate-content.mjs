@@ -4,9 +4,10 @@ import assert from 'node:assert/strict';
 
 const publicDirectory = path.resolve('public');
 const catalogue = JSON.parse(await readFile(path.join(publicDirectory, 'works/catalogue.json'), 'utf8'));
+const schema = JSON.parse(await readFile(path.join(publicDirectory, 'works/catalogue.schema.json'), 'utf8'));
 const projectTags = JSON.parse(await readFile(path.resolve('src/content/project-tags.json'), 'utf8'));
 const slugs = new Set();
-const types = ['bedrock', 'java', 'tools', 'mods'];
+const types = schema.$defs.project.properties.type.enum;
 const tabs = ['description', 'changelog', 'versions'];
 const localeKeys = ['zh', 'en', 'ja'];
 
@@ -56,10 +57,12 @@ for (const project of catalogue.projects) {
     if (project[field]) assert(/^https:\/\//.test(project[field]), `${label}.${field}: use an HTTPS URL.`);
   }
   await checkAsset(project.image, `${label}.image`);
+  if (!/^https?:\/\//.test(project.image)) assert(project.image.startsWith('assets/'), `${label}.image: put website images under public/assets/.`);
   for (const field of ['download', 'fallbackDownload']) if (project[field]) await checkAsset(project[field], `${label}.${field}`);
   assert(project.content && typeof project.content === 'object', `${label}: content is required.`);
   for (const tab of tabs) {
     for (const contentPath of textValues(project.content[tab], `${label}.content.${tab}`)) {
+      if (!/^https?:\/\//.test(contentPath)) assert(contentPath.startsWith(`works/${label}/`), `${label}.content.${tab}: keep Markdown in its project directory.`);
       await checkAsset(contentPath, `${label}.content.${tab}`, true);
     }
   }

@@ -206,7 +206,7 @@ export const Maps: React.FC = () => {
           opacity: tooltipContent.visible ? 1 : 0,
           borderStyle: 'solid',
           borderWidth: '8px',
-          borderImageSource: `url(${basePath}HUD/Tooltip_background.png)`,
+          borderImageSource: `url(${basePath}assets/images/ui/minecraft/Tooltip_background.png)`,
           borderImageSlice: '6 fill',
           borderImageRepeat: 'stretch',
           textShadow: '2px 2px 0px #3f3f3f',

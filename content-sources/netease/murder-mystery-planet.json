@@ -1,0 +1,106 @@
+{
+  "sourceUrl": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4649193987275973018",
+  "sourceEndpoint": "https://g79apigatewayobt.nie.netease.com/h5/pe-item-detail-v2",
+  "sourceRequest": {
+    "item_id": "4649193987275973018",
+    "channel_id": 5
+  },
+  "sourceField": "entity.info",
+  "accessedDate": "2026-10-10",
+  "sourceLanguage": "zh-CN",
+  "title": "密室杀手星球版",
+  "storeItemId": "4649193987275973018",
+  "storefrontPublisher": "KCINE",
+  "creditedAuthors": [
+    "水晶215"
+  ],
+  "unverifiedVersionFields": {
+    "mod_version": "1.23",
+    "res_version": 3
+  },
+  "publishedAt": "2021-08-09T23:38:56.000Z",
+  "updatedAt": "2021-08-20T03:49:20.000Z",
+  "publishedDate": "2021-08-10",
+  "updatedDate": "2021-08-20",
+  "dateTimezone": "Asia/Shanghai",
+  "publishedUnixSeconds": 1628552336,
+  "updatedUnixSeconds": 1629431360,
+  "resourceSizeBytes": 669707,
+  "descriptionMarkdown": "works/murder-mystery-planet/description.zh.md",
+  "originalDescriptionHtml": "<p><span class=\"ql-size-large\">地图：密室杀手星球版</span></p><p><span class=\"ql-size-large\">作者：水晶215</span></p><p><strong style=\"color: orange;\">密室杀手超多职业版！</strong></p><p><strong style=\"color: orange;\">在密室杀手经典玩法上增加大幅职业数量，使可玩性大幅提高</strong></p><p><strong style=\"color: orange;\">快来和小伙伴一起玩吧</strong></p><p><br></p><p>具体职业：</p><p>警长：开局2箭</p><p>魔法师：发射凋零雪球</p><p>预言家：预言靠近的杀手</p><p>幻术师：使用幻术（末影珍珠）来恶心杀手</p><p>守卫：金刚之身（有CD</p><p>骑士：秒杀圣剑（</p><p>忍者：隐身大法</p><p>牧师：复活大法</p><p><br></p><p><span style=\"color: red;\">杀手：秒杀邪剑，鸡蛋锁定击杀</span></p><p><span style=\"color: red;\">内鬼：秒杀恶剑，免疫预言家和幻术师的技能</span></p><p><br></p><p><img src=\"https://x19.fp.ps.netease.com/file/61091c196f0494592e22b5b6ijWlh6VZ03\"></p><p>有bug请反馈群937760015</p><p>欢迎大家支持Fimel工作室</p>",
+  "originalEmbeddedImageUrls": [
+    "https://x19.fp.ps.netease.com/file/61091c196f0494592e22b5b6ijWlh6VZ03"
+  ],
+  "cover": {
+    "sourceUrl": "https://x19.fp.ps.netease.com/file/61091e018b74274c0f530e0d9aC91INi03",
+    "sourceBytes": 976559,
+    "sourceWidth": 1000,
+    "sourceHeight": 1000,
+    "localPath": "assets/images/works/murder-mystery-planet/cover.webp",
+    "width": 544,
+    "height": 544,
+    "bytes": 41434,
+    "processing": "Proportional resize and WebP encoding only; no cropping or generated content."
+  },
+  "snapshotStats": {
+    "downloads": 85190,
+    "rating": 1,
+    "comments": 66
+  },
+  "conversionNotes": [
+    "Original wording and credited names are retained; Quill font/color styling and empty spacer paragraphs are removed.",
+    "Embedded and gallery images were not downloaded or included.",
+    "Publisher is not assumed to be an individual creator. Where no creator is credited, the catalogue uses the studio attribution supplied by the user.",
+    "mod_version and res_version semantics are unverified and are not presented as work versions.",
+    "Dates reflect storefront create_time and refresh_time, not a complete release history."
+  ],
+  "gallery": {
+    "retrieved": "2026-10-11",
+    "sourceField": "entity.pic_url_list",
+    "images": [
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/61091ca08b742775ceeae1ef1J5wc1T503",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/murder-mystery-planet/gallery-01.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 69404,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 666821,
+        "originalSha256": "4ed6519f7b0618366fbe8164be09fb61ae881eed8babfc187f25fe54eab31d4c",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/61091ca48b74270e78e831a7GxTrJTid03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/murder-mystery-planet/gallery-02.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 26166,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 320760,
+        "originalSha256": "55b6b5f533337f1a1e1be917374368750c65ce23a3d18f74f4e2f1fe93972816",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/61091ca98b74275220d58c46GzkCWeAb03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/murder-mystery-planet/gallery-03.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 69056,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 657432,
+        "originalSha256": "86245d1c145a78d24acd4dfaa363b03ea0e909efdc6970583fab71374d42e541",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      }
+    ],
+    "failures": []
+  }
+}

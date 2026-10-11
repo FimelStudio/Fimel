@@ -6,7 +6,7 @@ const resources = {
   zh: {
     translation: {
       ...contentMessages.zh,
-      nav: { home: "主页", about: "关于我们", works: "作品", primary: "主导航", language: "切换语言", theme_light: "切换至亮色", theme_dark: "切换至暗色", skip_content: "跳转到内容", contact: "联络合作", menu: "菜单", nav_maps: "地图作品", nav_maps_all: "全部地图", nav_maps_be: "基岩版 / 网易版", nav_maps_je: "Java 版地图 / 数据包", nav_mods: "模组 / MODS", nav_tools: "插件与工具" },
+      nav: { home: "主页", about: "关于我们", works: "作品", primary: "主导航", language: "切换语言", theme_light: "切换至亮色", theme_dark: "切换至暗色", skip_content: "跳转到内容", contact: "联络合作", menu: "菜单", nav_maps: "地图作品", nav_maps_all: "全部地图", nav_maps_be: "基岩版 / 网易版", nav_maps_je: "Java 版地图", nav_datapacks: "数据包", nav_mods: "模组 / MODS", nav_tools: "插件与工具" },
       hero: { gen: "世界生成中...", crafting: "构筑", worlds: "无限", sub: "期盼在 MC 中玩到任何游戏", scroll: "向下滑动" },
       siteMeta: {
         bingoCategory: 'Minecraft 1.21.11 · Fabric 模组',
@@ -16,7 +16,7 @@ const resources = {
         contactLabels: ['项目合作', '创作者联动', '玩家反馈 / 技术支持'],
         studio: {
           originTitle: "正在制作与已经发布",
-          originBody: "21 项网易基岩版作品已发布，包括地图与音乐制作命令包；两个 Java 版地图正在制作。Bingo But Don't Do It 和 Minecraft OBJ Cubizer 已开放下载。之后，我们也想尝试 Minecraft 之外的游戏和互动作品。",
+          originBody: "21 项网易基岩版作品已发布，包括地图与音乐制作命令包；两个 Java 版地图与 Fimel Card 卡牌桌游数据包正在制作。Bingo But Don't Do It 和 Minecraft OBJ Cubizer 已开放下载。之后，我们也想尝试 Minecraft 之外的游戏和互动作品。",
           milestones: [],
           principles: []
         }
@@ -24,11 +24,11 @@ const resources = {
       home: {
         studio_label: "Minecraft 创作工作室",
         featured_cta: "浏览作品",
-        current_cta: "Java 项目",
-        status_java: "2 个 Java 项目制作中",
+        current_cta: "Java 版地图",
+        status_java: "2 个 Java 版地图制作中",
         status_maps: "21 项网易作品已发布",
         quick_tag: "作品",
-        quick_title: "地图、模组和创作工具",
+        quick_title: "地图、数据包、模组和创作工具",
         maps_title: "地图作品",
         maps_featured: "海岛逃生：黎明前夕",
         maps_desc: "网易基岩版地图已发布，Java 版地图正在制作。",
@@ -160,13 +160,13 @@ const resources = {
         download_count_loading: "正在读取下载次数",
         download_count_pending: "连接 Supabase 后显示下载次数",
         view_bedrock: "查看全部基岩版地图",
-        view_java: "查看 Java 版地图 / 数据包",
+        view_java: "查看 Java 版地图",
         stats: { projects: "内容数量", platform: "主要平台", mode: "状态" },
         status: { live: "已发布", wip: "开发中", prototype: "原型重构", design: "企划设计", released_research: "已发布 / 预研中" },
         maps: {
           eyebrow: "地图作品 / 总览",
           title: "地图作品",
-          desc: "汇集 Fimel 已发布与正在制作的地图内容。你可以进入网易基岩版作品库，或查看正在开发的 Java 版地图与数据包项目。",
+          desc: "汇集 Fimel 已发布与正在制作的地图内容。你可以进入网易基岩版作品库，或查看正在开发的 Java 版地图。数据包作品单独收录在作品目录的数据包分类中。",
           catalog: "地图目录"
         },
         bedrock: {
@@ -176,9 +176,9 @@ const resources = {
           catalog: "基岩版地图库"
         },
         java: {
-          eyebrow: "地图作品 / Java 与数据包",
-          title: "Java 版地图 / 数据包",
-          desc: "展示正在制作的 Java 版地图及配套数据包。当前项目重点包括玩法系统重构、多人协作逻辑、任务流程与服务端适配，发布状态会随开发进度更新。",
+          eyebrow: "地图作品 / Java",
+          title: "Java 版地图",
+          desc: "展示正在制作的 Java 版地图，发布状态会随开发进度更新。数据包作品可在独立的数据包分类中查看。",
           project1_tags: ["Java 重构", "感染逃生", "塔防协作", "核心机制"],
           project2_tags: ["剧情 RPG", "任务链", "定制系统", "世界观"]
         },
@@ -218,7 +218,7 @@ const resources = {
   en: {
     translation: {
       ...contentMessages.en,
-      nav: { home: "Home", about: "About", works: "Works", primary: "Main navigation", language: "Change language", theme_light: "Use light theme", theme_dark: "Use dark theme", skip_content: "Skip to content", contact: "Contact", menu: "Menu", nav_maps: "Maps", nav_maps_all: "All Maps", nav_maps_be: "Bedrock / NetEase", nav_maps_je: "Java Maps / Datapacks", nav_mods: "Mods", nav_tools: "Tools & Plugins" },
+      nav: { home: "Home", about: "About", works: "Works", primary: "Main navigation", language: "Change language", theme_light: "Use light theme", theme_dark: "Use dark theme", skip_content: "Skip to content", contact: "Contact", menu: "Menu", nav_maps: "Maps", nav_maps_all: "All Maps", nav_maps_be: "Bedrock / NetEase", nav_maps_je: "Java Maps", nav_datapacks: "Data Packs", nav_mods: "Mods", nav_tools: "Tools & Plugins" },
       hero: { gen: "GENERATING WORLD...", crafting: "CRAFTING", worlds: "WORLDS", sub: "We make Minecraft maps, mods and tools for creators.", scroll: "Scroll" },
       siteMeta: {
         bingoCategory: 'Minecraft 1.21.11 · Fabric Mod',
@@ -228,7 +228,7 @@ const resources = {
         contactLabels: ['Project collaboration', 'Creator collaboration', 'Player feedback / technical support'],
         studio: {
           originTitle: "Released works and current projects",
-          originBody: "21 NetEase Bedrock works are released, including maps and a music command pack; two Java maps are in development. Bingo But Don't Do It and Minecraft OBJ Cubizer are available to download. We also hope to explore games and interactive projects beyond Minecraft.",
+          originBody: "21 NetEase Bedrock works are released, including maps and a music command pack; two Java maps and the Fimel Card tabletop data pack are in development. Bingo But Don't Do It and Minecraft OBJ Cubizer are available to download. We also hope to explore games and interactive projects beyond Minecraft.",
           milestones: [],
           principles: []
         }
@@ -236,11 +236,11 @@ const resources = {
       home: {
         studio_label: "Minecraft creative studio",
         featured_cta: "Browse works",
-        current_cta: "Java projects",
-        status_java: "2 Java projects in development",
+        current_cta: "Java maps",
+        status_java: "2 Java maps in development",
         status_maps: "21 NetEase works released",
         quick_tag: "Works",
-        quick_title: "Maps, mods and creator tools",
+        quick_title: "Maps, data packs, mods and creator tools",
         maps_title: "Maps",
         maps_featured: "Island Escape: Before Dawn",
         maps_desc: "Released NetEase Bedrock maps and Java maps in development.",
@@ -372,13 +372,13 @@ const resources = {
         download_count_loading: "Loading download count",
         download_count_pending: "Connect Supabase to show downloads",
         view_bedrock: "View All Bedrock Maps",
-        view_java: "View Java Maps / Datapacks",
+        view_java: "View Java Maps",
         stats: { projects: "Content Count", platform: "Main Platform", mode: "Status" },
         status: { live: "Released", wip: "In Development", prototype: "Prototype Rebuild", design: "Design Phase", released_research: "Released / R&D" },
         maps: {
           eyebrow: "Maps / Overview",
           title: "Map Projects",
-          desc: "A catalogue of Fimel maps, from released NetEase Bedrock projects to Java maps and datapacks currently in production.",
+          desc: "A catalogue of Fimel maps, from released NetEase Bedrock projects to Java maps currently in production. Data packs have their own category in the works catalogue.",
           catalog: "Map Catalogue"
         },
         bedrock: {
@@ -388,9 +388,9 @@ const resources = {
           catalog: "Bedrock Map Library"
         },
         java: {
-          eyebrow: "Maps / Java & Datapacks",
-          title: "Java Maps / Datapacks",
-          desc: "Java maps and supporting datapacks currently in production, focused on rebuilt gameplay systems, multiplayer logic, quest flows, and server compatibility. Release status will be updated as development progresses.",
+          eyebrow: "Maps / Java",
+          title: "Java Maps",
+          desc: "Java maps currently in production. Release status will be updated as development progresses; data packs are listed in their own category.",
           project1_tags: ["Java rebuild", "Infection escape", "Tower teamwork", "Core mechanics"],
           project2_tags: ["Story RPG", "Quest chain", "Custom systems", "Worldbuilding"]
         },
@@ -430,7 +430,7 @@ const resources = {
   ja: {
     translation: {
       ...contentMessages.ja,
-      nav: { home: "ホーム", about: "私たちについて", works: "作品", primary: "メインナビゲーション", language: "言語を変更", theme_light: "ライトテーマに変更", theme_dark: "ダークテーマに変更", skip_content: "コンテンツへ移動", contact: "お問い合わせ", menu: "メニュー", nav_maps: "マップ作品", nav_maps_all: "すべてのマップ", nav_maps_be: "統合版 / NetEase版", nav_maps_je: "Java版マップ / データパック", nav_mods: "MOD", nav_tools: "プラグイン・ツール" },
+      nav: { home: "ホーム", about: "私たちについて", works: "作品", primary: "メインナビゲーション", language: "言語を変更", theme_light: "ライトテーマに変更", theme_dark: "ダークテーマに変更", skip_content: "コンテンツへ移動", contact: "お問い合わせ", menu: "メニュー", nav_maps: "マップ作品", nav_maps_all: "すべてのマップ", nav_maps_be: "統合版 / NetEase版", nav_maps_je: "Java版マップ", nav_datapacks: "データパック", nav_mods: "MOD", nav_tools: "プラグイン・ツール" },
       hero: { gen: "世界を生成中...", crafting: "創造", worlds: "無限", sub: "Minecraft のマップ、MOD、クリエイター向けツールを制作しています。", scroll: "スクロール" },
       siteMeta: {
         bingoCategory: 'Minecraft 1.21.11 · Fabric MOD',
@@ -439,8 +439,8 @@ const resources = {
         bingoTags: ['Bingo 対戦', 'DDI ルール', '356 種類の目標', '音声機能（任意）'],
         contactLabels: ['プロジェクト協業', 'クリエイター連携', 'プレイヤー / 技術サポート'],
         studio: {
-          originTitle: "公開済みの作品と制作中のマップ",
-          originBody: "マップと音楽制作コマンドパックを含む NetEase 統合版作品 21 本を公開し、Java 版マップ 2 本を制作しています。Bingo But Don't Do It と Minecraft OBJ Cubizer はダウンロードできます。今後は Minecraft 以外のゲームやインタラクティブな作品にも挑戦したいと考えています。",
+          originTitle: "公開済みの作品と制作中のプロジェクト",
+          originBody: "マップと音楽制作コマンドパックを含む NetEase 統合版作品 21 本を公開し、Java 版マップ 2 本と Fimel Card のカード・ボードゲーム用データパックを制作しています。Bingo But Don't Do It と Minecraft OBJ Cubizer はダウンロードできます。今後は Minecraft 以外のゲームやインタラクティブな作品にも挑戦したいと考えています。",
           milestones: [],
           principles: []
         }
@@ -448,11 +448,11 @@ const resources = {
       home: {
         studio_label: "Minecraft 制作スタジオ",
         featured_cta: "作品を見る",
-        current_cta: "Java 作品",
-        status_java: "Java 作品 2 本を制作中",
+        current_cta: "Java 版マップ",
+        status_java: "Java 版マップ 2 本を制作中",
         status_maps: "NetEase 作品 21 本を公開",
         quick_tag: "作品",
-        quick_title: "マップ、MOD、制作ツール",
+        quick_title: "マップ、データパック、MOD、制作ツール",
         maps_title: "マップ",
         maps_featured: "海岛逃生：黎明前夕",
         maps_desc: "NetEase 統合版マップは公開済み、Java 版マップは制作中です。",
@@ -584,13 +584,13 @@ const resources = {
         download_count_loading: "ダウンロード数を読み込み中",
         download_count_pending: "Supabase接続後に表示",
         view_bedrock: "統合版マップをすべて見る",
-        view_java: "Java版マップ / データパックを見る",
+        view_java: "Java版マップを見る",
         stats: { projects: "内容数", platform: "主要プラットフォーム", mode: "状態" },
         status: { live: "公開済み", wip: "開発中", prototype: "プロトタイプ再構築", design: "企画設計", released_research: "公開済み / 研究開発" },
         maps: {
           eyebrow: "マップ作品 / 一覧",
           title: "マップ制作",
-          desc: "Fimel が公開・制作しているマップをまとめています。NetEase 統合版の公開作品と、開発中の Java版マップ・データパックを確認できます。",
+          desc: "Fimel が公開・制作しているマップをまとめています。NetEase 統合版の公開作品と、開発中の Java版マップを確認できます。データパックは作品一覧の独立したカテゴリーに掲載しています。",
           catalog: "マップ一覧"
         },
         bedrock: {
@@ -600,9 +600,9 @@ const resources = {
           catalog: "統合版マップライブラリ"
         },
         java: {
-          eyebrow: "マップ / Java・データパック",
-          title: "Java版マップ / データパック",
-          desc: "制作中の Java版マップと関連データパックです。ゲームシステムの再構築、マルチプレイロジック、クエスト進行、サーバー対応を中心に開発し、公開状況は進捗に合わせて更新します。",
+          eyebrow: "マップ / Java",
+          title: "Java版マップ",
+          desc: "制作中の Java版マップです。公開状況は進捗に合わせて更新します。データパックは独立したカテゴリーから確認できます。",
           project1_tags: ["Java再構築", "感染脱出", "タワー協力", "コア機構"],
           project2_tags: ["ストーリーRPG", "クエストチェーン", "カスタムシステム", "世界観"]
         },

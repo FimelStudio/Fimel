@@ -1,0 +1,107 @@
+{
+  "sourceUrl": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648775938384483560",
+  "sourceEndpoint": "https://g79apigatewayobt.nie.netease.com/h5/pe-item-detail-v2",
+  "sourceRequest": {
+    "item_id": "4648775938384483560",
+    "channel_id": 5
+  },
+  "sourceField": "entity.info",
+  "accessedDate": "2026-10-10",
+  "sourceLanguage": "zh-CN",
+  "title": "山野小镇",
+  "storeItemId": "4648775938384483560",
+  "storefrontPublisher": "KCINE",
+  "creditedAuthors": [
+    "建筑老e",
+    "水晶215"
+  ],
+  "unverifiedVersionFields": {
+    "mod_version": "1.23",
+    "res_version": 3
+  },
+  "publishedAt": "2021-08-08T05:52:48.000Z",
+  "updatedAt": "2021-08-08T05:52:48.000Z",
+  "publishedDate": "2021-08-08",
+  "updatedDate": "2021-08-08",
+  "dateTimezone": "Asia/Shanghai",
+  "publishedUnixSeconds": 1628401968,
+  "updatedUnixSeconds": 1628401968,
+  "resourceSizeBytes": 6876646,
+  "descriptionMarkdown": "works/mountain-town/description.zh.md",
+  "originalDescriptionHtml": "<p>&nbsp;&nbsp;&nbsp;冒险家，欢迎来到夏尔镇。这里有风光旖旎的芬兰高地，有戒备森严的王室，热闹的集市。&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p><p>&nbsp;--作者的话&nbsp;&nbsp;</p><p>故事背景：拥有两百年历史的夏尔镇，在过去的几年间饱受掠夺者的侵略，现在，你来到了这里虽然你一穷二白，但王室把领主职位赋予你。你可以作一位爱好和平的君主，也可带领村民一举攻下掠夺者的老巢。贤明的君主，你会作何选择？</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本地图由：建筑老e以及水晶215制作完成。</p><p>=========================</p><p>如果喜欢我们的作品，别忘了给一个好评哦</p><p>Fimel Studio交流群807646558/1060796710</p><p>Fimel Studio也在火热招贤纳士啦，我们热烈欢迎有经验有技术的指令人员，建筑人员，addons制作者，视频剪辑以及宣传人才加入我们，加群就可以审核啦</p><p><img src=\"https://x19.fp.ps.netease.com/file/60f03a225e602759730542b2fdrB8uum03\"></p>",
+  "originalEmbeddedImageUrls": [
+    "https://x19.fp.ps.netease.com/file/60f03a225e602759730542b2fdrB8uum03"
+  ],
+  "cover": {
+    "sourceUrl": "https://x19.fp.ps.netease.com/file/60f032dea7f2524a891e84d8SxoAxy8803",
+    "sourceBytes": 1332744,
+    "sourceWidth": 1000,
+    "sourceHeight": 1000,
+    "localPath": "assets/images/works/mountain-town/cover.webp",
+    "width": 544,
+    "height": 544,
+    "bytes": 59904,
+    "processing": "Proportional resize and WebP encoding only; no cropping or generated content."
+  },
+  "snapshotStats": {
+    "downloads": 27625,
+    "rating": 4.77,
+    "comments": 17
+  },
+  "conversionNotes": [
+    "Original wording and credited names are retained; Quill font/color styling and empty spacer paragraphs are removed.",
+    "Embedded and gallery images were not downloaded or included.",
+    "Publisher is not assumed to be an individual creator. Where no creator is credited, the catalogue uses the studio attribution supplied by the user.",
+    "mod_version and res_version semantics are unverified and are not presented as work versions.",
+    "Dates reflect storefront create_time and refresh_time, not a complete release history."
+  ],
+  "gallery": {
+    "retrieved": "2026-10-11",
+    "sourceField": "entity.pic_url_list",
+    "images": [
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/60f032fda7f25261ee1fc83eBBYSedfu03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/mountain-town/gallery-01.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 105756,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 932156,
+        "originalSha256": "bacc6f08e1cfb5c74dd11ca5db7a4c73568e2971d3fc1ad77debe4c06c6d9ec0",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/60f0330aa7f2525b99cc98ccv0zBimG503",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/mountain-town/gallery-02.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 124038,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 1006401,
+        "originalSha256": "7c6f9c69eee5ad6180116c02eefdd3006123237dd35faf6f36ec7e59f5bd8d4f",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/60f03316a7f25240c3f70651iuYUISWw03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/mountain-town/gallery-03.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 141750,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 1117840,
+        "originalSha256": "92baaae3bf63bddaceb2435fd8b8fe23e863d4d974ab6d15bff4e1bf920e22b1",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      }
+    ],
+    "failures": []
+  }
+}

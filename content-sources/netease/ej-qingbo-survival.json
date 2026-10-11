@@ -1,0 +1,106 @@
+{
+  "sourceUrl": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4649651119622229329",
+  "sourceEndpoint": "https://g79apigatewayobt.nie.netease.com/h5/pe-item-detail-v2",
+  "sourceRequest": {
+    "item_id": "4649651119622229329",
+    "channel_id": 5
+  },
+  "sourceField": "entity.info",
+  "accessedDate": "2026-10-10",
+  "sourceLanguage": "zh-CN",
+  "title": "［Ej］生存家园-青泊庄",
+  "storeItemId": "4649651119622229329",
+  "storefrontPublisher": "KCINE",
+  "creditedAuthors": [
+    "建造老e"
+  ],
+  "unverifiedVersionFields": {
+    "mod_version": "1.23",
+    "res_version": 4
+  },
+  "publishedAt": "2021-08-27T10:41:15.000Z",
+  "updatedAt": "2021-08-27T10:41:15.000Z",
+  "publishedDate": "2021-08-27",
+  "updatedDate": "2021-08-27",
+  "dateTimezone": "Asia/Shanghai",
+  "publishedUnixSeconds": 1630060875,
+  "updatedUnixSeconds": 1630060875,
+  "resourceSizeBytes": 11263954,
+  "descriptionMarkdown": "works/ej-qingbo-survival/description.zh.md",
+  "originalDescriptionHtml": "<p>［Ej］系列为建造老e单独建造系列，风格简约，适合生存使用，支持多人联机。</p><p>地图介绍：青泊庄全境约5000x6000平方米，其中分为了港口(出生地)，造船厂，种植区，家园区，海滨浴场，主广场，矿山及煤矿厂，旅馆，酒庄等。</p><p>关于地图：简单，保留物品栏，昼夜更替，生存模式。</p><p>地图用心制作，烦请5星支持。</p><p>作者：建造老e。</p><p>体验及帮助：水晶215。</p><p><br></p><p><br></p><p><br></p><p><img src=\"https://x19.fp.ps.netease.com/file/6114d3a8143cfa2318d7c6d6G8c2lORx03\"></p><p>如果喜欢我们的作品，别忘了给一个好评哦</p><p>Fimel Studio交流群937760015/1060796710</p><p>Fimel Studio也在火热招贤纳士啦，我们热烈欢迎有经验有技术的指令人员，建筑人员，addons制作者，视频剪辑以及宣传人才加入我们，加群就可以审核啦</p>",
+  "originalEmbeddedImageUrls": [
+    "https://x19.fp.ps.netease.com/file/6114d3a8143cfa2318d7c6d6G8c2lORx03"
+  ],
+  "cover": {
+    "sourceUrl": "https://x19.fp.ps.netease.com/file/61245d4f96dee46cea1262b6g8LOpFrq03",
+    "sourceBytes": 705654,
+    "sourceWidth": 1000,
+    "sourceHeight": 1000,
+    "localPath": "assets/images/works/ej-qingbo-survival/cover.webp",
+    "width": 544,
+    "height": 544,
+    "bytes": 36058,
+    "processing": "Proportional resize and WebP encoding only; no cropping or generated content."
+  },
+  "snapshotStats": {
+    "downloads": 26298,
+    "rating": 4.62,
+    "comments": 28
+  },
+  "conversionNotes": [
+    "Original wording and credited names are retained; Quill font/color styling and empty spacer paragraphs are removed.",
+    "Embedded and gallery images were not downloaded or included.",
+    "Publisher is not assumed to be an individual creator. Where no creator is credited, the catalogue uses the studio attribution supplied by the user.",
+    "mod_version and res_version semantics are unverified and are not presented as work versions.",
+    "Dates reflect storefront create_time and refresh_time, not a complete release history."
+  ],
+  "gallery": {
+    "retrieved": "2026-10-11",
+    "sourceField": "entity.pic_url_list",
+    "images": [
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/61245d6596dee4730e0797eaDJpTtOPf03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/ej-qingbo-survival/gallery-01.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 65034,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 602218,
+        "originalSha256": "670e11fe4eee4f573a0115a7b3a134b7860788ec9e717b30cbda3326f530c281",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/61245d485e60278754b4367dcGIAYhY803",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/ej-qingbo-survival/gallery-02.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 74560,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 553985,
+        "originalSha256": "79fad23a0bc909976841b6f36e13516fefa9eabc6bec92c0d67842d8bf44db4c",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/61245d6496dee45d41340eaauHRlL45v03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/ej-qingbo-survival/gallery-03.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 69268,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 743200,
+        "originalSha256": "cc0bb77506796d34df10ee6e777512f11c88bbbaeae4e0d85284b5f6b77c3734",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      }
+    ],
+    "failures": []
+  }
+}

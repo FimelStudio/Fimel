@@ -1,64 +1,33 @@
-import React, { forwardRef } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { useReducedMotion } from 'motion/react';
 
 interface PageTransitionProps {
   pageKey: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-const curtainVariants = {
-  initial: { scaleY: 1, transformOrigin: "top" },
-  ready: { 
-    scaleY: 0, 
-    transformOrigin: "top",
-    transition: { duration: 0.35, ease: [0.76, 0, 0.24, 1] as const }
-  },
-  exit: { 
-    scaleY: 1, 
-    transformOrigin: "bottom",
-    transition: { duration: 0.25, ease: [0.76, 0, 0.24, 1] as const }
-  }
-};
+function PageContent({ children, reducedMotion }: { children: ReactNode; reducedMotion: boolean }) {
+  const [curtainVisible, setCurtainVisible] = useState(!reducedMotion);
+  useEffect(() => {
+    if (reducedMotion) return;
+    // Animation callbacks can be lost/throttled after background inactivity.
+    // A decorative curtain has a deadline, never ownership of router progress.
+    const timeout = window.setTimeout(() => setCurtainVisible(false), 600);
+    return () => window.clearTimeout(timeout);
+  }, [reducedMotion]);
+  return <div className="relative w-full">
+    <div id="page-content-wrapper" className="relative w-full route-content-enter">
+      {children}
+    </div>
+    {!reducedMotion && curtainVisible && <div aria-hidden="true" data-page-curtain
+      className="route-curtain fixed inset-0 z-[9999] bg-paper dark:bg-canvas pointer-events-none" />}
+  </div>;
+}
 
-const PageContent = forwardRef<HTMLDivElement, { children: React.ReactNode; reducedMotion: boolean }>(({ children, reducedMotion }, ref) => {
-  return (
-    <motion.div
-      ref={ref}
-      className="relative w-full"
-      initial={reducedMotion ? false : "initial"}
-      animate="ready"
-      exit={reducedMotion ? undefined : "exit"}
-    >
-      <motion.div 
-        id="page-content-wrapper"
-        initial={reducedMotion ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: reducedMotion ? 0 : 0.2 }}
-        className="relative w-full"
-      >
-        {children}
-      </motion.div>
-      
-      {!reducedMotion && (
-        <motion.div
-          aria-hidden="true"
-          className="fixed inset-0 z-[9999] bg-paper dark:bg-canvas pointer-events-none"
-          variants={curtainVariants}
-        />
-      )}
-    </motion.div>
-  );
-});
-
-PageContent.displayName = 'PageContent';
-
-export const PageTransition: React.FC<PageTransitionProps> = ({ pageKey, children }) => {
+export function PageTransition({ pageKey, children }: PageTransitionProps) {
   const reducedMotion = Boolean(useReducedMotion());
-  return (
-    <AnimatePresence mode="wait" initial={false}>
-      <PageContent key={pageKey} reducedMotion={reducedMotion}>
-        {children}
-      </PageContent>
-    </AnimatePresence>
-  );
-};
+  // The live Outlet must not be retained in an exiting presence tree: it still
+  // follows router context, so new/suspended pages can join an old exit queue.
+  // Mount the latest route immediately and clean up the previous page/Canvas.
+  return <PageContent key={pageKey} reducedMotion={reducedMotion}>{children}</PageContent>;
+}

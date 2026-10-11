@@ -1,9 +1,9 @@
 export const contentMessages = {
   zh: {
     catalogue: {
-      title: '作品', intro: '浏览地图、模组和工具，按类型或关键词查找。',
+      title: '作品', intro: '浏览地图、数据包、模组和工具，按类型或关键词查找。',
       search: '搜索作品', search_placeholder: '搜索名称、玩法或标签…', all: '全部作品',
-      types: { bedrock: '网易基岩版地图', java: 'Java 版地图 / 数据包', tools: '插件与工具', mods: '模组' },
+      types: { bedrock: '网易基岩版地图', java: 'Java 版地图', datapacks: '数据包', tools: '插件与工具', mods: '模组' },
       results: '{{count}} 个作品', updated: '上次更新', no_date: '尚未公布',
       downloads: '下载', version: '版本', status: '状态', creators: '创作者',
       empty: '没有找到匹配的作品', empty_desc: '试试其他关键词或作品分类。', clear: '清空搜索',
@@ -24,6 +24,9 @@ export const contentMessages = {
       translation_notice: '本节暂以中文原文呈现。', developing: '作品正在制作，下载入口将在发布后开放。',
       historical_metrics: '商店数据为已收录的历史记录，请以平台最新信息为准。',
       discord: '加入 Discord', support: '反馈与支持', latest: '最新版',
+      gallery_title: '作品图片', gallery_carousel: '图片轮播', gallery_slide: '图片',
+      gallery_keyboard: '作品图片，使用左右方向键切换', gallery_previous: '上一张图片', gallery_next: '下一张图片',
+      gallery_count: '第 {{current}} 张，共 {{count}} 张', gallery_error: '图片暂时无法加载',
     },
     studioContact: {
       copy_qq: '复制 QQ 群号', qq_group: 'QQ 群', connect: '联系与社区', view_works: '浏览作品',
@@ -35,9 +38,9 @@ export const contentMessages = {
   },
   en: {
     catalogue: {
-      title: 'Works', intro: 'Browse maps, mods and tools. Filter by type or search with keywords.',
+      title: 'Works', intro: 'Browse maps, data packs, mods and tools. Filter by type or search with keywords.',
       search: 'Search works', search_placeholder: 'Search names, gameplay or tags…', all: 'All works',
-      types: { bedrock: 'NetEase Bedrock Maps', java: 'Java Maps / Data Packs', tools: 'Tools & Plugins', mods: 'Mods' },
+      types: { bedrock: 'NetEase Bedrock Maps', java: 'Java Maps', datapacks: 'Data Packs', tools: 'Tools & Plugins', mods: 'Mods' },
       results: '{{count}} works', updated: 'Last updated', no_date: 'Not announced',
       downloads: 'downloads', version: 'Version', status: 'Status', creators: 'Creators',
       empty: 'No matching works', empty_desc: 'Try another keyword or category.', clear: 'Clear search',
@@ -58,6 +61,9 @@ export const contentMessages = {
       translation_notice: 'This section is currently available in the original Chinese.', developing: 'This work is in development. Downloads will open after release.',
       historical_metrics: 'Store figures are historical records. Check the platform for current information.',
       discord: 'Join Discord', support: 'Feedback & support', latest: 'Latest',
+      gallery_title: 'Project images', gallery_carousel: 'Image carousel', gallery_slide: 'Image',
+      gallery_keyboard: 'Project images. Use the left and right arrow keys to browse.', gallery_previous: 'Previous image', gallery_next: 'Next image',
+      gallery_count: '{{current}} of {{count}}', gallery_error: 'Image could not be loaded',
     },
     studioContact: {
       copy_qq: 'Copy QQ group number', qq_group: 'QQ group', connect: 'Contact & community', view_works: 'Browse works',
@@ -69,9 +75,9 @@ export const contentMessages = {
   },
   ja: {
     catalogue: {
-      title: '作品', intro: 'マップ、MOD、ツールを一覧で確認。種類やキーワードで探せます。',
+      title: '作品', intro: 'マップ、データパック、MOD、ツールを一覧で確認。種類やキーワードで探せます。',
       search: '作品を検索', search_placeholder: '名前、遊び方、タグで検索…', all: 'すべての作品',
-      types: { bedrock: 'NetEase 統合版マップ', java: 'Java マップ / データパック', tools: 'プラグイン・ツール', mods: 'MOD' },
+      types: { bedrock: 'NetEase 統合版マップ', java: 'Java マップ', datapacks: 'データパック', tools: 'プラグイン・ツール', mods: 'MOD' },
       results: '{{count}} 件の作品', updated: '最終更新', no_date: '未発表',
       downloads: 'ダウンロード', version: 'バージョン', status: '公開状況', creators: '制作者',
       empty: '該当する作品はありません', empty_desc: '別のキーワードやカテゴリーをお試しください。', clear: '検索をクリア',
@@ -92,6 +98,9 @@ export const contentMessages = {
       translation_notice: 'このセクションは現在、中国語の原文で表示されています。', developing: '現在制作中です。公開後にダウンロードできるようになります。',
       historical_metrics: 'ストアの数値は過去の記録です。最新情報は配信元でご確認ください。',
       discord: 'Discord に参加', support: 'フィードバック・サポート', latest: '最新版',
+      gallery_title: '作品画像', gallery_carousel: '画像カルーセル', gallery_slide: '画像',
+      gallery_keyboard: '作品画像。左右の矢印キーで切り替えられます。', gallery_previous: '前の画像', gallery_next: '次の画像',
+      gallery_count: '{{count}} 枚中 {{current}} 枚', gallery_error: '画像を読み込めませんでした',
     },
     studioContact: {
       copy_qq: 'QQ グループ番号をコピー', qq_group: 'QQ グループ', connect: 'お問い合わせ・コミュニティ', view_works: '作品を見る',

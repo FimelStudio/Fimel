@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { assetUrl } from '../content/projects';
+import { ProjectGallery, type ProjectGalleryImage } from './ProjectGallery';
 
 const markdownCache = new Map<string, string>();
 
@@ -44,6 +45,25 @@ export function ProjectMarkdown({ path }: { path: string }) {
   if (content === null) return <div role="status" aria-label={t('project.loading')} className="space-y-4 py-3"><div className="h-7 w-1/2 bg-obsidian/5 dark:bg-surface-raised animate-pulse motion-reduce:animate-none" /><div className="h-28 bg-obsidian/5 dark:bg-surface-raised animate-pulse motion-reduce:animate-none" /></div>;
   const fileUrl = new URL(assetUrl(path), window.location.origin);
   return <div className="project-markdown"><Markdown remarkPlugins={[remarkGfm]} skipHtml components={{
+    p: ({ node, children }) => {
+      // Standard Markdown: adjacent image lines (no blank line) form one
+      // image-only paragraph. Mixed text or linked images stay normal prose.
+      const imageOnly = node?.children.length && node.children.every((child) =>
+        child.type === 'element' && child.tagName === 'img' || child.type === 'text' && !child.value.trim());
+      if (imageOnly) {
+        const images: ProjectGalleryImage[] = [];
+        for (const child of node!.children) {
+          if (child.type !== 'element' || child.tagName !== 'img' || typeof child.properties.src !== 'string' || !child.properties.src) continue;
+          try {
+            images.push({ src: new URL(child.properties.src, fileUrl).href, alt: String(child.properties.alt ?? '') });
+          } catch {
+            // An invalid image URL must not prevent the project text loading.
+          }
+        }
+        if (images.length) return <ProjectGallery key={images.map((image) => image.src).join('|')} images={images} />;
+      }
+      return <p>{children}</p>;
+    },
     a: ({ href, children }) => {
       if (href?.startsWith('#/')) return <Link to={href.slice(1)}>{children}</Link>;
       const resolved = href ? new URL(href, fileUrl).href : undefined;

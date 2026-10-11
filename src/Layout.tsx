@@ -279,7 +279,7 @@ export const Layout: React.FC = () => {
         <div className="mx-auto grid max-w-[1600px] grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1 px-4 py-2 md:min-h-[72px] md:grid-cols-[auto_1fr_auto] md:px-8 md:py-0 lg:px-12">
           <Link to="/" aria-label={`Fimel / ${t('nav.home')}`} className="hover-target order-1 inline-flex items-center outline-offset-4 transition-transform hover:scale-[1.03] focus-visible:outline-2 focus-visible:outline-diamond">
             {logoFailed ? <span className="text-2xl font-black tracking-tight">FIMEL.</span> : (
-              <img src={`${basePath}Fimel%20logo.png`} alt="Fimel" width="104" height="44" className="h-10 w-[95px] object-contain object-left dark:invert md:h-11 md:w-[104px]" onError={() => setLogoFailed(true)} />
+              <img src={`${basePath}assets/brand/fimel-logo.png`} alt="Fimel" width="104" height="44" className="h-10 w-[95px] object-contain object-left dark:invert md:h-11 md:w-[104px]" onError={() => setLogoFailed(true)} />
             )}
           </Link>
 
@@ -333,7 +333,7 @@ export const Layout: React.FC = () => {
         </div>
       </footer>
 
-      <div className="pointer-events-none fixed right-2 top-28 z-[100] flex h-[64px] w-[min(320px,calc(100vw-16px))] items-center bg-contain bg-center bg-no-repeat px-4 transition-transform duration-500 motion-reduce:transition-none md:right-8 md:top-24 image-rendering-pixelated" style={{ backgroundImage: `url('${basePath}HUD/Toast_advancement.png')`, transform: advancementVisible ? 'translateX(0)' : 'translateX(150%)' }} aria-hidden="true">
+      <div className="pointer-events-none fixed right-2 top-28 z-[100] flex h-[64px] w-[min(320px,calc(100vw-16px))] items-center bg-contain bg-center bg-no-repeat px-4 transition-transform duration-500 motion-reduce:transition-none md:right-8 md:top-24 image-rendering-pixelated" style={{ backgroundImage: `url('${basePath}assets/images/ui/minecraft/Toast_advancement.png')`, transform: advancementVisible ? 'translateX(0)' : 'translateX(150%)' }} aria-hidden="true">
         <div className="ml-[68px] mt-1 flex flex-col justify-center font-['Minecraftia',monospace] text-[13px] leading-[1.2] tracking-wide" style={{ textShadow: '2px 2px 0 #3f3f3f' }}>
           <span className="text-[#FFFF55]">Advancement Made!</span>
           <span className="text-white">First Steps</span>

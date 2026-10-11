@@ -1,0 +1,106 @@
+{
+  "sourceUrl": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648967044809257014",
+  "sourceEndpoint": "https://g79apigatewayobt.nie.netease.com/h5/pe-item-detail-v2",
+  "sourceRequest": {
+    "item_id": "4648967044809257014",
+    "channel_id": 5
+  },
+  "sourceField": "entity.info",
+  "accessedDate": "2026-10-10",
+  "sourceLanguage": "zh-CN",
+  "title": "飞行棋[CB]",
+  "storeItemId": "4648967044809257014",
+  "storefrontPublisher": "KCINE",
+  "creditedAuthors": [
+    "KCINE"
+  ],
+  "unverifiedVersionFields": {
+    "mod_version": "1.23",
+    "res_version": 4
+  },
+  "publishedAt": "2021-07-29T08:27:21.000Z",
+  "updatedAt": "2021-07-29T08:27:21.000Z",
+  "publishedDate": "2021-07-29",
+  "updatedDate": "2021-07-29",
+  "dateTimezone": "Asia/Shanghai",
+  "publishedUnixSeconds": 1627547241,
+  "updatedUnixSeconds": 1627547241,
+  "resourceSizeBytes": 159499,
+  "descriptionMarkdown": "works/aeroplane-chess-cb/description.zh.md",
+  "originalDescriptionHtml": "<p><strong class=\"ql-size-huge\">飞行棋[CB]</strong></p><p><strong class=\"ql-size-large\">作者：KCINE</strong></p><p><br></p><p><span class=\"ql-size-large\">基本还原了经典飞行棋玩法</span></p><p><span class=\"ql-size-large\">并且制作了AI机器人可以加入对战</span></p><p><span class=\"ql-size-large\">当然可以全部设置成机器人</span></p><p><span class=\"ql-size-large\">建议用生存模式进行游玩</span></p><p><span class=\"ql-size-large\">以下规则不同：</span></p><p><span class=\"ql-size-large\">5,6点数起飞且掷6不可再次投掷</span></p><p><span class=\"ql-size-large\">\"大跳跃\"不会击落路径上的敌机</span></p><p><br></p><p><span class=\"ql-size-large\">其他规则参考经典飞行棋</span></p><p><br></p><p><span class=\"ql-size-large\">如有bug请反馈群1060796710电影游戏社</span></p><p><br></p><p><br></p><p><span class=\"ql-size-large\">电影游戏社欢迎各路制作好玩游戏的大神加入</span></p><p><span class=\"ql-size-large\">我们只是一个社团性质的由各路MC游戏制作爱好者组成的团体，并非工作室</span></p><p><img src=\"https://x19.fp.ps.netease.com/file/60fb95bd5e602772086dead7XV5xSm4d03\"></p>",
+  "originalEmbeddedImageUrls": [
+    "https://x19.fp.ps.netease.com/file/60fb95bd5e602772086dead7XV5xSm4d03"
+  ],
+  "cover": {
+    "sourceUrl": "https://x19.fp.ps.netease.com/file/60fb96d85e60277364251c8a1JRmuuLK03",
+    "sourceBytes": 1009525,
+    "sourceWidth": 1000,
+    "sourceHeight": 1000,
+    "localPath": "assets/images/works/aeroplane-chess-cb/cover.webp",
+    "width": 544,
+    "height": 544,
+    "bytes": 36522,
+    "processing": "Proportional resize and WebP encoding only; no cropping or generated content."
+  },
+  "snapshotStats": {
+    "downloads": 38402,
+    "rating": 3.83,
+    "comments": 41
+  },
+  "conversionNotes": [
+    "Original wording and credited names are retained; Quill font/color styling and empty spacer paragraphs are removed.",
+    "Embedded and gallery images were not downloaded or included.",
+    "Publisher is not assumed to be an individual creator. Where no creator is credited, the catalogue uses the studio attribution supplied by the user.",
+    "mod_version and res_version semantics are unverified and are not presented as work versions.",
+    "Dates reflect storefront create_time and refresh_time, not a complete release history."
+  ],
+  "gallery": {
+    "retrieved": "2026-10-11",
+    "sourceField": "entity.pic_url_list",
+    "images": [
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/60fb96e35e602771b8e052ceRRohPoPS03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/aeroplane-chess-cb/gallery-01.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 48214,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 433307,
+        "originalSha256": "a77ab08e3b0c270b20a95b2ccff4d58ade967a19fa2378e693029a8c732c8bef",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/60fb96e95e602779a9ccebe2CI37F9Xp03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/aeroplane-chess-cb/gallery-02.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 28666,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 290223,
+        "originalSha256": "5c5966b1636cac4a1ce1372005b1dd6a32a0b76c3f57935e47a156c3152103ca",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/60fb96f05e602782fd52bb53iikXJ6i403",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/aeroplane-chess-cb/gallery-03.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 87484,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 805051,
+        "originalSha256": "4869919726beca6cd30f523197583ae951aaf563551f7885154ac9fa9fe59a05",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      }
+    ],
+    "failures": []
+  }
+}

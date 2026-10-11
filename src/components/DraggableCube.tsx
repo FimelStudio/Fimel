@@ -62,12 +62,12 @@ export const DraggableCube: React.FC<DraggableCubeProps> = ({ basePath }) => {
           }}
           transition={{ scale: { type: "spring", stiffness: 300, damping: 20 } }}
         >
-          <div className="mc-face border-2 border-obsidian/30 dark:border-line" style={{ transform: "rotateY(0deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/block_side.png')` }}></div>
-          <div className="mc-face border-2 border-obsidian/30 dark:border-line" style={{ transform: "rotateY(180deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/block_side.png')` }}></div>
-          <div className="mc-face border-2 border-obsidian/30 dark:border-line" style={{ transform: "rotateY(90deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/block_side.png')` }}></div>
-          <div className="mc-face border-2 border-obsidian/30 dark:border-line" style={{ transform: "rotateY(-90deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/block_side.png')` }}></div>
-          <div className="mc-face border-2 border-obsidian/30 dark:border-line bg-[#7cbd6b]" style={{ transform: "rotateX(90deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/block_top.png')`, backgroundBlendMode: 'multiply' }}></div>
-          <div className="mc-face border-2 border-obsidian/30 dark:border-line bg-obsidian/20 dark:bg-canvas" style={{ transform: "rotateX(-90deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}textures/dirt.png')` }}></div>
+          <div className="mc-face border-2 border-obsidian/30 dark:border-line" style={{ transform: "rotateY(0deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}assets/textures/minecraft/block_side.png')` }}></div>
+          <div className="mc-face border-2 border-obsidian/30 dark:border-line" style={{ transform: "rotateY(180deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}assets/textures/minecraft/block_side.png')` }}></div>
+          <div className="mc-face border-2 border-obsidian/30 dark:border-line" style={{ transform: "rotateY(90deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}assets/textures/minecraft/block_side.png')` }}></div>
+          <div className="mc-face border-2 border-obsidian/30 dark:border-line" style={{ transform: "rotateY(-90deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}assets/textures/minecraft/block_side.png')` }}></div>
+          <div className="mc-face border-2 border-obsidian/30 dark:border-line bg-[#7cbd6b]" style={{ transform: "rotateX(90deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}assets/textures/minecraft/block_top.png')`, backgroundBlendMode: 'multiply' }}></div>
+          <div className="mc-face border-2 border-obsidian/30 dark:border-line bg-obsidian/20 dark:bg-canvas" style={{ transform: "rotateX(-90deg) translateZ(var(--tz))", backgroundImage: `url('${basePath}assets/textures/minecraft/dirt.png')` }}></div>
         </motion.div>
       </div>
     </motion.div>

@@ -1,0 +1,108 @@
+{
+  "sourceUrl": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4647154283526030957",
+  "sourceEndpoint": "https://g79apigatewayobt.nie.netease.com/h5/pe-item-detail-v2",
+  "sourceRequest": {
+    "item_id": "4647154283526030957",
+    "channel_id": 5
+  },
+  "sourceField": "entity.info",
+  "accessedDate": "2026-10-10",
+  "sourceLanguage": "zh-CN",
+  "title": "中国象棋[CB]",
+  "storeItemId": "4647154283526030957",
+  "storefrontPublisher": "KCINE",
+  "creditedAuthors": [
+    "KCINE"
+  ],
+  "unverifiedVersionFields": {
+    "mod_version": "1.22",
+    "res_version": 5
+  },
+  "publishedAt": "2021-06-05T10:31:09.000Z",
+  "updatedAt": "2021-07-19T02:46:06.000Z",
+  "publishedDate": "2021-06-05",
+  "updatedDate": "2021-07-19",
+  "dateTimezone": "Asia/Shanghai",
+  "publishedUnixSeconds": 1622889069,
+  "updatedUnixSeconds": 1626662766,
+  "resourceSizeBytes": 287052,
+  "descriptionMarkdown": "works/chinese-chess-cb/description.zh.md",
+  "originalDescriptionHtml": "<p><strong class=\"ql-size-huge\" style=\"color: red;\">中国象棋</strong></p><p><strong class=\"ql-size-large\">作者:KCINE</strong></p><p><strong style=\"color: green;\">游玩须知</strong>:(1)双人对弈,<span style=\"color: orange;\">支持多人</span>观战,设有观战区</p><p>(2)对弈者用<u style=\"color: orange;\">蝙蝠生成蛋</u>选择棋子(可多次选择)</p><p>使用<u style=\"color: orange;\">兔子生成蛋</u>落子(需要放置玻璃上)</p><p>(3)本地图纯命令制作,如果有bug请及时联系作者,群号:1060791710</p><p>(4)内有重置游戏按钮,遇到问题请按它</p><p>======================</p><p><strong class=\"ql-size-large\" style=\"color: red;\"><em><u>更新小贴士:游戏更新，mod实体被删除，导致地图已经无法游玩，望见谅，作者大大正在全力更新</u></em></strong></p><p><br></p><p><br></p><p><br></p><p><strong class=\"ql-size-huge\" style=\"color: red;\"><img src=\"https://x19.fp.ps.netease.com/file/608f8a86a7f252286ac4823fqqQLd3hu03\"></strong></p><p><img src=\"https://x19.fp.ps.netease.com/file/608f87082786fd534efdc260eflwufDf03\"></p><p><span class=\"ql-size-large\">如果喜欢我们的作品，别忘了给一个好评哦</span></p><p><span class=\"ql-size-large\">Fimel Studio交流群807646558/1060796710</span></p><p><span class=\"ql-size-large\">Fimel Studio也在火热招贤纳士啦，我们热烈欢迎有经验有技术的指令人员，建筑人员，addons制作者，视频剪辑以及宣传人才加入我们，加群就可以审核啦</span></p><p><span class=\"ql-size-large\"><span class=\"ql-cursor\">﻿</span></span><img src=\"https://x19.fp.ps.netease.com/file/60e7e60b8b74274c94708b96WNtzGXpI03\"></p><p><br></p>",
+  "originalEmbeddedImageUrls": [
+    "https://x19.fp.ps.netease.com/file/608f8a86a7f252286ac4823fqqQLd3hu03",
+    "https://x19.fp.ps.netease.com/file/608f87082786fd534efdc260eflwufDf03",
+    "https://x19.fp.ps.netease.com/file/60e7e60b8b74274c94708b96WNtzGXpI03"
+  ],
+  "cover": {
+    "sourceUrl": "https://x19.fp.ps.netease.com/file/60a8e33996dee40c751799f8N7xJNXr303",
+    "sourceBytes": 637848,
+    "sourceWidth": 1000,
+    "sourceHeight": 1000,
+    "localPath": "assets/images/works/chinese-chess-cb/cover.webp",
+    "width": 544,
+    "height": 544,
+    "bytes": 31246,
+    "processing": "Proportional resize and WebP encoding only; no cropping or generated content."
+  },
+  "snapshotStats": {
+    "downloads": 51528,
+    "rating": 3.2,
+    "comments": 48
+  },
+  "conversionNotes": [
+    "Original wording and credited names are retained; Quill font/color styling and empty spacer paragraphs are removed.",
+    "Embedded and gallery images were not downloaded or included.",
+    "Publisher is not assumed to be an individual creator. Where no creator is credited, the catalogue uses the studio attribution supplied by the user.",
+    "mod_version and res_version semantics are unverified and are not presented as work versions.",
+    "Dates reflect storefront create_time and refresh_time, not a complete release history."
+  ],
+  "gallery": {
+    "retrieved": "2026-10-11",
+    "sourceField": "entity.pic_url_list",
+    "images": [
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/608f87d2a7f2526e9b4cea26XNYi2Ciu03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/chinese-chess-cb/gallery-01.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 142862,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 1024964,
+        "originalSha256": "cb45024481a59b765bbd7e8a53dbeb00df3200cd2e69ae667b48b6c562d88ed9",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/608f87dba7f2526e9b4cea54USP0UN6O03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/chinese-chess-cb/gallery-02.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 64462,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 649905,
+        "originalSha256": "dfaf228d45ff29f2c6f26d1e83353856cedb605e3177ca5bdffe66a1a62bcb79",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/608f87e3a7f252286ac4632b8cvpYgco03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/chinese-chess-cb/gallery-03.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 33926,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 407836,
+        "originalSha256": "b657e2cee73fee3faac222e805d54b3c1066c0e1a83181d4058fdce0cdffea2d",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      }
+    ],
+    "failures": []
+  }
+}

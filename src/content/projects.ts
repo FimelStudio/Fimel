@@ -3,7 +3,7 @@ import projectTags from './project-tags.json';
 
 export type ProjectTag = keyof typeof projectTags;
 
-export const PROJECT_TYPES = ['bedrock', 'java', 'tools', 'mods'] as const;
+export const PROJECT_TYPES = ['bedrock', 'java', 'datapacks', 'tools', 'mods'] as const;
 export type ProjectType = typeof PROJECT_TYPES[number];
 export const PROJECT_TABS = ['description', 'changelog', 'versions'] as const;
 export type ProjectTab = typeof PROJECT_TABS[number];

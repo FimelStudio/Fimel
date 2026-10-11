@@ -39,10 +39,10 @@ export const Studio: React.FC = () => {
   ];
 
   const team = [
-    { name: 'Ylong', role: t('team.role1'), letter: 'Y', color: 'text-brand', avatar: `${basePath}team/YYYlong.png` },
-    { name: 'TreeHey', role: t('team.role2'), letter: 'T', color: 'text-amethyst', avatar: `${basePath}team/TreeHey.png` },
-    { name: 'crystal215', role: t('team.role4'), letter: 'C', color: 'text-brand', avatar: `${basePath}team/crystal215.png` },
-    { name: 'chengzi', role: t('team.role3'), letter: 'C', color: 'text-[#ffa500]', avatar: `${basePath}team/chengzi_bucheng.png` }
+    { name: 'Ylong', role: t('team.role1'), letter: 'Y', color: 'text-brand', avatar: `${basePath}assets/images/team/YYYlong.png` },
+    { name: 'TreeHey', role: t('team.role2'), letter: 'T', color: 'text-amethyst', avatar: `${basePath}assets/images/team/TreeHey.png` },
+    { name: 'crystal215', role: t('team.role4'), letter: 'C', color: 'text-brand', avatar: `${basePath}assets/images/team/crystal215.png` },
+    { name: 'chengzi', role: t('team.role3'), letter: 'C', color: 'text-[#ffa500]', avatar: `${basePath}assets/images/team/chengzi_bucheng.png` }
   ];
 
   return (
@@ -88,7 +88,7 @@ export const Studio: React.FC = () => {
             </ScrollTextReveal>
           </div>
           <div className="reveal-up relative min-h-[22rem] overflow-hidden border border-line bg-surface-raised perspective-1000 group">
-            <div className="parallax-bg absolute inset-[-15%] w-[130%] h-[130%] opacity-35 dark:opacity-25 bg-repeat image-rendering-pixelated" style={{ backgroundImage: `url(${basePath}textures/stone.png)`, backgroundSize: '96px' }}></div>
+            <div className="parallax-bg absolute inset-[-15%] w-[130%] h-[130%] opacity-35 dark:opacity-25 bg-repeat image-rendering-pixelated" style={{ backgroundImage: `url(${basePath}assets/textures/minecraft/stone.png)`, backgroundSize: '96px' }}></div>
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,210,211,0.18),transparent_65%)]"></div>
             <div className="absolute inset-0"><DeferredWorldCore isDark={isDark} /></div>
           </div>

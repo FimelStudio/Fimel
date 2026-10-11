@@ -30,8 +30,8 @@ const TexturePanel = ({ texture, code, image, title, basePath }: { texture: stri
         className="absolute inset-[-20%] w-[140%] h-[140%] bg-repeat image-rendering-pixelated opacity-60 dark:opacity-40 group-hover:scale-110 transition-transform duration-[1.5s] ease-out"
         style={{
           backgroundImage: texture === 'amethyst'
-            ? `url(${basePath}textures/diamond_block.png)`
-            : `url(${basePath}textures/${texture})`,
+            ? `url(${basePath}assets/textures/minecraft/diamond_block.png)`
+            : `url(${basePath}assets/textures/minecraft/${texture})`,
           backgroundSize: '128px'
         }}
       />

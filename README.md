@@ -7,11 +7,15 @@
 
 ## 🌟 项目简介
 
-Fimel 官方网站展示了工作室自 2019 年以来的核心创作积淀，涵盖：
+Fimel 官方网站展示工作室的地图、数据包、模组和创作者工具。作品目录分为五个独立分类：
+
 - **基岩版 / 网易版地图作品**：收录包括《海岛逃生：黎明前夕》、《狼人杀-F小镇》、《饥饿游戏：旧城迷行》、《通电2雪域危机》等数百万累计下载量的代表作品；
-- **Java 版地图与数据包**：包含系统重构的《海岛逃生 (Java Core)》与大型叙事 RPG 企划；
-- **可游玩玩法模组**：如《Bingo × Don't Do It》（Fabric 1.21.x）；
-- **创作者插件与工具**：如《Minecraft OBJ Cubizer》（Blockbench 官方生态模型转换插件），并集成实时下载统计。
+- **Java 版地图**：两个制作中的 Java 地图项目；
+- **数据包**：新增《Fimel Card 卡牌桌游数据包》，暂未发布，项目入口为 [FimelStudio/fimelcard-dp](https://github.com/FimelStudio/fimelcard-dp)；
+- **模组**：如已发布的《Bingo But Don't Do It》；
+- **插件与工具**：如《Minecraft OBJ Cubizer》，并集成下载统计。
+
+作品目录目前为 27 条，其中网易分类为 21 条。音乐制作命令包按工作室要求保留在网易分类，不因数据包分类拆分而迁移。Fimel Card 仓库目前无法公开读取，因此网站仅展示已确认的信息，不补造规则、版本或下载入口。
 
 ---
 
@@ -23,7 +27,7 @@ Fimel 官方网站展示了工作室自 2019 年以来的核心创作积淀，�
 - **样式方案**：Tailwind CSS v4
 - **国际化 (i18n)**：i18next, react-i18next (支持 简体中文 / English / 日本語)
 - **后端服务**：Supabase (工作物下载实时计数与持久化)
-- **部署平台**：GitHub Pages (自动化 Actions) / Cloudflare Workers & Pages
+- **部署平台**：GitHub Pages（自动化 Actions）/ Cloudflare Workers
 
 ---
 
@@ -63,6 +67,17 @@ npm run lint
 ```bash
 npm run build
 ```
+
+构建会先运行 `npm run check:content`，依次执行内容与静态资源校验脚本，检查作品类型和 JSON Schema 一致性、分类标签、资源路径实际大小写及 Markdown 链接，再生成生产资源与 Bingo 本地备用下载分片。也可以单独运行该检查命令。浏览器回归测试运行 `npm run test:e2e`。
+
+## 内容与目录维护
+
+- [内容维护说明](docs/content-maintenance.md)：主页文案位置、五类作品、JSON 字段、Markdown、下载与新增作品步骤。
+- [项目目录规范](docs/project-structure.md)：静态图片、纹理、音效、团队头像、内容来源和稳定下载路径。
+- [网易内容来源](docs/netease-content-sources.md)：原商店说明、作者署名、封面与历史数据边界。
+- [前端验证记录](docs/frontend-verification.md)：按阶段记录的构建、部署、浏览器及性能检查。
+
+`public/` 仅存放要部署的网站资源；来源快照放在 `content-sources/`，旧页面存档放在 `docs/archive/`。作品封面统一放在 `public/assets/images/works/<slug>/`，正文统一放在 `public/works/<slug>/`。已有 `public/mods/` 与 `public/plugins/` 下载入口有意保持不变，避免破坏外部链接。
 
 ---
 

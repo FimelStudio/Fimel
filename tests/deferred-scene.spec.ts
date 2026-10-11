@@ -51,7 +51,7 @@ test('a failed 3D chunk falls back locally instead of blanking the page', async 
 test('a hanging texture times out locally while foreground controls stay usable', async ({ page }) => {
   let release!: () => void;
   const gate = new Promise<void>(resolve => { release = resolve; });
-  await page.route('**/textures/block_side.png', async route => {
+  await page.route('**/assets/textures/minecraft/block_side.png', async route => {
     await gate;
     await route.abort().catch(() => {});
   });

@@ -1,0 +1,15 @@
+# 狼人杀-F小镇
+
+## 作品展示
+
+![狼人杀-F小镇 · 商店展示图 1](../../assets/images/works/werewolf-f-town/gallery-01.webp)
+![狼人杀-F小镇 · 商店展示图 2](../../assets/images/works/werewolf-f-town/gallery-02.webp)
+![狼人杀-F小镇 · 商店展示图 3](../../assets/images/works/werewolf-f-town/gallery-03.webp)
+
+FIMEL STUDIO工作室出品
+
+玩法：开局随机分配侦探，狼人和平民，狼人要去gan侦探和平民全部gan完获胜
+
+侦探开局有弓，找出狼人进行击杀，平民可以捡钱买箭来反击狼人
+
+感谢你的游玩

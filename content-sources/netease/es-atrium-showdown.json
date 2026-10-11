@@ -1,0 +1,107 @@
+{
+  "sourceUrl": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4649725567306540590",
+  "sourceEndpoint": "https://g79apigatewayobt.nie.netease.com/h5/pe-item-detail-v2",
+  "sourceRequest": {
+    "item_id": "4649725567306540590",
+    "channel_id": 5
+  },
+  "sourceField": "entity.info",
+  "accessedDate": "2026-10-10",
+  "sourceLanguage": "zh-CN",
+  "title": "［ES］中庭决战-职业对抗",
+  "storeItemId": "4649725567306540590",
+  "storefrontPublisher": "KCINE",
+  "creditedAuthors": [
+    "水晶215",
+    "建造老e"
+  ],
+  "unverifiedVersionFields": {
+    "mod_version": "1.23",
+    "res_version": 3
+  },
+  "publishedAt": "2021-08-30T02:15:00.000Z",
+  "updatedAt": "2021-08-30T02:15:00.000Z",
+  "publishedDate": "2021-08-30",
+  "updatedDate": "2021-08-30",
+  "dateTimezone": "Asia/Shanghai",
+  "publishedUnixSeconds": 1630289700,
+  "updatedUnixSeconds": 1630289700,
+  "resourceSizeBytes": 257884,
+  "descriptionMarkdown": "works/es-atrium-showdown/description.zh.md",
+  "originalDescriptionHtml": "<p>游戏简介：</p><p>作者：水晶215，建造老e</p><p>关于游戏：</p><p>［ES］系列是由建造老e以及水晶215联合创造的竞技类小游戏会有衍生材质包，若没有则表示正在审核</p><p>本游戏目标为击败所有在场玩家，成为最后一民战士。</p><p>职业共计12个，职业不可重复，§4规定时间内未选择职业者会依旧参赛！！！</p><p>本游戏拥有观战系统，草丛隐身等特色。</p><p>期待您的下载！</p><p>制作不易，烦请5星！</p><p><img src=\"https://x19.fp.ps.netease.com/file/6128cd1b4ae863059733e486JicdJLAo03\"></p>",
+  "originalEmbeddedImageUrls": [
+    "https://x19.fp.ps.netease.com/file/6128cd1b4ae863059733e486JicdJLAo03"
+  ],
+  "cover": {
+    "sourceUrl": "https://x19.fp.ps.netease.com/file/6128c1c5a7f2526d6c6aede8WO8lMTOD03",
+    "sourceBytes": 614109,
+    "sourceWidth": 1000,
+    "sourceHeight": 1000,
+    "localPath": "assets/images/works/es-atrium-showdown/cover.webp",
+    "width": 544,
+    "height": 544,
+    "bytes": 31708,
+    "processing": "Proportional resize and WebP encoding only; no cropping or generated content."
+  },
+  "snapshotStats": {
+    "downloads": 16317,
+    "rating": 3.6,
+    "comments": 13
+  },
+  "conversionNotes": [
+    "Original wording and credited names are retained; Quill font/color styling and empty spacer paragraphs are removed.",
+    "Embedded and gallery images were not downloaded or included.",
+    "Publisher is not assumed to be an individual creator. Where no creator is credited, the catalogue uses the studio attribution supplied by the user.",
+    "mod_version and res_version semantics are unverified and are not presented as work versions.",
+    "Dates reflect storefront create_time and refresh_time, not a complete release history."
+  ],
+  "gallery": {
+    "retrieved": "2026-10-11",
+    "sourceField": "entity.pic_url_list",
+    "images": [
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/6128c203a7f2520bcb190042EQk2SFij03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/es-atrium-showdown/gallery-01.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 60090,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 677230,
+        "originalSha256": "28a8aa477008699cc3bc11da20128a271908d243e4667a842d3c93a3311983b0",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/6128c214a7f2520bcb190093N66dRp0P03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/es-atrium-showdown/gallery-02.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 62026,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 573462,
+        "originalSha256": "3b30f023c2aa8279ecfa6813c75673a49dd9e6148f861d1a7220a444b25654d8",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/6128c21ba7f25233a678b371gSRWzNUV03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/es-atrium-showdown/gallery-03.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 56120,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 642553,
+        "originalSha256": "3744e70f546ea16b3b9c4f990c1177bf306654ddb6637a9591d9b2fec99b31a0",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      }
+    ],
+    "failures": []
+  }
+}

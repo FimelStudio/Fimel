@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Home, Info, Map, Library, Wrench, PenTool, Swords, Blocks, Mail, ChevronUp, ChevronDown } from 'lucide-react';
+import { Home, Info, Map, Layers, Wrench, PenTool, Swords, Blocks, Mail, ChevronUp, ChevronDown } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 
@@ -17,7 +17,7 @@ export default function HotbarNav({ scrollProgress, handleNavClick, activePage }
     { id: '#hero', tooltip: 'Respawn (Home)', icon: Home, color: '#FFFF55', page: 'home' },
     { id: '#quick-entry', tooltip: t('home.featured_cta'), icon: Blocks, color: '#55FFFF', page: 'home' },
     { id: '#/studio', tooltip: t('nav.about'), icon: Info, color: 'white', page: 'studio' },
-    { id: '#/studio', tooltip: 'Studio', icon: Library, color: 'white', page: 'studio' },
+    { id: '#/works?type=datapacks', tooltip: t('nav.nav_datapacks'), icon: Layers, color: 'white', page: 'works' },
     { id: '#/works?type=bedrock', tooltip: t('nav.nav_maps_be'), icon: Map, color: 'white', page: 'works' },
     { id: '#/works?type=java', tooltip: t('nav.nav_maps_je'), icon: Wrench, color: 'white', page: 'works' },
     { id: '#/works?type=tools', tooltip: t('nav.nav_tools'), icon: PenTool, color: 'white', page: 'works' },
@@ -107,16 +107,16 @@ export default function HotbarNav({ scrollProgress, handleNavClick, activePage }
         
         {/* MC Experience Bar Scroll Indicator (Embedded above hotbar) */}
         <div className="w-[273px] h-[7.5px] md:w-[364px] md:h-[10px] bg-no-repeat bg-cover image-rendering-pixelated mb-1 md:mb-2 pointer-events-none drop-shadow-md"
-          style={{ backgroundImage: `url(${basePath}HUD/experience_bar_background.png)` }}>
+          style={{ backgroundImage: `url(${basePath}assets/images/ui/minecraft/experience_bar_background.png)` }}>
           <div className="h-full w-full bg-no-repeat bg-cover image-rendering-pixelated origin-left transition-transform duration-100 ease-out"
-            style={{ transform: `scaleX(${Math.max(0, Math.min(1, scrollProgress))})`, backgroundImage: `url(${basePath}HUD/experience_bar_progress.png)` }}
+            style={{ transform: `scaleX(${Math.max(0, Math.min(1, scrollProgress))})`, backgroundImage: `url(${basePath}assets/images/ui/minecraft/experience_bar_progress.png)` }}
           />
         </div>
       
       {/* Hotbar Background */}
       <div 
         className="w-[273px] h-[33px] md:w-[364px] md:h-[44px] bg-no-repeat bg-cover image-rendering-pixelated relative pointer-events-auto flex"
-        style={{ backgroundImage: `url(${basePath}HUD/Hotbar.png)` }}
+        style={{ backgroundImage: `url(${basePath}assets/images/ui/minecraft/Hotbar.png)` }}
       >
         {/* Clickable slots with Icons */}
         {slots.map((slot, idx) => (
@@ -144,7 +144,7 @@ export default function HotbarNav({ scrollProgress, handleNavClick, activePage }
         <div 
           className="absolute top-[-1.5px] md:top-[-2px] w-[36px] h-[36px] md:w-[48px] md:h-[48px] pointer-events-none bg-no-repeat bg-cover transition-all duration-200 ease-out image-rendering-pixelated hidden md:block z-20"
           style={{ 
-            backgroundImage: `url(${basePath}HUD/Hotbar_selection.png)`,
+            backgroundImage: `url(${basePath}assets/images/ui/minecraft/Hotbar_selection.png)`,
             left: '-2px',
             transform: `translateX(${visibleActiveSlot * 40}px)`,
           }}
@@ -152,7 +152,7 @@ export default function HotbarNav({ scrollProgress, handleNavClick, activePage }
         <div 
           className="absolute top-[-1.5px] w-[36px] h-[36px] pointer-events-none bg-no-repeat bg-cover transition-all duration-200 ease-out image-rendering-pixelated md:hidden z-20"
           style={{ 
-            backgroundImage: `url(${basePath}HUD/Hotbar_selection.png)`,
+            backgroundImage: `url(${basePath}assets/images/ui/minecraft/Hotbar_selection.png)`,
             left: '-1.5px',
             transform: `translateX(${visibleActiveSlot * 30.33}px)`,
           }}

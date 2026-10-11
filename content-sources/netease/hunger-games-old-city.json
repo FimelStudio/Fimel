@@ -1,0 +1,98 @@
+{
+  "i18nKey": "hungerGamesOldCity",
+  "sourceUrl": "https://resource-minecraft.h5.163.com/#/detail?id=4657291854883079467",
+  "sourceEndpoint": "https://g79apigatewayobt.nie.netease.com/h5/pe-item-detail-v2",
+  "sourceRequest": {
+    "item_id": "4657291854883079467",
+    "channel_id": 5
+  },
+  "sourceField": "entity.info",
+  "accessedDate": "2026-10-10",
+  "sourceLanguage": "zh-CN",
+  "title": "饥饿游戏：旧城迷行",
+  "storeItemId": "4657291854883079467",
+  "unverifiedVersionFields": {
+    "mod_version": "2.2"
+  },
+  "author": "KCINE",
+  "authorRole": "storefront publisher; see creditedAuthors and original description for creators",
+  "creditedAuthors": [
+    "E建"
+  ],
+  "publishedAt": "2022-08-09T07:00:32.000Z",
+  "updatedAt": "2022-08-28T11:17:17.000Z",
+  "publishedDate": "2022-08-09",
+  "updatedDate": "2022-08-28",
+  "dateTimezone": "Asia/Shanghai",
+  "publishedUnixSeconds": 1660028432,
+  "updatedUnixSeconds": 1661685437,
+  "descriptionMarkdown": "works/hunger-games-old-city/description.zh.md",
+  "changelogMarkdown": "works/hunger-games-old-city/changelog.zh.md",
+  "changelogVersion": "2.0",
+  "changelogDate": null,
+  "originalDescriptionHtml": "<p class=\"ql-align-center\"><strong style=\"background-color: lightblue; color: darkslateblue;\" class=\"ql-size-huge\">饥饿游戏：旧城迷行</strong></p><p><strong style=\"color: palevioletred;\" class=\"ql-size-large\">①玩法介绍</strong></p><p><span class=\"ql-size-large\">局外，玩家需要到达</span><strong class=\"ql-size-large\" style=\"color: orange;\">天赋区</strong><span class=\"ql-size-large\">选择</span><strong class=\"ql-size-large\" style=\"color: orange;\">天赋</strong><span class=\"ql-size-large\">（12种），为了给玩家更好的游戏体验，我们设置了</span><strong class=\"ql-size-large\" style=\"color: orange;\">天气/时间调节屋</strong><span class=\"ql-size-large\">。点击按钮开始游戏，每个玩家将会传送到不同的区域，游戏内每个玩家各自为战，通过点燃TNT来获得物资，局内设有铁砧和工作台，为玩家提供合成以及附魔需求。</span></p><p><strong style=\"color: palevioletred;\" class=\"ql-size-large\">②道具介绍</strong></p><p><strong style=\"color: orange;\" class=\"ql-size-large\">雪球 </strong><strong class=\"ql-size-large\">: </strong><span class=\"ql-size-large\"> 投掷后冰冻小范围内的其他玩家。</span></p><p><strong style=\"color: orange;\" class=\"ql-size-large\">末影珍珠 </strong><strong class=\"ql-size-large\">: </strong><span class=\"ql-size-large\">投掷后将会获得隐身，力量buff。</span></p><p><strong style=\"color: orange;\" class=\"ql-size-large\">鸡蛋</strong><strong class=\"ql-size-large\"> : </strong><span class=\"ql-size-large\"> 投掷后有概率获得绿宝石和不死图腾。</span></p><p><strong style=\"color: palevioletred;\" class=\"ql-size-large\">③特殊地区</strong></p><p><strong style=\"color: orange;\" class=\"ql-size-large\">古堡</strong><span class=\"ql-size-large\">：使用80绿宝石在王座上召唤烈焰骑士及其随从，击败后有概率掉落烈焰棒，可在河边兑奖屋兑换神器:</span><strong class=\"ql-size-large\" style=\"color: orange;\">三叉戟</strong><span class=\"ql-size-large\">。</span></p><p><strong style=\"color: orange;\" class=\"ql-size-large\">兑奖屋</strong><span class=\"ql-size-large\">：消耗64绿宝石随机获得两种高级套装的其中一件。#如果绿宝石不足会被吞噬掉</span></p><p><strong style=\"color: orange;\" class=\"ql-size-large\">巫女地摊</strong><span class=\"ql-size-large\">：位于西集市，可以消耗苹果使游戏内任意一名玩家身边召唤出尸壳。</span></p><p><strong style=\"color: palevioletred;\" class=\"ql-size-large\">④其他</strong></p><p><span class=\"ql-size-large\">等待无聊？可以在天赋区游玩跑酷，也可以在大厅选择打凋零和冰船游玩，等待下一局开始。</span></p><p><span class=\"ql-size-large\">——E建</span></p><p><br></p><p><strong style=\"color: goldenrod;\" class=\"ql-size-large\"><em>饥饿游戏-旧城迷行v2.0更新日志</em></strong></p><p>扩大出生点范围，优化冰船游戏.</p><p>地图内新增部分建筑及建筑内饰.</p><p>优化了部分已发现的：bug.</p><p>优化了公告栏.</p><p>新增胜利榜，上局获胜显示.</p><p>下调绿宝石消耗及上调获取量.</p><p>新增定时饥饿buff.</p><p>新增死斗玩法.</p><p><strong style=\"color: goldenrod;\"><em>本次更新人员：</em></strong></p><p><strong style=\"color: deepskyblue;\">建造老e</strong></p><p><strong style=\"color: deepskyblue;\">水晶215</strong></p><p><strong style=\"color: deepskyblue;\">初风sky</strong></p><p><span class=\"ql-size-large\">﻿</span><img src=\"https://x19.fp.ps.netease.com/file/62ebc73100722e6648db1e80Hb0ogs3R04\"></p>",
+  "originalEmbeddedImageUrls": [
+    "https://x19.fp.ps.netease.com/file/62ebc73100722e6648db1e80Hb0ogs3R04"
+  ],
+  "snapshotStats": {
+    "downloads": 97784,
+    "rating": 4.4,
+    "comments": 92,
+    "ratingsCount": 148
+  },
+  "conversionNotes": [
+    "Quill font sizes, colors and blank spacer paragraphs were removed; original HTML is retained above.",
+    "Original embedded images were not downloaded or inserted into the Markdown.",
+    "Wording, historical contacts and credited names are retained from the source.",
+    "Published and updated dates reflect API create_time and refresh_time, not an inferred release history."
+  ],
+  "gallery": {
+    "retrieved": "2026-10-11",
+    "sourceField": "entity.pic_url_list",
+    "images": [
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/62ebc8d700722e7f3e300a29Mpxqdf3Y04",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/hunger-games-old-city/gallery-01.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 91480,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 884534,
+        "originalSha256": "e91a426420190a1b89ed63e53d2af3e1a258641a3faad239ed66ac6c95caa2bd",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/62ebc8fa00722e9202cdfcfa8sSmx9sC04",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/hunger-games-old-city/gallery-02.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 136408,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 1091802,
+        "originalSha256": "5ba78a3bb53aab9e8bb0e32cf736a46d8b1d4fc2a6894324474e6d47d180550c",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/62ebc92000722e55bffd8b5djrAa6esN04",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/hunger-games-old-city/gallery-03.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 83406,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 902425,
+        "originalSha256": "fddadaf5d51c805b6883926c7fba3f14fdaf13457523754e6cc61986dc64f7eb",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      }
+    ],
+    "failures": []
+  }
+}

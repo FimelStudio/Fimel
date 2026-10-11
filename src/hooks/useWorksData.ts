@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 export type BedrockEntry = {
+  slug: string;
   i18nKey: string;
   downloads: string;
   rating: string;
@@ -18,6 +19,7 @@ export type BedrockEntry = {
 
 export const FEATURED_MAPS: BedrockEntry[] = [
   {
+    slug: 'werewolf-f-town',
     i18nKey: "werewolfFTown",
     downloads: "430,994",
     rating: "4.1",
@@ -27,12 +29,13 @@ export const FEATURED_MAPS: BedrockEntry[] = [
     version: "v1.23",
     released: "2021-07-12",
     updated: "2021-07-12",
-    image: "maps/werewolf-f-town.png",
+    image: "assets/images/works/werewolf-f-town/cover.png",
     link: "https://resource-minecraft.h5.163.com/#/detail?id=4648588173337957318",
     accent: "group-hover:text-red-500 dark:group-hover:text-red-400",
     bg: "from-red-500/10"
   },
   {
+    slug: 'hunger-games-old-city',
     i18nKey: "hungerGamesOldCity",
     downloads: "84,098",
     rating: "4.3",
@@ -42,12 +45,13 @@ export const FEATURED_MAPS: BedrockEntry[] = [
     version: "v2.2",
     released: "2022-08-09",
     updated: "2022-08-28",
-    image: "maps/hunger-games-old-city.png",
+    image: "assets/images/works/hunger-games-old-city/cover.png",
     link: "https://resource-minecraft.h5.163.com/#/detail?id=4657291854883079467",
     accent: "group-hover:text-amber-500",
     bg: "from-amber-500/10"
   },
   {
+    slug: 'abyss-sky-pit',
     i18nKey: "abyssSkyPit",
     downloads: "1,990",
     rating: "4.3",
@@ -57,12 +61,13 @@ export const FEATURED_MAPS: BedrockEntry[] = [
     version: "v1.23",
     released: "2021-09-03",
     updated: "2021-09-03",
-    image: "maps/abyss-sky-pit.png",
+    image: "assets/images/works/abyss-sky-pit/cover.png",
     link: "https://resource-minecraft.h5.163.com/#/detail?id=4649770038789663060",
     accent: "group-hover:text-green-500",
     bg: "from-green-500/10"
   },
   {
+    slug: 'fml-sky-nature-arena',
     i18nKey: "fmlSkyNatureArena",
     downloads: "33,251",
     rating: "4.7",
@@ -72,12 +77,13 @@ export const FEATURED_MAPS: BedrockEntry[] = [
     version: "v1.21",
     released: "2021-04-02",
     updated: "2021-07-14",
-    image: "maps/fml-sky-nature-arena.png",
+    image: "assets/images/works/fml-sky-nature-arena/cover.png",
     link: "https://resource-minecraft.h5.163.com/#/detail?id=4646359448597896554",
     accent: "group-hover:text-blue-500",
     bg: "from-blue-500/10"
   },
   {
+    slug: 'run-for-money',
     i18nKey: "runForMoney",
     downloads: "17,809",
     rating: "4.2",
@@ -87,12 +93,13 @@ export const FEATURED_MAPS: BedrockEntry[] = [
     version: "v2.0",
     released: "2022-01-28",
     updated: "2022-01-30",
-    image: "maps/run-for-money.png",
+    image: "assets/images/works/run-for-money/cover.png",
     link: "https://resource-minecraft.h5.163.com/#/detail?id=4653059746050819814",
     accent: "group-hover:text-rose-500",
     bg: "from-rose-500/10"
   },
   {
+    slug: 'power-on-2-snow-crisis',
     i18nKey: "powerOn2SnowCrisis",
     downloads: "22,286",
     rating: "5.0",
@@ -102,12 +109,13 @@ export const FEATURED_MAPS: BedrockEntry[] = [
     version: "v2.1",
     released: "2022-06-02",
     updated: "2022-06-02",
-    image: "maps/power-on-2-snow-crisis.png",
+    image: "assets/images/works/power-on-2-snow-crisis/cover.png",
     link: "https://resource-minecraft.h5.163.com/#/detail?id=4655644384723477429",
     accent: "group-hover:text-cyan-500",
     bg: "from-cyan-500/10"
   },
   {
+    slug: 'island-escape-before-dawn',
     i18nKey: "islandEscapeBeforeDawn",
     downloads: "39,810",
     rating: "4.2",
@@ -117,12 +125,13 @@ export const FEATURED_MAPS: BedrockEntry[] = [
     version: "v3.2",
     released: "2025-02-16",
     updated: "2025-02-16",
-    image: "maps/island-escape-before-dawn.png",
+    image: "assets/images/works/island-escape-before-dawn/cover.png",
     link: "https://resource-minecraft.h5.163.com/#/detail?id=4677793220493990518",
     accent: "group-hover:text-emerald-500",
     bg: "from-emerald-500/10"
   },
   {
+    slug: 'amethyst-salvation',
     i18nKey: "amethystSalvation",
     downloads: "14,126",
     rating: "4.7",
@@ -132,7 +141,7 @@ export const FEATURED_MAPS: BedrockEntry[] = [
     version: "v2.11",
     released: "2024-07-01",
     updated: "2024-09-20",
-    image: "maps/amethyst-salvation.png",
+    image: "assets/images/works/amethyst-salvation/cover.png",
     link: "https://resource-minecraft.h5.163.com/#/detail?id=4672593901126936215",
     accent: "group-hover:text-amethyst",
     bg: "from-amethyst/10"
@@ -196,9 +205,9 @@ export function useWorksData() {
   });
 
   const objCubizerDownload = `${basePath}plugins/minecraft-obj-cubizer/minecraft_obj_cubizer-1.4.0.zip`;
-  const objCubizerLogo = `${basePath}plugins/minecraft-obj-cubizer/minecraft-obj-cubizer-logo.svg`;
+  const objCubizerLogo = `${basePath}assets/images/works/minecraft-obj-cubizer/cover.svg`;
   const objCubizerRepo = 'https://github.com/Ylong4004/minecraft_obj_cubizer';
-  const bingoLogo = `${basePath}bingo-but-dont-do-it-logo.png`;
+  const bingoLogo = `${basePath}assets/images/works/bingo-but-dont-do-it/cover.png`;
   const bingoFallbackDownload = `${basePath}mods/bingo-but-dont-do-it-1.21.11-v1.0.jar`;
 
   const javaEntries: ProjectEntry[] = [

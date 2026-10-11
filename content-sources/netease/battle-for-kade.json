@@ -1,0 +1,106 @@
+{
+  "sourceUrl": "https://resource-minecraft.h5.163.com/#/detail?uid=2772171834&id=4648994215119378218",
+  "sourceEndpoint": "https://g79apigatewayobt.nie.netease.com/h5/pe-item-detail-v2",
+  "sourceRequest": {
+    "item_id": "4648994215119378218",
+    "channel_id": 5
+  },
+  "sourceField": "entity.info",
+  "accessedDate": "2026-10-10",
+  "sourceLanguage": "zh-CN",
+  "title": "决战，卡得！",
+  "storeItemId": "4648994215119378218",
+  "storefrontPublisher": "KCINE",
+  "creditedAuthors": [
+    "建造老e"
+  ],
+  "unverifiedVersionFields": {
+    "mod_version": "1.23",
+    "res_version": 4
+  },
+  "publishedAt": "2021-08-07T10:48:27.000Z",
+  "updatedAt": "2021-08-13T04:50:45.000Z",
+  "publishedDate": "2021-08-07",
+  "updatedDate": "2021-08-13",
+  "dateTimezone": "Asia/Shanghai",
+  "publishedUnixSeconds": 1628333307,
+  "updatedUnixSeconds": 1628830245,
+  "resourceSizeBytes": 7213718,
+  "descriptionMarkdown": "works/battle-for-kade/description.zh.md",
+  "originalDescriptionHtml": "<p><span class=\"ql-size-large\">地图：决战，卡得！</span></p><p><span class=\"ql-size-large\">作者：建造老e</span></p><p><span class=\"ql-size-large\">公元1500年，夏尔王室，人类王室，精灵王室三国联合攻打卡得，今日乃决战之日，就让你来带领三国战胜卡得吧。(本游戏建议4人以上游玩)</span></p><p><br></p><p><br></p><p><br></p><p><span class=\"ql-size-large\">﻿</span></p><p><img src=\"https://x19.fp.ps.netease.com/file/60fd35ab6f04944a06674fc2GoDBvPu603\"></p><p>Fimel Studio出品</p><p>交流群1060796710/937760015</p>",
+  "originalEmbeddedImageUrls": [
+    "https://x19.fp.ps.netease.com/file/60fd35ab6f04944a06674fc2GoDBvPu603"
+  ],
+  "cover": {
+    "sourceUrl": "https://x19.fp.ps.netease.com/file/60fd354a5e602721e1eb0666BhvoCUue03",
+    "sourceBytes": 1276583,
+    "sourceWidth": 1000,
+    "sourceHeight": 1000,
+    "localPath": "assets/images/works/battle-for-kade/cover.webp",
+    "width": 544,
+    "height": 544,
+    "bytes": 58898,
+    "processing": "Proportional resize and WebP encoding only; no cropping or generated content."
+  },
+  "snapshotStats": {
+    "downloads": 15630,
+    "rating": 4.85,
+    "comments": 5
+  },
+  "conversionNotes": [
+    "Original wording and credited names are retained; Quill font/color styling and empty spacer paragraphs are removed.",
+    "Embedded and gallery images were not downloaded or included.",
+    "Publisher is not assumed to be an individual creator. Where no creator is credited, the catalogue uses the studio attribution supplied by the user.",
+    "mod_version and res_version semantics are unverified and are not presented as work versions.",
+    "Dates reflect storefront create_time and refresh_time, not a complete release history."
+  ],
+  "gallery": {
+    "retrieved": "2026-10-11",
+    "sourceField": "entity.pic_url_list",
+    "images": [
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/60fd35796f04945ce58b777045FX2UPd03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/battle-for-kade/gallery-01.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 77558,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 806707,
+        "originalSha256": "6b6f2dd13b264f51e38cfc05894c1f77772ac4979de4a6498bffa5b3cf937175",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/60fd35836f049437bf19dff1UxONrSNA03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/battle-for-kade/gallery-02.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 73684,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 768372,
+        "originalSha256": "86724df1837eeeb0e56fd85259c82670456178d8fad6b44b3edb77914e6b76f8",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      },
+      {
+        "sourceUrl": "https://x19.fp.ps.netease.com/file/60fd35966f04945ce58b787aktHQ736s03",
+        "sourceField": "entity.pic_url_list",
+        "sourceKind": "store-gallery",
+        "localPath": "assets/images/works/battle-for-kade/gallery-03.webp",
+        "width": 992,
+        "height": 558,
+        "bytes": 81810,
+        "originalWidth": 992,
+        "originalHeight": 558,
+        "originalBytes": 878438,
+        "originalSha256": "b0b76ee56dea8f03107b00b428ce4697f6e9df42d546a569e3579ec8ce56d577",
+        "processing": "Proportional resize to at most 1280px and WebP encoding; no cropping, overlays or generated content."
+      }
+    ],
+    "failures": []
+  }
+}
