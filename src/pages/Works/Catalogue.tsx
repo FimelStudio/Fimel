@@ -1,4 +1,4 @@
-import { useDeferredValue } from 'react';
+import { useDeferredValue, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowUpRight, CalendarDays, Download, Search, X } from 'lucide-react';
@@ -14,7 +14,15 @@ export function Catalogue() {
   const typeParam = params.get('type');
   const activeType = PROJECT_TYPES.includes(typeParam as ProjectType) ? typeParam : 'all';
   const search = params.get('q') ?? '';
+  // The IME owns preedit text. URL navigation is asynchronous and must never
+  // drive the input value while the user is composing Chinese/Japanese/etc.
+  const composing = useRef(false);
+  const [searchDraft, setSearchDraft] = useState({ source: search, value: search, isComposing: false });
   const query = useDeferredValue(search.trim().toLocaleLowerCase());
+  if (searchDraft.source !== search) {
+    // Restore shared URLs/history without overwriting an active composition.
+    setSearchDraft({ ...searchDraft, source: search, value: searchDraft.isComposing ? searchDraft.value : search });
+  }
   const sort = params.get('sort') ?? 'featured';
   const numberFormatter = new Intl.NumberFormat(language);
   const updateParams = (key: string, value: string, replace = false) => {
@@ -45,10 +53,29 @@ export function Catalogue() {
           <label htmlFor="work-search" className="block mb-2 font-mono text-xs text-gray-600 dark:text-content-muted">{t('catalogue.search')}</label>
           <div className="relative">
             <Search aria-hidden className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-content-muted" />
-            <input id="work-search" type="search" value={search} onChange={(event) => updateParams('q', event.target.value, true)}
+            <input id="work-search" type="search" value={searchDraft.value}
+              onCompositionStart={() => {
+                composing.current = true;
+                setSearchDraft(current => ({ ...current, isComposing: true }));
+              }}
+              onCompositionEnd={(event) => {
+                const value = event.currentTarget.value;
+                composing.current = false;
+                setSearchDraft({ source: search, value, isComposing: false });
+                updateParams('q', value, true);
+              }}
+              onChange={(event) => {
+                const value = event.currentTarget.value;
+                setSearchDraft(current => ({ ...current, value }));
+                if (!composing.current && !(event.nativeEvent as InputEvent).isComposing) updateParams('q', value, true);
+              }}
               placeholder={t('catalogue.search_placeholder')}
               className="work-search w-full min-h-14 bg-white dark:bg-surface border border-obsidian/15 dark:border-line pl-12 pr-14 rounded-sm text-base placeholder:text-content-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link" />
-            {search && <button type="button" onClick={() => updateParams('q', '', true)} aria-label={t('catalogue.clear')}
+            {searchDraft.value && <button type="button" onClick={() => {
+              composing.current = false;
+              setSearchDraft({ source: search, value: '', isComposing: false });
+              updateParams('q', '', true);
+            }} aria-label={t('catalogue.clear')}
               className="absolute right-1 top-1 h-12 w-12 flex items-center justify-center hover:text-diamond focus-visible:outline-2 focus-visible:outline-link"><X aria-hidden size={18} /></button>}
           </div>
         </div>
