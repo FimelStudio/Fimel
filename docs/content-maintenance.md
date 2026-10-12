@@ -192,7 +192,7 @@ JSON 中的 `image`、`download` 和 Markdown 路径都相对于 `public/`，不
 
 ## 网易基岩版作品来源
 
-作品目录现有 27 条，其中网易基岩版分类有 21 条：原有 8 张地图，以及补充的 12 张地图和 1 个音乐制作命令包。命令包按工作室要求放在网易版分类，以分发入口归类，标签使用 `music`、`creator-tools`；不要因为它是命令包就自动迁移到「插件与工具」或「数据包」。
+作品目录现有 28 条，其中网易基岩版分类有 21 条：原有 8 张地图，以及补充的 12 张地图和 1 个音乐制作命令包。命令包按工作室要求放在网易版分类，以分发入口归类，标签使用 `music`、`creator-tools`；不要因为它是命令包就自动迁移到「插件与工具」或「数据包」。
 
 21 条作品均通过提供的原商店链接核实说明。概述统一在 `public/works/<slug>/description.zh.md`，详情页按需读取。对应来源快照统一在仓库的 `content-sources/netease/<slug>.json`，保存原始说明、来源、署名和核实数据，供维护人员查证；它们不再放在 `public/`，不会随静态资源公开部署，也不会在浏览页面时请求网易接口。
 
@@ -213,6 +213,10 @@ JSON 中的 `image`、`download` 和 Markdown 路径都相对于 `public/`，不
 中国象棋原文提示游戏更新后所需实体被删除、无法游玩，目录及详情中的兼容性警告不能在润色时删除。「已发布」表示历史发布状态，不代表仍在维护或当前可用。`developer_name` 是发布账户，只有原文明确署名时才可当作作者；没有个人署名的作品保留来源记录中的空署名数组，不猜测个人作者。历史组织介绍、旧招募内容也不能替换 Fimel 当前品牌介绍。
 
 ## 下载与部署路径
+
+Minecraft Explorer 注册为 `minecraft-explorer`、`tools`、版本 1.0.0。概述、日志与版本页各提供中英日正文，源码为 `Ylong4004/Minecraft-Explorer`。实际下载仅指向 `public/plugins/minecraft-explorer/MinecraftExplorer-1.0-win-x64.exe`，不设置 `latestReleaseRepo`，不经过仅选择 JAR 的 Bingo 下载逻辑。此 EXE 内置图标与第三方许可，页面说明系统运行库及缓存位置。
+
+更新 Explorer 时须使用普通 Release 构建，不携带 `ui-smoke` 测试入口；核对关于页与 Windows 文件版本、文件名、体积和 SHA256，再同步目录、版本正文及发行记录。界面展示在 `public/assets/images/works/minecraft-explorer/`，来自该程序生成演示数据的原生截图，不公开用户存档。当前 EXE 小于 Cloudflare 单静态资源 25 MiB 限制，不需要分片；体积增长后应先核对部署限制。
 
 Bingo 的 `latestReleaseRepo` 指向 `FimelStudio/bingo-but-dont-do-it`。下载按钮会优先请求最新正式发布的 GitHub 版本，并选择发布资源中的 JAR；请求超时、失败或没有可用 JAR 时，再下载 `fallbackDownload` 指向的本地文件。
 

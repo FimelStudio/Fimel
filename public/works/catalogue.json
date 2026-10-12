@@ -611,6 +611,57 @@
       ]
     },
     {
+      "slug": "minecraft-explorer",
+      "type": "tools",
+      "title": "Minecraft Explorer",
+      "summary": {
+        "zh": "集中查找 Minecraft Java 存档与内容，分析空间占用，确认后备份和管理文件。",
+        "en": "Find Minecraft Java worlds and content across directories, analyze storage, and back up or manage files after review.",
+        "ja": "Minecraft Java のワールドやコンテンツを検索し、容量を分析して、確認付きでバックアップとファイル管理。"
+      },
+      "tags": [
+        "creator-tools",
+        "development"
+      ],
+      "image": "assets/images/works/minecraft-explorer/cover.png",
+      "imageFit": "contain",
+      "status": "released",
+      "platform": [
+        "Windows 10/11 x64",
+        "Minecraft Java"
+      ],
+      "creators": [
+        {
+          "name": "Ylong4004",
+          "url": "https://github.com/Ylong4004"
+        }
+      ],
+      "published": "2026-10-12",
+      "updated": "2026-10-12",
+      "version": "1.0.0",
+      "repository": "https://github.com/Ylong4004/Minecraft-Explorer",
+      "issues": "https://github.com/Ylong4004/Minecraft-Explorer/issues",
+      "download": "plugins/minecraft-explorer/MinecraftExplorer-1.0-win-x64.exe",
+      "content": {
+        "description": {
+          "zh": "works/minecraft-explorer/description.zh.md",
+          "en": "works/minecraft-explorer/description.en.md",
+          "ja": "works/minecraft-explorer/description.ja.md"
+        },
+        "changelog": {
+          "zh": "works/minecraft-explorer/changelog.zh.md",
+          "en": "works/minecraft-explorer/changelog.en.md",
+          "ja": "works/minecraft-explorer/changelog.ja.md"
+        },
+        "versions": {
+          "zh": "works/minecraft-explorer/versions.zh.md",
+          "en": "works/minecraft-explorer/versions.en.md",
+          "ja": "works/minecraft-explorer/versions.ja.md"
+        }
+      },
+      "size": "21.22 MiB"
+    },
+    {
       "slug": "production-toolchain",
       "type": "tools",
       "title": "开发工具链",

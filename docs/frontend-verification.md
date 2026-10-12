@@ -1,5 +1,7 @@
 # 首轮前端改动与验证记录
 
+2026-10-12 新增 Minecraft Explorer 工具作品的当前验证见 [单文件发行记录](./minecraft-explorer-release.md)：目录 28 条、完整 57 项浏览器测试，以及根目录 / GitHub Pages 子目录生产下载检查通过。以下仍保留各历史阶段指标。
+
 验证日期：2026-10-10。本次只修改本地项目，未提交 Git、未发布到 Cloudflare 或 GitHub Pages。
 
 此文件保存首轮统一作品页与主题的验证结果，不代表后续改动的最新指标。分类标签、文案精简与 3D 延后加载的追加验证见 [本轮更新记录](./tag-copy-loading-update.md)。

@@ -1,0 +1,22 @@
+# Minecraft Explorer 1.0 登记与验收
+
+2026-10-12，在既有作品目录中加入 `minecraft-explorer`，分类“插件与工具”。源码入口为 [Ylong4004/Minecraft-Explorer](https://github.com/Ylong4004/Minecraft-Explorer)。应用版本及 Windows 文件版本为 1.0.0，网站下载名称按要求使用 `MinecraftExplorer-1.0-win-x64.exe`。
+
+## 内容与文件
+
+- `public/works/catalogue.json`：标题、三语简介、创作辅助 / 开发工具标签、Windows 平台、实际作者仓库链接、版本、体积与直接 EXE 下载路径。目录现在为 28 条，未改变原有作品。
+- `public/works/minecraft-explorer/`：概述、日志、版本三个页签各有中英日正文。概述包含首次添加根目录、自动分析、搜索、备份、启动器与脚本关联、缓存位置、系统运行库和许可使用步骤。
+- `public/assets/images/works/minecraft-explorer/`：原创程序图标封面及三张当前源码的原生窗口截图。截图来自生成演示数据，正文明确说明；没有公开真实用户游戏文件。
+- `public/plugins/minecraft-explorer/MinecraftExplorer-1.0-win-x64.exe`：唯一的作品下载文件，普通 Release 构建，不是 ZIP 或安装器。图标及项目、依赖许可原文内置，可从关于页主动导出查看。源码、运行库安装包或测试程序不加入下载目录。
+
+EXE 大小 **22,254,080 B（21.22 MiB）**，SHA256：`7E5B53411DA579BF99A457DC5527AC3B0795F30A9605309864B336D717BE9C59`。Windows FileVersion / ProductVersion 均为 1.0.0。与 Minecraft Explorer 普通 Release 构建逐字节一致，并单独运行通过全新缓存、图标、内置完整许可、无 UI 测试入口和正常退出检查。
+
+## 验证
+
+`npm run build`、`npm run lint` 通过，内容校验为 28 个作品 / 240 条精确大小写路径 / 21 份网易来源资料。完整 `npm run test:e2e` **57 项通过**，含新增四项 Explorer 回归：实际下载、单个精确文件名、完整 SHA256、MZ 文件头、工具搜索与源码入口，另覆盖中英日正文、三个截图、深浅主题和 320 px 详情页。
+
+独立生产预览在根目录 `/` 与 GitHub Pages 子目录 `/Fimel/` 均通过下载完整 EXE、同一 SHA256、截图加载、版本页刷新与窄屏无页面溢出，两个预览没有页面异常。记录与截图在忽略的 `.artifacts/explorer-production-*` 中，测试脚本的第一次图片路径断言误将 Markdown 解析后的绝对 URL 当作相对 URL；修正断言后两个部署目录通过。
+
+Minecraft Explorer 自身通过 **106 项集成测试**、格式、Clippy、普通 Release 构建，以及当前原生界面 8 组交互和重启回归。首次下载测试因正文与详情标题都为 H1 而出现定位歧义，已将断言限定到详情标题；没有修改产品页面来迁就测试。
+
+更新文件时保持直接 EXE 路径，并同步版本、体积、SHA256 与正文，具体流程见 [内容维护说明](content-maintenance.md)。新作品未接入已有模组专用的 JAR 最新版本下载逻辑，也未更改 Supabase 表或计数规则。

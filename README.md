@@ -13,9 +13,9 @@ Fimel 官方网站展示工作室的地图、数据包、模组和创作者工�
 - **Java 版地图**：两个制作中的 Java 地图项目；
 - **数据包**：新增《Fimel Card 卡牌桌游数据包》，暂未发布，项目入口为 [FimelStudio/fimelcard-dp](https://github.com/FimelStudio/fimelcard-dp)；
 - **模组**：如已发布的《Bingo But Don't Do It》；
-- **插件与工具**：如《Minecraft OBJ Cubizer》，并集成下载统计。
+- **插件与工具**：如《Minecraft OBJ Cubizer》与《Minecraft Explorer》；Explorer 提供单文件 Windows EXE、使用教程、界面截图和源码入口。
 
-作品目录目前为 27 条，其中网易分类为 21 条。音乐制作命令包按工作室要求保留在网易分类，不因数据包分类拆分而迁移。Fimel Card 仓库目前无法公开读取，因此网站仅展示已确认的信息，不补造规则、版本或下载入口。
+作品目录目前为 28 条，其中网易分类为 21 条。音乐制作命令包按工作室要求保留在网易分类，不因数据包分类拆分而迁移。Fimel Card 仓库目前无法公开读取，因此网站仅展示已确认的信息，不补造规则、版本或下载入口。
 
 ---
 
