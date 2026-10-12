@@ -2,7 +2,7 @@
 
 | Item | Value |
 | --- | --- |
-| Version | 1.0.0 |
+| Version | 1.0.1 |
 | Release date | 2026-10-12 |
 | File | MinecraftExplorer-1.0-win-x64.exe |
 | OS | Windows 10/11 x64; tested locally on Windows 11 |

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1 · 2026-10-12
+
+- Detect matching last-launch scripts automatically in the PCL2 / PCL CE mapping dialog.
+- Require exact version and game-directory matches, and save a separate copy to prevent later launches replacing a mapping.
+- Add Auto-detect retries and missing-script guidance while preserving manual entries.
+
 ## 1.0.0 · 2026-10-12
 
 - Multi-source content indexing, search, ownership, icons, favorites and tags.

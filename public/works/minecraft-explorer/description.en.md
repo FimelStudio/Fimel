@@ -28,6 +28,8 @@ Register **PCL2, PCL CE or HMCL** in Settings and map an item's target version. 
 
 To run a particular version from this app, separately link its launcher-exported **BAT / CMD** and working directory, then use Run linked launch script. Native external instance launch interfaces remain unverified. Opening a launcher is not proof of a game launch. Scripts can contain login information; keep them private.
 
+PCL2 / PCL CE can automatically detect an existing script. Launch the target version once in the original launcher, then open Set mapping. Both the script version and game directory must match exactly before the app fills the fields. A separate copy under the app data launch-scripts directory protects the mapping from later launches. Review and save the mapping; Auto-detect retries. Unmatched or unsupported formats still need a manual script. Copies may contain original login parameters; keep them private. Launch the version again in the original launcher and detect again after login expires.
+
 ## Data and licenses
 
 Settings, index, favorites and tags default to `%LOCALAPPDATA%\MinecraftExplorer\`. Scanning and storage analysis do not modify game files or upload content. File operations require a preview and confirmation. Removing a source only removes the app's association.
