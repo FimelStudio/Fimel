@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2 · 2026-10-13
+
+- Removed obsolete development notes and persistent logs from Settings, and simplified repeated footers.
+- Scan issues are available on demand from the status bar, with language switching, duplicate merging and clearing.
+- Launcher states now use readable action hints and correctly show linked launch scripts.
+
 ## 1.0.1 · 2026-10-12
 
 - Detect matching last-launch scripts automatically in the PCL2 / PCL CE mapping dialog.

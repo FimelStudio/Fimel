@@ -32,7 +32,7 @@ test('Explorer is discoverable in tools and downloads exactly the published EXE'
   expect(createHash('sha256').update(received).digest('hex')).toBe(createHash('sha256').update(published).digest('hex'));
   expect(downloads).toEqual([fileName]);
   await page.getByRole('tab', { name: '版本', exact: true }).click();
-  await expect(page.locator('.project-markdown')).toContainText('1.0.1');
+  await expect(page.locator('.project-markdown')).toContainText('1.0.2');
   await expect(page.locator('.project-markdown')).toContainText(fileName);
 });
 

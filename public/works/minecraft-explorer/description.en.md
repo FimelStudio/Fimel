@@ -22,11 +22,13 @@ The treemap represents logical file sizes. Double-click folders to drill down an
 
 Select content to rename, copy, move, back up or recycle. Generate a preview, check the paths, and explicitly confirm. Copy and move verify content; existing files are not overwritten and recycling has no permanent-delete fallback. Backups must be outside registered game directories and are verified before restoring. Close Minecraft first; this tool does not provide hot backups of running worlds.
 
+If scanning or monitoring encounters a problem, use View issues in the status bar to see the affected paths and causes. Duplicate messages are combined; the latest 100 from this session are kept. Clear removes messages without changing files. File-operation errors remain in their dialog and recovery records remain in Cleanup & backup.
+
 ## Launchers
 
 Register **PCL2, PCL CE or HMCL** in Settings and map an item's target version. Open selected launcher opens the original launcher; select and start the game there.
 
-To run a particular version from this app, separately link its launcher-exported **BAT / CMD** and working directory, then use Run linked launch script. Native external instance launch interfaces remain unverified. Opening a launcher is not proof of a game launch. Scripts can contain login information; keep them private.
+To run a particular version from this app, link its launcher-exported **BAT / CMD** and working directory, then use Run linked launch script. Direct launching requires this version’s script; after opening a launcher, select the version there. Scripts can contain login information; keep them private.
 
 PCL2 / PCL CE can automatically detect an existing script. Launch the target version once in the original launcher, then open Set mapping. Both the script version and game directory must match exactly before the app fills the fields. A separate copy under the app data launch-scripts directory protects the mapping from later launches. Review and save the mapping; Auto-detect retries. Unmatched or unsupported formats still need a manual script. Copies may contain original login parameters; keep them private. Launch the version again in the original launcher and detect again after login expires.
 

@@ -637,8 +637,8 @@
         }
       ],
       "published": "2026-10-12",
-      "updated": "2026-10-12",
-      "version": "1.0.1",
+      "updated": "2026-10-13",
+      "version": "1.0.2",
       "repository": "https://github.com/Ylong4004/Minecraft-Explorer",
       "issues": "https://github.com/Ylong4004/Minecraft-Explorer/issues",
       "download": "plugins/minecraft-explorer/MinecraftExplorer-1.0-win-x64.exe",
@@ -659,7 +659,7 @@
           "ja": "works/minecraft-explorer/versions.ja.md"
         }
       },
-      "size": "21.27 MiB"
+      "size": "21.35 MiB"
     },
     {
       "slug": "production-toolchain",
