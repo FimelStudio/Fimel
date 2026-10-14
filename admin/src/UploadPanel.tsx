@@ -52,15 +52,25 @@ export function UploadPanel({ workId, versionId, kind, disabled, onUploaded, onB
         const ext = file.name.split('.').pop()!.toLowerCase();
         if (!MIME_TYPES[ext] || file.size < 1 || file.size > (kind === 'image' ? MAX_IMAGE_SIZE : MAX_FILE_SIZE) || (kind === 'image') !== ['png','jpg','jpeg','webp'].includes(ext)) throw new Error('格式不支持或文件超过限制。');
         const checked = await hash(file, abort.signal);
+        const stem=file.name.slice(0,-ext.length-1).replace(/[^a-zA-Z0-9_-]/g,'-').replace(/^[^a-zA-Z0-9]+/,'').slice(0,120)||'file';
+        const name=`${stem}.${ext}`;
         const storageKey = `fimel_upload:${workId}:${versionId ?? 'images'}:${checked.sha256}`;
         let saved: UploadState | null = null;
         const oldId = localStorage.getItem(storageKey);
         if (oldId) { try { saved = (await api<UploadState>(`uploads/${oldId}`, {signal:abort.signal})).data; } catch(cause) { if(cause instanceof RequestError && [404,410].includes(cause.status)) localStorage.removeItem(storageKey); else throw cause; } }
         if (saved && (saved.upload.status === 'cancelled' || Date.parse(saved.upload.expiresAt) < Date.now())) saved = null;
         if (!saved) {
-          const stem=file.name.slice(0,-ext.length-1).replace(/[^a-zA-Z0-9_-]/g,'-').replace(/^[^a-zA-Z0-9]+/,'').slice(0,120)||'file';
-          const name=`${stem}.${ext}`;
-          const created = await api<{ upload: Upload }>('uploads', { method: 'POST', signal:abort.signal, body: JSON.stringify({ name, displayName:file.name, size: file.size, kind, workId, versionId }) });
+          const matches:UploadState[]=[];
+          const {data}=await api<{uploads:Upload[]}>('uploads',{signal:abort.signal});
+          for(const upload of data.uploads.filter(u=>u.workId===workId&&u.versionId===versionId&&u.kind===kind&&u.name===name&&u.size===file.size&&['uploading','verifying'].includes(u.status)&&Date.parse(u.expiresAt)>Date.now()&&(!u.sha256||u.sha256===checked.sha256))){
+            const candidate=(await api<UploadState>(`uploads/${upload.id}`,{signal:abort.signal})).data;
+            if(candidate.parts.every(p=>p.sha256===checked.parts[p.partNumber-1]&&p.size===Math.min(PART_SIZE,file.size-(p.partNumber-1)*PART_SIZE)))matches.push(candidate);
+          }
+          if(matches.length===1){saved=matches[0];localStorage.setItem(storageKey,saved.upload.id);setLabel(`已恢复上次上传 · ${saved.parts.length} 个分片已完成`);}
+          if(matches.length>1)throw new Error('存在多个相同文件的未完成会话，请在“备份与恢复”中取消多余会话后重试。');
+        }
+        if (!saved) {
+          const created = await api<{ upload: Upload }>('uploads', { method: 'POST', signal:abort.signal, body: JSON.stringify({ name, displayName:file.name, size: file.size, kind, workId, versionId, sha256:checked.sha256 }) });
           saved = { upload: created.data.upload, parts: [] }; localStorage.setItem(storageKey, saved.upload.id);
         }
         session.current = saved.upload.id;

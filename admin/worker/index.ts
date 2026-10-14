@@ -8,6 +8,7 @@ import { backup, libraryState, LIBRARY_KEY, listAll, publicState } from './stora
 import { commitPublication, publishedWork } from './publication';
 import { uploadRoute } from './uploads';
 import { runAudited, auditFeed, actorKey } from './audit';
+import type { AuditedSource } from './audit';
 import { metrics } from './analytics';
 import type { AnalyticsSecrets } from './analytics';
 export type AdminEnv = Env & ServerSecrets & AnalyticsSecrets;
@@ -21,7 +22,7 @@ export async function handle(request: Request, env: AdminEnv, ctx: AccessContext
     if (!url.pathname.startsWith('/api/')) {
       if (!['GET', 'HEAD'].includes(request.method)) throw new ApiError(405, '不支持此方法。');
       response = await env.ASSETS.fetch(request);
-    } else response = await runAudited(request, env.PRIVATE, email, () => route(request, env, email));
+    } else response = await runAudited(request, env.PRIVATE, email, source => route(request, env, email, source));
   } catch (error) {
     if (!(error instanceof ApiError)) console.error(JSON.stringify({ operation: 'request-failed', requestId }));
     response = json({ error: error instanceof ApiError ? error.message : '存储服务暂时不可用，操作未确认成功。', requestId }, error instanceof ApiError ? error.status : 503);
@@ -34,7 +35,7 @@ export async function handle(request: Request, env: AdminEnv, ctx: AccessContext
   secured.headers.set('Content-Security-Policy', ADMIN_CSP);
   return secured;
 }
-async function route(request: Request, env: AdminEnv, email: string): Promise<Response> {
+async function route(request: Request, env: AdminEnv, email: string, source?:AuditedSource): Promise<Response> {
   const path = new URL(request.url).pathname.split('/').filter(Boolean).slice(1);
   const method = request.method;
   if (path[0] === 'import-source' && path.length === 1 && method === 'GET') {
@@ -57,12 +58,12 @@ async function route(request: Request, env: AdminEnv, email: string): Promise<Re
     return new Response(object.body, { headers: { 'Content-Type': upload.mime, 'Cache-Control': 'no-store' } });
   }
   if (path[0] === 'library' && path.length === 1) {
-    const state = await libraryState(env.PRIVATE);
+    const state = source?.library ?? await libraryState(env.PRIVATE);
     if (method === 'GET') { const published = await publicState(env.PUBLIC); return json({ library: state.value, public: published.value, publicEtag: published.etag }, 200, state.etag); }
     if (method === 'PUT') {
       expectMatch(request, state.etag);
-      const input = await readJson(request);
-      const errors = validateLibrary(input); if (errors.length) throw new ApiError(422, errors.join('\n'));
+      const input = source?.candidate ? source.candidate.value : await readJson(request);
+      const errors = source?.candidate?.errors ?? validateLibrary(input); if (errors.length) throw new ApiError(422, errors.join('\n'));
       const value = input as Library;
       const visible=await publicState(env.PUBLIC);
       if(value.works.some(w=>w.workflow==='archived'&&visible.value.projects.some(p=>p.slug===w.project.slug)))throw new ApiError(422,'已公开作品请先下架，再保存归档状态。');

@@ -8,8 +8,9 @@ export function safeUrl(value: string, local = false): boolean {
   try { const url = new URL(value); return url.protocol === 'https:' && !url.username && !url.password; } catch { return false; }
 }
 
-export function validateLibrary(value: unknown): string[] {
-  if (JSON.stringify(value).length > 4_000_000) return ['作品库超过 4 MB，请减少正文或拆分内容。'];
+export function validateLibrary(value: unknown, boundedRequestBody = false): string[] {
+  // Only the Worker may skip this serialization after readJson has enforced its byte limit.
+  if (!boundedRequestBody && JSON.stringify(value).length > 4_000_000) return ['作品库超过 4 MB，请减少正文或拆分内容。'];
   if (!validate(value)) return (validate.errors ?? []).map(e => `${e.instancePath || '/'} ${e.message}`).slice(0, 15);
   const errors: string[] = [];
   const ids = new Set<string>(), slugs = new Set<string>();

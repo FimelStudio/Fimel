@@ -27,14 +27,17 @@ export function libraryChanges(before:Library,after:Library):AuditChange[] {
     const names:Record<string,string>={title:'作品名称',summary:'简短介绍',status:'发行状态',tags:'用途标签',platform:'游戏平台',creators:'作者',image:'封面地址',version:'版本号',size:'文件大小',published:'首次发布日期',updated:'更新日期',download:'下载地址',downloadUrl:'公开下载地址',store:'商店链接',repository:'仓库链接',issues:'反馈链接'};
     for(const key of new Set([...Object.keys(old?.project??{}),...Object.keys(current?.project??{})]))record(names[key]??key,old?.project[key as keyof Work['project']],current?.project[key as keyof Work['project']]);
     record('编辑状态',old?.workflow,current?.workflow);record('列表顺序',old?.order,current?.order);record('选中的封面',old?.coverId,current?.coverId);
-    for(const tab of ['description','changelog','versions']as const)for(const locale of ['zh','en','ja']as const){const a=old?.markdown[tab][locale],b=current?.markdown[tab][locale];if(a!==b)record(`${{description:'正文介绍',changelog:'更新日志',versions:'版本正文'}[tab]} · ${locale}`,a===undefined?undefined:`${a.length} 字符`,b===undefined?undefined:`${b.length} 字符`);}
+    const textChange=(name:string,a:string|undefined,b:string|undefined)=>{if(a!==b)output.push({name,before:a===undefined?'未设置':`${a.length} 字符`,after:b===undefined?'未设置':`${b.length} 字符${a!==undefined&&a.length===b.length?'（内容已更改）':''}`});};
+    for(const tab of ['description','changelog','versions']as const)for(const locale of ['zh','en','ja']as const)textChange(`${{description:'正文介绍',changelog:'更新日志',versions:'版本正文'}[tab]} · ${locale}`,old?.markdown[tab][locale],current?.markdown[tab][locale]);
+    const previousVersions=new Map(old?.versions.map(v=>[v.id,v])??[]),nextVersions=new Map(current?.versions.map(v=>[v.id,v])??[]);
+    for(const id of new Set([...previousVersions.keys(),...nextVersions.keys()]))for(const locale of ['zh','en','ja']as const){const a=previousVersions.get(id),b=nextVersions.get(id);const localized=(value:Work['versions'][number]|undefined)=>typeof value?.changelog==='string'?(locale==='zh'?value.changelog:undefined):value?.changelog?.[locale];textChange(`发行日志 · ${(b??a)!.label} · ${locale}`,localized(a),localized(b));}
     record('截图集',old?.gallery.map(a=>a.displayName??a.name),current?.gallery.map(a=>a.displayName??a.name));
     const releases=(work:Work|undefined)=>work?.versions.map(v=>({version:v.label,status:v.status,date:v.date,gameVersions:v.gameVersions,files:v.files.map(a=>({name:a.displayName??a.name,size:a.size,primary:!!a.primary})),changelogLength:JSON.stringify(v.changelog).length}));
     record('发行版本与文件',releases(old),releases(current));return output.slice(0,100);
   };
-  const output:AuditChange[]=[];
-  for(const id of new Set([...before.works.map(w=>w.id),...after.works.map(w=>w.id)])){
-    const old=before.works.find(w=>w.id===id),current=after.works.find(w=>w.id===id);if(JSON.stringify(old)===JSON.stringify(current))continue;const work=current??old!;
+  const output:AuditChange[]=[];const previous=new Map(before.works.map(w=>[w.id,w])),next=new Map(after.works.map(w=>[w.id,w]));
+  for(const id of new Set([...previous.keys(),...next.keys()])){
+    const old=previous.get(id),current=next.get(id);const work=current??old!;
     const changed=fields(old,current);if(old&&current&&!changed.length)continue;
     output.push({workId:id,slug:work.project.slug,title:localizedText(work.project.title,'zh'),action:!old?'created':!current?'removed':'updated',fields:changed});
   }
@@ -46,10 +49,11 @@ function operation(request:Request):string|undefined {
   if(['publish','unpublish','restore'].includes(p[0])&&request.method==='POST')return p[0]==='restore'?`restore-${p[1]}`:p[0];
   if(p[0]==='uploads'&&!(p[2]==='parts')){if(p[1]==='cleanup'&&request.method==='POST')return 'cleanup-temporary';if(p.length===1&&request.method==='POST')return 'start-upload';if(p[2]==='complete'&&request.method==='POST')return 'complete-upload';if(p.length===2&&request.method==='DELETE')return 'cancel-upload';}
 }
-export async function runAudited(request:Request,bucket:R2Bucket,email:string,run:()=>Promise<Response>):Promise<Response> {
+export type AuditedSource={library:Awaited<ReturnType<typeof libraryState>>;candidate?:{value:unknown;errors:string[]}};
+export async function runAudited(request:Request,bucket:R2Bucket,email:string,run:(source?:AuditedSource)=>Promise<Response>):Promise<Response> {
   const op=operation(request);if(!op)return run();
   const source=await libraryState(bucket);const p=new URL(request.url).pathname.split('/').filter(Boolean).slice(1);
-  const changes:AuditChange[]=[];if(op==='save-library'){const candidate=await readJson(request.clone());if(validateLibrary(candidate).length===0)changes.push(...libraryChanges(source.value,candidate as Library));}
+  const prepared:AuditedSource={library:source};const changes:AuditChange[]=[];if(op==='save-library'){const value=await readJson(request);const errors=validateLibrary(value,true);prepared.candidate={value,errors};if(errors.length===0)changes.push(...libraryChanges(source.value,value as Library));}
   if(op==='restore-library'&&/^[a-zA-Z0-9-]{1,80}$/.test(p[2]??'')){const stored=await bucket.get(`backups/library/${p[2]}.json`);if(stored){const snapshot=await stored.json<{value:Library}>();if(validateLibrary(snapshot.value).length===0)changes.push(...libraryChanges(source.value,snapshot.value));}}
   let workId=['publish','unpublish'].includes(op)?p[1]:undefined;const uploadId=p[0]==='uploads'&&p[1]!=='cleanup'?p[1]:undefined;
   if(op==='start-upload'){const input=await readJson(request.clone(),4096) as {workId?:string};if(source.value.works.some(w=>w.id===input.workId))workId=input.workId;}
@@ -61,7 +65,7 @@ export async function runAudited(request:Request,bucket:R2Bucket,email:string,ru
     try{await putJson(bucket,key,{...event,status,httpStatus,finishedAt:new Date().toISOString(),...(afterEtag?{afterEtag}:{})},stored.httpEtag);return true;}
     catch{console.error(JSON.stringify({operation:'audit-finalize-failed',requestId:id}));return false;}
   };
-  try{const response=await run();const confirmed=await finish(response.ok?'success':'failed',response.status,response.headers.get('etag')??undefined);if(!confirmed)response.headers.set('X-Fimel-Audit-Pending','1');return response;}
+  try{const response=await run(prepared);const confirmed=await finish(response.ok?'success':'failed',response.status,response.headers.get('etag')??undefined);if(!confirmed)response.headers.set('X-Fimel-Audit-Pending','1');return response;}
   catch(error){await finish('failed',error instanceof ApiError?error.status:503);throw error;}
 }
 export async function auditFeed(request:Request,bucket:R2Bucket,env:ServerSecrets,email:string):Promise<AuditFeed> {

@@ -62,12 +62,14 @@ test('multipart completion checks SHA-256 in actual local R2',async()=>{await up
 test('native R2 part verification rejects corrupted retries and cleans staging objects without touching verified files',async()=>{
   const w=await add('native-part-check');w.versions=[{id:'v1',label:'1.0',date:'2026-10-15',gameVersions:[],status:'draft',changelog:{zh:'checksum verification'},files:[]}];
   const current=await state();current.data.library.works=current.data.library.works.map(x=>x.id===w.id?w:x);assert.equal((await req('library','PUT',current.data.library,{'If-Match':current.etag})).status,200);
-  const created=await req('uploads','POST',{name:'native.zip',size:32,kind:'file',workId:w.id,versionId:'v1'});assert.equal(created.status,201,await created.clone().text());const {upload:s}=await created.json()as{upload:Upload};
   const bytes=Buffer.alloc(32,7);bytes.set([0x50,0x4b,3,4]);const digest=createHash('sha256').update(bytes).digest('hex');
+  assert.equal((await req('uploads','POST',{name:'native.zip',size:32,kind:'file',workId:w.id,versionId:'v1',sha256:'invalid'})).status,422);
+  const created=await req('uploads','POST',{name:'native.zip',size:32,kind:'file',workId:w.id,versionId:'v1',sha256:digest});assert.equal(created.status,201,await created.clone().text());const {upload:s}=await created.json()as{upload:Upload};assert.equal(s.sha256,digest);
   const part=(body:Buffer,hash:string)=>mf.dispatchFetch(`http://127.0.0.1/api/uploads/${s.id}/parts/1`,{method:'PUT',headers:{Origin:origin,'X-Fimel-CSRF':'1','Content-Type':'application/octet-stream','Content-Length':String(body.length),'X-Part-SHA256':hash},body});
   assert.equal((await part(bytes,'0'.repeat(64))).status,422);const invalid=Buffer.alloc(32,7);assert.equal((await part(invalid,createHash('sha256').update(invalid).digest('hex'))).status,422);
   assert.equal((await part(bytes,digest)).status,200);const corrupted=Buffer.from(bytes);corrupted[10]++;assert.equal((await part(corrupted,digest)).status,422);assert.equal((await part(corrupted,createHash('sha256').update(corrupted).digest('hex'))).status,409);
   const bucket=await mf.getR2Bucket('PRIVATE');assert.equal((await bucket.list({prefix:`uploads/temporary/${s.id}/parts/`})).objects.length,0);
+  assert.equal((await req(`uploads/${s.id}/complete`,'POST',{sha256:'f'.repeat(64)})).status,409);
   assert.equal((await req(`uploads/${s.id}/complete`,'POST',{sha256:digest})).status,200);const confirmed=await req(`uploads/${s.id}`);const completed=(await confirmed.json()as{upload:Upload}).upload;
   await bucket.put(`uploads/temporary/${s.id}/parts/interrupted`,new Uint8Array([1]));assert.equal((await req('uploads/cleanup','POST',{sessionIds:[s.id]})).status,200);
   assert.equal((await bucket.list({prefix:`uploads/temporary/${s.id}/`})).objects.length,0);assert.ok(await bucket.head(completed.asset!.privateKey!));

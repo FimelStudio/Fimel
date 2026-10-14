@@ -30,6 +30,16 @@ test('audit strips URL query values, keeps field changes and does not invent his
   const before:Library={schemaVersion:1,works:[]};const work=makeWork();work.project.slug='redacted';work.project.title='作品';work.project.creators=[{name:'作者',url:'https://example.com/author?token=not-for-logs'}];
   const changes=libraryChanges(before,{schemaVersion:1,works:[work]});assert.ok(JSON.stringify(changes).includes('example.com/author'));assert.ok(!JSON.stringify(changes).includes('not-for-logs'));
 });
+test('audited saves reject invalid and oversized libraries without changing their revision',async()=>{
+  const initial=await req('library');const state=await initial.json()as{library:Library;etag:string};
+  for(const invalid of [null,{schemaVersion:1,works:[{id:'invalid'}]}])assert.equal((await req('library','PUT',invalid,{'If-Match':state.etag})).status,422);
+  assert.equal((await req('library','PUT',{padding:'x'.repeat(4_000_001)},{'If-Match':state.etag})).status,413);
+  const unchanged=await(await req('library')).json()as{library:Library;etag:string};assert.equal(unchanged.etag,state.etag);assert.deepEqual(unchanged.library,state.library);
+});
+test('audit detects changed Markdown with unchanged length and omits unchanged large bodies',()=>{
+  const work=makeWork();work.project.slug='large-audit';work.project.title='Large audit';work.markdown.description.zh='a'.repeat(200_000);const before:Library={schemaVersion:1,works:[work]},after=structuredClone(before);
+  assert.deepEqual(libraryChanges(before,after),[]);after.works[0].markdown.description.zh='b'.repeat(200_000);const changes=libraryChanges(before,after);assert.equal(changes.length,1);assert.ok(changes[0].fields.some(f=>f.name==='正文介绍 · zh'));assert.ok(JSON.stringify(changes).length<1000);
+});
 test('analytics never exposes a token; missing permissions and invalid ranges fail explicitly',async()=>{
   assert.equal((await req('analytics')).status,503);assert.equal((await req('analytics?days=99')).status,422);assert.equal((await req('analytics','GET',undefined,{'x-local-test-anonymous':'1'})).status,401);
   await assert.rejects(metrics(new Request('https://admin.invalid/api/analytics?days=7'),{}),/只读/);

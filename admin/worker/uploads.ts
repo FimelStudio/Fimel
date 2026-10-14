@@ -46,6 +46,7 @@ export async function uploadRoute(request: Request, bucket: R2Bucket, segments: 
     const mime = MIME_TYPES[extension];
     const image = ['png', 'jpg', 'jpeg', 'webp'].includes(extension);
     if (!mime || input.kind !== (image ? 'image' : 'file') || !Number.isInteger(input.size) || input.size! < 1 || input.size! > (image ? MAX_IMAGE_SIZE : MAX_FILE_SIZE)) throw new ApiError(422, '文件类型或大小不符合要求。');
+    if (input.sha256 !== undefined && (typeof input.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(input.sha256))) throw new ApiError(422, '完整 SHA-256 格式错误。');
     const state = await libraryState(bucket); const work = state.value.works.find(w => w.id === input.workId);
     if (!work || !image && !work.versions.some(v => v.id === input.versionId)) throw new ApiError(422, '先保存作品与版本，再上传文件。');
     // Bound active sessions; no user-controlled object keys or multipart IDs.
@@ -57,7 +58,7 @@ export async function uploadRoute(request: Request, bucket: R2Bucket, segments: 
     const multipart = await bucket.createMultipartUpload(key, { httpMetadata: { contentType: mime }, customMetadata: { workId: work.id, kind: input.kind } });
     const upload: Upload = { id: newId, workId: work.id, ...(input.versionId ? { versionId: input.versionId } : {}), kind: input.kind,
       name: input.name, ...(input.displayName?{displayName:input.displayName}:{}), size: input.size!, mime, key, uploadId: multipart.uploadId,
-      expiresAt: new Date(Date.now() + 24 * 3600_000).toISOString(), status: 'uploading' };
+      expiresAt: new Date(Date.now() + 24 * 3600_000).toISOString(), status: 'uploading', ...(input.sha256 ? {sha256:input.sha256} : {}) };
     try { await putJson(bucket, sessionKey(newId), upload); await putJson(bucket, `uploads/active/${newId}.json`, upload); } catch (cause) { await multipart.abort(); throw cause; }
     return json({ upload, partSize: PART_SIZE }, 201);
   }
