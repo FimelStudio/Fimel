@@ -2,6 +2,13 @@ import { expect, test } from '@playwright/test';
 import { resolve } from 'node:path';
 import { mkdir } from 'node:fs/promises';
 import {readFile} from 'node:fs/promises';
+test('real local Worker serves the validated official import snapshot only to an authenticated admin',async({page})=>{
+  await page.goto('/');const response=await page.request.get('/api/import-source');expect(response.status()).toBe(200);const source=await response.json();expect(source.library.works).toHaveLength(28);
+  const anonymous=await page.request.get('/api/import-source',{headers:{'x-local-test-anonymous':'1'}});expect(anonymous.status()).toBe(401);
+  const current=(await(await page.request.get('/api/library')).json()).library;
+  const existing=new Set(current.works.map((work:{id:string})=>work.id));const added=source.library.works.filter((work:{id:string})=>!existing.has(work.id)).length;
+  await page.getByRole('button',{name:'导入现有作品',exact:true}).click();const dialog=page.getByRole('dialog',{name:'导入作品预览'});await expect(dialog).toContainText(`新增 ${added} 个作品`);await expect(dialog).toContainText(`已有 ${28-added} 个作品保留当前内容`);await page.getByRole('button',{name:'取消',exact:true}).click();
+});
 test('initial library loading blocks new/import/export until the real response arrives',async({page})=>{
   let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});
   await page.route('**/api/library',async route=>{await gate;await route.continue();});

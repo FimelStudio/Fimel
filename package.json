@@ -22,6 +22,7 @@
     "admin:test:e2e": "node scripts/admin-upload-fixture.mjs && playwright test --config admin/playwright.config.ts",
     "admin:test:public": "playwright test --config admin/remote-site.config.ts",
     "admin:generate": "tsx scripts/admin-validator.ts",
+    "admin:prepare-deploy": "node scripts/admin-deploy-target.mjs",
     "admin:test:production": "npm run admin:build && playwright test --config admin/production-preview.config.ts"
   },
   "dependencies": {

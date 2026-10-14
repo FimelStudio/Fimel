@@ -10,7 +10,8 @@ if (-not $StageSecretVersion) {
 }
 Push-Location -LiteralPath $taskRoot
 try {
-    if (-not (Test-Path -LiteralPath '.artifacts/admin-deploy.json')) { throw 'Admin deployment target is not prepared.' }
+    & node scripts/admin-deploy-target.mjs
+    if ($LASTEXITCODE -ne 0) { throw 'Admin deployment target is not prepared.' }
     $analyticsSecure = Read-Host 'Paste the read-only Analytics Token here (hidden; never paste it into chat)' -AsSecureString
     $analyticsPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($analyticsSecure)
     try {
