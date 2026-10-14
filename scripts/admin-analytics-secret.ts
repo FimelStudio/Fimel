@@ -8,9 +8,12 @@ let input='';
 for await(const bytes of process.stdin){input+=bytes;if(input.length>16_384)throw new Error('输入超过限制。');}
 let token='';
 try {
-  const value=JSON.parse(input) as {token?:string};input='';
-  token=value.token?.trim()??'';delete value.token;
-  if(!/^[A-Za-z0-9_.-]{20,4096}$/.test(token))throw new Error('分析 Token 格式不正确。');
+  let value:{token?:unknown};
+  try{value=JSON.parse(input);}catch{throw new Error('隐藏输入没有被正确读取，请重新运行配置脚本。');}
+  input='';
+  token=typeof value?.token==='string'?value.token.trim():'';if(value&&typeof value==='object')delete value.token;
+  if(token.length<20)throw new Error(`仅收到 ${token.length} 个字符，请复制 Cloudflare 创建完成页上的完整 Token；终端无法粘贴时可使用 -FromClipboard。`);
+  if(!/^[A-Za-z0-9_.-]{20,4096}$/.test(token))throw new Error('输入包含非 Token 内容，请只复制完整令牌，不要复制测试命令、名称或遮蔽星号。');
   const configPath=resolve('.artifacts/admin-deploy.json');
   const target=JSON.parse(await readFile(configPath,'utf8'));
   if(target.name!=='fimel-admin'||target.account_id!=='13d3ede85821bfcfb2ed2f452d64c8da'||target.workers_dev!==false||target.preview_urls!==false)throw new Error('后台目标配置未就绪，未设置任何 Secret。');

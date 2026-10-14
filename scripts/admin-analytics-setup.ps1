@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([switch]$StageSecretVersion)
+param([switch]$StageSecretVersion, [switch]$FromClipboard)
 $ErrorActionPreference = 'Stop'
 $taskRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 if (-not $StageSecretVersion) {
@@ -12,17 +12,25 @@ Push-Location -LiteralPath $taskRoot
 try {
     & node scripts/admin-deploy-target.mjs
     if ($LASTEXITCODE -ne 0) { throw 'Admin deployment target is not prepared.' }
-    $analyticsSecure = Read-Host 'Paste the read-only Analytics Token here (hidden; never paste it into chat)' -AsSecureString
-    $analyticsPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($analyticsSecure)
+    $analyticsSecure = $null
+    $analyticsPointer = [IntPtr]::Zero
     try {
-        $analyticsPlain = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($analyticsPointer)
+        if ($FromClipboard) {
+            $analyticsPlain = Get-Clipboard -Raw -ErrorAction Stop
+            if ([string]::IsNullOrWhiteSpace($analyticsPlain)) { throw 'Clipboard is empty. Copy the complete Token from Cloudflare, then rerun.' }
+            Write-Host 'Reading clipboard privately; its contents will not be displayed or saved.'
+        } else {
+            $analyticsSecure = Read-Host 'Paste the complete Token (right-click or Ctrl+Shift+V if Ctrl+V fails)' -AsSecureString
+            $analyticsPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($analyticsSecure)
+            $analyticsPlain = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($analyticsPointer)
+        }
         $analyticsPayload = @{ token = $analyticsPlain } | ConvertTo-Json -Compress
         $analyticsPayload | & node --use-env-proxy --import tsx scripts/admin-analytics-secret.ts
         if ($LASTEXITCODE -ne 0) { throw 'Analytics setup failed; no version was intentionally activated.' }
     } finally {
-        [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($analyticsPointer)
+        if ($analyticsPointer -ne [IntPtr]::Zero) { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($analyticsPointer) }
         $analyticsPlain = $null
         $analyticsPayload = $null
-        $analyticsSecure.Dispose()
+        if ($null -ne $analyticsSecure) { $analyticsSecure.Dispose() }
     }
 } finally { Pop-Location }

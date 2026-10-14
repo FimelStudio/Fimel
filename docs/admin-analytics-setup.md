@@ -27,6 +27,14 @@ Cloudflare 新增的 [Analytics SQL binding](https://developers.cloudflare.com/a
    ```
 
    脚本以隐藏输入读取 Token，先验证只读查询，再暂存 Secret 版本。不要把 Token 粘贴到聊天、命令行参数或 `.env` 中。
+
+   如果终端的隐藏输入无法粘贴，在 Cloudflare 的 Token 创建完成页点击复制后，改为运行：
+
+   ```powershell
+   .\scripts\admin-analytics-setup.ps1 -StageSecretVersion -FromClipboard
+   ```
+
+   这个选项仅由用户在本机运行时读取剪贴板，不显示或保存其内容。Token 仅在创建完成页显示一次；列表里的名称、ID 或遮蔽星号不是 Token。如果已离开完成页且没有保存，需要在该专用 Token 的菜单中 Roll／重新生成，再复制新的完整 Token。参见 [Cloudflare 创建 Token 说明](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/)。
 3. 只向 Codex 提供成功提示与版本 ID。Codex 检查新版本保留身份 Secrets、R2 绑定、Access 和域名，再激活并验证统计页面。配置失败时保留原线上版本，不把模拟数据当作真实统计。
 
 不带参数运行脚本仅显示配置范围，不请求凭据或修改云端。
