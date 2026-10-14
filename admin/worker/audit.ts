@@ -50,7 +50,9 @@ export async function runAudited(request:Request,bucket:R2Bucket,email:string,ru
   const op=operation(request);if(!op)return run();
   const source=await libraryState(bucket);const p=new URL(request.url).pathname.split('/').filter(Boolean).slice(1);
   const changes:AuditChange[]=[];if(op==='save-library'){const candidate=await readJson(request.clone());if(validateLibrary(candidate).length===0)changes.push(...libraryChanges(source.value,candidate as Library));}
+  if(op==='restore-library'&&/^[a-zA-Z0-9-]{1,80}$/.test(p[2]??'')){const stored=await bucket.get(`backups/library/${p[2]}.json`);if(stored){const snapshot=await stored.json<{value:Library}>();if(validateLibrary(snapshot.value).length===0)changes.push(...libraryChanges(source.value,snapshot.value));}}
   let workId=['publish','unpublish'].includes(op)?p[1]:undefined;const uploadId=p[0]==='uploads'&&p[1]!=='cleanup'?p[1]:undefined;
+  if(op==='start-upload'){const input=await readJson(request.clone(),4096) as {workId?:string};if(source.value.works.some(w=>w.id===input.workId))workId=input.workId;}
   if(uploadId&&/^[a-zA-Z0-9-]{1,80}$/.test(uploadId)){const stored=await bucket.get(`uploads/sessions/${uploadId}.json`);if(stored)workId=(await stored.json<{workId:string}>()).workId;}
   const time=new Date().toISOString(),id=crypto.randomUUID();const key=`audit/${time.slice(0,10)}/${time.replaceAll(':','-')}-${id}.json`;
   const event:AuditEvent={schemaVersion:2,id,actorId:await actorKey(email),operation:op,time,status:'prepared',changes,...(workId?{workId}:{}),...(uploadId?{uploadId}:{}),beforeEtag:source.etag};

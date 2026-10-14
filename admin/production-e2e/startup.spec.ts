@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import {makeWork} from '../shared/model';
 test('production CSP permits startup and editing; weakened CDN ETag does not cause false conflicts',async({page})=>{
   const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
   const response=await page.goto('/');expect(response?.headers()['content-security-policy']).not.toContain('unsafe-eval');
@@ -44,4 +45,16 @@ test('unconnected analytics shows an explicit error instead of invented traffic'
   await page.route('**/api/analytics?days=7',route=>route.fulfill({status:503,json:{error:'域名统计尚未连接'}}));
   await page.goto('/');await page.getByRole('button',{name:'访问与下载统计',exact:true}).click();
   await expect(page.getByRole('alert')).toContainText('域名统计尚未连接');await expect(page.locator('.metrics-grid')).toHaveCount(0);
+});
+
+test('official import previews all 28 works, keeps existing edits and saves only after explicit review',async({page})=>{
+  const saved=makeWork();saved.project.slug='existing-private';saved.project.title='保留的私有草稿';let writes=0;
+  await page.route('**/api/library',async route=>{
+    if(route.request().method()==='PUT'){writes++;const input=route.request().postDataJSON();expect(input.works).toHaveLength(29);expect(input.works[0]).toEqual(saved);await route.fulfill({json:{saved:true,etag:'"after-import"'}});return;}
+    await route.fulfill({json:{library:{schemaVersion:1,works:[saved]},public:{schemaVersion:2,publicationId:'empty',projects:[],releases:{}},publicEtag:'"empty"',etag:'"before-import"'}});
+  });
+  await page.goto('/');await page.getByRole('button',{name:'导入现有作品',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'导入作品预览'});await expect(dialog).toContainText('新增 28 个作品');await expect(dialog.getByRole('row')).toHaveCount(29);expect(writes).toBe(0);
+  await dialog.getByRole('button',{name:'合并到编辑区'}).click();await expect(page.getByText('29 个作品 · 0 个已公开',{exact:true})).toBeVisible();expect(writes).toBe(0);
+  await page.getByRole('button',{name:'保存草稿',exact:true}).click();await expect(page.getByText('草稿已保存到私有存储。')).toBeVisible();expect(writes).toBe(1);
 });

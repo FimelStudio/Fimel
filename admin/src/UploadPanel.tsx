@@ -4,16 +4,16 @@ import { api, RequestError } from './api';
 import { MAX_FILE_SIZE, MAX_IMAGE_SIZE, MIME_TYPES, PART_SIZE } from '../shared/model';
 import type { Asset, Upload } from '../shared/model';
 
-type Props = { workId: string; versionId?: string; kind: 'image' | 'file'; disabled?: boolean; onUploaded(asset: Asset): void };
+type Props = { workId: string; versionId?: string; kind: 'image' | 'file'; disabled?: boolean; onUploaded(asset: Asset): void; onBusyChange?(id:string,active:boolean):void };
 type UploadState = { upload: Upload; parts: { partNumber: number; size: number; sha256: string }[] };
-export function UploadPanel({ workId, versionId, kind, disabled, onUploaded }: Props) {
+export function UploadPanel({ workId, versionId, kind, disabled, onUploaded, onBusyChange }: Props) {
   const [progress, setProgress] = useState(0); const [label, setLabel] = useState('');
   const [busy, setBusy] = useState(false); const [error, setError] = useState('');
   const controller = useRef<AbortController | null>(null); const session = useRef<string | null>(null);
   const pending = useRef<File[]>([]); const hashing = useRef<Worker | null>(null);
   const onUploadedRef = useRef(onUploaded);
   useEffect(() => { onUploadedRef.current = onUploaded; }, [onUploaded]);
-  useEffect(() => () => { controller.current?.abort(); hashing.current?.terminate(); }, []);
+  useEffect(() => () => { controller.current?.abort(); hashing.current?.terminate(); onBusyChange?.(`${workId}:${versionId??kind}`,false); }, [workId,versionId,kind,onBusyChange]);
   useEffect(() => { if(!busy)return; const warn=(event:BeforeUnloadEvent)=>event.preventDefault(); window.addEventListener('beforeunload',warn); return ()=>window.removeEventListener('beforeunload',warn); }, [busy]);
   const hash = (file: File, signal: AbortSignal) => new Promise<{ sha256: string; parts: string[] }>((resolve, reject) => {
     const worker = new Worker(new URL('./hash-worker.ts', import.meta.url), { type: 'module' }); hashing.current = worker;
@@ -41,6 +41,9 @@ export function UploadPanel({ workId, versionId, kind, disabled, onUploaded }: P
     xhr.send(bytes);
   });
   async function start(files: File[]) {
+    if(!files.length)return;
+    onBusyChange?.(`${workId}:${versionId??kind}`,true);
+    setLabel(`准备校验 ${files[0].name}…`);
     setBusy(true); setError(''); pending.current = files;
     const abort = new AbortController(); controller.current = abort;
     try {
@@ -80,7 +83,7 @@ export function UploadPanel({ workId, versionId, kind, disabled, onUploaded }: P
       }
       setLabel('文件已验证并关联，请保存作品草稿。'); pending.current = [];
     } catch (cause) { setError(cause instanceof Error ? cause.message : '上传失败。'); }
-    finally { setBusy(false); }
+    finally { setBusy(false);onBusyChange?.(`${workId}:${versionId??kind}`,false); }
   }
   async function cancel() {
     controller.current?.abort();

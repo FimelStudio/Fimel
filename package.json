@@ -15,7 +15,7 @@
     "admin:api": "wrangler dev --config admin/wrangler.local.jsonc --ip 127.0.0.1 --port 8788 --persist-to .artifacts/admin-local",
     "admin:types": "wrangler types admin/worker-configuration.d.ts --config admin/wrangler.jsonc --include-runtime false && wrangler types admin/public-api/worker-configuration.d.ts --config admin/public-api/wrangler.example.jsonc --env-interface StatisticsEnv --include-runtime false",
     "admin:check": "npm run admin:generate && npm run admin:types && tsc -p admin/tsconfig.json",
-    "admin:build": "npm run admin:check && vite build --config admin/vite.config.ts && node scripts/admin-assets.mjs",
+    "admin:build": "npm run admin:check && tsx scripts/admin-migration.ts && vite build --config admin/vite.config.ts && node scripts/admin-assets.mjs",
     "admin:migration": "npm run admin:generate && tsx scripts/admin-migration.ts",
     "admin:seed": "tsx scripts/admin-migration.ts && tsx scripts/admin-seed-local.ts",
     "admin:test": "npm run admin:generate && tsx scripts/admin-migration.ts && tsx --test admin/tests/*.test.ts",

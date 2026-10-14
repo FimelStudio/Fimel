@@ -11,6 +11,7 @@ createServer(async (request, response) => {
   response.setHeader('Cache-Control', 'no-store');
   const path = new URL(request.url ?? '/', 'http://127.0.0.1').pathname;
   if (path === '/api/session') { response.setHeader('Content-Type','application/json');response.end(JSON.stringify({authenticated:true,username:'预览账号',actorId:'preview'}));return; }
+  if (path === '/api/import-source') {response.setHeader('Content-Type','application/json');response.end(JSON.stringify({library:JSON.parse(await readFile(resolve(root,'migration/library.json'),'utf8')),source:'现有官网作品快照'}));return;}
   if (path === '/api/library') {
     for await (const chunk of request) void chunk;
     response.setHeader('Content-Type','application/json'); response.setHeader('ETag','W/"preview"');

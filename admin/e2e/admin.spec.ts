@@ -26,7 +26,10 @@ test('browser create, localized edit, Markdown preview, real 100 MiB upload, pub
   await page.getByRole('button',{name:'发行版本',exact:true}).click();await page.getByRole('button',{name:'添加版本'}).click();await page.getByLabel('版本号',{exact:true}).fill('1.0');await page.getByRole('combobox',{name:'发行状态',exact:true}).selectOption('released');
   await page.getByRole('button',{name:'保存草稿',exact:true}).first().click();await expect(page.getByText('草稿已保存到私有存储。')).toBeVisible();
   await page.getByLabel('选择发行文件').setInputFiles(resolve('.artifacts/admin-fixtures/100-mib.zip'));
+  await expect(page.getByRole('button',{name:'返回',exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'作品库',exact:false})).toBeDisabled();
+  await expect(page.getByRole('button',{name:'基本信息',exact:true})).toBeDisabled();
   await expect(page.getByText('文件已验证并关联，请保存作品草稿。')).toBeVisible({timeout:150000});await expect(page.locator('.file-row')).toContainText('100.0 MiB');
+  await expect(page.getByRole('button',{name:'返回',exact:true})).toBeEnabled();
   await page.getByRole('button',{name:'保存草稿',exact:true}).first().click();await page.getByRole('button',{name:'发布预览'}).click();await expect(page.getByRole('dialog')).toBeVisible();await page.getByRole('button',{name:'确认发布'}).click();await expect(page.getByText('发布成功，公开 manifest 已更新。')).toBeVisible({timeout:60000});
   await mkdir('.artifacts/admin-screenshots',{recursive:true});await page.screenshot({path:'.artifacts/admin-screenshots/editor-light.png',fullPage:true});
   await page.getByRole('button',{name:'切换主题'}).click();await expect(page.locator('html')).toHaveClass(/dark/);await page.screenshot({path:'.artifacts/admin-screenshots/editor-dark.png',fullPage:true});

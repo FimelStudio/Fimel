@@ -37,6 +37,13 @@ export async function handle(request: Request, env: AdminEnv, ctx: AccessContext
 async function route(request: Request, env: AdminEnv, email: string): Promise<Response> {
   const path = new URL(request.url).pathname.split('/').filter(Boolean).slice(1);
   const method = request.method;
+  if (path[0] === 'import-source' && path.length === 1 && method === 'GET') {
+    const response = await env.ASSETS.fetch(new Request(new URL('/migration/library.json',request.url)));
+    if (!response.ok) throw new ApiError(503,'现有作品导入文件尚未构建，请联系维护者。');
+    const library = await readJson({headers:response.headers,body:response.body});
+    if (validateLibrary(library).length) throw new ApiError(503,'现有作品导入文件校验失败，未修改作品库。');
+    return json({library,source:'现有官网作品快照'});
+  }
   if (path[0] === 'audit' && path.length === 1 && method === 'GET') return json(await auditFeed(request,env.PRIVATE,env,email));
   if (path[0] === 'analytics' && path.length === 1 && method === 'GET') return json(await metrics(request,env));
   if (path[0] === 'session' && path.length === 1 && method === 'GET') return json({ authenticated: true, username: email.split('@')[0], actorId: await actorKey(email) });
