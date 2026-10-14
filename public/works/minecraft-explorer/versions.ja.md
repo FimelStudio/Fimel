@@ -13,4 +13,6 @@
 
 上部ボタンから取得するのはこの EXE のみです。ZIP やインストーラーではありません。初回起動時に `%LOCALAPPDATA%\MinecraftExplorer\` に設定とキャッシュを作成し、ゲーム内にスキャン用ファイルを作成しません。このツール自体に Java は不要ですが、HMCL JAR には別途 Java が必要です。
 
+[R2 から 1.0.2 の EXE をダウンロード](https://download.studiofimel.com/works/tools/minecraft-explorer/1.0.2/MinecraftExplorer-1.0-win-x64.exe)
+
 同じキャッシュを使用するウィンドウは一つにしてください。[英語ガイド](https://github.com/Ylong4004/Minecraft-Explorer/blob/main/docs/README.en.md) に詳細を記載しています。

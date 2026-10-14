@@ -74,7 +74,7 @@ export const Layout: React.FC = () => {
       return false;
     }
   });
-  const [logoFailed, setLogoFailed] = useState(false);
+  const [logoSource, setLogoSource] = useState<'svg' | 'png' | 'none'>('svg');
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [advancementVisible, setAdvancementVisible] = useState(false);
 
@@ -276,16 +276,18 @@ export const Layout: React.FC = () => {
       <CurtainLoading isLoading={loading} />
 
       <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-canvas/95 text-content transition-colors duration-300">
-        <div className="mx-auto grid max-w-[1600px] grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1 px-4 py-2 md:min-h-[72px] md:grid-cols-[auto_1fr_auto] md:px-8 md:py-0 lg:px-12">
-          <Link to="/" aria-label={`Fimel / ${t('nav.home')}`} className="hover-target order-1 inline-flex items-center outline-offset-4 transition-transform hover:scale-[1.03] focus-visible:outline-2 focus-visible:outline-diamond">
-            {logoFailed ? <span className="text-2xl font-black tracking-tight">FIMEL.</span> : (
-              <img src={`${basePath}assets/brand/fimel-logo.png`} alt="Fimel" width="104" height="44" className="h-10 w-[95px] object-contain object-left dark:invert md:h-11 md:w-[104px]" onError={() => setLogoFailed(true)} />
+        <div className="mx-auto grid max-w-[1600px] grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1 px-4 py-2 md:min-h-[72px] md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:px-8 md:py-0 lg:px-12">
+          <Link to="/" aria-label={`Fimel Studio / ${t('nav.home')}`} className="brand-link hover-target order-1 inline-flex items-center outline-offset-4 focus-visible:outline-2 focus-visible:outline-diamond">
+            {logoSource === 'none' ? <span aria-hidden="true" className="brand-mark brand-mark-fallback">F</span> : (
+              <img src={`${basePath}assets/brand/fimel-logo.${logoSource}`} alt="" width="56" height="56" className="brand-mark dark:invert" decoding="async"
+                onError={() => setLogoSource(current => current === 'svg' ? 'png' : 'none')} />
             )}
+            <span className="brand-wordmark" data-wordmark="Fimel Studio">Fimel Studio</span>
           </Link>
 
           <nav aria-label={t('nav.primary')} className="order-3 col-span-2 flex items-center justify-center gap-1 md:order-2 md:col-span-1 md:gap-2">
             {navigation.map(({ to, label, end }) => (
-              <NavLink key={to} to={to} end={end} className={({ isActive }) => `hover-target relative inline-flex min-h-11 items-center justify-center whitespace-nowrap px-3 text-[13px] font-bold outline-offset-2 transition-colors focus-visible:outline-2 focus-visible:outline-diamond sm:px-5 sm:text-sm md:px-6 ${isActive ? 'text-content after:absolute after:bottom-1 after:left-3 after:right-3 after:h-0.5 after:bg-diamond' : 'text-content-muted hover:text-content'}`}>
+              <NavLink key={to} to={to} end={end} className={({ isActive }) => `hover-target relative inline-flex min-h-11 items-center justify-center whitespace-nowrap px-3 text-[13px] font-bold outline-offset-2 transition-colors focus-visible:outline-2 focus-visible:outline-diamond sm:px-5 sm:text-sm md:px-3 lg:px-6 ${isActive ? 'text-content after:absolute after:bottom-1 after:left-3 after:right-3 after:h-0.5 after:bg-diamond' : 'text-content-muted hover:text-content'}`}>
                 {label}
               </NavLink>
             ))}

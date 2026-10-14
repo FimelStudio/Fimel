@@ -40,14 +40,16 @@ try {
   await page.reload();
   await page.locator('.project-markdown').waitFor();
   await page.screenshot({ path: `.artifacts/fimel-card-${base === '/' ? 'root' : 'github'}.png`, fullPage: true });
-  for (const project of projects.filter(project => project.download || project.fallbackDownload)) {
-    const response = await page.request.head(`${origin}${base}${project.download || project.fallbackDownload}`);
+  for (const project of projects.filter(project => project.downloadUrl || project.download || project.fallbackDownload)) {
+    const download = project.downloadUrl || project.download || project.fallbackDownload;
+    const response = await page.request.head(/^https:\/\//.test(download) ? download : `${origin}${base}${download}`);
     assert.ok(response.ok() && !response.headers()['content-type'].includes('text/html'), `Broken existing download: ${project.slug}`);
   }
   // A moved image must not change a featured work's detail URL.
   await page.goto(`${origin}${base}`);
   await page.locator('#works').waitFor();
-  for (const slug of ['island-escape-before-dawn', 'amethyst-salvation', 'werewolf-f-town']) {
+  for (const slug of ['island-escape-before-dawn', 'amethyst-salvation', 'es-atrium-showdown', 'minecraft-explorer', 'minecraft-obj-cubizer', 'bingo-but-dont-do-it', 'fimel-card', 'spoiler-rpg', 'island-escape-java']) {
+    await page.locator(`#works a[href="#/works/${slug}"]`).waitFor();
     assert.equal(await page.locator(`#works a[href="#/works/${slug}"]`).count(), 1);
   }
   await page.setViewportSize({ width: 320, height: 900 });

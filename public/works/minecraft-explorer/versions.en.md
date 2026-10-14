@@ -13,4 +13,6 @@
 
 The Download button downloads only this EXE, not an installer or ZIP. First launch creates settings and cache in `%LOCALAPPDATA%\MinecraftExplorer\`, outside game directories. The tool needs no Java; HMCL JAR needs its own Java runtime.
 
+[Download the 1.0.2 EXE from R2](https://download.studiofimel.com/works/tools/minecraft-explorer/1.0.2/MinecraftExplorer-1.0-win-x64.exe)
+
 Use one app window per cache for now. See the [full guide](https://github.com/Ylong4004/Minecraft-Explorer/blob/main/docs/README.en.md) for compatibility and operation limits.

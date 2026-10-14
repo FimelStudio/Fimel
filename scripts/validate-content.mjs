@@ -59,6 +59,16 @@ for (const project of catalogue.projects) {
   await checkAsset(project.image, `${label}.image`);
   if (!/^https?:\/\//.test(project.image)) assert(project.image.startsWith('assets/'), `${label}.image: put website images under public/assets/.`);
   for (const field of ['download', 'fallbackDownload']) if (project[field]) await checkAsset(project[field], `${label}.${field}`);
+  if (project.downloadUrl !== undefined) {
+    assert(typeof project.downloadUrl === 'string', `${label}.downloadUrl needs an HTTPS string.`);
+    const url = new URL(project.downloadUrl);
+    const prefix = `/works/${project.type}/${project.slug}/`;
+    assert(url.protocol === 'https:' && url.hostname === 'download.studiofimel.com' && !url.port && !url.username && !url.password && !url.search && !url.hash,
+      `${label}.downloadUrl must use the public R2 download domain without credentials/query/fragment.`);
+    assert(url.pathname.startsWith(prefix) && url.pathname.slice(prefix.length).split('/').length === 2,
+      `${label}.downloadUrl must contain its type, slug, version and filename.`);
+    assert(project.status === 'released', `${label}: unreleased works must not have downloadUrl.`);
+  }
   assert(project.content && typeof project.content === 'object', `${label}: content is required.`);
   for (const tab of tabs) {
     for (const contentPath of textValues(project.content[tab], `${label}.content.${tab}`)) {

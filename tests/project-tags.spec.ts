@@ -99,7 +99,7 @@ test('home uses the official Bingo name and the same historical metrics as proje
   const bingo = page.locator('#works a[href="#/works/bingo-but-dont-do-it"]');
   await expect(bingo).toContainText('Bingo But Don\'t Do It');
   await expect(bingo.locator('img')).toHaveAttribute('alt', 'Bingo But Don\'t Do It');
-  for (const slug of ['island-escape-before-dawn', 'amethyst-salvation', 'werewolf-f-town']) {
+  for (const slug of ['island-escape-before-dawn', 'amethyst-salvation', 'es-atrium-showdown']) {
     const project = catalogue.projects.find((entry: { slug: string }) => entry.slug === slug);
     await expect(page.locator(`#works a[href="#/works/${slug}"]`)).toContainText(project.downloads.toLocaleString('en-US'));
   }

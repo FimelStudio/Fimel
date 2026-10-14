@@ -1,0 +1,2 @@
+Fimel Studio R2 uploader smoke test.
+This archive contains no project files, credentials, or personal data.

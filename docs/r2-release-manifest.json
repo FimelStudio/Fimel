@@ -1,0 +1,43 @@
+{
+  "checkedOn": "2026-10-14",
+  "remote": "fimel-r2",
+  "bucket": "fimel-downloads",
+  "domain": "https://download.studiofimel.com",
+  "verification": "Full rclone readback SHA-256 matched source files.",
+  "files": [
+    {
+      "slug": "minecraft-obj-cubizer",
+      "type": "tools",
+      "version": "1.4.0",
+      "key": "works/tools/minecraft-obj-cubizer/1.4.0/minecraft_obj_cubizer-1.4.0.zip",
+      "downloadUrl": "https://download.studiofimel.com/works/tools/minecraft-obj-cubizer/1.4.0/minecraft_obj_cubizer-1.4.0.zip",
+      "size": 53731,
+      "md5": "bb03dc1752e28233400dcccf1a64265b",
+      "sha256": "5fdb927a8003b4d383ab9895743988374e3c05a53a9c2a1ff1845ae594d76476",
+      "verifiedAt": "2026-10-14T08:03:03.8273597Z"
+    },
+    {
+      "slug": "minecraft-explorer",
+      "type": "tools",
+      "version": "1.0.2",
+      "key": "works/tools/minecraft-explorer/1.0.2/MinecraftExplorer-1.0-win-x64.exe",
+      "downloadUrl": "https://download.studiofimel.com/works/tools/minecraft-explorer/1.0.2/MinecraftExplorer-1.0-win-x64.exe",
+      "size": 22384640,
+      "md5": "852ef844a64ad2f1624098cb4feccf68",
+      "sha256": "ec26fa368de51458ad1cf153d03ab0309674e5ef1cec7b964af0ffd836c6250e",
+      "verifiedAt": "2026-10-14T08:03:51.8384629Z"
+    },
+    {
+      "slug": "bingo-but-dont-do-it",
+      "type": "mods",
+      "version": "1.21.11-v1.0",
+      "previousKeyRetained": "works/mods/bingo-but-dont-do-it/1.0/bingo-but-dont-do-it-1.21.11-v1.0.jar",
+      "key": "works/mods/bingo-but-dont-do-it/1.21.11-v1.0/bingo-but-dont-do-it-1.21.11-v1.0.jar",
+      "downloadUrl": "https://download.studiofimel.com/works/mods/bingo-but-dont-do-it/1.21.11-v1.0/bingo-but-dont-do-it-1.21.11-v1.0.jar",
+      "size": 59689247,
+      "md5": "160bc297b9b483f68b2d9351948fd036",
+      "sha256": "482217c9e73786296ea2a9c32eab684c3919190fa40ca44a79dc69608572deec",
+      "verifiedAt": "2026-10-14T08:05:38.4033178Z"
+    }
+  ]
+}

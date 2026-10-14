@@ -2,6 +2,76 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@font-face {
+  font-family: 'Fimel Pixel';
+  src: url('/assets/fonts/minecraft-seven/minecraft-seven-latin.woff') format('woff');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0020-007E;
+}
+
+.brand-link { min-height: 44px; gap: 8px; justify-self: start; white-space: nowrap; }
+.brand-mark { width: 44px; height: 44px; flex: none; object-fit: contain; }
+.brand-mark-fallback { display: grid; place-items: center; border: 1px solid currentColor; border-radius: 50%; font: 400 24px 'Fimel Pixel', monospace; }
+.brand-wordmark {
+  --brand-gradient: linear-gradient(110deg, #006d77, #267044, #006d77);
+  --brand-hover-gradient: linear-gradient(110deg, #6546a5, #0969a5, #6546a5);
+  position: relative;
+  width: 6em;
+  font-family: 'Fimel Pixel', 'Geist Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  font-synthesis: none;
+  font-variant-ligatures: none;
+  line-height: 1.25;
+  letter-spacing: 0;
+  color: #006d77;
+}
+.dark .brand-wordmark {
+  --brand-gradient: linear-gradient(110deg, #5eead4, #a3e635, #5eead4);
+  --brand-hover-gradient: linear-gradient(110deg, #c4b5fd, #7dd3fc, #c4b5fd);
+  color: #5eead4;
+}
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .brand-wordmark {
+    background-image: var(--brand-gradient);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+  .brand-wordmark::after {
+    content: attr(data-wordmark);
+    position: absolute;
+    inset: 0;
+    background-image: var(--brand-hover-gradient);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease-out;
+  }
+  .brand-link:is(:hover, :focus-visible) .brand-wordmark::after { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-wordmark::after { transition: none; }
+}
+@media (forced-colors: active) {
+  .brand-wordmark { color: LinkText; background: none; }
+  .brand-wordmark::after { content: none; }
+}
+@media (min-width: 768px) {
+  .brand-link { gap: 10px; }
+  .brand-mark { width: 52px; height: 52px; }
+  .brand-wordmark { font-size: 20px; }
+}
+@media (min-width: 1024px) {
+  .brand-link { gap: 12px; }
+  .brand-mark { width: 56px; height: 56px; }
+  .brand-wordmark { font-size: 24px; }
+}
+
 @theme {
   --color-obsidian: #0a0a0a;
   --color-paper: #f4f4f5;

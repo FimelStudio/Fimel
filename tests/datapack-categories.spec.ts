@@ -25,7 +25,7 @@ test('Java maps and data packs share a consistent but separate catalogue contrac
   expect(card.type).toBe('datapacks');
   expect(card.status).toBe('development');
   expect(card.repository).toBe('https://github.com/FimelStudio/fimelcard-dp');
-  for (const field of ['download', 'downloadSlug', 'latestReleaseRepo', 'releasePage', 'fallbackDownload', 'version', 'published'] as const) {
+  for (const field of ['downloadUrl', 'download', 'downloadSlug', 'latestReleaseRepo', 'releasePage', 'fallbackDownload', 'version', 'published'] as const) {
     expect(card[field]).toBeUndefined();
   }
   // A command pack distributed through NetEase remains in its actual platform

@@ -9,9 +9,9 @@
 | YetAnotherConfigLib（YACL） | 可选，提供完整 HUD 设置页 | `3.8.2+1.21.11-fabric` |
 | Simple Voice Chat | 可选，语音关键词需要服务端和参与客户端均安装 | `fabric-1.21.11-2.6.22`，最低 `1.21.11-2.6.20` |
 
-[下载 1.21.11 v1.0](https://github.com/FimelStudio/bingo-but-dont-do-it/releases/download/bingo-but-dont-do-it-1.21.11/bingo-but-dont-do-it-1.21.11-v1.0.jar)
+[下载 1.21.11 v1.0](https://download.studiofimel.com/works/mods/bingo-but-dont-do-it/1.21.11-v1.0/bingo-but-dont-do-it-1.21.11-v1.0.jar)
 
 [查看全部 Releases](https://github.com/FimelStudio/bingo-but-dont-do-it/releases)
 
-页面顶部的下载按钮会自动查找最新正式版；本页记录是上述版本的发布快照。
+页面顶部和本页的下载均使用 R2 中已校验的 v1.0 文件。发布新版后，工作室会上传新版本并更新下载地址；GitHub Releases 保留作为发布记录。
 

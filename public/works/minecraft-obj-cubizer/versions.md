@@ -6,7 +6,7 @@
 - 文件：`minecraft_obj_cubizer-1.4.0.zip`。
 - 平台：桌面插件，输出 Java Block / Item 模型。
 
-[下载 1.4.0 ZIP](../../plugins/minecraft-obj-cubizer/minecraft_obj_cubizer-1.4.0.zip)
+[下载 1.4.0 ZIP](https://download.studiofimel.com/works/tools/minecraft-obj-cubizer/1.4.0/minecraft_obj_cubizer-1.4.0.zip)
 
 解压后，通过 Blockbench 的本地插件安装入口加载 `minecraft_obj_cubizer.js`。菜单名称为 **Minecraft Cubizer / Minecraft 方块转换器**。
 

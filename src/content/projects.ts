@@ -31,6 +31,8 @@ export interface Project {
   repository?: string;
   issues?: string;
   download?: string;
+  /** Published R2 URL. Takes precedence over legacy local/GitHub downloads. */
+  downloadUrl?: string;
   downloadSlug?: string;
   latestReleaseRepo?: string;
   releasePage?: string;
@@ -43,6 +45,10 @@ export interface Project {
 export function assetUrl(path: string): string {
   if (/^https?:\/\//.test(path)) return path;
   return `${import.meta.env.BASE_URL}${path.replace(/^\/+/, '')}`;
+}
+
+export function projectDownloadUrl(project: Pick<Project, 'downloadUrl' | 'download'>): string | undefined {
+  return project.downloadUrl || project.download;
 }
 
 export function localizedText(value: LocalizedText | undefined, language: string): string {
@@ -90,6 +96,8 @@ export function parseCatalogue(value: unknown): Project[] {
       !['released', 'development', 'planned'].includes(entry.status) ||
       !Array.isArray(entry.creators) || !Array.isArray(entry.platform) || !entry.content || typeof entry.content !== 'object' ||
       !Array.isArray(entry.tags) || entry.tags.length > 4 || new Set(entry.tags).size !== entry.tags.length ||
+      (entry.downloadUrl !== undefined && (typeof entry.downloadUrl !== 'string' ||
+        !entry.downloadUrl.startsWith(`https://download.studiofimel.com/works/${entry.type}/${entry.slug}/`))) ||
       entry.tags.some((tag: unknown) => typeof tag !== 'string' || !Object.hasOwn(projectTags, tag))) {
       throw new Error('Invalid project record in work catalogue.');
     }

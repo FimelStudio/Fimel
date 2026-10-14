@@ -2,6 +2,8 @@
 
 当前更新为 **1.0.2**，追加验收见文末。下面保留首次登记及历史验证记录，旧 SHA256 不代表当前下载。
 
+2026-10-14：当前发行文件已逐字节上传并校验到 R2，网站使用目录中的 `downloadUrl`，文件名仍为 `MinecraftExplorer-1.0-win-x64.exe`。[R2 下载 1.0.2](https://download.studiofimel.com/works/tools/minecraft-explorer/1.0.2/MinecraftExplorer-1.0-win-x64.exe)。本地原件保留作兼容，旧记录中的本地下载方式属于迁移前状态；正式流程与当前哈希见 [R2 上传说明](r2-uploads.md) 和 [发行清单](r2-release-manifest.json)。
+
 2026-10-12，在既有作品目录中加入 `minecraft-explorer`，分类“插件与工具”。源码入口为 [Ylong4004/Minecraft-Explorer](https://github.com/Ylong4004/Minecraft-Explorer)。应用版本及 Windows 文件版本为 1.0.0，网站下载名称按要求使用 `MinecraftExplorer-1.0-win-x64.exe`。
 
 ## 内容与文件

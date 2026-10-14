@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext, Link, useNavigate } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
-import { Diamond, ArrowUpRight, Download } from 'lucide-react';
+import { Diamond, ArrowUpRight } from 'lucide-react';
 import { HeroTitleReveal } from '../components/HeroTitleReveal';
 import { DraggableCube } from '../components/DraggableCube';
 import { ScrollTextReveal } from '../components/ScrollTextReveal';
 import { TiltGlareCard } from '../components/TiltGlareCard';
 import { Magnetic } from '../components/Magnetic';
-import { useWorksData } from '../hooks/useWorksData';
+import { HomeFeaturedWorks } from '../components/HomeFeaturedWorks';
 import { DeferredParticleScene } from '../components/DeferredScene';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
   const { isDark, basePath } = useOutletContext<{ isDark: boolean; basePath: string }>();
   const { t } = useTranslation();
-  const { siteMeta, bedrockEntries } = useWorksData();
   const [tooltipContent, setTooltipContent] = useState<{ visible: boolean; title: string; category: string; desc: string }>({ visible: false, title: '', category: '', desc: '' });
   const openCategory = (event: React.MouseEvent<HTMLAnchorElement>, path: string) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
@@ -265,130 +264,15 @@ export const Home: React.FC = () => {
             <h2 className="reveal-up text-5xl md:text-7xl lg:text-8xl font-black uppercase tracking-tighter leading-tight pb-2 text-obsidian dark:text-content transition-colors duration-700">
               <Trans i18nKey="works.title" />
             </h2>
-            <Link to="/studio" state={{ scrollTo: '#contact' }} className="reveal-up flex items-center gap-3 pb-2 border-b border-obsidian dark:border-white hover:text-brand hover:border-diamond dark:hover:border-diamond transition-colors group font-mono uppercase tracking-widest text-xs text-obsidian dark:text-content">
-              {t('works.inquire')} <ArrowUpRight className="w-4 h-4 group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
+            <Link to="/works" className="hover-target reveal-up flex items-center gap-3 pb-2 border-b border-obsidian dark:border-white hover:text-brand hover:border-diamond dark:hover:border-diamond transition-colors group font-mono uppercase tracking-widest text-xs text-obsidian dark:text-content">
+              {t('homeFeatured.view_all')} <ArrowUpRight className="w-4 h-4 group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
 
-          <div className="space-y-24">
-            <div className="reveal-up grid lg:grid-cols-[0.8fr_1.2fr] gap-8 border-y border-obsidian/10 dark:border-line py-8 md:py-12">
-              <div className="flex flex-col justify-between gap-8">
-                <div>
-                  <div className="font-mono text-brand tracking-[0.2em] text-sm flex items-center gap-4">
-                    <span className="w-10 h-px bg-diamond"></span>
-                    {t('nav.nav_maps_je')}
-                  </div>
-                  <h3 className="mt-6 text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none text-obsidian dark:text-content">
-                    {t('catalogue.development')}
-                  </h3>
-                </div>
-                <Link to="/works?type=java" className="hover-target w-fit flex items-center gap-3 text-xs uppercase tracking-[0.2em] font-mono text-gray-600 dark:text-content-muted hover:text-[#007d7e] dark:hover:text-brand transition-colors">
-                  {t('workPages.view_java')} <ArrowUpRight className="w-4 h-4" />
-                </Link>
-              </div>
-              <div className="grid sm:grid-cols-2 gap-5">
-                {[
-                  { slug: 'island-escape-java', title: t('works.m9_t'), category: t('works.m9_c'), desc: t('works.m9_d'), texture: 'ice.png', accent: 'hover:border-[#ff9ff3] hover:text-[#ff9ff3]' },
-                  { slug: 'spoiler-rpg', title: t('works.m10_t'), category: t('works.m10_c'), desc: t('works.m10_d'), texture: 'diamond_block.png', accent: 'hover:border-diamond hover:text-brand' }
-                ].map((work) => (
-                  <Link key={work.title} to={`/works/${work.slug}`} className={`hover-target group relative min-h-[18rem] overflow-hidden border border-obsidian/10 dark:border-line p-6 flex flex-col justify-end transition-colors duration-500 ${work.accent}`}>
-                    <div className="parallax-bg absolute inset-[-18%] w-[136%] h-[136%] opacity-30 dark:opacity-40 bg-repeat image-rendering-pixelated group-hover:scale-110 transition-transform duration-[1.5s] ease-out" style={{ backgroundImage: `url(${basePath}assets/textures/minecraft/${work.texture})`, backgroundSize: '112px' }}></div>
-                    <div className="relative z-10">
-                      <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-gray-600 dark:text-content-muted">{work.category}</p>
-                      <h4 className="mt-3 text-2xl md:text-3xl font-bold uppercase tracking-tighter leading-none">{work.title}</h4>
-                      <p className="mt-4 text-sm leading-relaxed text-gray-600 dark:text-content-muted">{work.desc}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            <div className="reveal-up flex flex-col md:flex-row md:items-end justify-between gap-8">
-              <div>
-                <div className="font-mono text-brand tracking-[0.2em] text-sm flex items-center gap-4">
-                  <span className="w-10 h-px bg-diamond"></span>
-                  {t('workPages.status.live')}
-                </div>
-                <h3 className="mt-5 text-4xl md:text-6xl font-black uppercase tracking-tighter text-obsidian dark:text-content">{t('works.category_maps')}</h3>
-              </div>
-              <Link to="/works?type=bedrock" className="hover-target w-fit flex items-center gap-3 border-b border-obsidian dark:border-white pb-2 text-xs uppercase tracking-[0.2em] font-mono text-obsidian dark:text-content hover:text-brand hover:border-diamond transition-colors">
-                {t('workPages.maps.catalog')} <ArrowUpRight className="w-4 h-4" />
-              </Link>
-            </div>
-
-            <div className="grid lg:grid-cols-3 gap-6">
-              {[bedrockEntries[6], bedrockEntries[7], bedrockEntries[0]].map((work) => {
-                return (
-                  <article key={work.link} className="reveal-up group relative min-h-[30rem] overflow-hidden bg-[#e0e0e0] dark:bg-canvas border border-obsidian/5 dark:border-line/70" onMouseEnter={() => setTooltipContent({ visible: true, title: work.title, category: work.category, desc: work.desc })} onMouseLeave={() => setTooltipContent({ visible: false, title: '', category: '', desc: '' })}>
-                    <Link to={`/works/${work.slug}`} className="hover-target absolute inset-0">
-                      <div className="parallax-bg absolute inset-[-18%] w-[136%] h-[136%]">
-                        <img src={`${basePath}${work.image}`} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out" />
-                      </div>
-                      <div className={`absolute inset-0 bg-gradient-to-t ${work.bg} via-transparent to-obsidian/45 opacity-80 group-hover:opacity-100 transition-opacity duration-700`}></div>
-                      <div className="absolute inset-x-0 bottom-0 p-6 text-white">
-                        <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/70">{work.category}</p>
-                        <h4 className="mt-3 text-3xl font-bold uppercase tracking-tighter leading-none">{work.title}</h4>
-                        <div className="mt-5 flex items-center gap-3 text-xs font-mono text-white/80"><Download className="w-4 h-4 text-brand" />{t('works.downloads_metric', { downloads: work.downloads })}</div>
-                      </div>
-                    </Link>
-                  </article>
-                );
-              })}
-            </div>
-
-            <p className="reveal-up text-xs leading-relaxed text-gray-600 dark:text-content-muted">
-              {t('project.historical_metrics')}
-            </p>
-
-            <div className="reveal-up flex flex-wrap gap-4 pt-2">
-              <Link to="/works?type=bedrock" className="hover-target inline-flex items-center gap-3 border border-obsidian dark:border-white px-5 py-4 font-mono text-xs uppercase tracking-[0.2em] hover:text-brand hover:border-diamond transition-colors">{t('nav.nav_maps')} <ArrowUpRight className="w-4 h-4" /></Link>
-              <Link to="/works?type=tools" className="hover-target inline-flex items-center gap-3 border border-obsidian/20 dark:border-line px-5 py-4 font-mono text-xs uppercase tracking-[0.2em] text-gray-600 dark:text-content-muted hover:text-[#007d7e] dark:hover:text-brand hover:border-diamond transition-colors">{t('nav.nav_tools')} <ArrowUpRight className="w-4 h-4" /></Link>
-              <Link to="/works?type=mods" className="hover-target inline-flex items-center gap-3 border border-obsidian/20 dark:border-line px-5 py-4 font-mono text-xs uppercase tracking-[0.2em] text-gray-600 dark:text-content-muted hover:text-[#007d7e] dark:hover:text-brand hover:border-diamond transition-colors">{t('nav.nav_mods')} <ArrowUpRight className="w-4 h-4" /></Link>
-            </div>
-
-            <div className="pt-16 md:pt-24 border-t border-obsidian/10 dark:border-line">
-              <div className="reveal-up flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10">
-                <div>
-                  <h3 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-obsidian dark:text-content">{t('home.tools_title')}</h3>
-                </div>
-                <Link to="/works?type=tools" className="hover-target w-fit flex items-center gap-3 border-b border-obsidian dark:border-white pb-2 text-xs uppercase tracking-[0.2em] font-mono text-obsidian dark:text-content hover:text-blue-500 hover:border-blue-500 transition-colors">
-                  {t('nav.nav_tools')} <ArrowUpRight className="w-4 h-4" />
-                </Link>
-              </div>
-              <div className="max-w-4xl">
-                <Link to="/works/minecraft-obj-cubizer" className="hover-target reveal-up group relative min-h-[22rem] overflow-hidden p-7 md:p-10 border border-obsidian/10 dark:border-line flex flex-col justify-end bg-[#e5e5e5] dark:bg-surface">
-                  <div className="parallax-bg absolute inset-[-15%] w-[130%] h-[130%] opacity-20 dark:opacity-30 group-hover:scale-110 transition-transform duration-[1.5s] ease-out flex items-center justify-center p-10">
-                    <img src={`${basePath}assets/images/works/minecraft-obj-cubizer/cover.svg`} alt="Minecraft OBJ Cubizer" className="w-full h-full max-w-md object-contain opacity-90" />
-                  </div>
-                  <div className="relative z-10">
-                    <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-gray-600 dark:text-content-muted">{t('workPages.tools.objCubizer.category')} · {t('catalogue.live')}</p>
-                    <h4 className="mt-3 text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none text-obsidian dark:text-content group-hover:text-brand transition-colors">Minecraft OBJ Cubizer</h4>
-                    <p className="mt-5 max-w-xl text-sm md:text-base leading-relaxed text-gray-600 dark:text-content-muted">{t('home.tools_desc')}</p>
-                  </div>
-                </Link>
-              </div>
-            </div>
-
-            <div className="pt-16 md:pt-24 border-t border-obsidian/10 dark:border-line">
-              <div className="reveal-up flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10">
-                <div>
-                  <h3 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-obsidian dark:text-content">{t('home.mods_title')}</h3>
-                </div>
-                <Link to="/works?type=mods" className="hover-target w-fit flex items-center gap-3 border-b border-obsidian dark:border-white pb-2 text-xs uppercase tracking-[0.2em] font-mono text-obsidian dark:text-content hover:text-emerald-500 hover:border-emerald-500 transition-colors">
-                  {t('nav.nav_mods')} <ArrowUpRight className="w-4 h-4" />
-                </Link>
-              </div>
-              <Link to="/works/bingo-but-dont-do-it" className="hover-target reveal-up group relative block min-h-[18rem] overflow-hidden p-7 md:p-10 border border-obsidian/10 dark:border-line bg-[#07120a]">
-                <img src={`${basePath}assets/images/works/bingo-but-dont-do-it/cover.png`} alt={t('home.mods_featured')} className="parallax-bg absolute inset-[-10%] w-[120%] h-[120%] object-contain p-8 md:p-12 opacity-55 group-hover:opacity-80 group-hover:scale-105 transition-all duration-[1.2s] ease-out" />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#07120a] via-[#07120a]/55 to-transparent"></div>
-                <div className="relative z-10 max-w-xl pt-24">
-                  <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-300">{siteMeta.bingoCategory} · {t('workPages.status.live')}</p>
-                  <h4 className="mt-3 text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none text-white">{t('home.mods_featured')}</h4>
-                  <p className="mt-5 text-sm md:text-base leading-relaxed text-white/70">{t('home.mods_desc')}</p>
-                </div>
-              </Link>
-            </div>
-          </div>
+          <HomeFeaturedWorks
+            onPreview={(title, category, desc) => setTooltipContent({ visible: true, title, category, desc })}
+            onPreviewEnd={() => setTooltipContent({ visible: false, title: '', category: '', desc: '' })}
+          />
 
         </div>
       </section>

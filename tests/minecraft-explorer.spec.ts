@@ -1,12 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 
 const repository = 'https://github.com/Ylong4004/Minecraft-Explorer';
 const fileName = 'MinecraftExplorer-1.0-win-x64.exe';
 const filePath = `plugins/minecraft-explorer/${fileName}`;
+const explorer = JSON.parse(readFileSync('public/works/catalogue.json', 'utf8')).projects.find((project: { slug: string }) => project.slug === 'minecraft-explorer');
 
 test('Explorer is discoverable in tools and downloads exactly the published EXE', async ({ page }) => {
+  // Serve the actual local release bytes behind the R2 URL for offline E2E.
+  await page.route(explorer.downloadUrl, route => route.fulfill({ path: `public/${filePath}`, contentType: 'application/octet-stream', headers: { 'Content-Disposition': `attachment; filename="${fileName}"` } }));
   await page.addInitScript(() => {
     sessionStorage.setItem('fimel_intro_seen', '1');
     localStorage.setItem('fimel_user_lang', 'zh');
@@ -19,7 +23,7 @@ test('Explorer is discoverable in tools and downloads exactly the published EXE'
   await expect(page.getByRole('link', { name: 'GitHub 仓库', exact: true })).toHaveAttribute('href', repository);
   await expect(page.locator('.project-markdown')).toContainText('添加 Minecraft 根目录');
   const link = page.getByRole('link', { name: '下载', exact: true });
-  await expect(link).toHaveAttribute('href', `/${filePath}`);
+  await expect(link).toHaveAttribute('href', explorer.downloadUrl);
   const downloads: string[] = [];
   page.on('download', download => downloads.push(download.suggestedFilename()));
   const started = page.waitForEvent('download');

@@ -15,6 +15,7 @@ Fimel/
 ├─ public/                      原样复制到 dist 的运行时静态资源
 │  ├─ assets/
 │  │  ├─ brand/                 Fimel 标识
+│  │  ├─ fonts/                各字体独立目录，含本地子集及许可证
 │  │  ├─ images/
 │  │  │  ├─ works/<slug>/       作品封面、后续截图等展示图
 │  │  │  ├─ team/               成员 Minecraft 头像
@@ -26,8 +27,8 @@ Fimel/
 │  │  ├─ catalogue.json        唯一的运行时作品目录
 │  │  ├─ catalogue.schema.json 目录字段与类型约束
 │  │  └─ <slug>/              概述、更新日志、版本 Markdown
-│  ├─ mods/                    保留已公开的模组备用下载地址
-│  ├─ plugins/                 保留插件发行文件及相关公开地址
+│  ├─ mods/                    既有 JAR 原件，旧地址兼容；新文件上传 R2
+│  ├─ plugins/                 既有发行原件、Blockbench 元数据及旧地址兼容
 │  └─ robots.txt               站点爬虫规则
 ├─ content-sources/netease/     内容来源 JSON 快照，不作为静态资源部署
 ├─ scripts/                    内容校验、下载分片与冒烟检查
@@ -42,7 +43,8 @@ Fimel/
 
 ## 图片、音效和图标
 
-- 工作室标识：`public/assets/brand/fimel-logo.png`。
+- 工作室标识：`public/assets/brand/fimel-logo.svg` 为从现有图形轮廓描摹的导航矢量版；`fimel-logo.png` 保留原图，用于备用显示、favicon 和分享预览。
+- 导航字标字体：`public/assets/fonts/minecraft-seven/minecraft-seven-latin.woff`，仅含可打印 ASCII；同目录保留来源说明及 `OFL.txt`，不使用外部字体 CDN。旧 `monocraft/` 保留但不再加载。
 - 作品封面：`public/assets/images/works/<slug>/cover.<扩展名>`；商店展示图放在同一作品目录，按原顺序使用 `gallery-01.webp`、`gallery-02.webp` 等文件名，不新增散放的截图目录。
 - 团队头像：`public/assets/images/team/<原文件名>.png`，保留原始像素图，不用其他成员的图作占位。
 - 游戏界面图：`public/assets/images/ui/minecraft/`；3D 材质则放在 `public/assets/textures/minecraft/`，两者不要混放。
@@ -79,9 +81,11 @@ Fimel Card 使用 `slug: fimel-card`、`type: datapacks`、`status: development`
 
 ## 稳定分发路径的例外
 
-`public/mods/bingo-but-dont-do-it-1.21.11-v1.0.jar` 和 `public/plugins/` 的 ZIP、插件包及发行附带文件继续使用原公开地址。这是兼容外部下载、Blockbench 入口和已有备用下载机制的有意例外，不能只为目录看起来一致就移动。
+`public/mods/bingo-but-dont-do-it-1.21.11-v1.0.jar` 和 `public/plugins/` 中的三个正式发行原件已上传 R2，网站优先使用目录的 `downloadUrl`。本次原件暂不删除，旧本地字段保留作历史地址兼容；新文件放在仓库外并上传 R2，不继续扩大 `public/` 的发行文件体积。
 
-Bingo 备用 JAR 同时关联目录 JSON、`scripts/prepare-bingo-download.mjs` 和 `src/worker.ts` 的静态资源分片／流式返回逻辑；这次资源整理不更换其下载地址，也不修改该业务流程。插件自身发行目录中的 README、安装说明等是包内容，网站详情正文则放在 `public/works/minecraft-obj-cubizer/`。其中 `description.zh.md` 原样复制自插件的 `about.md`，原文件仍保留在发行目录；网站和插件包的说明分属不同维护入口，不要为统一路径而删除插件文件。
+`scripts/prepare-bingo-download.mjs` 是保留原构建命令的兼容入口，实际调用 `prepare-r2-downloads.mjs` 生成 `dist/downloads/r2-redirects.json` 及 `.assetsignore`，不再生成 JAR 分片。Cloudflare 的三个旧下载路径由现有 Worker 跳转 R2；GitHub Pages 仍保留旧静态文件，新页面在两种部署中都下载 R2 文件。Supabase 业务不变。详细流程及哈希见 [R2 上传说明](r2-uploads.md)。
+
+插件自身目录中的 README、安装说明与 JavaScript 是发行配套内容，不重复当作独立作品上传，也不更改 Blockbench 元数据入口。网站详情正文仍在 `public/works/minecraft-obj-cubizer/`，不要因上传本体删除源码或说明文件。
 
 ## 部署路径与检查
 

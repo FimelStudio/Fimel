@@ -15,6 +15,11 @@ test-results/
 playwright-report/
 *.local
 
+# Rclone credentials/config must stay outside the repository.
+**/rclone.conf
+**/*rclone*.conf
+**/fimel-rclone.txt
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

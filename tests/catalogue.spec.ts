@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import type { Project } from '../src/content/projects';
 
@@ -6,6 +7,14 @@ const catalogueProjects: Project[] = JSON.parse(readFileSync(new URL('../public/
 const projectCount = catalogueProjects.length;
 const bedrockCount = catalogueProjects.filter(project => project.type === 'bedrock').length;
 const modCount = catalogueProjects.filter(project => project.type === 'mods').length;
+
+async function useLegacyGitHubCatalogue(page: Page) {
+  // Keep the old latest-release/fallback behavior covered for unmigrated data.
+  await page.route('**/works/catalogue.json', route => route.fulfill({ json: {
+    schemaVersion: 1,
+    projects: catalogueProjects.map(project => project.slug === 'bingo-but-dont-do-it' ? { ...project, downloadUrl: undefined } : project),
+  } }));
+}
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -54,6 +63,7 @@ test('all NetEase maps have original description, creators and correct outbound 
 });
 
 test('latest-release failure automatically downloads the local JAR', async ({ page }) => {
+  await useLegacyGitHubCatalogue(page);
   await page.route('https://api.github.com/repos/FimelStudio/bingo-but-dont-do-it/releases/latest', (route) => route.fulfill({ status: 403, body: '{}' }));
   await page.route('**/mods/bingo-but-dont-do-it-1.21.11-v1.0.jar', (route) => route.fulfill({
     status: 200, contentType: 'application/java-archive', body: Buffer.from('fallback-download-test'),
@@ -67,6 +77,7 @@ test('latest-release failure automatically downloads the local JAR', async ({ pa
 });
 
 test('latest release downloads the published JAR rather than source archives', async ({ page }) => {
+  await useLegacyGitHubCatalogue(page);
   const jarUrl = 'https://github.com/FimelStudio/bingo-but-dont-do-it/releases/download/test/latest.jar';
   await page.route('https://api.github.com/repos/FimelStudio/bingo-but-dont-do-it/releases/latest', (route) => route.fulfill({
     json: { assets: [

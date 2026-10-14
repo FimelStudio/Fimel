@@ -1,5 +1,9 @@
 export const contentMessages = {
   zh: {
+    homeFeatured: {
+      maps: '精选地图', released: '模组与创作工具', development: '制作中的作品',
+      view_all: '查看全部作品', explore: '了解作品',
+    },
     catalogue: {
       title: '作品', intro: '浏览地图、数据包、模组和工具，按类型或关键词查找。',
       search: '搜索作品', search_placeholder: '搜索名称、玩法或标签…', all: '全部作品',
@@ -37,6 +41,10 @@ export const contentMessages = {
     },
   },
   en: {
+    homeFeatured: {
+      maps: 'Selected maps', released: 'Mods & creator tools', development: 'In development',
+      view_all: 'View all works', explore: 'Explore project',
+    },
     catalogue: {
       title: 'Works', intro: 'Browse maps, data packs, mods and tools. Filter by type or search with keywords.',
       search: 'Search works', search_placeholder: 'Search names, gameplay or tags…', all: 'All works',
@@ -74,6 +82,10 @@ export const contentMessages = {
     },
   },
   ja: {
+    homeFeatured: {
+      maps: 'ピックアップマップ', released: 'Mod と制作ツール', development: '制作中の作品',
+      view_all: 'すべての作品を見る', explore: '作品を見る',
+    },
     catalogue: {
       title: '作品', intro: 'マップ、データパック、MOD、ツールを一覧で確認。種類やキーワードで探せます。',
       search: '作品を検索', search_placeholder: '名前、遊び方、タグで検索…', all: 'すべての作品',

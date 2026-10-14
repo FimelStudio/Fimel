@@ -185,6 +185,11 @@
         "download": {
           "type": "string"
         },
+        "downloadUrl": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://download\\.studiofimel\\.com/works/(bedrock|java|datapacks|tools|mods)/"
+        },
         "downloadSlug": {
           "type": "string"
         },
