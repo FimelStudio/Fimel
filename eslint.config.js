@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist', '**/dist', '**/.wrangler', '**/.artifacts', 'test-results', 'playwright-report', 'admin/**/worker-configuration.d.ts']),
+  globalIgnores(['dist', '**/dist', '**/.wrangler', '**/.artifacts', 'test-results', 'playwright-report', 'admin/**/worker-configuration.d.ts', 'admin/shared/generated/library-validator.js']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

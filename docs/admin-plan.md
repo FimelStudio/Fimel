@@ -27,6 +27,8 @@
 
 ## API 约定
 
+2026-10-14 追加：首批独立 Admin 已上线，正式内容迁移与官网切换仍待授权。继续本地开发管理员操作日志和 Cloudflare 域名统计；日志写私有 R2，记录验证过的操作者标识和字段差异。统计只用服务端限定查询读取 Cloudflare，新增只读凭据需单独确认。当前用户要求窗口自适应和右上角用户名，已纳入生产 CSP 浏览器验收；发布现有 Worker 新代码前集中确认。
+
 `GET /api/session`；`GET/PUT /api/library`（If-Match）；`POST /api/publish/:id`；`POST /api/unpublish/:id`（If-Match 与 X-Public-ETag）；`GET /api/history`；`POST /api/restore/:snapshot`；`POST /api/uploads`；`GET/DELETE /api/uploads/:id`；`PUT /api/uploads/:id/parts/:number`；`POST /api/uploads/:id/complete`；`GET /api/media/:id`。所有管理路由和静态文件先鉴权。错误包括 401/403、404、405、409、413、422、428，客户端明确显示。
 
 生产白名单、Access AUD/issuer 用 Secret；无默认管理员。静态资源内部路由可能不传递 ctx.access，因此验证 Access JWT（签名/issuer/aud/有效期），不信任 email Header。ctx.access 可用时验证 aud 与身份。workers.dev/preview 默认禁用，仍要求 Worker 级 Access。

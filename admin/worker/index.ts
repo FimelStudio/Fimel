@@ -1,23 +1,27 @@
 import type { Library, PublicManifest, Upload } from '../shared/model';
+import { ADMIN_CSP } from '../shared/security';
 import { validateLibrary } from '../shared/validation';
 import { authenticate, protectWrite } from './auth';
 import type { AccessContext, ServerSecrets } from './auth';
 import { ApiError, expectMatch, json, putJson, readJson } from './http';
-import { audit, backup, libraryState, LIBRARY_KEY, listAll, publicState } from './storage';
+import { backup, libraryState, LIBRARY_KEY, listAll, publicState } from './storage';
 import { commitPublication, publishedWork } from './publication';
 import { uploadRoute } from './uploads';
-export type AdminEnv = Env & ServerSecrets;
+import { runAudited, auditFeed, actorKey } from './audit';
+import { metrics } from './analytics';
+import type { AnalyticsSecrets } from './analytics';
+export type AdminEnv = Env & ServerSecrets & AnalyticsSecrets;
 export async function handle(request: Request, env: AdminEnv, ctx: AccessContext): Promise<Response> {
   const requestId = crypto.randomUUID();
   let response: Response;
   try {
-    await authenticate(request, env, ctx);
+    const email = await authenticate(request, env, ctx);
     const url = new URL(request.url);
     protectWrite(request, env.ADMIN_ORIGIN);
     if (!url.pathname.startsWith('/api/')) {
       if (!['GET', 'HEAD'].includes(request.method)) throw new ApiError(405, '不支持此方法。');
       response = await env.ASSETS.fetch(request);
-    } else response = await route(request, env);
+    } else response = await runAudited(request, env.PRIVATE, email, () => route(request, env, email));
   } catch (error) {
     if (!(error instanceof ApiError)) console.error(JSON.stringify({ operation: 'request-failed', requestId }));
     response = json({ error: error instanceof ApiError ? error.message : '存储服务暂时不可用，操作未确认成功。', requestId }, error instanceof ApiError ? error.status : 503);
@@ -27,13 +31,15 @@ export async function handle(request: Request, env: AdminEnv, ctx: AccessContext
   secured.headers.set('Referrer-Policy', 'same-origin');
   secured.headers.set('X-Frame-Options', 'DENY');
   secured.headers.set('Cache-Control', 'no-store');
-  secured.headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
+  secured.headers.set('Content-Security-Policy', ADMIN_CSP);
   return secured;
 }
-async function route(request: Request, env: AdminEnv): Promise<Response> {
+async function route(request: Request, env: AdminEnv, email: string): Promise<Response> {
   const path = new URL(request.url).pathname.split('/').filter(Boolean).slice(1);
   const method = request.method;
-  if (path[0] === 'session' && method === 'GET') return json({ authenticated: true });
+  if (path[0] === 'audit' && path.length === 1 && method === 'GET') return json(await auditFeed(request,env.PRIVATE,env,email));
+  if (path[0] === 'analytics' && path.length === 1 && method === 'GET') return json(await metrics(request,env));
+  if (path[0] === 'session' && path.length === 1 && method === 'GET') return json({ authenticated: true, username: email.split('@')[0], actorId: await actorKey(email) });
   if (path[0] === 'uploads') return uploadRoute(request, env.PRIVATE, path.slice(1));
   if (path[0] === 'media' && path.length === 2 && method === 'GET') {
     if (!/^[a-zA-Z0-9-]{1,80}$/.test(path[1])) throw new ApiError(404, '图片不存在。');
@@ -59,7 +65,6 @@ async function route(request: Request, env: AdminEnv): Promise<Response> {
         if (old.project.slug !== current.project.slug || old.project.type !== current.project.type) throw new ApiError(422, '已有作品 slug 和分类保持稳定，避免历史地址失效。');
       }
       await backup(env.PRIVATE, state.value, 'library');
-      await audit(env.PRIVATE, 'save-library');
       const result = await putJson(env.PRIVATE, LIBRARY_KEY, value, state.etag);
       return json({ saved: true }, 200, result.httpEtag);
     }
@@ -85,7 +90,6 @@ async function route(request: Request, env: AdminEnv): Promise<Response> {
       after.projects.push(prepared.project); after.releases[slug] = prepared.releases;
       after.projects.sort((a,b) => (state.value.works.find(w => w.project.slug === a.slug)?.order ?? 0) - (state.value.works.find(w => w.project.slug === b.slug)?.order ?? 0));
     } else delete after.releases[slug];
-    await audit(env.PRIVATE, path[0], work.id);
     const latestSource=await env.PRIVATE.head(LIBRARY_KEY);
     if(latestSource?.httpEtag!==state.etag)throw new ApiError(409,'发布期间草稿已被修改，请重新加载后重试。');
     const result = await commitPublication(env.PRIVATE, env.PUBLIC, published.value, after, published.etag);
@@ -102,7 +106,7 @@ async function route(request: Request, env: AdminEnv): Promise<Response> {
     if (path[1] === 'library') {
       const state = await libraryState(env.PRIVATE); expectMatch(request, state.etag);
       const errors = validateLibrary(snapshot.value); if (errors.length) throw new ApiError(422, errors.join('\n'));
-      await backup(env.PRIVATE, state.value, 'library'); await audit(env.PRIVATE, 'restore-library');
+      await backup(env.PRIVATE, state.value, 'library');
       const result = await putJson(env.PRIVATE, LIBRARY_KEY, snapshot.value, state.etag); return json({ restored: true }, 200, result.httpEtag);
     }
     const published = await publicState(env.PUBLIC); expectMatch(request, published.etag, 'x-public-etag');
@@ -113,7 +117,7 @@ async function route(request: Request, env: AdminEnv): Promise<Response> {
         if (url.startsWith('https://download.studiofimel.com/') && !await env.PUBLIC.head(new URL(url).pathname.slice(1))) throw new ApiError(422, '恢复引用的正文缺失。');
       }
     }
-    await audit(env.PRIVATE, 'restore-public'); const result = await commitPublication(env.PRIVATE, env.PUBLIC, published.value, value, published.etag);
+    const result = await commitPublication(env.PRIVATE, env.PUBLIC, published.value, value, published.etag);
     return json({ restored: true }, 200, result.httpEtag);
   }
   throw new ApiError(404, '接口不存在。');

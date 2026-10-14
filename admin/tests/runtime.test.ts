@@ -26,6 +26,14 @@ test('new draft is private; publish → public manifest → unpublish → republ
 });
 test('private snapshots and restore create backup before update',async()=>{const history=await req('history');const items=await history.json() as {snapshots:{key:string}[]};const snapshot=items.snapshots.find(x=>x.key.startsWith('backups/library/'))!;assert.ok(snapshot);const s=await state();const [ ,kind,id ]=snapshot.key.split('/');const r=await req(`restore/${kind}/${id.replace('.json','')}`,'POST',{}, {'If-Match':s.etag});assert.equal(r.status,200,await r.text());});
 test('upload validates limits, filename, extension and association',async()=>{const w=await add('upload-tests');for(const input of [{name:'a.svg',size:10,kind:'image'},{name:123,size:10,kind:'file'},{name:'a.png',displayName:'bad\u0000name.png',size:10,kind:'image'},{name:'../a.zip',size:10,kind:'file'},{name:'a.zip',size:MAX_FILE_SIZE+1,kind:'file'},{name:'a.zip',size:10,kind:'file'}]){assert.equal((await req('uploads','POST',{...input,workId:w.id})).status,422);}});
+
+test('scoped temporary cleanup preserves other sessions and every verified object',async()=>{
+  const w=await add('cleanup-scope');const bucket=await mf.getR2Bucket('PRIVATE');const uploads:Upload[]=[];
+  for(let n=0;n<3;n++){const r=await req('uploads','POST',{name:`scope-${n}.png`,size:10,kind:'image',workId:w.id});assert.equal(r.status,201);const{upload}=await r.json()as{upload:Upload};uploads.push(upload);await bucket.put(upload.key,'temporary');await bucket.put(`uploads/verified/${upload.id}/${upload.name}`,'verified');if(n<2)await bucket.put(`uploads/sessions/${upload.id}.json`,JSON.stringify({...upload,status:'complete'}));}
+  assert.equal((await req('uploads/cleanup','POST',{sessionIds:['../escape']})).status,422);
+  const cleaned=await req('uploads/cleanup','POST',{sessionIds:[uploads[0].id,uploads[2].id]});assert.equal(cleaned.status,200);assert.equal((await cleaned.json()as{cleaned:number}).cleaned,1);
+  assert.equal(await bucket.head(uploads[0].key),null);assert.ok(await bucket.head(uploads[1].key));assert.ok(await bucket.head(uploads[2].key));for(const u of uploads)assert.ok(await bucket.head(`uploads/verified/${u.id}/${u.name}`));
+});
 async function upload(size:number, options:{wrongHash?:boolean;cancel?:boolean}={}) {
   const w=await add(`upload-${crypto.randomUUID()}`);w.project.status='released';w.versions=[{id:'v1',label:'1.0',date:'2026-10-14',gameVersions:['1.21'],status:'released',changelog:'测试',files:[]}];
   const s=await state();const lib=s.data.library;lib.works=lib.works.map(x=>x.id===w.id?w:x);assert.equal((await req('library','PUT',lib,{'If-Match':s.etag})).status,200);

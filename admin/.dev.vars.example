@@ -2,3 +2,6 @@
 ACCESS_AUD=
 ACCESS_ISSUER=
 ADMIN_EMAILS=
+# Optional read-only analytics connection; never expose as VITE_ variables.
+CF_ANALYTICS_TOKEN=
+CF_ANALYTICS_ZONE=

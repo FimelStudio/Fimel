@@ -1,8 +1,18 @@
-# Admin 生产变更审阅清单（尚未执行）
+# Admin 生产变更审阅清单
 
 2026-10-14。用户已确认旧 R2 Token 撤销并更换新凭据，也已指定两名管理员和邮箱一次性验证码登录。实际邮箱只保留在会话及未来服务端 Secret，不写 Git。本文件不是生产授权。
 
-## 实际只读盘点
+## 当前状态（2026-10-14 更新）
+
+用户确认第一批后，已创建 `fimel-private`、独立 Worker `fimel-admin`、域名 `admin.studiofimel.com` 和 Worker 级 Access 邮箱验证码保护，并设置服务端身份 Secrets。私有桶没有公开域名，r2.dev 未启用；Worker 的 workers.dev 和预览地址禁用。原官网 Worker、正式下载文件与公开 manifest 未修改，没有 Git 推送或 D1 激活。
+
+真实邮箱登录及作品库显示已由用户确认，私有验收草稿保存成功。线上黑屏已通过静态 AJV 校验器修复，保存冲突已通过 JSON 强版本号修复。当前线上版本为 `0fb44988-0918-490a-972e-64bc9fac5bb0`，可作为下一次代码发布的回滚版本。真实 100 MiB / 1 GiB 上传验收尚未完成，不能以本地上传测试代替。
+
+本地新增：窗口自适应、右上角当前用户名、管理员操作日志、访问与下载统计页面。用户名从已验证身份提取邮箱前缀；日志用私有存储记录操作者标识和字段变化。统计连接需要单独确认服务端 Analytics 只读凭据，尚未创建或设置该凭据。以上新修改尚未部署。
+
+下一次拟发布对象仅为现有 `fimel-admin` 的代码与静态资源：包含窗口自适应、用户名和此前要求的管理员日志。统计页在未连接时明确提示，不能显示模拟访问量；不改 Access、DNS、R2 绑定、官网、正式内容或现有身份 Secrets。发布前仍需用户集中确认。
+
+## 第一批执行前的只读盘点（历史记录）
 
 - `fimel-downloads` 存在，`download.studiofimel.com` 的 SSL/ownership active，r2.dev 未启用。桶目前没有 CORS 配置。
 - `fimel-private` 不存在；无 Admin Worker、Admin DNS 或 Access 应用。Zero Trust 已有组织与 Cloudflare 身份提供商。

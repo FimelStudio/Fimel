@@ -16,10 +16,15 @@ export async function uploadRoute(request: Request, bucket: R2Bucket, segments: 
     return json({ uploads: uploads.sort((a,b) => b.expiresAt.localeCompare(a.expiresAt)).slice(0,100) });
   }
   if (id === 'cleanup' && segments.length === 1 && request.method === 'POST') {
+    const input = await readJson(request, 8192) as { sessionIds?: unknown };
+    if (!input || typeof input !== 'object' || Array.isArray(input) || Object.keys(input).some(key => key !== 'sessionIds') ||
+      input.sessionIds !== undefined && (!Array.isArray(input.sessionIds) || input.sessionIds.length > 100 || input.sessionIds.some(value => typeof value !== 'string' || !/^[a-zA-Z0-9-]{1,80}$/.test(value)))) throw new ApiError(422, '清理会话范围不合法。');
+    const selected = input.sessionIds === undefined ? null : new Set(input.sessionIds as string[]);
     let cleaned = 0;
     for (const item of await listAll(bucket, 'uploads/sessions/')) {
       const object = await bucket.get(item.key); if (!object) continue;
       const s = await object.json<Upload>();
+      if (selected && !selected.has(s.id)) continue;
       if (s.status === 'complete' || s.status === 'cancelled' || Date.parse(s.expiresAt) < Date.now()) {
         if (s.status !== 'complete') {
           try { await bucket.resumeMultipartUpload(s.key,s.uploadId).abort(); } catch { /* R2 auto-aborts expired multipart uploads. */ }

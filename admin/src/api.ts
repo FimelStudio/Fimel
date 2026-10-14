@@ -9,5 +9,6 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<{
   let data: unknown;
   try { data = await response.json(); } catch { throw new RequestError(response.status, '管理会话可能已失效，请重新登录。'); }
   if (!response.ok) throw new RequestError(response.status, data && typeof data === 'object' && 'error' in data && typeof data.error === 'string' ? data.error : '请求失败。');
-  return { data: data as T, etag: response.headers.get('etag') ?? '' };
+  const revision = data && typeof data === 'object' && 'etag' in data && typeof data.etag === 'string' ? data.etag : response.headers.get('etag')?.replace(/^W\//, '') ?? '';
+  return { data: data as T, etag: revision };
 }

@@ -3,9 +3,11 @@ export class ApiError extends Error {
   constructor(status: number, message: string) { super(message); this.status = status; }
 }
 export function json(value: unknown, status = 200, etag?: string): Response {
-  return Response.json(value, { status, headers: { 'Cache-Control': 'no-store', ...(etag ? { ETag: etag } : {}) } });
+  // CDN compression may weaken/remove HTTP ETag. Keep the opaque storage revision in JSON.
+  const payload = etag && value && typeof value === 'object' && !Array.isArray(value) ? { ...value, etag } : value;
+  return Response.json(payload, { status, headers: { 'Cache-Control': 'no-store', ...(etag ? { ETag: etag } : {}) } });
 }
-export async function readJson(request: Request, limit = 4_000_000): Promise<unknown> {
+export async function readJson(request: Pick<Request, 'headers' | 'body'>, limit = 4_000_000): Promise<unknown> {
   if (!request.headers.get('content-type')?.startsWith('application/json')) throw new ApiError(415, '需要 JSON 请求。');
   const reader = request.body?.getReader();
   if (!reader) throw new ApiError(422, '缺少请求正文。');

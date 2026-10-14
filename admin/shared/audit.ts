@@ -1,0 +1,3 @@
+export type AuditChange = { workId:string; slug:string; title:string; action:'created'|'updated'|'removed'; fields:{name:string;before:string;after:string}[] };
+export type AuditEvent = { schemaVersion:2; id:string; actorId:string; operation:string; time:string; finishedAt?:string; status:'prepared'|'success'|'failed'; httpStatus?:number; workId?:string; uploadId?:string; changes:AuditChange[]; beforeEtag?:string; afterEtag?:string };
+export type AuditFeed = { events:(AuditEvent|{operation:string;time:string;status:'prepared';workId?:string})[]; actors:Record<string,string>; currentActorId:string; truncated:boolean };
