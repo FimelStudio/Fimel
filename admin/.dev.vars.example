@@ -1,0 +1,4 @@
+# Only server-side values. Set production values with Wrangler Secrets, never VITE_.
+ACCESS_AUD=
+ACCESS_ISSUER=
+ADMIN_EMAILS=

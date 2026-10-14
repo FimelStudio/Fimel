@@ -7,6 +7,14 @@ import { assetUrl } from '../content/projects';
 import { ProjectGallery, type ProjectGalleryImage } from './ProjectGallery';
 
 const markdownCache = new Map<string, string>();
+function resolveContentUrl(value: string | undefined, base: URL, image = false): string | undefined {
+  if (!value) return;
+  try {
+    const url = new URL(value, base);
+    if (!['https:', 'http:', ...(image ? [] : ['mailto:'])].includes(url.protocol)) return;
+    return url.href;
+  } catch { return; }
+}
 
 export function ProjectMarkdown({ path }: { path: string }) {
   const { t } = useTranslation();
@@ -55,7 +63,8 @@ export function ProjectMarkdown({ path }: { path: string }) {
         for (const child of node!.children) {
           if (child.type !== 'element' || child.tagName !== 'img' || typeof child.properties.src !== 'string' || !child.properties.src) continue;
           try {
-            images.push({ src: new URL(child.properties.src, fileUrl).href, alt: String(child.properties.alt ?? '') });
+            const src = resolveContentUrl(child.properties.src, fileUrl, true);
+            if (src) images.push({ src, alt: String(child.properties.alt ?? '') });
           } catch {
             // An invalid image URL must not prevent the project text loading.
           }
@@ -66,11 +75,11 @@ export function ProjectMarkdown({ path }: { path: string }) {
     },
     a: ({ href, children }) => {
       if (href?.startsWith('#/')) return <Link to={href.slice(1)}>{children}</Link>;
-      const resolved = href ? new URL(href, fileUrl).href : undefined;
+      const resolved = resolveContentUrl(href, fileUrl);
       const external = resolved ? new URL(resolved).origin !== window.location.origin : false;
       return <a href={resolved} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined} download={resolved && /\.(jar|zip)(?:\?|$)/i.test(resolved) && !external ? true : undefined}>{children}</a>;
     },
-    img: ({ src, alt }) => <img src={typeof src === 'string' ? new URL(src, fileUrl).href : undefined} alt={alt ?? ''} loading="lazy" decoding="async" />,
+    img: ({ src, alt }) => <img src={resolveContentUrl(typeof src === 'string' ? src : undefined, fileUrl, true)} alt={alt ?? ''} loading="lazy" decoding="async" />,
     table: ({ children }) => <div className="markdown-table-scroll"><table>{children}</table></div>,
   }}>{content}</Markdown></div>;
 }

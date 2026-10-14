@@ -122,10 +122,10 @@ function Detail({ project }: { project: Project }) {
 export function ProjectDetail() {
   const { slug } = useParams();
   const { t } = useTranslation();
-  const { status, projects, retry } = useProjectCatalogue();
+  const { status, projects, retry, fallback } = useProjectCatalogue();
   const project = projects.find((entry) => entry.slug === slug);
   if (status === 'idle' || status === 'loading') return <div role="status" className="pt-40 pb-24 px-6 min-h-[75dvh] max-w-[1320px] mx-auto text-gray-600 dark:text-content-muted">{t('catalogue.loading')}</div>;
   if (status === 'error') return <div role="alert" className="pt-40 pb-24 px-6 min-h-[75dvh]"><p>{t('catalogue.error')}</p><button type="button" onClick={() => void retry()} className="mt-4 min-h-11 border border-current px-4">{t('catalogue.retry')}</button></div>;
   if (!project) return <div className="pt-40 pb-24 px-6 min-h-[75dvh] max-w-[1320px] mx-auto text-obsidian dark:text-content"><h1 className="text-3xl font-bold">{t('project.not_found')}</h1><Link to="/works" className="inline-flex items-center gap-2 mt-5 min-h-11"><ArrowLeft size={16} />{t('project.back')}</Link></div>;
-  return <Detail key={project.slug} project={project} />;
+  return <>{fallback && <p role="status" className="px-6 pt-28 text-sm text-content-muted">{t('catalogue.fallback')}</p>}<Detail key={project.slug} project={project} /></>;
 }

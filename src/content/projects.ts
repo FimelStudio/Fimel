@@ -85,16 +85,21 @@ export function formatProjectDate(value: string | undefined, language: string, u
 }
 
 export function parseCatalogue(value: unknown): Project[] {
-  if (!value || typeof value !== 'object' || !('projects' in value) || !Array.isArray(value.projects)) {
+  if (!value || typeof value !== 'object' || !('schemaVersion' in value) || (value.schemaVersion !== 1 && value.schemaVersion !== 2) || !('projects' in value) || !Array.isArray(value.projects)) {
     throw new Error('Invalid work catalogue.');
   }
   const slugs = new Set<string>();
   for (const entry of value.projects) {
     if (!entry || typeof entry !== 'object' || typeof entry.slug !== 'string' ||
       !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(entry.slug) || slugs.has(entry.slug) ||
-      !PROJECT_TYPES.includes(entry.type) || !entry.title || typeof entry.image !== 'string' ||
+      !PROJECT_TYPES.includes(entry.type) || !validLocalizedText(entry.title) || !localizedText(entry.title, 'zh').trim() || typeof entry.image !== 'string' ||
+      (entry.summary !== undefined && !validLocalizedText(entry.summary)) ||
       !['released', 'development', 'planned'].includes(entry.status) ||
-      !Array.isArray(entry.creators) || !Array.isArray(entry.platform) || !entry.content || typeof entry.content !== 'object' ||
+      !Array.isArray(entry.creators) || entry.creators.some((creator: unknown) => !creator || typeof creator !== 'object' || !('name' in creator) || typeof creator.name !== 'string' || ('url' in creator && typeof creator.url !== 'string')) ||
+      !Array.isArray(entry.platform) || entry.platform.some((platform: unknown) => typeof platform !== 'string') ||
+      !entry.content || typeof entry.content !== 'object' || Array.isArray(entry.content) ||
+      Object.entries(entry.content).some(([tab, path]) => !PROJECT_TABS.includes(tab as ProjectTab) || !validLocalizedText(path) || !Object.values(typeof path === 'string' ? { path } : path).every(validContentPath)) ||
+      (entry.translations !== undefined && (!entry.translations || typeof entry.translations !== 'object' || Object.entries(entry.translations).some(([key, text]) => !['title', 'summary'].includes(key) || typeof text !== 'string'))) ||
       !Array.isArray(entry.tags) || entry.tags.length > 4 || new Set(entry.tags).size !== entry.tags.length ||
       (entry.downloadUrl !== undefined && (typeof entry.downloadUrl !== 'string' ||
         !entry.downloadUrl.startsWith(`https://download.studiofimel.com/works/${entry.type}/${entry.slug}/`))) ||
@@ -104,4 +109,14 @@ export function parseCatalogue(value: unknown): Project[] {
     slugs.add(entry.slug);
   }
   return value.projects as Project[];
+}
+
+function validLocalizedText(value: unknown): value is LocalizedText {
+  return typeof value === 'string' || !!value && typeof value === 'object' && !Array.isArray(value) &&
+    Object.entries(value).every(([locale, text]) => ['zh', 'en', 'ja'].includes(locale) && typeof text === 'string');
+}
+
+function validContentPath(value: string): boolean {
+  try { return ['https:', 'http:'].includes(new URL(value, 'https://studiofimel.com/').protocol); }
+  catch { return false; }
 }

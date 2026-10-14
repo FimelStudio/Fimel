@@ -108,6 +108,17 @@ test('a single Markdown image has no carousel controls or counter', async ({ pag
   await expect(page.locator('.project-markdown')).toContainText('单图之后的正文');
 });
 
+test('malformed Markdown URLs and executable links leave project text usable', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await mockDescription(page, '## 安全正文\n\n[无效地址](https://[broken)\n\n[危险地址](javascript:alert%281%29)\n\n文字 ![无效图片](https://[broken) 保持可读。\n\n<script>window.markdownExecuted=true</script>');
+  await page.goto('/#/works/fimel-card');
+  await expect(page.locator('.project-markdown')).toContainText('保持可读');
+  await expect(page.locator('.project-markdown a[href]')).toHaveCount(0);
+  expect(await page.evaluate(() => Object.hasOwn(window, 'markdownExecuted'))).toBe(false);
+  expect(errors).toEqual([]);
+});
+
 test('one failed gallery image leaves the description, repository and remaining slides usable', async ({ page }) => {
   await mockDescription(page, multiImageMarkdown);
   await page.route(`**/${pictures[0].path}`, route => route.fulfill({ status: 404, body: 'missing gallery frame' }));

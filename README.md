@@ -68,7 +68,20 @@ npm run lint
 npm run build
 ```
 
-构建会先运行 `npm run check:content`，依次执行内容与静态资源校验脚本，检查作品类型和 JSON Schema 一致性、分类标签、资源路径实际大小写及 Markdown 链接，再生成生产资源与 Bingo 本地备用下载分片。也可以单独运行该检查命令。浏览器回归测试运行 `npm run test:e2e`。
+构建会先运行 `npm run check:content`，检查作品类型、分类标签、资源路径实际大小写及 Markdown 链接，再生成生产资源与旧下载地址的 R2 跳转映射，不再生成 Bingo 分片。浏览器回归测试运行 `npm run test:e2e`。
+
+## 独立 Admin（本地实现，尚未部署）
+
+后台使用同一 React/Vite、字体、品牌和明暗主题，独立构建于 `admin/`。支持私有草稿、三语正文、多版本/多文件、封面截图、条件发布、下架归档、备份恢复和 16 MiB 分片上传（最大 1 GiB）。生产资源变更须先确认。
+
+先运行 `npm run admin:migration` 和 `npm run admin:build`，然后两个终端分别运行 `npm run admin:api` 与 `npm run admin:dev`，打开 `http://127.0.0.1:5174`。本地数据仅在模拟 R2 中，不连接生产桶。
+
+- [Admin 启动、操作、模型、API 与回滚](docs/admin-guide.md)
+- [现状核实与开发基线](docs/admin-plan.md)
+- [本地验证结果与待验收事项](docs/admin-verification.md)
+- [生产变更审阅清单](docs/admin-deployment-review.md)
+
+`VITE_CATALOGUE_URL` 与 `VITE_ANALYTICS_URL` 默认空。前者在批准 R2 内容迁移后启用，后者在批准 D1 统计迁移后启用；当前官网继续原有数据来源。Admin 不能用 GitHub Pages 运行服务端 API，公开网站的 GitHub Pages 工作流保持。
 
 ## 内容与目录维护
 

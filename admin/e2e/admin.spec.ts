@@ -1,0 +1,47 @@
+import { expect, test } from '@playwright/test';
+import { resolve } from 'node:path';
+import { mkdir } from 'node:fs/promises';
+import {readFile} from 'node:fs/promises';
+test('initial library loading blocks new/import/export until the real response arrives',async({page})=>{
+  let release!:()=>void;const gate=new Promise<void>(resolve=>{release=resolve;});
+  await page.route('**/api/library',async route=>{await gate;await route.continue();});
+  await page.goto('/');
+  await expect(page.getByRole('button',{name:'新建作品',exact:true})).toBeDisabled();
+  await expect(page.getByRole('button',{name:'导入',exact:true})).toBeDisabled();
+  await expect(page.getByRole('button',{name:'导出',exact:true})).toBeDisabled();
+  release();await expect(page.getByRole('button',{name:'新建作品',exact:true})).toBeEnabled();
+  await page.getByRole('button',{name:'新建作品',exact:true}).click();await page.getByLabel('作品名称',{exact:true}).fill('延迟加载后的新作品');
+  await expect(page.getByLabel('作品名称',{exact:true})).toHaveValue('延迟加载后的新作品');
+});
+test('browser create, localized edit, Markdown preview, real 100 MiB upload, publish and unpublish',async({page})=>{
+  await page.goto('/');await expect(page.getByRole('heading',{name:'作品库',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'新建作品'}).click();
+  const slug=`browser-map-${Date.now()}`;
+  await page.getByLabel('作品名称',{exact:true}).fill('浏览器测试地图');await page.getByLabel('稳定 slug').fill(slug);
+  await page.getByRole('button',{name:'English',exact:true}).click();await page.getByLabel('作品名称',{exact:true}).fill('Browser Test Map');await page.getByRole('button',{name:'中文',exact:true}).click();
+  await page.getByRole('button',{name:'保存草稿',exact:true}).first().click();await expect(page.getByText('草稿已保存到私有存储。')).toBeVisible();
+  await page.getByRole('button',{name:'正文与预览'}).click();await page.getByLabel('Markdown 正文',{exact:true}).fill('# 实时预览\n\n<script>window.fimelXss=true</script>\n\n[危险](javascript:alert(1))');
+  await expect(page.locator('.project-markdown').getByRole('heading',{name:'实时预览'})).toBeVisible();expect(await page.evaluate(()=>Object.hasOwn(window,'fimelXss'))).toBe(false);expect(await page.locator('.project-markdown a').getAttribute('href')).not.toContain('javascript:');
+  await page.getByRole('button',{name:'基本信息'}).click();await page.getByLabel('作品发行状态').selectOption('released');
+  await page.getByRole('button',{name:'发行版本',exact:true}).click();await page.getByRole('button',{name:'添加版本'}).click();await page.getByLabel('版本号',{exact:true}).fill('1.0');await page.getByRole('combobox',{name:'发行状态',exact:true}).selectOption('released');
+  await page.getByRole('button',{name:'保存草稿',exact:true}).first().click();await expect(page.getByText('草稿已保存到私有存储。')).toBeVisible();
+  await page.getByLabel('选择发行文件').setInputFiles(resolve('.artifacts/admin-fixtures/100-mib.zip'));
+  await expect(page.getByText('文件已验证并关联，请保存作品草稿。')).toBeVisible({timeout:150000});await expect(page.locator('.file-row')).toContainText('100.0 MiB');
+  await page.getByRole('button',{name:'保存草稿',exact:true}).first().click();await page.getByRole('button',{name:'发布预览'}).click();await expect(page.getByRole('dialog')).toBeVisible();await page.getByRole('button',{name:'确认发布'}).click();await expect(page.getByText('发布成功，公开 manifest 已更新。')).toBeVisible({timeout:60000});
+  await mkdir('.artifacts/admin-screenshots',{recursive:true});await page.screenshot({path:'.artifacts/admin-screenshots/editor-light.png',fullPage:true});
+  await page.getByRole('button',{name:'切换主题'}).click();await expect(page.locator('html')).toHaveClass(/dark/);await page.screenshot({path:'.artifacts/admin-screenshots/editor-dark.png',fullPage:true});
+  page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'下架',exact:true}).click();await expect(page.getByText('作品已下架，草稿与历史文件保留。')).toBeVisible();
+  await page.getByRole('button',{name:'返回',exact:true}).click();await page.getByLabel('搜索作品',{exact:true}).fill(slug);await expect(page.locator('.work-row')).toHaveCount(1);
+  await page.setViewportSize({width:390,height:844});await page.screenshot({path:'.artifacts/admin-screenshots/list-mobile.png',fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+test('two browser tabs show conflict and preserve unsaved edits',async({page,context})=>{
+  await page.goto('/');await expect(page.locator('.work-row').first()).toBeVisible();await page.locator('.work-row').first().click();const second=await context.newPage();await second.goto('/');await second.locator('.work-row').first().click();
+  await page.getByLabel('作品名称',{exact:true}).fill(`窗口 A 修改 ${Date.now()}`);await page.getByRole('button',{name:'保存草稿',exact:true}).first().click();await expect(page.getByText('草稿已保存到私有存储。')).toBeVisible();
+  await second.getByLabel('作品名称',{exact:true}).fill('窗口 B 未保存');await second.getByRole('button',{name:'保存草稿',exact:true}).first().click();await expect(second.getByRole('alert')).toContainText('其他窗口修改');await expect(second.getByLabel('作品名称',{exact:true})).toHaveValue('窗口 B 未保存');await second.close();
+});
+test('real Chinese-name image batch uploads retain both images and publish a chosen cover',async({page})=>{
+  await page.goto('/');await page.getByRole('button',{name:'新建作品'}).click();await page.getByLabel('作品名称',{exact:true}).fill('图片批量测试');await page.getByLabel('稳定 slug').fill(`image-test-${Date.now()}`);
+  await page.getByRole('button',{name:'正文与预览'}).click();await page.getByLabel('Markdown 正文',{exact:true}).fill('# 图片测试\n\n两张工作室图片。');await page.getByRole('button',{name:'保存草稿',exact:true}).first().click();await expect(page.getByText('草稿已保存到私有存储。')).toBeVisible();
+  await page.getByRole('button',{name:'封面与截图'}).click();const png=await readFile('public/assets/brand/fimel-logo.png');await page.getByLabel('选择图片').setInputFiles([{name:'海岛封面.png',mimeType:'image/png',buffer:png},{name:'場景二.png',mimeType:'image/png',buffer:png}]);await expect(page.locator('.gallery-grid>div')).toHaveCount(2,{timeout:30000});await expect(page.getByText('海岛封面.png',{exact:true})).toBeVisible();await expect(page.getByText('場景二.png',{exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'设为封面',exact:true}).click();await page.getByRole('button',{name:'前移',exact:true}).last().click();await page.getByRole('button',{name:'保存草稿',exact:true}).first().click();await page.getByRole('button',{name:'发布预览'}).click();await page.getByRole('button',{name:'确认发布'}).click();await expect(page.getByText('发布成功，公开 manifest 已更新。')).toBeVisible();await page.getByRole('button',{name:'封面与截图'}).click();await expect(page.locator('.gallery-grid img').first()).toBeVisible();
+});

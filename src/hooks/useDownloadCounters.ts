@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { isSupabaseConfigured, supabase } from '../lib/supabase';
+import { countsConfigured, readDownloadCounts, incrementDownloadCount } from '../lib/download-counts';
 
 export type DownloadCounts = Record<string, number>;
 
@@ -22,45 +22,36 @@ export function useDownloadCounters(slugs: readonly string[]) {
   );
   const trackedSlugSet = useMemo(() => new Set(trackedSlugs), [trackedSlugs]);
   const [counts, setCounts] = useState<DownloadCounts>(() => countsForSlugs(trackedSlugs));
-  const [loading, setLoading] = useState(isSupabaseConfigured && trackedSlugs.length > 0);
+  const [loading, setLoading] = useState(countsConfigured && trackedSlugs.length > 0);
   const visibleCounts = useMemo(() => countsForSlugs(trackedSlugs, counts), [counts, trackedSlugs]);
 
   useEffect(() => {
     let isMounted = true;
 
-    if (!isSupabaseConfigured || !supabase || trackedSlugs.length === 0) {
+    if (!countsConfigured || trackedSlugs.length === 0) {
       return () => {
         isMounted = false;
       };
     }
 
-    supabase
-      .from('work_downloads')
-      .select('slug, download_count')
-      .in('slug', trackedSlugs)
-      .then(({ data, error }) => {
+    readDownloadCounts(trackedSlugs)
+      .then((data) => {
         if (!isMounted) {
-          return;
-        }
-
-        if (error) {
-          console.warn('Unable to load work download counters:', error.message);
-          setLoading(false);
           return;
         }
 
         setCounts((previous) => {
           const next = countsForSlugs(trackedSlugs, previous);
 
-          data?.forEach((row) => {
-            const count = Number(row.download_count);
-            next[row.slug] = Number.isFinite(count) ? count : 0;
+          Object.entries(data).forEach(([slug, value]) => {
+            const count = Number(value);
+            next[slug] = Number.isFinite(count) ? count : 0;
           });
 
           return next;
         });
         setLoading(false);
-      });
+      }).catch(() => { if (isMounted) setLoading(false); });
 
     return () => {
       isMounted = false;
@@ -71,7 +62,7 @@ export function useDownloadCounters(slugs: readonly string[]) {
     async (slug: string) => {
       const normalizedSlug = normalizeSlug(slug);
 
-      if (!trackedSlugSet.has(normalizedSlug) || !isSupabaseConfigured || !supabase) {
+      if (!trackedSlugSet.has(normalizedSlug) || !countsConfigured) {
         return;
       }
 
@@ -80,12 +71,10 @@ export function useDownloadCounters(slugs: readonly string[]) {
         [normalizedSlug]: (previous[normalizedSlug] ?? 0) + 1,
       }));
 
-      const { data, error } = await supabase.rpc('increment_work_download', {
-        p_slug: normalizedSlug,
-      });
-
-      if (error) {
-        console.warn('Unable to record work download:', error.message);
+      let savedCount: number;
+      try { savedCount = await incrementDownloadCount(normalizedSlug); }
+      catch {
+        console.warn('Unable to record work download.');
         setCounts((previous) => ({
           ...previous,
           [normalizedSlug]: Math.max((previous[normalizedSlug] ?? 1) - 1, 0),
@@ -93,7 +82,6 @@ export function useDownloadCounters(slugs: readonly string[]) {
         return;
       }
 
-      const savedCount = Number(data);
       if (Number.isFinite(savedCount)) {
         setCounts((previous) => ({
           ...previous,
@@ -105,7 +93,7 @@ export function useDownloadCounters(slugs: readonly string[]) {
   );
 
   return {
-    configured: isSupabaseConfigured,
+    configured: countsConfigured,
     counts: visibleCounts,
     loading,
     recordDownload,

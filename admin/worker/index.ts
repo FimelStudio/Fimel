@@ -1,0 +1,121 @@
+import type { Library, PublicManifest, Upload } from '../shared/model';
+import { validateLibrary } from '../shared/validation';
+import { authenticate, protectWrite } from './auth';
+import type { AccessContext, ServerSecrets } from './auth';
+import { ApiError, expectMatch, json, putJson, readJson } from './http';
+import { audit, backup, libraryState, LIBRARY_KEY, listAll, publicState } from './storage';
+import { commitPublication, publishedWork } from './publication';
+import { uploadRoute } from './uploads';
+export type AdminEnv = Env & ServerSecrets;
+export async function handle(request: Request, env: AdminEnv, ctx: AccessContext): Promise<Response> {
+  const requestId = crypto.randomUUID();
+  let response: Response;
+  try {
+    await authenticate(request, env, ctx);
+    const url = new URL(request.url);
+    protectWrite(request, env.ADMIN_ORIGIN);
+    if (!url.pathname.startsWith('/api/')) {
+      if (!['GET', 'HEAD'].includes(request.method)) throw new ApiError(405, '不支持此方法。');
+      response = await env.ASSETS.fetch(request);
+    } else response = await route(request, env);
+  } catch (error) {
+    if (!(error instanceof ApiError)) console.error(JSON.stringify({ operation: 'request-failed', requestId }));
+    response = json({ error: error instanceof ApiError ? error.message : '存储服务暂时不可用，操作未确认成功。', requestId }, error instanceof ApiError ? error.status : 503);
+  }
+  const secured = new Response(response.body, response);
+  secured.headers.set('X-Content-Type-Options', 'nosniff');
+  secured.headers.set('Referrer-Policy', 'same-origin');
+  secured.headers.set('X-Frame-Options', 'DENY');
+  secured.headers.set('Cache-Control', 'no-store');
+  secured.headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
+  return secured;
+}
+async function route(request: Request, env: AdminEnv): Promise<Response> {
+  const path = new URL(request.url).pathname.split('/').filter(Boolean).slice(1);
+  const method = request.method;
+  if (path[0] === 'session' && method === 'GET') return json({ authenticated: true });
+  if (path[0] === 'uploads') return uploadRoute(request, env.PRIVATE, path.slice(1));
+  if (path[0] === 'media' && path.length === 2 && method === 'GET') {
+    if (!/^[a-zA-Z0-9-]{1,80}$/.test(path[1])) throw new ApiError(404, '图片不存在。');
+    const session = await env.PRIVATE.get(`uploads/sessions/${path[1]}.json`);
+    const upload = session ? await session.json<Upload>() : null;
+    if (!upload?.asset?.privateKey || upload.kind !== 'image') throw new ApiError(404, '图片不存在。');
+    const object = await env.PRIVATE.get(upload.asset.privateKey); if (!object) throw new ApiError(404, '图片不存在。');
+    return new Response(object.body, { headers: { 'Content-Type': upload.mime, 'Cache-Control': 'no-store' } });
+  }
+  if (path[0] === 'library' && path.length === 1) {
+    const state = await libraryState(env.PRIVATE);
+    if (method === 'GET') { const published = await publicState(env.PUBLIC); return json({ library: state.value, public: published.value, publicEtag: published.etag }, 200, state.etag); }
+    if (method === 'PUT') {
+      expectMatch(request, state.etag);
+      const input = await readJson(request);
+      const errors = validateLibrary(input); if (errors.length) throw new ApiError(422, errors.join('\n'));
+      const value = input as Library;
+      const visible=await publicState(env.PUBLIC);
+      if(value.works.some(w=>w.workflow==='archived'&&visible.value.projects.some(p=>p.slug===w.project.slug)))throw new ApiError(422,'已公开作品请先下架，再保存归档状态。');
+      for (const old of state.value.works) {
+        const current = value.works.find(w => w.id === old.id);
+        if (!current) throw new ApiError(422, '不支持永久删除作品，请归档。');
+        if (old.project.slug !== current.project.slug || old.project.type !== current.project.type) throw new ApiError(422, '已有作品 slug 和分类保持稳定，避免历史地址失效。');
+      }
+      await backup(env.PRIVATE, state.value, 'library');
+      await audit(env.PRIVATE, 'save-library');
+      const result = await putJson(env.PRIVATE, LIBRARY_KEY, value, state.etag);
+      return json({ saved: true }, 200, result.httpEtag);
+    }
+    throw new ApiError(405, '此接口仅支持 GET / PUT。');
+  }
+  if (['publish', 'unpublish', 'preview'].includes(path[0]) && path.length === 2) {
+    if (method !== (path[0] === 'preview' ? 'GET' : 'POST')) throw new ApiError(405, '方法不支持。');
+    const state = await libraryState(env.PRIVATE); const published = await publicState(env.PUBLIC);
+    const work = state.value.works.find(w => w.id === path[1]); if (!work) throw new ApiError(404, '作品不存在。');
+    if (path[0] === 'preview') return json({ before: published.value.projects.find(p => p.slug === work.project.slug) ?? null, after: work.project, versions: work.versions.filter(v => v.status === 'released'), warnings: work.workflow === 'archived' ? ['作品已归档'] : [] });
+    expectMatch(request, state.etag); expectMatch(request, published.etag, 'x-public-etag');
+    const publicationId = crypto.randomUUID();
+    const after: PublicManifest = structuredClone(published.value); after.publicationId = publicationId;
+    const slug = work.project.slug; after.projects = after.projects.filter(p => p.slug !== slug);
+    if (path[0] === 'publish') {
+      const errors = validateLibrary(state.value); if (errors.length) throw new ApiError(422, errors.join('\n'));
+      for (const object of await listAll(env.PRIVATE,'uploads/active/')) {
+        const active=await env.PRIVATE.get(object.key);
+        const upload=active?await active.json<Upload>():null;
+        if(upload?.workId===work.id&&Date.parse(upload.expiresAt)>Date.now())throw new ApiError(409,'此作品仍有未完成上传，请完成或取消会话后再发布。');
+      }
+      const prepared = await publishedWork(work, env.PRIVATE, env.PUBLIC, publicationId);
+      after.projects.push(prepared.project); after.releases[slug] = prepared.releases;
+      after.projects.sort((a,b) => (state.value.works.find(w => w.project.slug === a.slug)?.order ?? 0) - (state.value.works.find(w => w.project.slug === b.slug)?.order ?? 0));
+    } else delete after.releases[slug];
+    await audit(env.PRIVATE, path[0], work.id);
+    const latestSource=await env.PRIVATE.head(LIBRARY_KEY);
+    if(latestSource?.httpEtag!==state.etag)throw new ApiError(409,'发布期间草稿已被修改，请重新加载后重试。');
+    const result = await commitPublication(env.PRIVATE, env.PUBLIC, published.value, after, published.etag);
+    return json({ published: path[0] === 'publish', publicationId }, 200, result.httpEtag);
+  }
+  if (path[0] === 'history' && method === 'GET') {
+    const objects = await listAll(env.PRIVATE, 'backups/');
+    return json({ snapshots: objects.sort((a,b) => b.uploaded.getTime() - a.uploaded.getTime()).slice(0,100).map(o => ({ key: o.key, time: o.uploaded.toISOString() })) });
+  }
+  if (path[0] === 'restore' && path.length === 3 && method === 'POST') {
+    if (!['library', 'public'].includes(path[1]) || !/^[a-zA-Z0-9-]{1,80}$/.test(path[2])) throw new ApiError(422, '恢复编号不合法。');
+    const object = await env.PRIVATE.get(`backups/${path[1]}/${path[2]}.json`); if (!object) throw new ApiError(404, '备份不存在。');
+    const snapshot = await object.json<{ value: Library | PublicManifest }>();
+    if (path[1] === 'library') {
+      const state = await libraryState(env.PRIVATE); expectMatch(request, state.etag);
+      const errors = validateLibrary(snapshot.value); if (errors.length) throw new ApiError(422, errors.join('\n'));
+      await backup(env.PRIVATE, state.value, 'library'); await audit(env.PRIVATE, 'restore-library');
+      const result = await putJson(env.PRIVATE, LIBRARY_KEY, snapshot.value, state.etag); return json({ restored: true }, 200, result.httpEtag);
+    }
+    const published = await publicState(env.PUBLIC); expectMatch(request, published.etag, 'x-public-etag');
+    const value = snapshot.value as PublicManifest; value.publicationId = crypto.randomUUID();
+    for (const project of value.projects) {
+      if (project.downloadUrl && !await env.PUBLIC.head(new URL(project.downloadUrl).pathname.slice(1))) throw new ApiError(422, '恢复引用的下载文件缺失。');
+      for (const path of Object.values(project.content)) for (const url of typeof path === 'string' ? [path] : Object.values(path ?? {})) {
+        if (url.startsWith('https://download.studiofimel.com/') && !await env.PUBLIC.head(new URL(url).pathname.slice(1))) throw new ApiError(422, '恢复引用的正文缺失。');
+      }
+    }
+    await audit(env.PRIVATE, 'restore-public'); const result = await commitPublication(env.PRIVATE, env.PUBLIC, published.value, value, published.etag);
+    return json({ restored: true }, 200, result.httpEtag);
+  }
+  throw new ApiError(404, '接口不存在。');
+}
+export default { fetch: handle };

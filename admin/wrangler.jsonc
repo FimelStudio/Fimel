@@ -1,0 +1,13 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "fimel-admin",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-14",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{"pattern":"admin.studiofimel.com","custom_domain":true}],
+  "assets": {"directory": "dist", "binding": "ASSETS", "run_worker_first": true, "not_found_handling": "single-page-application"},
+  "r2_buckets": [{"binding":"PRIVATE","bucket_name":"fimel-private"},{"binding":"PUBLIC","bucket_name":"fimel-downloads"}],
+  "vars": {"ADMIN_ORIGIN":"https://admin.studiofimel.com"},
+  "observability": {"enabled":true,"logs":{"enabled":true,"head_sampling_rate":1},"traces":{"enabled":true,"head_sampling_rate":0.01}}
+}

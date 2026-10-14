@@ -14,6 +14,16 @@ dist-ssr
 test-results/
 playwright-report/
 *.local
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+.wrangler/
+admin/dist/
+admin/worker-configuration.d.ts
+admin/public-api/worker-configuration.d.ts
 
 # Rclone credentials/config must stay outside the repository.
 **/rclone.conf

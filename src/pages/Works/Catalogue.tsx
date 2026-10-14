@@ -8,7 +8,7 @@ import type { ProjectType } from '../../content/projects';
 
 export function Catalogue() {
   const { t, i18n } = useTranslation();
-  const { projects, status, retry } = useProjectCatalogue();
+  const { projects, status, retry, fallback } = useProjectCatalogue();
   const [params, setParams] = useSearchParams();
   const language = i18n.resolvedLanguage ?? i18n.language;
   const typeParam = params.get('type');
@@ -105,6 +105,7 @@ export function Catalogue() {
           </div>
         </div>
 
+        {fallback && <p role="status" className="mb-5 text-sm text-content-muted">{t('catalogue.fallback')}</p>}
         {(status === 'idle' || status === 'loading') && <div role="status" aria-label={t('catalogue.loading')} className="space-y-3">
           {[0, 1, 2].map((index) => <div key={index} className="h-40 border border-obsidian/10 dark:border-line rounded-sm bg-obsidian/5 dark:bg-surface-raised animate-pulse motion-reduce:animate-none" />)}
         </div>}

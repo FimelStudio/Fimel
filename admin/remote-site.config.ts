@@ -1,0 +1,2 @@
+import { defineConfig } from '@playwright/test';
+export default defineConfig({testDir:'remote-e2e',outputDir:'../.artifacts/remote-e2e',workers:1,reporter:'list',use:{baseURL:'http://127.0.0.1:5175',browserName:'chromium',channel:process.platform==='win32'?'msedge':undefined,reducedMotion:'reduce'},webServer:{command:'npm run dev -- --host 127.0.0.1 --port 5175 --strictPort',url:'http://127.0.0.1:5175',reuseExistingServer:false,env:{VITE_CATALOGUE_URL:'https://download.studiofimel.com/data/works.json'}},timeout:30000});
