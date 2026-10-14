@@ -55,6 +55,6 @@ test('official import previews all 28 works, keeps existing edits and saves only
   });
   await page.goto('/');await page.getByRole('button',{name:'导入现有作品',exact:true}).click();
   const dialog=page.getByRole('dialog',{name:'导入作品预览'});await expect(dialog).toContainText('新增 28 个作品');await expect(dialog.getByRole('row')).toHaveCount(29);expect(writes).toBe(0);
-  await dialog.getByRole('button',{name:'合并到编辑区'}).click();await expect(page.getByText('29 个作品 · 0 个已公开',{exact:true})).toBeVisible();expect(writes).toBe(0);
+  await dialog.getByRole('button',{name:'合并到编辑区'}).click();await expect(page.getByText('29 个在用作品 · 0 个后台已发布',{exact:true})).toBeVisible();expect(writes).toBe(0);
   await page.getByRole('button',{name:'保存草稿',exact:true}).click();await expect(page.getByText('草稿已保存到私有存储。')).toBeVisible();expect(writes).toBe(1);
 });

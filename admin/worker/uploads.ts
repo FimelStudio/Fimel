@@ -31,7 +31,7 @@ export async function uploadRoute(request: Request, bucket: R2Bucket, segments: 
         }
         // Delete only the generated temporary object, never verified files, backups or public objects.
         if (!s.key.startsWith(`uploads/temporary/${s.id}/`)) throw new ApiError(422,'临时对象范围异常。');
-        await bucket.delete(s.key);
+        for (const temporary of await listAll(bucket, `uploads/temporary/${s.id}/`)) await bucket.delete(temporary.key);
         await bucket.delete(`uploads/active/${s.id}.json`);
         cleaned++;
       }
@@ -85,20 +85,32 @@ export async function uploadRoute(request: Request, bucket: R2Bucket, segments: 
     if (request.headers.get('content-type') !== 'application/octet-stream' || Number(request.headers.get('content-length')) !== expectedSize) throw new ApiError(422, '分片类型或长度错误。');
     const claimed = request.headers.get('x-part-sha256');
     if (!claimed || !/^[a-f0-9]{64}$/.test(claimed)) throw new ApiError(422, '缺少分片校验值。');
-    // Bounded to 16 MiB, never buffer the full file or an unbounded request.
-    const reader = request.body?.getReader(); if (!reader) throw new ApiError(422, '缺少分片。');
-    const bytes = new Uint8Array(expectedSize); let length = 0;
-    for (;;) { const next = await reader.read(); if (next.done) break; if (length + next.value.length > expectedSize) { await reader.cancel(); throw new ApiError(413, '分片超过限制。'); } bytes.set(next.value, length); length += next.value.length; }
-    if (length !== expectedSize) throw new ApiError(422, '分片不完整。');
-    const hash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), b => b.toString(16).padStart(2, '0')).join('');
-    if (hash !== claimed) throw new ApiError(422, '分片 SHA-256 校验失败。');
-    if (number === 1) checkSignature(bytes, upload.name);
-    const receipt = await bucket.get(receiptKey(id, number));
-    if (receipt) { const saved = await receipt.json<{ sha256: string }>(); if (saved.sha256 !== hash) throw new ApiError(409, '分片已存在且内容不同。'); return json(saved); }
-    const part = await multipart.uploadPart(number, bytes);
-    const saved = { ...part, size: length, sha256: hash };
-    await putJson(bucket, receiptKey(id, number), saved);
-    return json(saved);
+    if (!request.body) throw new ApiError(422, '缺少分片。');
+    // R2 verifies the real bytes with native SHA-256, then streams them into multipart.
+    // Avoid copying/hashing 16 MiB in Worker CPU; only the first 12 signature bytes are buffered.
+    const stagedKey = `uploads/temporary/${id}/parts/${number}-${crypto.randomUUID()}`;
+    try {
+      let staged: R2Object | null;
+      try { staged = await bucket.put(stagedKey, request.body, { sha256: claimed, onlyIf: { etagDoesNotMatch: '*' } }); }
+      catch (cause) { if (cause instanceof Error && /checksum|sha-?256|digest/i.test(cause.message)) throw new ApiError(422, '分片 SHA-256 校验失败。'); throw cause; }
+      if (!staged || staged.size !== expectedSize) throw new ApiError(422, '分片不完整或长度错误。');
+      if (number === 1) {
+        const prefix = await bucket.get(stagedKey, { range: { offset: 0, length: Math.min(12, staged.size) } });
+        if (!prefix) throw new ApiError(503, '分片暂存读取失败，请重试。');
+        checkSignature(new Uint8Array(await prefix.arrayBuffer()), upload.name);
+      }
+      const receipt = await bucket.get(receiptKey(id, number));
+      if (receipt) { const saved = await receipt.json<{ sha256: string }>(); if (saved.sha256 !== claimed) throw new ApiError(409, '分片已存在且内容不同。'); return json(saved); }
+      const bytes = await bucket.get(stagedKey);
+      if (!bytes) throw new ApiError(503, '分片暂存读取失败，请重试。');
+      const part = await multipart.uploadPart(number, bytes.body);
+      const saved = { ...part, size: expectedSize, sha256: claimed };
+      await putJson(bucket, receiptKey(id, number), saved);
+      return json(saved);
+    } finally {
+      try { await bucket.delete(stagedKey); }
+      catch { console.warn(JSON.stringify({ operation: 'part-stage-cleanup-pending', uploadId: id, partNumber: number })); }
+    }
   }
   if (segments[1] === 'complete' && request.method === 'POST' && segments.length === 2) {
     const input = await readJson(request, 1024) as { sha256?: string };
