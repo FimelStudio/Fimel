@@ -1,6 +1,6 @@
 # 后台真实域名统计接入
 
-目标为现有 `fimel-admin` 的 `/api/analytics`，仅展示 `studiofimel.com`、`www.studiofimel.com`、`download.studiofimel.com` 和 `admin.studiofimel.com` 的聚合数据。现有页面和查询已经实现；当前缺少独立服务端分析凭据。
+现有 `fimel-admin` 的 `/api/analytics` 已接通真实数据，仅展示 `studiofimel.com`、`www.studiofimel.com`、`download.studiofimel.com` 和 `admin.studiofimel.com` 的聚合数据。用户在控制台创建只读 Token 并通过本机脚本验证；2026-10-15 00:45 激活 Secret 版本 `16896dc1-1655-4a1c-8129-7e7a345115cd`。真实登录浏览器的 7 天查询已返回 200，后续后台版本保留两项分析 Secrets。下面的设置步骤也供到期轮换使用；不必重复创建 Token。
 
 ## 本次变更范围
 
