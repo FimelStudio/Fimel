@@ -70,7 +70,7 @@ npm run build
 
 构建会先运行 `npm run check:content`，检查作品类型、分类标签、资源路径实际大小写及 Markdown 链接，再生成生产资源与旧下载地址的 R2 跳转映射，不再生成 Bingo 分片。浏览器回归测试运行 `npm run test:e2e`。
 
-## 独立 Admin（本地实现，尚未部署）
+## 独立 Admin 管理后台（已上线）
 
 后台使用同一 React/Vite、字体、品牌和明暗主题，独立构建于 `admin/`。支持私有草稿、三语正文、多版本/多文件、封面截图、条件发布、下架归档、备份恢复和 16 MiB 分片上传（最大 1 GiB）。生产资源变更须先确认。
 
@@ -81,7 +81,9 @@ npm run build
 - [本地验证结果与待验收事项](docs/admin-verification.md)
 - [生产变更审阅清单](docs/admin-deployment-review.md)
 
-`VITE_CATALOGUE_URL` 与 `VITE_ANALYTICS_URL` 默认空。前者在批准 R2 内容迁移后启用，后者在批准 D1 统计迁移后启用；当前官网继续原有数据来源。Admin 不能用 GitHub Pages 运行服务端 API，公开网站的 GitHub Pages 工作流保持。
+后台位于 `https://admin.studiofimel.com`，仅允许授权邮箱通过验证码登录，会话最长保留 30 天。28 个现有作品已发布到 R2；官网和 GitHub Pages 已通过 `VITE_CATALOGUE_URL=https://download.studiofimel.com/data/works.json` 接入。今后保存草稿后点击发布即可更新公开内容，无需日常推送 Git。管理员日志、真实域名统计、私有文件下载和软删除恢复均在后台操作。
+
+`VITE_ANALYTICS_URL` 仍为空，原下载点击计数兼容保留；后台 Cloudflare 域名统计独立使用服务端只读凭据。D1 点击统计迁移尚未启用。Admin 的服务端 API 由独立 Worker 提供，公开网站的 GitHub Pages 工作流保持。
 
 ## 内容与目录维护
 

@@ -55,8 +55,12 @@ export function useProjectCatalogue() {
   useEffect(() => {
     if (getSnapshot().status === 'idle') void loadCatalogue();
     if (!remoteUrl) return;
-    const refresh = () => { if (document.visibilityState === 'visible' && Date.now() - lastValidated > 60_000) void loadCatalogue(); };
-    const interval = window.setInterval(refresh, 60_000);
+    const refresh = () => { if (document.visibilityState === 'visible' && Date.now() - lastValidated >= 60_000) void loadCatalogue(); };
+    // The first read can finish after this timer starts. Do not skip its first
+    // minute tick merely because that response is slightly less than a minute old.
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void loadCatalogue();
+    }, 60_000);
     window.addEventListener('focus', refresh);
     window.addEventListener('online', refresh);
     return () => { window.clearInterval(interval); window.removeEventListener('focus', refresh); window.removeEventListener('online', refresh); };
