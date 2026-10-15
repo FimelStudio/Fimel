@@ -35,10 +35,12 @@ test('administrator log shows identity, work and before/after fields with honest
 });
 
 test('domain statistics distinguish visits, whole-zone IPs and file requests; no overflow on mobile',async({page})=>{
+  const work=makeWork();work.project.slug='long-title-example';work.project.title={zh:'这是一个名称较长且包含多个版本说明的工作室作品'};
+  await page.route('**/api/library',route=>route.fulfill({json:{library:{schemaVersion:1,works:[work]},public:{schemaVersion:2,publicationId:'empty',projects:[],releases:{}},publicEtag:'"empty"',etag:'"preview"'}}));
   await page.route('**/api/analytics?days=7',route=>route.fulfill({json:{generatedAt:'2026-10-14T10:00:00Z',from:'2026-10-14T00:00:00Z',to:'2026-10-15T00:00:00Z',timeZone:'UTC',domains:[{date:'2026-10-14',host:'studiofimel.com',requests:12,visits:4,bytes:1024}],zoneVisitors:[{date:'2026-10-14',requests:20,uniqueIPs:8}],downloadDays:[{date:'2026-10-14',requests:3,bytes:10000}],files:[{date:'2026-10-14',path:'/works/tools/example/1.0/tool.zip',slug:'example',requests:3,bytes:10000}],filesTruncated:false}}));
   await page.goto('/');await page.getByRole('button',{name:'访问与下载统计',exact:true}).click();
   await expect(page.getByRole('heading',{name:'访问与下载统计',exact:true})).toBeVisible();await expect(page.getByRole('columnheader',{name:'全站独立 IP',exact:true})).toBeVisible();await expect(page.getByRole('cell',{name:'/works/tools/example/1.0/tool.zip',exact:true})).toBeVisible();
-  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  for(const width of [390,320]){await page.setViewportSize({width,height:844});await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}
 });
 
 test('unconnected analytics shows an explicit error instead of invented traffic',async({page})=>{
