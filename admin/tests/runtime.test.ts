@@ -27,23 +27,36 @@ test('new draft is private; publish → public manifest → unpublish → republ
 test('private snapshots and restore create backup before update',async()=>{const history=await req('history');const items=await history.json() as {snapshots:{key:string}[]};const snapshot=items.snapshots.find(x=>x.key.startsWith('backups/library/'))!;assert.ok(snapshot);const s=await state();const [ ,kind,id ]=snapshot.key.split('/');const r=await req(`restore/${kind}/${id.replace('.json','')}`,'POST',{}, {'If-Match':s.etag});assert.equal(r.status,200,await r.text());});
 test('upload validates limits, filename, extension and association',async()=>{const w=await add('upload-tests');for(const input of [{name:'a.svg',size:10,kind:'image'},{name:123,size:10,kind:'file'},{name:'a.png',displayName:'bad\u0000name.png',size:10,kind:'image'},{name:'../a.zip',size:10,kind:'file'},{name:'a.zip',size:MAX_FILE_SIZE+1,kind:'file'},{name:'a.zip',size:10,kind:'file'}]){assert.equal((await req('uploads','POST',{...input,workId:w.id})).status,422);}});
 
-test('uploaded cover with empty URL saves privately and publishes positioned images exactly once',async()=>{
+test('uploaded cover stays separate from body images and deleted images never reappear after republishing',async()=>{
   const w=await add('uploaded-cover');const priv=await mf.getR2Bucket('PRIVATE');const pub=await mf.getR2Bucket('PUBLIC');
   const bytes=Buffer.from('verified-image-fixture');const sha256=createHash('sha256').update(bytes).digest('hex');
   const gallery:Asset[]=[];
-  for(let n=0;n<2;n++){
+  for(let n=0;n<4;n++){
     const id=crypto.randomUUID();const name=`cover-${n}.png`;const privateKey=`uploads/verified/${id}/${name}`;
     await priv.put(privateKey,bytes,{httpMetadata:{contentType:'image/png'},customMetadata:{workId:w.id,assetId:id,sha256,versionId:''}});
     gallery.push({id,name,size:bytes.length,mime:'image/png',sha256,privateKey});
   }
-  const s=await state();const draft=s.data.library.works.find(item=>item.id===w.id)!;draft.project.image='';draft.coverId=gallery[1].id;draft.gallery=gallery;
+  const s=await state();const draft=s.data.library.works.find(item=>item.id===w.id)!;draft.project.image='';draft.coverId=gallery[2].id;draft.gallery=gallery;
   draft.markdown.description.zh=`Before\n\n![one](fimel-asset:${gallery[0].id})\n![two](fimel-asset:${gallery[1].id})\n\nAfter`;
   const saved=await req('library','PUT',s.data.library,{'If-Match':s.etag});assert.equal(saved.status,200,await saved.text());
   const ready=await state();assert.equal(ready.data.library.works.find(item=>item.id===w.id)!.project.image,'');assert.equal(ready.data.public.projects.some(item=>item.slug===w.project.slug),false);
   const published=await req(`publish/${w.id}`,'POST',{}, {'If-Match':ready.etag,'X-Public-ETag':ready.data.publicEtag});assert.equal(published.status,200,await published.text());
   const manifest=await(await pub.get('data/works.json'))!.json() as {projects:Array<typeof w.project>};const project=manifest.projects.find(item=>item.slug===w.project.slug)!;
-  assert.ok(project.image.includes(gallery[1].id));const content=project.content.description;const path=typeof content==='string'?content:content!.zh!;
+  assert.ok(project.image.includes(gallery[2].id));const content=project.content.description;const path=typeof content==='string'?content:content!.zh!;
   const markdown=await(await pub.get(new URL(path).pathname.slice(1)))!.text();assert.equal((markdown.match(/!\[/g)??[]).length,2);assert.equal(markdown.includes('fimel-asset:'),false);assert.ok(markdown.indexOf('![one]')<markdown.indexOf('After'));
+  assert.equal(markdown.includes(gallery[2].id),false);
+  const key=(asset:Asset)=>`images/${w.project.type}/${w.project.slug}/${asset.id}/${asset.name}`;
+  assert.ok(await pub.head(key(gallery[2])));assert.equal(await pub.head(key(gallery[3])),null);
+  for(const [body,count] of [[`Only two\n\n![two](fimel-asset:${gallery[1].id})`,1],['Images deleted; text retained.',0]] as const){
+    const current=await state();current.data.library.works.find(item=>item.id===w.id)!.markdown.description.zh=body;
+    const save=await req('library','PUT',current.data.library,{'If-Match':current.etag});assert.equal(save.status,200,await save.text());
+    const next=await state();const publish=await req(`publish/${w.id}`,'POST',{}, {'If-Match':next.etag,'X-Public-ETag':next.data.publicEtag});assert.equal(publish.status,200,await publish.text());
+    const manifest=await(await pub.get('data/works.json'))!.json() as {projects:Array<typeof w.project>};const published=manifest.projects.find(item=>item.slug===w.project.slug)!;
+    const paths=published.content.description;const url=typeof paths==='string'?paths:paths!.zh!;const rendered=await(await pub.get(new URL(url).pathname.slice(1)))!.text();
+    assert.equal((rendered.match(/!\[/g)??[]).length,count);assert.ok(published.image.includes(gallery[2].id));
+    assert.equal((await state()).data.library.works.find(item=>item.id===w.id)!.gallery.length,4);
+  }
+  assert.ok(await pub.head(key(gallery[0])));assert.equal(await pub.head(key(gallery[3])),null);assert.ok(await priv.head(gallery[3].privateKey!));
 });
 
 test('scoped temporary cleanup preserves other sessions and every verified object',async()=>{

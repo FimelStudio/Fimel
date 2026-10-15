@@ -5,7 +5,7 @@ import { makeWork } from '../shared/model';
 import { validateLibrary } from '../shared/validation';
 import { authenticate, protectWrite } from '../worker/auth';
 import {generateKeyPair,exportJWK,SignJWT} from 'jose';
-import { appendGallery, imageMarkdown } from '../shared/markdown';
+import { referencedImages, imageMarkdown } from '../shared/markdown';
 
 function fixture() { const work=makeWork(); work.project.slug='test-map'; work.project.title={zh:'测试地图',en:'Test Map',ja:'テスト'}; return {schemaVersion:1,works:[work]}; }
 test('valid existing migration retains all 28 records',async()=>{const library=JSON.parse(await readFile('.artifacts/admin-migration/library.json','utf8'));assert.equal(library.works.length,28);assert.deepEqual(validateLibrary(library),[]);for(const work of library.works)assert.equal(work.legacy.slug,work.project.slug);});
@@ -20,11 +20,14 @@ test('uploaded cover permits an empty fallback URL without relaxing legacy or mi
   assert.deepEqual(validateLibrary(x),[]);
   w.coverId='missing';assert.ok(validateLibrary(x).length);w.coverId='cover';w.legacy={...w.project};assert.ok(validateLibrary(x).length);
 });
-test('explicit inline image groups keep their position and are not appended again',()=>{
+test('only explicit references across languages and tabs select body images',()=>{
   const first={id:'first',name:'one.png',size:1,mime:'image/png',sha256:'a'.repeat(64)};const second={...first,id:'second',name:'two.png'};
   const body=`Intro\n\n${imageMarkdown(first)}\n${imageMarkdown(second)}\n\nOutro`;
-  assert.equal(appendGallery(body,[first,second]),body);
-  assert.equal(appendGallery('Intro',[first,second]),`Intro\n\n${imageMarkdown(first)}\n${imageMarkdown(second)}`);
+  const w=fixture().works[0];w.gallery=[first,second];w.coverId=first.id;
+  assert.deepEqual([...referencedImages(w.markdown)],[]);
+  w.markdown.description.zh=body;assert.deepEqual([...referencedImages(w.markdown)],['first','second']);
+  w.markdown.description.zh='Images removed';assert.deepEqual([...referencedImages(w.markdown)],[]);
+  w.markdown.changelog.en=imageMarkdown(second);assert.deepEqual([...referencedImages(w.markdown)],['second']);
 });
 test('schema rejects duplicate versions and unpublished downloads',()=>{const x=fixture();const v={id:'v1',label:'1.0',date:'2026-10-14',gameVersions:[],status:'draft' as const,changelog:'',files:[]};x.works[0].versions=[v,v];assert.ok(validateLibrary(x).length);x.works[0].versions=[];x.works[0].project.downloadUrl='https://download.studiofimel.com/works/bedrock/test-map/1.0/test.zip';assert.ok(validateLibrary(x).length);});
 const env={ACCESS_AUD:'test-aud',ACCESS_ISSUER:'https://team.cloudflareaccess.com',ADMIN_EMAILS:'test-admin@example.invalid'};

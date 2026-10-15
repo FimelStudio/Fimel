@@ -40,6 +40,12 @@ test('drop and paste image files upload through real R2, retain prose and match 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: '.artifacts/admin-screenshots/inline-images-mobile.png', fullPage: true });
   await expect.poll(()=>page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);expect(errors).toEqual([]);
+  await editor.fill('Images removed; keep this text.');await expect(page.locator('.project-gallery')).toHaveCount(0);
+  await page.getByRole('button',{name:'保存草稿',exact:true}).first().click();await expect(page.getByText('草稿已保存到私有存储。')).toBeVisible();
+  const after=await(await page.request.get('/api/library')).json();const retained=after.library.works.find((item:{project:{slug:string}})=>item.project.slug===slug);
+  expect(retained.gallery).toHaveLength(3);expect(retained.markdown.description.zh).toBe('Images removed; keep this text.');
+  await page.reload();await page.getByLabel('搜索作品',{exact:true}).fill(slug);await page.locator('.work-row').click();await page.getByRole('button',{name:'正文与预览',exact:true}).click();
+  await expect(page.getByLabel('Markdown 正文',{exact:true})).toHaveValue('Images removed; keep this text.');await expect(page.locator('.project-gallery')).toHaveCount(0);
 });
 
 test('failed image batches retry only remaining files; unsupported files and normal text do not destroy prose', async ({ page }) => {

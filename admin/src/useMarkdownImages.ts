@@ -60,7 +60,6 @@ export function useMarkdownImages({ work, saved, tab, locale, update, onSave }: 
     }
     target.last = markup;
     const next = { ...current, gallery: [...current.gallery.filter(item => item.id !== asset.id), asset],
-      coverId: current.coverId ?? (!current.project.image.trim() ? asset.id : undefined),
       markdown: { ...current.markdown, [target.tab]: { ...current.markdown[target.tab], [target.locale]: value } },
     };
     latest.current = next;update(next);

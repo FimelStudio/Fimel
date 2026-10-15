@@ -104,7 +104,7 @@ export function UploadPanel({ workId, versionId, kind, disabled, compact, upload
   }
   if (compact && !label && !error && !busy) return null;
   return <div className="upload-panel">
-    {!compact && <label className="upload-picker"><UploadCloud size={22}/><span>{kind === 'image' ? '添加封面与截图' : '上传发行文件'}<small>{kind === 'image' ? 'PNG / JPEG / WebP · 每张 ≤ 10 MiB' : 'ZIP / JAR / EXE / MCWORLD / MCPACK · ≤ 1 GiB'}</small></span>
+    {!compact && <label className="upload-picker"><UploadCloud size={22}/><span>{kind === 'image' ? '添加封面图片' : '上传发行文件'}<small>{kind === 'image' ? 'PNG / JPEG / WebP · 每张 ≤ 10 MiB' : 'ZIP / JAR / EXE / MCWORLD / MCPACK · ≤ 1 GiB'}</small></span>
       <input aria-label={kind === 'image' ? '选择图片' : '选择发行文件'} type="file" multiple={kind === 'image'} accept={kind === 'image' ? '.png,.jpg,.jpeg,.webp' : '.zip,.jar,.exe,.mcworld,.mcpack,.mctemplate'} disabled={busy || disabled} onChange={e => { const files = Array.from(e.target.files ?? []); if (files.length) void start(files); e.target.value = ''; }}/>
     </label>}
     {disabled && <p className="hint">先保存作品与版本，上传后仍须发布才会公开。</p>}
