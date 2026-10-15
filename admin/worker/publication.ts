@@ -4,9 +4,11 @@ import type { Project, ProjectTab, LocalizedText } from '../../src/content/proje
 import { localizedText } from '../../src/content/projects';
 import { ApiError, putJson } from './http';
 import { backup, MANIFEST_KEY } from './storage';
+import { appendGallery } from '../shared/markdown';
 
 export async function publishedWork(work: Work, privateBucket: R2Bucket, publicBucket: R2Bucket, publicationId: string) {
   if (work.workflow === 'archived') throw new ApiError(422, '归档作品须先恢复为草稿。');
+  if (!work.coverId && !work.project.image.trim()) throw new ApiError(422, '发布前请选择上传封面，或填写已有封面地址。');
   if(!Object.values(work.markdown.description).some(value=>value?.trim()))throw new ApiError(422,'发布前至少填写一种语言的作品详情。');
   const project: Project = structuredClone(work.project);
   const releaseAssets = work.versions.filter(v => v.status === 'released').flatMap(v => v.files);
@@ -23,7 +25,7 @@ export async function publishedWork(work: Work, privateBucket: R2Bucket, publicB
   for (const tab of ['description', 'changelog', 'versions'] as ProjectTab[]) {
     const paths: Record<string, string> = {};
     for (const [locale, markdown] of Object.entries(work.markdown[tab])) {
-      let body = markdown;
+      let body = tab === 'description' ? appendGallery(markdown, work.gallery) : markdown;
       for (const [id, url] of publicAssets) body = body.replaceAll(`fimel-asset:${id}`, url);
       if (/fimel-asset:/.test(body)) throw new ApiError(422, '正文引用了未发布资源。');
       if (tab === 'versions') {
@@ -32,7 +34,6 @@ export async function publishedWork(work: Work, privateBucket: R2Bucket, publicB
           for (const file of release.files) body += `- [${markdownName(file)}](${publicAssets.get(file.id)}) · ${(file.size/1024**2).toFixed(1)} MiB\n  - SHA-256: \`${file.sha256}\`\n`;
         }
       }
-      if (tab === 'description' && work.gallery.length) body += '\n\n' + work.gallery.map(a => `![${markdownName(a)}](${publicAssets.get(a.id)})`).join('\n');
       const key = `content/${project.slug}/${publicationId}/${tab}.${locale}.md`;
       const saved = await publicBucket.put(key, body, { onlyIf: { etagDoesNotMatch: '*' }, httpMetadata: { contentType: 'text/markdown; charset=utf-8', cacheControl: 'public, max-age=31536000, immutable' } });
       if (!saved) throw new ApiError(409, '正文快照已存在。');

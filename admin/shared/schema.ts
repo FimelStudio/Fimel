@@ -11,13 +11,17 @@ const asset = { type: 'object', additionalProperties: false, required: ['id', 'n
   publicUrl: { type: 'string', format: 'uri' }, primary: { type: 'boolean' },
 } };
 const project = structuredClone(catalogueSchema.$defs.project);
+const draftProject = structuredClone(project);
+// A private draft may use an uploaded cover instead of an existing image URL.
+// The public catalogue and the retained legacy record keep their strict contract.
+draftProject.properties.image.minLength = 0;
 // Embed the existing contract without losing fields or accepting unknown ones.
 const schema = {
   $schema: 'https://json-schema.org/draft/2020-12/schema', type: 'object', additionalProperties: false,
   required: ['schemaVersion', 'works'], properties: { schemaVersion: { const: 1 }, works: {
     type: 'array', maxItems: 500, items: { type: 'object', additionalProperties: false,
       required: ['id', 'project', 'workflow', 'order', 'markdown', 'gallery', 'versions', 'createdAt', 'updatedAt'],
-      properties: { id, project, legacy: project, workflow: { enum: ['draft', 'ready', 'archived'] },
+      properties: { id, project: draftProject, legacy: project, workflow: { enum: ['draft', 'ready', 'archived'] },
         order: { type: 'integer', minimum: 0, maximum: 100000 }, createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' }, coverId: id,
         markdown: { type: 'object', required: ['description', 'changelog', 'versions'], additionalProperties: false,
           properties: Object.fromEntries(['description', 'changelog', 'versions'].map(k => [k, { type: 'object', additionalProperties: false, maxProperties: 3, properties: { zh: text, en: text, ja: text } }])) },

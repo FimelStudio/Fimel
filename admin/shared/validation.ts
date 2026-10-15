@@ -16,12 +16,13 @@ export function validateLibrary(value: unknown, boundedRequestBody = false): str
   const ids = new Set<string>(), slugs = new Set<string>();
   for (const work of value.works) {
     const p = work.project;
+    if (!p.image.trim() && !work.gallery.some(a => a.id === work.coverId)) errors.push(`${p.slug}：请选择一张上传图片作为封面，或填写已有封面地址。`);
     if (ids.has(work.id) || slugs.has(p.slug)) errors.push('作品 ID / slug 重复。');
     ids.add(work.id); slugs.add(p.slug);
     if (!p.title || !Object.values(typeof p.title === 'string' ? { zh: p.title } : p.title).some(s => s.trim())) errors.push(`${p.slug} 名称不能为空。`);
     if (p.tags.some(tag => !Object.hasOwn(tags, tag))) errors.push(`${p.slug} 使用了未知标签。`);
     for (const [key, url] of Object.entries(p)) {
-      if (['image', 'download', 'fallbackDownload'].includes(key) && typeof url === 'string' && !safeUrl(url, true)) errors.push(`${p.slug} ${key} 地址不安全。`);
+      if (['image', 'download', 'fallbackDownload'].includes(key) && typeof url === 'string' && !(key === 'image' && url === '') && !safeUrl(url, true)) errors.push(`${p.slug} ${key} 地址不安全。`);
       if (['store', 'repository', 'issues', 'releasePage', 'downloadUrl'].includes(key) && typeof url === 'string' && !safeUrl(url)) errors.push(`${p.slug} ${key} 地址不安全。`);
     }
     if (p.creators.some(c => c.url && !safeUrl(c.url)) || p.source && !safeUrl(p.source.url)) errors.push(`${p.slug} 作者/来源链接不安全。`);

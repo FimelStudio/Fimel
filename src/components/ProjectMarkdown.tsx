@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import Markdown from 'react-markdown';
+import Markdown, { defaultUrlTransform } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -52,7 +52,15 @@ export function ProjectMarkdown({ path }: { path: string }) {
   if (error) return <div role="alert" className="py-10"><p>{t('project.content_error')}</p><button type="button" onClick={() => { setError(false); setAttempt((value) => value + 1); }} className="mt-4 border border-current px-5 min-h-11">{t('project.retry')}</button></div>;
   if (content === null) return <div role="status" aria-label={t('project.loading')} className="space-y-4 py-3"><div className="h-7 w-1/2 bg-obsidian/5 dark:bg-surface-raised animate-pulse motion-reduce:animate-none" /><div className="h-28 bg-obsidian/5 dark:bg-surface-raised animate-pulse motion-reduce:animate-none" /></div>;
   const fileUrl = new URL(assetUrl(path), window.location.origin);
-  return <div className="project-markdown"><Markdown remarkPlugins={[remarkGfm]} skipHtml components={{
+  return <ProjectMarkdownBody content={content} fileUrl={fileUrl} />;
+}
+
+/** Shared by the public reader and authenticated Admin preview. */
+export function ProjectMarkdownBody({ content, fileUrl, resolveAsset }: {
+  content: string; fileUrl: URL; resolveAsset?: (id: string) => string | undefined;
+}) {
+  return <div className="project-markdown"><Markdown remarkPlugins={[remarkGfm]} skipHtml
+    urlTransform={(url, key) => url.startsWith('fimel-asset:') ? key === 'src' ? resolveAsset?.(url.slice('fimel-asset:'.length)) ?? '' : '' : defaultUrlTransform(url)} components={{
     p: ({ node, children }) => {
       // Standard Markdown: adjacent image lines (no blank line) form one
       // image-only paragraph. Mixed text or linked images stay normal prose.
@@ -74,7 +82,7 @@ export function ProjectMarkdown({ path }: { path: string }) {
       return <p>{children}</p>;
     },
     a: ({ href, children }) => {
-      if (href?.startsWith('#/')) return <Link to={href.slice(1)}>{children}</Link>;
+      if (!resolveAsset && href?.startsWith('#/')) return <Link to={href.slice(1)}>{children}</Link>;
       const resolved = resolveContentUrl(href, fileUrl);
       const external = resolved ? new URL(resolved).origin !== window.location.origin : false;
       return <a href={resolved} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined} download={resolved && /\.(jar|zip)(?:\?|$)/i.test(resolved) && !external ? true : undefined}>{children}</a>;

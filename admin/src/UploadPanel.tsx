@@ -1,17 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useImperativeHandle, useRef, useState, type Ref } from 'react';
 import { UploadCloud, X, RotateCcw } from 'lucide-react';
 import { api, RequestError } from './api';
 import { MAX_FILE_SIZE, MAX_IMAGE_SIZE, MIME_TYPES, PART_SIZE } from '../shared/model';
 import type { Asset, Upload } from '../shared/model';
 
-type Props = { workId: string; versionId?: string; kind: 'image' | 'file'; disabled?: boolean; onUploaded(asset: Asset): void; onBusyChange?(id:string,active:boolean):void };
+export type UploadHandle = { start(files: File[]): Promise<void> };
+type Props = { workId: string; versionId?: string; kind: 'image' | 'file'; disabled?: boolean; compact?: boolean; uploadRef?: Ref<UploadHandle>; onUploaded(asset: Asset): void; onBusyChange?(id:string,active:boolean):void };
 type UploadState = { upload: Upload; parts: { partNumber: number; size: number; sha256: string }[] };
-export function UploadPanel({ workId, versionId, kind, disabled, onUploaded, onBusyChange }: Props) {
+export function UploadPanel({ workId, versionId, kind, disabled, compact, uploadRef, onUploaded, onBusyChange }: Props) {
   const [progress, setProgress] = useState(0); const [label, setLabel] = useState('');
   const [busy, setBusy] = useState(false); const [error, setError] = useState('');
   const controller = useRef<AbortController | null>(null); const session = useRef<string | null>(null);
   const pending = useRef<File[]>([]); const hashing = useRef<Worker | null>(null);
   const onUploadedRef = useRef(onUploaded);
+  useImperativeHandle(uploadRef, () => ({ start }));
   useEffect(() => { onUploadedRef.current = onUploaded; }, [onUploaded]);
   useEffect(() => () => { controller.current?.abort(); hashing.current?.terminate(); onBusyChange?.(`${workId}:${versionId??kind}`,false); }, [workId,versionId,kind,onBusyChange]);
   useEffect(() => { if(!busy)return; const warn=(event:BeforeUnloadEvent)=>event.preventDefault(); window.addEventListener('beforeunload',warn); return ()=>window.removeEventListener('beforeunload',warn); }, [busy]);
@@ -47,7 +49,7 @@ export function UploadPanel({ workId, versionId, kind, disabled, onUploaded, onB
     setBusy(true); setError(''); pending.current = files;
     const abort = new AbortController(); controller.current = abort;
     try {
-      for (const file of files) {
+      for (const [index, file] of files.entries()) {
         setProgress(0); session.current = null;
         const ext = file.name.split('.').pop()!.toLowerCase();
         if (!MIME_TYPES[ext] || file.size < 1 || file.size > (kind === 'image' ? MAX_IMAGE_SIZE : MAX_FILE_SIZE) || (kind === 'image') !== ['png','jpg','jpeg','webp'].includes(ext)) throw new Error('格式不支持或文件超过限制。');
@@ -74,7 +76,7 @@ export function UploadPanel({ workId, versionId, kind, disabled, onUploaded, onB
           saved = { upload: created.data.upload, parts: [] }; localStorage.setItem(storageKey, saved.upload.id);
         }
         session.current = saved.upload.id;
-        if (saved.upload.status === 'complete' && saved.upload.asset) { onUploadedRef.current(saved.upload.asset); localStorage.removeItem(storageKey); continue; }
+        if (saved.upload.status === 'complete' && saved.upload.asset) { onUploadedRef.current(saved.upload.asset); localStorage.removeItem(storageKey); pending.current = files.slice(index + 1); continue; }
         let done = saved.parts.reduce((sum, p) => sum + p.size, 0);
         for (let n = 1; n <= Math.ceil(file.size / PART_SIZE); n++) {
           if (abort.signal.aborted) throw new Error('上传已暂停。');
@@ -90,6 +92,7 @@ export function UploadPanel({ workId, versionId, kind, disabled, onUploaded, onB
         setLabel(`${file.name} · R2 完整 SHA-256 验证中`);
         const completed = await api<{ asset: Asset }>(`uploads/${saved.upload.id}/complete`, { method: 'POST', signal:abort.signal, body: JSON.stringify({ sha256: checked.sha256 }) });
         onUploadedRef.current(completed.data.asset); localStorage.removeItem(storageKey); setProgress(1);
+        pending.current = files.slice(index + 1);
       }
       setLabel('文件已验证并关联，请保存作品草稿。'); pending.current = [];
     } catch (cause) { setError(cause instanceof Error ? cause.message : '上传失败。'); }
@@ -99,10 +102,11 @@ export function UploadPanel({ workId, versionId, kind, disabled, onUploaded, onB
     controller.current?.abort();
     if (session.current) { try { await api(`uploads/${session.current}`, { method: 'DELETE' }); setLabel('会话已取消，未发布文件。'); } catch (cause) { setError(String(cause)); } }
   }
+  if (compact && !label && !error && !busy) return null;
   return <div className="upload-panel">
-    <label className="upload-picker"><UploadCloud size={22}/><span>{kind === 'image' ? '添加封面与截图' : '上传发行文件'}<small>{kind === 'image' ? 'PNG / JPEG / WebP · 每张 ≤ 10 MiB' : 'ZIP / JAR / EXE / MCWORLD / MCPACK · ≤ 1 GiB'}</small></span>
+    {!compact && <label className="upload-picker"><UploadCloud size={22}/><span>{kind === 'image' ? '添加封面与截图' : '上传发行文件'}<small>{kind === 'image' ? 'PNG / JPEG / WebP · 每张 ≤ 10 MiB' : 'ZIP / JAR / EXE / MCWORLD / MCPACK · ≤ 1 GiB'}</small></span>
       <input aria-label={kind === 'image' ? '选择图片' : '选择发行文件'} type="file" multiple={kind === 'image'} accept={kind === 'image' ? '.png,.jpg,.jpeg,.webp' : '.zip,.jar,.exe,.mcworld,.mcpack,.mctemplate'} disabled={busy || disabled} onChange={e => { const files = Array.from(e.target.files ?? []); if (files.length) void start(files); e.target.value = ''; }}/>
-    </label>
+    </label>}
     {disabled && <p className="hint">先保存作品与版本，上传后仍须发布才会公开。</p>}
     {label && <p role="status">{label}</p>}
     {busy && <><progress max={1} value={progress}/><div className="button-row"><button type="button" onClick={() => controller.current?.abort()}>暂停</button><button type="button" onClick={() => void cancel()}><X size={15}/>取消会话</button></div></>}
