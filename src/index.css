@@ -58,6 +58,7 @@
   .brand-wordmark::after { transition: none; }
 }
 @media (forced-colors: active) {
+  .social-icon { forced-color-adjust: none; background-color: LinkText; }
   .brand-wordmark { color: LinkText; background: none; }
   .brand-wordmark::after { content: none; }
 }

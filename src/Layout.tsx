@@ -11,6 +11,7 @@ import CustomCursor from './components/CustomCursor';
 import HotbarNav from './components/HotbarNav';
 import { CurtainLoading } from './components/CurtainLoading';
 import { PageTransition } from './components/PageTransition';
+import { SocialLinks } from './components/SocialLinks';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -276,8 +277,8 @@ export const Layout: React.FC = () => {
       <CurtainLoading isLoading={loading} />
 
       <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-canvas/95 text-content transition-colors duration-300">
-        <div className="mx-auto grid max-w-[1600px] grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1 px-4 py-2 md:min-h-[72px] md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:px-8 md:py-0 lg:px-12">
-          <Link to="/" aria-label={`Fimel Studio / ${t('nav.home')}`} className="brand-link hover-target order-1 inline-flex items-center outline-offset-4 focus-visible:outline-2 focus-visible:outline-diamond">
+        <div className="mx-auto grid max-w-[1600px] grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 px-4 py-2 md:px-8 lg:min-h-[72px] lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:px-12 lg:py-0">
+          <Link to="/" aria-label={`Fimel Studio / ${t('nav.home')}`} className="brand-link hover-target col-start-1 row-start-1 inline-flex items-center outline-offset-4 focus-visible:outline-2 focus-visible:outline-diamond">
             {logoSource === 'none' ? <span aria-hidden="true" className="brand-mark brand-mark-fallback">F</span> : (
               <img src={`${basePath}assets/brand/fimel-logo.${logoSource}`} alt="" width="56" height="56" className="brand-mark dark:invert" decoding="async"
                 onError={() => setLogoSource(current => current === 'svg' ? 'png' : 'none')} />
@@ -285,15 +286,17 @@ export const Layout: React.FC = () => {
             <span className="brand-wordmark" data-wordmark="Fimel Studio">Fimel Studio</span>
           </Link>
 
-          <nav aria-label={t('nav.primary')} className="order-3 col-span-2 flex items-center justify-center gap-1 md:order-2 md:col-span-1 md:gap-2">
+          <nav aria-label={t('nav.primary')} className="col-start-1 row-start-2 flex items-center justify-start gap-1 lg:col-start-2 lg:row-start-1 lg:justify-center lg:gap-2">
             {navigation.map(({ to, label, end }) => (
-              <NavLink key={to} to={to} end={end} className={({ isActive }) => `hover-target relative inline-flex min-h-11 items-center justify-center whitespace-nowrap px-3 text-[13px] font-bold outline-offset-2 transition-colors focus-visible:outline-2 focus-visible:outline-diamond sm:px-5 sm:text-sm md:px-3 lg:px-6 ${isActive ? 'text-content after:absolute after:bottom-1 after:left-3 after:right-3 after:h-0.5 after:bg-diamond' : 'text-content-muted hover:text-content'}`}>
+              <NavLink key={to} to={to} end={end} className={({ isActive }) => `hover-target relative inline-flex min-h-11 items-center justify-center whitespace-nowrap px-1 text-[11px] font-bold outline-offset-2 transition-colors focus-visible:outline-2 focus-visible:outline-diamond min-[400px]:px-3 min-[400px]:text-[13px] sm:px-5 sm:text-sm md:px-3 lg:px-6 ${isActive ? 'text-content after:absolute after:bottom-1 after:left-1 after:right-1 after:h-0.5 after:bg-diamond min-[400px]:after:left-3 min-[400px]:after:right-3' : 'text-content-muted hover:text-content'}`}>
                 {label}
               </NavLink>
             ))}
           </nav>
 
-          <div className="order-2 flex items-center gap-1 justify-self-end md:order-3">
+          <div className="contents lg:col-start-3 lg:row-start-1 lg:flex lg:items-center lg:justify-self-end">
+            <SocialLinks />
+            <div className="header-controls col-start-2 row-start-2 flex items-center gap-1 justify-self-end">
             <div ref={languageRef} className="relative">
               <button onClick={() => setLangMenuOpen((open) => !open)} aria-label={`${t('nav.language')} (${(i18n.resolvedLanguage || i18n.language || 'zh').split('-')[0].toUpperCase()})`} aria-expanded={langMenuOpen} aria-controls="language-options" className="hover-target flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-2 outline-offset-2 transition-colors hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-diamond">
                 <Globe size={17} strokeWidth={1.8} />
@@ -312,13 +315,14 @@ export const Layout: React.FC = () => {
             <button onClick={() => setIsDark((dark) => !dark)} aria-label={t(isDark ? 'nav.theme_light' : 'nav.theme_dark')} title={t(isDark ? 'nav.theme_light' : 'nav.theme_dark')} aria-pressed={isDark} className="hover-target flex min-h-11 min-w-11 items-center justify-center outline-offset-2 transition-colors hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-diamond">
               {isDark ? <Sun size={18} strokeWidth={1.8} /> : <Moon size={18} strokeWidth={1.8} />}
             </button>
+            </div>
           </div>
         </div>
       </header>
 
       <ScrollProgressHud ref={hudRef} activePage={activePage} handleNavClick={handleNavClick} />
 
-      <main ref={mainRef} id="main-content" tabIndex={-1} className="relative z-10 min-h-[70dvh] bg-canvas text-content outline-none">
+      <main ref={mainRef} id="main-content" tabIndex={-1} className="relative z-10 min-h-[70dvh] bg-canvas text-content outline-none md:max-lg:pt-10">
         <PageTransition pageKey={location.pathname}>
           <Outlet context={{ isDark, basePath }} />
         </PageTransition>

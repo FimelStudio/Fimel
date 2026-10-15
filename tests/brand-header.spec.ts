@@ -50,11 +50,11 @@ for (const width of [320, 390, 768, 1024, 1440]) {
       const dimensions = await page.evaluate(() => {
         const brand = document.querySelector('.brand-link')!.getBoundingClientRect();
         const nav = document.querySelector('header nav')!.getBoundingClientRect();
-        const controls = document.querySelector('header nav')!.nextElementSibling!.getBoundingClientRect();
+        const controls = document.querySelector('.header-controls')!.getBoundingClientRect();
         const word = document.querySelector('.brand-wordmark')!.getBoundingClientRect();
         return { brandRight: brand.right, navLeft: nav.left, navRight: nav.right, controlsLeft: controls.left, wordHeight: word.height, headerHeight: document.querySelector('header')!.getBoundingClientRect().height };
       });
-      if (width >= 768) {
+      if (width >= 1024) {
         expect(dimensions.brandRight).toBeLessThanOrEqual(dimensions.navLeft);
         expect(dimensions.navRight).toBeLessThanOrEqual(dimensions.controlsLeft);
         expect(dimensions.headerHeight).toBeLessThanOrEqual(80);
@@ -66,7 +66,7 @@ for (const width of [320, 390, 768, 1024, 1440]) {
   });
 }
 
-test('longer English and Japanese menus stay centered and clear of the wordmark at 768px', async ({ page }) => {
+test('longer English and Japanese menus stay clear of the controls at 768px', async ({ page }) => {
   await page.setViewportSize({ width: 768, height: 900 });
   await page.goto('/#/works');
   for (const language of ['English', '日本語']) {
@@ -75,12 +75,12 @@ test('longer English and Japanese menus stay centered and clear of the wordmark 
     const positions = await page.evaluate(() => {
       const brand = document.querySelector('.brand-link')!.getBoundingClientRect();
       const nav = document.querySelector('header nav')!.getBoundingClientRect();
-      const controls = document.querySelector('header nav')!.nextElementSibling!.getBoundingClientRect();
-      return { brand: brand.right, navStart: nav.left, navEnd: nav.right, controls: controls.left };
+      const controls = document.querySelector('.header-controls')!.getBoundingClientRect();
+      const social = document.querySelector('.header-social')!.getBoundingClientRect();
+      return { brand: brand.right, social: social.left, navEnd: nav.right, controls: controls.left };
     });
-    expect(positions.brand).toBeLessThanOrEqual(positions.navStart);
+    expect(positions.brand).toBeLessThanOrEqual(positions.social);
     expect(positions.navEnd).toBeLessThanOrEqual(positions.controls);
-    expect(Math.abs((positions.navStart + positions.navEnd) / 2 - 384)).toBeLessThan(2);
   }
 });
 
