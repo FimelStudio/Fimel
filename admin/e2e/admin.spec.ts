@@ -42,6 +42,7 @@ test('browser create, localized edit, Markdown preview, real 100 MiB upload, pub
   await page.getByRole('button',{name:'重试续传',exact:true}).click();
   await expect(page.getByText('文件已验证并关联，请保存作品草稿。')).toBeVisible({timeout:150000});await expect(page.locator('.file-row')).toContainText('100.0 MiB');
   const resumed=(await(await page.request.get('/api/uploads/'+oldSession.id)).json()).upload;expect(resumed.status).toBe('complete');expect(resumed.sha256).toMatch(/^[a-f0-9]{64}$/);
+  const privateLink=page.getByRole('link',{name:'下载私有文件',exact:true});await expect(privateLink).toBeVisible();const privateRange=await page.request.get((await privateLink.getAttribute('href'))!,{headers:{Range:'bytes=0-3'}});expect(privateRange.status()).toBe(206);expect([...await privateRange.body()]).toEqual([0x50,0x4b,3,4]);
   await expect(page.getByRole('button',{name:'返回',exact:true})).toBeEnabled();
   await page.getByRole('button',{name:'保存草稿',exact:true}).first().click();await page.getByRole('button',{name:'发布预览'}).click();await expect(page.getByRole('dialog')).toBeVisible();await page.getByRole('button',{name:'确认发布'}).click();await expect(page.getByText('发布成功，公开 manifest 已更新。')).toBeVisible({timeout:60000});
   await mkdir('.artifacts/admin-screenshots',{recursive:true});await page.screenshot({path:'.artifacts/admin-screenshots/editor-light.png',fullPage:true});

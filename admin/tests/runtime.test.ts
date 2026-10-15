@@ -69,8 +69,14 @@ test('native R2 part verification rejects corrupted retries and cleans staging o
   assert.equal((await part(bytes,'0'.repeat(64))).status,422);const invalid=Buffer.alloc(32,7);assert.equal((await part(invalid,createHash('sha256').update(invalid).digest('hex'))).status,422);
   assert.equal((await part(bytes,digest)).status,200);const corrupted=Buffer.from(bytes);corrupted[10]++;assert.equal((await part(corrupted,digest)).status,422);assert.equal((await part(corrupted,createHash('sha256').update(corrupted).digest('hex'))).status,409);
   const bucket=await mf.getR2Bucket('PRIVATE');assert.equal((await bucket.list({prefix:`uploads/temporary/${s.id}/parts/`})).objects.length,0);
+  assert.equal((await req(`files/${s.id}`)).status,404);
   assert.equal((await req(`uploads/${s.id}/complete`,'POST',{sha256:'f'.repeat(64)})).status,409);
   assert.equal((await req(`uploads/${s.id}/complete`,'POST',{sha256:digest})).status,200);const confirmed=await req(`uploads/${s.id}`);const completed=(await confirmed.json()as{upload:Upload}).upload;
+  const download=await req(`files/${s.id}`);assert.equal(download.status,200);assert.deepEqual(Buffer.from(await download.arrayBuffer()),bytes);assert.match(download.headers.get('content-disposition')!,/^attachment/);
+  const partial=await req(`files/${s.id}`,'GET',undefined,{Range:'bytes=0-3'});assert.equal(partial.status,206);assert.equal(partial.headers.get('content-range'),'bytes 0-3/32');assert.deepEqual(Buffer.from(await partial.arrayBuffer()),bytes.subarray(0,4));
+  const suffix=await req(`files/${s.id}`,'GET',undefined,{Range:'bytes=-4'});assert.equal(suffix.status,206);assert.deepEqual(Buffer.from(await suffix.arrayBuffer()),bytes.subarray(28));assert.equal((await req(`files/${s.id}`,'GET',undefined,{Range:'bytes=0-1,3-4'})).status,416);
+  const head=await req(`files/${s.id}`,'HEAD');assert.equal(head.status,200);assert.equal(head.headers.get('content-length'),'32');assert.equal((await head.arrayBuffer()).byteLength,0);
+  assert.equal((await req(`files/${s.id}`,'GET',undefined,{'x-local-test-anonymous':'1'})).status,401);assert.equal((await req(`files/${s.id}`,'GET',undefined,{Range:'bytes=33-'})).status,416);
   await bucket.put(`uploads/temporary/${s.id}/parts/interrupted`,new Uint8Array([1]));assert.equal((await req('uploads/cleanup','POST',{sessionIds:[s.id]})).status,200);
   assert.equal((await bucket.list({prefix:`uploads/temporary/${s.id}/`})).objects.length,0);assert.ok(await bucket.head(completed.asset!.privateKey!));
 });

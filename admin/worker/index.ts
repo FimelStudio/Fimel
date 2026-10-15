@@ -49,6 +49,25 @@ async function route(request: Request, env: AdminEnv, email: string, source?:Aud
   if (path[0] === 'analytics' && path.length === 1 && method === 'GET') return json(await metrics(request,env));
   if (path[0] === 'session' && path.length === 1 && method === 'GET') return json({ authenticated: true, username: email.split('@')[0], actorId: await actorKey(email) });
   if (path[0] === 'uploads') return uploadRoute(request, env.PRIVATE, path.slice(1));
+  if (path[0] === 'files' && path.length === 2 && ['GET','HEAD'].includes(method)) {
+    if(!/^[a-zA-Z0-9-]{1,80}$/.test(path[1]))throw new ApiError(404,'文件不存在。');
+    const stored=await env.PRIVATE.get(`uploads/sessions/${path[1]}.json`);
+    const upload=stored?await stored.json<Upload>():null;const asset=upload?.asset;
+    if(upload?.status!=='complete'||upload.kind!=='file'||!asset?.privateKey||asset.privateKey!==`uploads/verified/${upload.id}/${upload.name}`)throw new ApiError(404,'文件尚未验证或不存在。');
+    const object=await env.PRIVATE.head(asset.privateKey);
+    if(!object||object.size!==asset.size||object.customMetadata?.assetId!==asset.id||object.customMetadata?.workId!==upload.workId||object.customMetadata?.sha256!==asset.sha256)throw new ApiError(404,'文件验证信息不一致。');
+    const headers=new Headers({'Content-Type':upload.mime,'Accept-Ranges':'bytes','Content-Length':String(object.size),'Cache-Control':'no-store','Content-Disposition':`attachment; filename="${upload.name}"; filename*=UTF-8''${encodeURIComponent(upload.displayName??upload.name).replace(/['()*]/g,c=>'%'+c.charCodeAt(0).toString(16).toUpperCase())}`});
+    const range=request.headers.get('range');let start=0,end=object.size-1;
+    if(range){const match=/^bytes=(\d*)-(\d*)$/.exec(range);if(!match||!match[1]&&!match[2])return new Response(null,{status:416,headers:{'Content-Range':`bytes */${object.size}`}});
+      if(match[1]){start=Number(match[1]);end=match[2]?Math.min(Number(match[2]),object.size-1):end;}else{const suffix=Number(match[2]);start=Math.max(0,object.size-suffix);}
+      if(!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start<0||start>=object.size||end<start)return new Response(null,{status:416,headers:{'Content-Range':`bytes */${object.size}`}});
+      headers.set('Content-Range',`bytes ${start}-${end}/${object.size}`);headers.set('Content-Length',String(end-start+1));
+    }
+    if(method==='HEAD')return new Response(null,{status:range?206:200,headers});
+    const body=await env.PRIVATE.get(asset.privateKey,{...(range?{range:{offset:start,length:end-start+1}}:{}),onlyIf:{etagMatches:object.etag}});
+    if(!body||!('body'in body))throw new ApiError(409,'文件版本已改变，请重新下载。');
+    return new Response(body.body,{status:range?206:200,headers});
+  }
   if (path[0] === 'media' && path.length === 2 && method === 'GET') {
     if (!/^[a-zA-Z0-9-]{1,80}$/.test(path[1])) throw new ApiError(404, '图片不存在。');
     const session = await env.PRIVATE.get(`uploads/sessions/${path[1]}.json`);
