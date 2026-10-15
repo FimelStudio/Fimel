@@ -1,9 +1,13 @@
+import type { R2Bucket, RateLimit } from '@cloudflare/workers-types';
+import { collectWorkEvent } from './lib/work-event-worker';
 interface StaticAssetsBinding {
   fetch(request: Request): Promise<Response>;
 }
 
 interface WorkerEnvironment {
   ASSETS: StaticAssetsBinding;
+  PUBLIC?:R2Bucket;
+  METRICS_LIMITER?:RateLimit;
   VITE_SUPABASE_URL?: string;
   VITE_SUPABASE_PUBLISHABLE_KEY?: string;
   VITE_SUPABASE_ANON_KEY?: string;
@@ -85,6 +89,7 @@ const keepSupabaseActive = async (env: WorkerEnvironment) => {
 
 export default {
   fetch(request: Request, env: WorkerEnvironment) {
+    if(new URL(request.url).pathname==='/api/work-events')return collectWorkEvent(request,env.PUBLIC,env.METRICS_LIMITER);
     if (LEGACY_DOWNLOAD_PATHS.has(new URL(request.url).pathname)) {
       return serveLegacyDownload(request, env);
     }

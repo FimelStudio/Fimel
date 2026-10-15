@@ -13,7 +13,7 @@ export async function publicState(bucket: R2Bucket) {
 export async function audit(bucket: R2Bucket, operation: string, workId?: string) {
   await putJson(bucket, `audit/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.json`, { operation, workId, status: 'prepared', time: new Date().toISOString() });
 }
-export async function backup(bucket: R2Bucket, value: unknown, kind: 'library' | 'public') {
+export async function backup(bucket: R2Bucket, value: unknown, kind: 'library' | 'public' | 'site') {
   const id = crypto.randomUUID();
   await putJson(bucket, `backups/${kind}/${id}.json`, { id, kind, time: new Date().toISOString(), value });
   return id;

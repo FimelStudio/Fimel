@@ -49,6 +49,8 @@ test('unconnected analytics shows an explicit error instead of invented traffic'
 
 test('official import previews all 28 works, keeps existing edits and saves only after explicit review',async({page})=>{
   const saved=makeWork();saved.project.slug='existing-private';saved.project.title='保留的私有草稿';let writes=0;
+  const server={schemaVersion:1,works:[saved]};
+  await page.route('**/api/works/*',async route=>{writes++;const input=route.request().postDataJSON();expect(input.base).toBeNull();expect(input.work.id).not.toBe(saved.id);server.works.push(input.work);await route.fulfill({json:{saved:true,library:server,public:{schemaVersion:2,publicationId:'empty',projects:[],releases:{}},publicEtag:'"empty"',etag:'"after-import"'}});});
   await page.route('**/api/library',async route=>{
     if(route.request().method()==='PUT'){writes++;const input=route.request().postDataJSON();expect(input.works).toHaveLength(29);expect(input.works[0]).toEqual(saved);await route.fulfill({json:{saved:true,etag:'"after-import"'}});return;}
     await route.fulfill({json:{library:{schemaVersion:1,works:[saved]},public:{schemaVersion:2,publicationId:'empty',projects:[],releases:{}},publicEtag:'"empty"',etag:'"before-import"'}});
@@ -56,5 +58,15 @@ test('official import previews all 28 works, keeps existing edits and saves only
   await page.goto('/');await page.getByRole('button',{name:'导入现有作品',exact:true}).click();
   const dialog=page.getByRole('dialog',{name:'导入作品预览'});await expect(dialog).toContainText('新增 28 个作品');await expect(dialog.getByRole('row')).toHaveCount(29);expect(writes).toBe(0);
   await dialog.getByRole('button',{name:'合并到编辑区'}).click();await expect(page.getByText('29 个在用作品 · 0 个后台已发布',{exact:true})).toBeVisible();expect(writes).toBe(0);
-  await page.getByRole('button',{name:'保存草稿',exact:true}).click();await expect(page.getByText('草稿已保存到私有存储。')).toBeVisible();expect(writes).toBe(1);
+  await page.getByRole('button',{name:'保存草稿',exact:true}).click();await expect(page.getByText('草稿已保存到私有存储。')).toBeVisible();expect(writes).toBe(28);expect(server.works).toHaveLength(29);expect(server.works[0]).toEqual(saved);
+});
+
+test('生产构建发现新版本时保留编辑，保存成功后才刷新',async({page})=>{
+  let writes=0;
+  await page.route('**/api/works/*',async route=>{writes++;const {work}=route.request().postDataJSON();await route.fulfill({json:{saved:true,etag:'"new-version"',library:{schemaVersion:1,works:[work]},public:{schemaVersion:2,publicationId:'empty',projects:[],releases:{}},publicEtag:'"empty"'}});});
+  await page.goto('/');await page.getByRole('button',{name:'新建作品',exact:true}).click();await page.getByLabel('作品名称',{exact:true}).fill('刷新前保留的编辑');await page.getByLabel('稳定 slug').fill('retain-on-update');
+  await page.route('http://127.0.0.1:4177/',async route=>{if(route.request().isNavigationRequest())return route.continue();const r=await route.fetch();const html=await r.text();await route.fulfill({response:r,body:html.replace(/src="[^"]+\.js"/,'src="/assets/new-release.js"')});});
+  await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+  await expect(page.getByText('后台已有新版本。',{exact:false})).toBeVisible();await expect(page.getByLabel('作品名称',{exact:true})).toHaveValue('刷新前保留的编辑');expect(writes).toBe(0);
+  await page.getByRole('button',{name:'保存全部草稿并刷新',exact:true}).click();await expect(page.getByRole('heading',{name:'作品库',exact:true})).toBeVisible();expect(writes).toBe(1);
 });

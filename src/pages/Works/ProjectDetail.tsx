@@ -6,11 +6,13 @@ import { useProjectCatalogue } from '../../hooks/useProjectCatalogue';
 import { useDownloadCounters } from '../../hooks/useDownloadCounters';
 import { PROJECT_TABS, assetUrl, formatProjectDate, localizedText, projectCopy, projectStatus } from '../../content/projects';
 import type { Project, ProjectTab } from '../../content/projects';
-import { ProjectDownload } from '../../components/ProjectDownload';
+import { ProjectDownloads } from '../../components/ProjectDownloads';
+import type { DownloadRelease } from '../../content/releases';
+import { recordWorkEvent } from '../../lib/work-events';
 
 const ProjectMarkdown = lazy(() => import('../../components/ProjectMarkdown').then((module) => ({ default: module.ProjectMarkdown })));
 
-function Detail({ project }: { project: Project }) {
+function Detail({ project, releases, discordUrl }: { project: Project; releases?: DownloadRelease[]; discordUrl?:string }) {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage ?? i18n.language;
   const locale = language.split('-')[0];
@@ -26,6 +28,7 @@ function Detail({ project }: { project: Project }) {
   const markdownPath = localizedText(markdownSource, language);
   const hasTranslation = typeof markdownSource === 'object' && locale in markdownSource;
   const date = (value?: string) => formatProjectDate(value, language, t('project.unknown'));
+  useEffect(()=>{recordWorkEvent(project.slug,'view');},[project.slug]);
   useEffect(() => {
     const previous = document.title;
     document.title = `${title} | Fimel`;
@@ -46,7 +49,7 @@ function Detail({ project }: { project: Project }) {
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter leading-[1.1] break-words">{title}</h1>
           <p className="mt-4 max-w-[75ch] text-sm sm:text-base leading-relaxed text-gray-600 dark:text-content-muted">{summary}</p>
           <div className="flex flex-wrap gap-3 mt-6 items-start">
-            <ProjectDownload project={project} onDownload={project.downloadSlug ? () => { void recordDownload(project.downloadSlug!); } : undefined} />
+            <ProjectDownloads project={project} releases={releases} onDownload={() => { recordWorkEvent(project.slug,'download');if(project.downloadSlug)void recordDownload(project.downloadSlug); }} />
             {project.store && <a href={project.store} target="_blank" rel="noopener noreferrer" className={`${buttonBase} bg-obsidian dark:bg-diamond text-white dark:text-obsidian`}><ExternalLink size={16} aria-hidden />{t('project.store')}</a>}
             {project.repository && <a href={project.repository} target="_blank" rel="noopener noreferrer" className={secondaryButton}><Code size={16} aria-hidden />{t('project.repository')}</a>}
           </div>
@@ -110,7 +113,7 @@ function Detail({ project }: { project: Project }) {
           <section className="space-y-2 text-sm">
             {project.issues && <a href={project.issues} target="_blank" rel="noopener noreferrer" className="hover-target flex gap-2 items-center min-h-9 hover:underline">{t('project.issues')}<ArrowUpRight aria-hidden size={14} /></a>}
             {project.source && <a href={project.source.url} target="_blank" rel="noopener noreferrer" className="hover-target flex gap-2 items-center min-h-9 hover:underline">{t('project.source')}<ArrowUpRight aria-hidden size={14} /></a>}
-            <a href="https://discord.gg/X9aVJJVvA" target="_blank" rel="noopener noreferrer" className="hover-target flex gap-2 items-center min-h-9 hover:underline">{t('project.discord')}<ArrowUpRight aria-hidden size={14} /></a>
+            <a href={discordUrl??'https://discord.gg/X9aVJJVvA'} target="_blank" rel="noopener noreferrer" className="hover-target flex gap-2 items-center min-h-9 hover:underline">{t('project.discord')}<ArrowUpRight aria-hidden size={14} /></a>
             <Link to="/studio" state={{ scrollTo: '#contact' }} className="hover-target flex gap-2 items-center min-h-9 hover:underline">{t('project.support')}<ArrowUpRight aria-hidden size={14} /></Link>
           </section>
         </aside>
@@ -122,10 +125,10 @@ function Detail({ project }: { project: Project }) {
 export function ProjectDetail() {
   const { slug } = useParams();
   const { t } = useTranslation();
-  const { status, projects, retry, fallback } = useProjectCatalogue();
+  const { status, projects, releases, site, retry, fallback } = useProjectCatalogue();
   const project = projects.find((entry) => entry.slug === slug);
   if (status === 'idle' || status === 'loading') return <div role="status" className="pt-40 pb-24 px-6 min-h-[75dvh] max-w-[1320px] mx-auto text-gray-600 dark:text-content-muted">{t('catalogue.loading')}</div>;
   if (status === 'error') return <div role="alert" className="pt-40 pb-24 px-6 min-h-[75dvh]"><p>{t('catalogue.error')}</p><button type="button" onClick={() => void retry()} className="mt-4 min-h-11 border border-current px-4">{t('catalogue.retry')}</button></div>;
   if (!project) return <div className="pt-40 pb-24 px-6 min-h-[75dvh] max-w-[1320px] mx-auto text-obsidian dark:text-content"><h1 className="text-3xl font-bold">{t('project.not_found')}</h1><Link to="/works" className="inline-flex items-center gap-2 mt-5 min-h-11"><ArrowLeft size={16} />{t('project.back')}</Link></div>;
-  return <>{fallback && <p role="status" className="px-6 pt-28 text-sm text-content-muted">{t('catalogue.fallback')}</p>}<Detail key={project.slug} project={project} /></>;
+  return <>{fallback && <p role="status" className="px-6 pt-28 text-sm text-content-muted">{t('catalogue.fallback')}</p>}<Detail key={project.slug} project={project} releases={releases?.[project.slug]} discordUrl={site?.contact.discord}/></>;
 }

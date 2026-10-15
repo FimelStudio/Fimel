@@ -54,7 +54,7 @@ test('browser create, localized edit, Markdown preview, real 100 MiB upload, pub
 test('two browser tabs show conflict and preserve unsaved edits',async({page,context})=>{
   await page.goto('/');await expect(page.locator('.work-row').first()).toBeVisible();await page.locator('.work-row').first().click();const second=await context.newPage();await second.goto('/');await second.locator('.work-row').first().click();
   await page.getByLabel('作品名称',{exact:true}).fill(`窗口 A 修改 ${Date.now()}`);await page.getByRole('button',{name:'保存草稿',exact:true}).first().click();await expect(page.getByText('草稿已保存到私有存储。')).toBeVisible();
-  await second.getByLabel('作品名称',{exact:true}).fill('窗口 B 未保存');await second.getByRole('button',{name:'保存草稿',exact:true}).first().click();await expect(second.getByRole('alert')).toContainText('其他窗口修改');await expect(second.getByLabel('作品名称',{exact:true})).toHaveValue('窗口 B 未保存');await second.close();
+  await second.getByLabel('作品名称',{exact:true}).fill('窗口 B 未保存');await second.getByRole('button',{name:'保存草稿',exact:true}).first().click();await expect(second.getByRole('alert')).toContainText('其他管理员修改');await expect(second.getByLabel('作品名称',{exact:true})).toHaveValue('窗口 B 未保存');await second.close();
 });
 test('real Chinese-name image batch uploads retain both images and publish a chosen cover',async({page})=>{
   const slug=`image-test-${Date.now()}`;

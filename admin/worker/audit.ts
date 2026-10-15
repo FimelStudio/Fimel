@@ -5,6 +5,8 @@ import { validateLibrary } from '../shared/validation';
 import { ApiError, putJson, readJson } from './http';
 import { libraryState } from './storage';
 import type { ServerSecrets } from './auth';
+import type { SiteContent } from '../../src/content/site-content';
+import { stable } from '../shared/revisions';
 
 export async function actorKey(email:string):Promise<string> {
   const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(email.trim().toLowerCase()));
@@ -46,16 +48,25 @@ export function libraryChanges(before:Library,after:Library):AuditChange[] {
 function operation(request:Request):string|undefined {
   const p=new URL(request.url).pathname.split('/').filter(Boolean).slice(1);
   if(p[0]==='library'&&p.length===1&&request.method==='PUT')return 'save-library';
+  if(p[0]==='works'&&p.length===2&&request.method==='PUT')return 'save-work';
+  if(p[0]==='site'&&request.method==='PUT')return 'save-site';
+  if(p[0]==='site'&&p[1]==='publish'&&request.method==='POST')return 'publish-site';
   if(['publish','unpublish','restore'].includes(p[0])&&request.method==='POST')return p[0]==='restore'?`restore-${p[1]}`:p[0];
   if(p[0]==='uploads'&&!(p[2]==='parts')){if(p[1]==='cleanup'&&request.method==='POST')return 'cleanup-temporary';if(p.length===1&&request.method==='POST')return 'start-upload';if(p[2]==='complete'&&request.method==='POST')return 'complete-upload';if(p.length===2&&request.method==='DELETE')return 'cancel-upload';}
 }
-export type AuditedSource={library:Awaited<ReturnType<typeof libraryState>>;candidate?:{value:unknown;errors:string[]}};
+export type AuditedSource={library:Awaited<ReturnType<typeof libraryState>>;candidate?:{value:unknown;errors:string[]};recordWorkChange?:(before:Work|null,after:Work)=>void;recordSiteChange?:(before:SiteContent|undefined,after:SiteContent)=>void};
 export async function runAudited(request:Request,bucket:R2Bucket,email:string,run:(source?:AuditedSource)=>Promise<Response>):Promise<Response> {
   const op=operation(request);if(!op)return run();
   const source=await libraryState(bucket);const p=new URL(request.url).pathname.split('/').filter(Boolean).slice(1);
   const prepared:AuditedSource={library:source};const changes:AuditChange[]=[];if(op==='save-library'){const value=await readJson(request);const errors=validateLibrary(value,true);prepared.candidate={value,errors};if(errors.length===0)changes.push(...libraryChanges(source.value,value as Library));}
+  if(op==='save-work')prepared.recordWorkChange=(before,after)=>{changes.splice(0,changes.length,...libraryChanges({schemaVersion:1,works:before?[before]:[]},{schemaVersion:1,works:[after]}));};
+  if(['save-site','publish-site','restore-site'].includes(op))prepared.recordSiteChange=(before,after)=>{
+    const names={featured:'首页精选与顺序',studio:'工作室与联系文案',contact:'公开联系方式',updates:'近期更新'};
+    const fields=(Object.keys(names)as(keyof typeof names)[]).filter(k=>stable(before?.[k])!==stable(after[k])).map(k=>({name:names[k],before:before?summary(before[k]):'未发布',after:summary(after[k])}));
+    changes.splice(0,changes.length,...(fields.length?[{workId:'site-content',slug:'site-content',title:'网站内容',action:'updated' as const,fields}]:[]));
+  };
   if(op==='restore-library'&&/^[a-zA-Z0-9-]{1,80}$/.test(p[2]??'')){const stored=await bucket.get(`backups/library/${p[2]}.json`);if(stored){const snapshot=await stored.json<{value:Library}>();if(validateLibrary(snapshot.value).length===0)changes.push(...libraryChanges(source.value,snapshot.value));}}
-  let workId=['publish','unpublish'].includes(op)?p[1]:undefined;const uploadId=p[0]==='uploads'&&p[1]!=='cleanup'?p[1]:undefined;
+  let workId=['publish','unpublish','save-work'].includes(op)?p[1]:undefined;const uploadId=p[0]==='uploads'&&p[1]!=='cleanup'?p[1]:undefined;
   if(op==='start-upload'){const input=await readJson(request.clone(),4096) as {workId?:string};if(source.value.works.some(w=>w.id===input.workId))workId=input.workId;}
   if(uploadId&&/^[a-zA-Z0-9-]{1,80}$/.test(uploadId)){const stored=await bucket.get(`uploads/sessions/${uploadId}.json`);if(stored)workId=(await stored.json<{workId:string}>()).workId;}
   const time=new Date().toISOString(),id=crypto.randomUUID();const key=`audit/${time.slice(0,10)}/${time.replaceAll(':','-')}-${id}.json`;

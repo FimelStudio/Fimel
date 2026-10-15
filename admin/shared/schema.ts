@@ -29,6 +29,7 @@ const schema = {
           type: 'object', additionalProperties: false, required: ['id', 'label', 'date', 'gameVersions', 'status', 'changelog', 'files'],
           properties: { id, label: { type: 'string', pattern: '^[a-zA-Z0-9][a-zA-Z0-9._+-]{0,79}$' }, date: { type: 'string', format: 'date' },
             gameVersions: { type: 'array', maxItems: 30, items: { type: 'string', maxLength: 80 } }, status: { enum: ['draft', 'released'] },
+            loaders: { type: 'array', maxItems: 30, items: { type: 'string', maxLength: 80 } }, platforms: { type: 'array', maxItems: 30, items: { type: 'string', maxLength: 80 } },
             changelog: localized, files: { type: 'array', maxItems: 30, items: asset },
           },
         } },

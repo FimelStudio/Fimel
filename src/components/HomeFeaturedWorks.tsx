@@ -13,7 +13,8 @@ type PreviewProps = {
 
 export function HomeFeaturedWorks({ onPreview, onPreviewEnd }: PreviewProps) {
   const { t, i18n } = useTranslation();
-  const { projects, status, retry } = useProjectCatalogue();
+  const { projects, status, retry, site } = useProjectCatalogue();
+  const featured = site?.featured ?? HOME_FEATURED;
   const language = i18n.resolvedLanguage ?? i18n.language;
   const select = (slugs: readonly string[], group: 'maps' | 'released' | 'development') => slugs
     .map(slug => projects.find(project => project.slug === slug))
@@ -44,7 +45,7 @@ export function HomeFeaturedWorks({ onPreview, onPreviewEnd }: PreviewProps) {
           <Link to="/works?type=bedrock" className={`${linkClasses} flex items-center gap-2 border-b border-current pb-2 text-sm text-obsidian dark:text-content hover:text-brand`}>{t('catalogue.types.bedrock')} <ArrowUpRight aria-hidden size={16} /></Link>
         </div>
         <div className="grid lg:grid-cols-3 gap-6" data-featured-group="maps">
-          {select(HOME_FEATURED.maps, 'maps').map(project => {
+          {select(featured.maps, 'maps').map(project => {
             const { title, summary, tags } = projectCopy(project, t, language);
             return (
               <article key={project.slug} className="group relative" onMouseEnter={() => preview(project)} onMouseLeave={onPreviewEnd}>
@@ -70,7 +71,7 @@ export function HomeFeaturedWorks({ onPreview, onPreviewEnd }: PreviewProps) {
       <div>
         <h3 className="mb-8 text-3xl md:text-5xl font-black tracking-tighter text-obsidian dark:text-content">{t('homeFeatured.released')}</h3>
         <div className="grid lg:grid-cols-[1.15fr_1fr] gap-5" data-featured-group="released">
-          {select(HOME_FEATURED.released, 'released').map((project, index) => {
+          {select(featured.released, 'released').map((project, index) => {
             const { title, summary, tags } = projectCopy(project, t, language);
             return (
               <Link key={project.slug} to={`/works/${project.slug}`} className={`${linkClasses} border border-obsidian/10 dark:border-line bg-white/50 dark:bg-surface p-6 md:p-8 hover:border-brand transition-colors ${index === 0 ? 'lg:row-span-2 flex flex-col' : 'flex flex-col sm:flex-row items-start gap-6'}`}>
@@ -91,7 +92,7 @@ export function HomeFeaturedWorks({ onPreview, onPreviewEnd }: PreviewProps) {
       <div>
         <h3 className="mb-8 text-3xl md:text-5xl font-black tracking-tighter text-obsidian dark:text-content">{t('homeFeatured.development')}</h3>
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8" data-featured-group="development">
-          {select(HOME_FEATURED.development, 'development').map(project => {
+          {select(featured.development, 'development').map(project => {
             const { title, summary, tags } = projectCopy(project, t, language);
             return (
               <Link key={project.slug} to={`/works/${project.slug}`} className={`${linkClasses} border-t border-obsidian/15 dark:border-line pt-6 text-obsidian dark:text-content`}>

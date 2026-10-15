@@ -11,6 +11,14 @@ import { runAudited, auditFeed, actorKey } from './audit';
 import type { AuditedSource } from './audit';
 import { metrics } from './analytics';
 import type { AnalyticsSecrets } from './analytics';
+import { saveWork } from './work-save';
+import { publishedPreview } from './published-preview';
+import { siteRoute, SITE_KEY } from './site-content';
+import { siteContentErrors } from '../../src/content/site-content';
+import type { SiteContent } from '../../src/content/site-content';
+import { workEventKey } from '../../src/content/work-events';
+import type { WorkEventDay } from '../../src/content/work-events';
+import { publicationFingerprint } from '../shared/revisions';
 export type AdminEnv = Env & ServerSecrets & AnalyticsSecrets;
 export async function handle(request: Request, env: AdminEnv, ctx: AccessContext): Promise<Response> {
   const requestId = crypto.randomUUID();
@@ -38,6 +46,9 @@ export async function handle(request: Request, env: AdminEnv, ctx: AccessContext
 async function route(request: Request, env: AdminEnv, email: string, source?:AuditedSource): Promise<Response> {
   const path = new URL(request.url).pathname.split('/').filter(Boolean).slice(1);
   const method = request.method;
+  if(path[0]==='site'&&(path.length===1||path.length===2&&path[1]==='publish'))return siteRoute(request,env.PRIVATE,env.PUBLIC,path.length===2,source?.recordSiteChange);
+  if (path[0] === 'published' && path.length === 2 && method === 'GET' && /^[a-zA-Z0-9-]{1,80}$/.test(path[1])) return publishedPreview(path[1],env.PRIVATE,env.PUBLIC);
+  if (path[0] === 'works' && path.length === 2 && method === 'PUT' && /^[a-zA-Z0-9-]{1,80}$/.test(path[1])) return saveWork(request, env.PRIVATE, env.PUBLIC, path[1],source?.recordWorkChange);
   if (path[0] === 'import-source' && path.length === 1 && method === 'GET') {
     const response = await env.ASSETS.fetch(new Request(new URL('/migration/library.json',request.url)));
     if (!response.ok) throw new ApiError(503,'现有作品导入文件尚未构建，请联系维护者。');
@@ -46,7 +57,12 @@ async function route(request: Request, env: AdminEnv, email: string, source?:Aud
     return json({library,source:'现有官网作品快照'});
   }
   if (path[0] === 'audit' && path.length === 1 && method === 'GET') return json(await auditFeed(request,env.PRIVATE,env,email));
-  if (path[0] === 'analytics' && path.length === 1 && method === 'GET') return json(await metrics(request,env));
+  if (path[0] === 'analytics' && path.length === 1 && method === 'GET') {
+    const feed=await metrics(request,env);const days:string[]=[];for(let d=new Date(feed.from);d.getTime()<Date.parse(feed.to);d.setUTCDate(d.getUTCDate()+1))days.push(d.toISOString().slice(0,10));
+    const records=await Promise.all(days.map(async date=>{const stored=await env.PUBLIC.get(workEventKey(date));return stored?stored.json<WorkEventDay>():null;}));
+    const workEvents=records.flatMap(day=>day?Object.entries(day.works).map(([slug,c])=>({date:day.date,slug,...c})):[]);
+    return json({...feed,workEvents,workEventsAvailable:records.some(Boolean)});
+  }
   if (path[0] === 'session' && path.length === 1 && method === 'GET') return json({ authenticated: true, username: email.split('@')[0], actorId: await actorKey(email) });
   if (path[0] === 'uploads') return uploadRoute(request, env.PRIVATE, path.slice(1));
   if (path[0] === 'files' && path.length === 2 && ['GET','HEAD'].includes(method)) {
@@ -115,8 +131,10 @@ async function route(request: Request, env: AdminEnv, email: string, source?:Aud
       }
       const prepared = await publishedWork(work, env.PRIVATE, env.PUBLIC, publicationId);
       after.projects.push(prepared.project); after.releases[slug] = prepared.releases;
+      after.publicationStates ??= {};
+      after.publicationStates[slug] = { fingerprint: await publicationFingerprint(work), publishedAt: new Date().toISOString(), savedAt: work.updatedAt };
       after.projects.sort((a,b) => (state.value.works.find(w => w.project.slug === a.slug)?.order ?? 0) - (state.value.works.find(w => w.project.slug === b.slug)?.order ?? 0));
-    } else delete after.releases[slug];
+    } else { delete after.releases[slug]; if (after.publicationStates) delete after.publicationStates[slug]; }
     const latestSource=await env.PRIVATE.head(LIBRARY_KEY);
     if(latestSource?.httpEtag!==state.etag)throw new ApiError(409,'发布期间草稿已被修改，请重新加载后重试。');
     const result = await commitPublication(env.PRIVATE, env.PUBLIC, published.value, after, published.etag);
@@ -127,9 +145,14 @@ async function route(request: Request, env: AdminEnv, email: string, source?:Aud
     return json({ snapshots: objects.sort((a,b) => b.uploaded.getTime() - a.uploaded.getTime()).slice(0,100).map(o => ({ key: o.key, time: o.uploaded.toISOString() })) });
   }
   if (path[0] === 'restore' && path.length === 3 && method === 'POST') {
-    if (!['library', 'public'].includes(path[1]) || !/^[a-zA-Z0-9-]{1,80}$/.test(path[2])) throw new ApiError(422, '恢复编号不合法。');
+    if (!['library', 'public','site'].includes(path[1]) || !/^[a-zA-Z0-9-]{1,80}$/.test(path[2])) throw new ApiError(422, '恢复编号不合法。');
     const object = await env.PRIVATE.get(`backups/${path[1]}/${path[2]}.json`); if (!object) throw new ApiError(404, '备份不存在。');
     const snapshot = await object.json<{ value: Library | PublicManifest }>();
+    if(path[1]==='site'){
+      const source=snapshot.value as unknown as {site:SiteContent;updatedAt:string|null};const errors=siteContentErrors(source.site);if(errors.length)throw new ApiError(422,errors.join('\n'));
+      const current=await env.PRIVATE.get(SITE_KEY);expectMatch(request,current?.httpEtag??'"empty"');if(current)await backup(env.PRIVATE,await current.json(),'site');
+      const saved=await putJson(env.PRIVATE,SITE_KEY,{site:source.site,updatedAt:new Date().toISOString()},current?.httpEtag??'"empty"');return json({restored:true},200,saved.httpEtag);
+    }
     if (path[1] === 'library') {
       const state = await libraryState(env.PRIVATE); expectMatch(request, state.etag);
       const errors = validateLibrary(snapshot.value); if (errors.length) throw new ApiError(422, errors.join('\n'));

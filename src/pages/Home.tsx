@@ -9,11 +9,16 @@ import { TiltGlareCard } from '../components/TiltGlareCard';
 import { Magnetic } from '../components/Magnetic';
 import { HomeFeaturedWorks } from '../components/HomeFeaturedWorks';
 import { DeferredParticleScene } from '../components/DeferredScene';
+import { RecentUpdates } from '../components/RecentUpdates';
+import { useProjectCatalogue } from '../hooks/useProjectCatalogue';
+import { localizedText } from '../content/projects';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
   const { isDark, basePath } = useOutletContext<{ isDark: boolean; basePath: string }>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { site } = useProjectCatalogue();
+  const studioTitle=localizedText(site?.studio.title,i18n.resolvedLanguage??'zh');
   const [tooltipContent, setTooltipContent] = useState<{ visible: boolean; title: string; category: string; desc: string }>({ visible: false, title: '', category: '', desc: '' });
   const openCategory = (event: React.MouseEvent<HTMLAnchorElement>, path: string) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
@@ -222,13 +227,13 @@ export const Home: React.FC = () => {
           <div className="w-full lg:w-[55%] lg:py-[20vh] pt-16 pb-32 space-y-[15vh] lg:space-y-[35vh]">
             <div className="min-h-[30vh] lg:min-h-[50vh] flex flex-col justify-center">
               <h2 className="reveal-up text-5xl md:text-6xl lg:text-8xl font-bold leading-[1.1] tracking-tighter text-obsidian dark:text-content transition-colors duration-700 max-w-lg">
-                <Trans i18nKey="about.title" />
+                {studioTitle||<Trans i18nKey="about.title" />}
               </h2>
             </div>
             
             <div className="min-h-[30vh] lg:min-h-[50vh] flex flex-col justify-center">
               <ScrollTextReveal className="text-2xl md:text-3xl lg:text-4xl text-obsidian dark:text-content font-bold leading-relaxed transition-colors duration-700">
-                {t('about.desc')}
+                {localizedText(site?.studio.description,i18n.resolvedLanguage??'zh')||t('about.desc')}
               </ScrollTextReveal>
             </div>
 
@@ -277,6 +282,7 @@ export const Home: React.FC = () => {
         </div>
       </section>
 
+      <RecentUpdates />
       {/* Quick Tooltip logic since Home has custom hover tooltips */}
       <div 
         ref={tooltipRef}

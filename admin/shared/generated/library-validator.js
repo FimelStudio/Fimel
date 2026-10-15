@@ -242,7 +242,7 @@ var require_stdin = __commonJS({
   "<stdin>"(exports, module) {
     module.exports = validate20;
     module.exports.default = validate20;
-    var schema31 = { "$schema": "https://json-schema.org/draft/2020-12/schema", "type": "object", "additionalProperties": false, "required": ["schemaVersion", "works"], "properties": { "schemaVersion": { "const": 1 }, "works": { "type": "array", "maxItems": 500, "items": { "type": "object", "additionalProperties": false, "required": ["id", "project", "workflow", "order", "markdown", "gallery", "versions", "createdAt", "updatedAt"], "properties": { "id": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{0,79}$" }, "project": { "type": "object", "required": ["slug", "type", "title", "image", "status", "platform", "creators", "content", "tags"], "properties": { "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" }, "type": { "enum": ["bedrock", "java", "datapacks", "tools", "mods"] }, "title": { "$ref": "#/$defs/localizedText" }, "summary": { "$ref": "#/$defs/localizedText" }, "translations": { "type": "object", "properties": { "title": { "type": "string" }, "summary": { "type": "string" } }, "additionalProperties": false }, "tags": { "type": "array", "maxItems": 4, "uniqueItems": true, "description": "Explicit genre/purpose IDs from src/content/project-tags.json. Leave empty when the genre is not verified.", "items": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" } }, "image": { "type": "string", "minLength": 0 }, "imageFit": { "enum": ["cover", "contain"] }, "status": { "enum": ["released", "development", "planned"] }, "platform": { "type": "array", "items": { "type": "string" }, "minItems": 1 }, "creators": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["name"], "properties": { "name": { "type": "string", "minLength": 1 }, "url": { "type": "string", "format": "uri" } }, "additionalProperties": false } }, "published": { "type": "string", "format": "date" }, "updated": { "type": "string", "format": "date" }, "version": { "type": "string" }, "size": { "type": "string" }, "downloads": { "type": "integer", "minimum": 0 }, "rating": { "type": "string" }, "store": { "type": "string", "format": "uri" }, "repository": { "type": "string", "format": "uri" }, "issues": { "type": "string", "format": "uri" }, "download": { "type": "string" }, "downloadUrl": { "type": "string", "format": "uri", "pattern": "^https://download\\.studiofimel\\.com/works/(bedrock|java|datapacks|tools|mods)/" }, "downloadSlug": { "type": "string" }, "latestReleaseRepo": { "type": "string", "pattern": "^[^/]+/[^/]+$" }, "releasePage": { "type": "string", "format": "uri" }, "fallbackDownload": { "type": "string" }, "fallbackFileName": { "type": "string" }, "content": { "type": "object", "required": ["description", "changelog", "versions"], "properties": { "description": { "$ref": "#/$defs/localizedText" }, "changelog": { "$ref": "#/$defs/localizedText" }, "versions": { "$ref": "#/$defs/localizedText" } }, "additionalProperties": false }, "source": { "type": "object", "required": ["label", "url"], "properties": { "label": { "type": "string" }, "url": { "type": "string", "format": "uri" }, "retrieved": { "type": "string", "format": "date" } }, "additionalProperties": false } }, "additionalProperties": false }, "legacy": { "type": "object", "required": ["slug", "type", "title", "image", "status", "platform", "creators", "content", "tags"], "properties": { "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" }, "type": { "enum": ["bedrock", "java", "datapacks", "tools", "mods"] }, "title": { "$ref": "#/$defs/localizedText" }, "summary": { "$ref": "#/$defs/localizedText" }, "translations": { "type": "object", "properties": { "title": { "type": "string" }, "summary": { "type": "string" } }, "additionalProperties": false }, "tags": { "type": "array", "maxItems": 4, "uniqueItems": true, "description": "Explicit genre/purpose IDs from src/content/project-tags.json. Leave empty when the genre is not verified.", "items": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" } }, "image": { "type": "string", "minLength": 1 }, "imageFit": { "enum": ["cover", "contain"] }, "status": { "enum": ["released", "development", "planned"] }, "platform": { "type": "array", "items": { "type": "string" }, "minItems": 1 }, "creators": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["name"], "properties": { "name": { "type": "string", "minLength": 1 }, "url": { "type": "string", "format": "uri" } }, "additionalProperties": false } }, "published": { "type": "string", "format": "date" }, "updated": { "type": "string", "format": "date" }, "version": { "type": "string" }, "size": { "type": "string" }, "downloads": { "type": "integer", "minimum": 0 }, "rating": { "type": "string" }, "store": { "type": "string", "format": "uri" }, "repository": { "type": "string", "format": "uri" }, "issues": { "type": "string", "format": "uri" }, "download": { "type": "string" }, "downloadUrl": { "type": "string", "format": "uri", "pattern": "^https://download\\.studiofimel\\.com/works/(bedrock|java|datapacks|tools|mods)/" }, "downloadSlug": { "type": "string" }, "latestReleaseRepo": { "type": "string", "pattern": "^[^/]+/[^/]+$" }, "releasePage": { "type": "string", "format": "uri" }, "fallbackDownload": { "type": "string" }, "fallbackFileName": { "type": "string" }, "content": { "type": "object", "required": ["description", "changelog", "versions"], "properties": { "description": { "$ref": "#/$defs/localizedText" }, "changelog": { "$ref": "#/$defs/localizedText" }, "versions": { "$ref": "#/$defs/localizedText" } }, "additionalProperties": false }, "source": { "type": "object", "required": ["label", "url"], "properties": { "label": { "type": "string" }, "url": { "type": "string", "format": "uri" }, "retrieved": { "type": "string", "format": "date" } }, "additionalProperties": false } }, "additionalProperties": false }, "workflow": { "enum": ["draft", "ready", "archived"] }, "order": { "type": "integer", "minimum": 0, "maximum": 1e5 }, "createdAt": { "type": "string", "format": "date-time" }, "updatedAt": { "type": "string", "format": "date-time" }, "coverId": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{0,79}$" }, "markdown": { "type": "object", "required": ["description", "changelog", "versions"], "additionalProperties": false, "properties": { "description": { "type": "object", "additionalProperties": false, "maxProperties": 3, "properties": { "zh": { "type": "string", "maxLength": 2e5 }, "en": { "type": "string", "maxLength": 2e5 }, "ja": { "type": "string", "maxLength": 2e5 } } }, "changelog": { "type": "object", "additionalProperties": false, "maxProperties": 3, "properties": { "zh": { "type": "string", "maxLength": 2e5 }, "en": { "type": "string", "maxLength": 2e5 }, "ja": { "type": "string", "maxLength": 2e5 } } }, "versions": { "type": "object", "additionalProperties": false, "maxProperties": 3, "properties": { "zh": { "type": "string", "maxLength": 2e5 }, "en": { "type": "string", "maxLength": 2e5 }, "ja": { "type": "string", "maxLength": 2e5 } } } } }, "gallery": { "type": "array", "maxItems": 100, "items": { "type": "object", "additionalProperties": false, "required": ["id", "name", "size", "mime", "sha256"], "properties": { "id": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{0,79}$" }, "name": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,149}$" }, "displayName": { "type": "string", "minLength": 1, "maxLength": 200, "pattern": "^[^\0-\x7F]+$" }, "size": { "type": "integer", "minimum": 1, "maximum": 1073741824 }, "mime": { "type": "string" }, "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "privateKey": { "type": "string", "pattern": "^uploads/verified/[a-zA-Z0-9-]+/[a-zA-Z0-9._-]+$" }, "publicUrl": { "type": "string", "format": "uri" }, "primary": { "type": "boolean" } } } }, "versions": { "type": "array", "maxItems": 100, "items": { "type": "object", "additionalProperties": false, "required": ["id", "label", "date", "gameVersions", "status", "changelog", "files"], "properties": { "id": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{0,79}$" }, "label": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._+-]{0,79}$" }, "date": { "type": "string", "format": "date" }, "gameVersions": { "type": "array", "maxItems": 30, "items": { "type": "string", "maxLength": 80 } }, "status": { "enum": ["draft", "released"] }, "changelog": { "anyOf": [{ "type": "string", "maxLength": 2e5 }, { "type": "object", "properties": { "zh": { "type": "string", "maxLength": 2e5 }, "en": { "type": "string", "maxLength": 2e5 }, "ja": { "type": "string", "maxLength": 2e5 } }, "minProperties": 1, "additionalProperties": false }] }, "files": { "type": "array", "maxItems": 30, "items": { "type": "object", "additionalProperties": false, "required": ["id", "name", "size", "mime", "sha256"], "properties": { "id": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{0,79}$" }, "name": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,149}$" }, "displayName": { "type": "string", "minLength": 1, "maxLength": 200, "pattern": "^[^\0-\x7F]+$" }, "size": { "type": "integer", "minimum": 1, "maximum": 1073741824 }, "mime": { "type": "string" }, "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "privateKey": { "type": "string", "pattern": "^uploads/verified/[a-zA-Z0-9-]+/[a-zA-Z0-9._-]+$" }, "publicUrl": { "type": "string", "format": "uri" }, "primary": { "type": "boolean" } } } } } } } } } } }, "$defs": { "localizedText": { "oneOf": [{ "type": "string", "minLength": 1 }, { "type": "object", "properties": { "zh": { "type": "string", "minLength": 1 }, "en": { "type": "string", "minLength": 1 }, "ja": { "type": "string", "minLength": 1 } }, "minProperties": 1, "additionalProperties": false }] }, "project": { "type": "object", "required": ["slug", "type", "title", "image", "status", "platform", "creators", "content", "tags"], "properties": { "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" }, "type": { "enum": ["bedrock", "java", "datapacks", "tools", "mods"] }, "title": { "$ref": "#/$defs/localizedText" }, "summary": { "$ref": "#/$defs/localizedText" }, "translations": { "type": "object", "properties": { "title": { "type": "string" }, "summary": { "type": "string" } }, "additionalProperties": false }, "tags": { "type": "array", "maxItems": 4, "uniqueItems": true, "description": "Explicit genre/purpose IDs from src/content/project-tags.json. Leave empty when the genre is not verified.", "items": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" } }, "image": { "type": "string", "minLength": 1 }, "imageFit": { "enum": ["cover", "contain"] }, "status": { "enum": ["released", "development", "planned"] }, "platform": { "type": "array", "items": { "type": "string" }, "minItems": 1 }, "creators": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["name"], "properties": { "name": { "type": "string", "minLength": 1 }, "url": { "type": "string", "format": "uri" } }, "additionalProperties": false } }, "published": { "type": "string", "format": "date" }, "updated": { "type": "string", "format": "date" }, "version": { "type": "string" }, "size": { "type": "string" }, "downloads": { "type": "integer", "minimum": 0 }, "rating": { "type": "string" }, "store": { "type": "string", "format": "uri" }, "repository": { "type": "string", "format": "uri" }, "issues": { "type": "string", "format": "uri" }, "download": { "type": "string" }, "downloadUrl": { "type": "string", "format": "uri", "pattern": "^https://download\\.studiofimel\\.com/works/(bedrock|java|datapacks|tools|mods)/" }, "downloadSlug": { "type": "string" }, "latestReleaseRepo": { "type": "string", "pattern": "^[^/]+/[^/]+$" }, "releasePage": { "type": "string", "format": "uri" }, "fallbackDownload": { "type": "string" }, "fallbackFileName": { "type": "string" }, "content": { "type": "object", "required": ["description", "changelog", "versions"], "properties": { "description": { "$ref": "#/$defs/localizedText" }, "changelog": { "$ref": "#/$defs/localizedText" }, "versions": { "$ref": "#/$defs/localizedText" } }, "additionalProperties": false }, "source": { "type": "object", "required": ["label", "url"], "properties": { "label": { "type": "string" }, "url": { "type": "string", "format": "uri" }, "retrieved": { "type": "string", "format": "date" } }, "additionalProperties": false } }, "additionalProperties": false } } };
+    var schema31 = { "$schema": "https://json-schema.org/draft/2020-12/schema", "type": "object", "additionalProperties": false, "required": ["schemaVersion", "works"], "properties": { "schemaVersion": { "const": 1 }, "works": { "type": "array", "maxItems": 500, "items": { "type": "object", "additionalProperties": false, "required": ["id", "project", "workflow", "order", "markdown", "gallery", "versions", "createdAt", "updatedAt"], "properties": { "id": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{0,79}$" }, "project": { "type": "object", "required": ["slug", "type", "title", "image", "status", "platform", "creators", "content", "tags"], "properties": { "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" }, "type": { "enum": ["bedrock", "java", "datapacks", "tools", "mods"] }, "title": { "$ref": "#/$defs/localizedText" }, "summary": { "$ref": "#/$defs/localizedText" }, "translations": { "type": "object", "properties": { "title": { "type": "string" }, "summary": { "type": "string" } }, "additionalProperties": false }, "tags": { "type": "array", "maxItems": 4, "uniqueItems": true, "description": "Explicit genre/purpose IDs from src/content/project-tags.json. Leave empty when the genre is not verified.", "items": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" } }, "image": { "type": "string", "minLength": 0 }, "imageFit": { "enum": ["cover", "contain"] }, "status": { "enum": ["released", "development", "planned"] }, "platform": { "type": "array", "items": { "type": "string" }, "minItems": 1 }, "creators": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["name"], "properties": { "name": { "type": "string", "minLength": 1 }, "url": { "type": "string", "format": "uri" } }, "additionalProperties": false } }, "published": { "type": "string", "format": "date" }, "updated": { "type": "string", "format": "date" }, "version": { "type": "string" }, "size": { "type": "string" }, "downloads": { "type": "integer", "minimum": 0 }, "rating": { "type": "string" }, "store": { "type": "string", "format": "uri" }, "repository": { "type": "string", "format": "uri" }, "issues": { "type": "string", "format": "uri" }, "download": { "type": "string" }, "downloadUrl": { "type": "string", "format": "uri", "pattern": "^https://download\\.studiofimel\\.com/works/(bedrock|java|datapacks|tools|mods)/" }, "downloadSlug": { "type": "string" }, "latestReleaseRepo": { "type": "string", "pattern": "^[^/]+/[^/]+$" }, "releasePage": { "type": "string", "format": "uri" }, "fallbackDownload": { "type": "string" }, "fallbackFileName": { "type": "string" }, "content": { "type": "object", "required": ["description", "changelog", "versions"], "properties": { "description": { "$ref": "#/$defs/localizedText" }, "changelog": { "$ref": "#/$defs/localizedText" }, "versions": { "$ref": "#/$defs/localizedText" } }, "additionalProperties": false }, "source": { "type": "object", "required": ["label", "url"], "properties": { "label": { "type": "string" }, "url": { "type": "string", "format": "uri" }, "retrieved": { "type": "string", "format": "date" } }, "additionalProperties": false } }, "additionalProperties": false }, "legacy": { "type": "object", "required": ["slug", "type", "title", "image", "status", "platform", "creators", "content", "tags"], "properties": { "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" }, "type": { "enum": ["bedrock", "java", "datapacks", "tools", "mods"] }, "title": { "$ref": "#/$defs/localizedText" }, "summary": { "$ref": "#/$defs/localizedText" }, "translations": { "type": "object", "properties": { "title": { "type": "string" }, "summary": { "type": "string" } }, "additionalProperties": false }, "tags": { "type": "array", "maxItems": 4, "uniqueItems": true, "description": "Explicit genre/purpose IDs from src/content/project-tags.json. Leave empty when the genre is not verified.", "items": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" } }, "image": { "type": "string", "minLength": 1 }, "imageFit": { "enum": ["cover", "contain"] }, "status": { "enum": ["released", "development", "planned"] }, "platform": { "type": "array", "items": { "type": "string" }, "minItems": 1 }, "creators": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["name"], "properties": { "name": { "type": "string", "minLength": 1 }, "url": { "type": "string", "format": "uri" } }, "additionalProperties": false } }, "published": { "type": "string", "format": "date" }, "updated": { "type": "string", "format": "date" }, "version": { "type": "string" }, "size": { "type": "string" }, "downloads": { "type": "integer", "minimum": 0 }, "rating": { "type": "string" }, "store": { "type": "string", "format": "uri" }, "repository": { "type": "string", "format": "uri" }, "issues": { "type": "string", "format": "uri" }, "download": { "type": "string" }, "downloadUrl": { "type": "string", "format": "uri", "pattern": "^https://download\\.studiofimel\\.com/works/(bedrock|java|datapacks|tools|mods)/" }, "downloadSlug": { "type": "string" }, "latestReleaseRepo": { "type": "string", "pattern": "^[^/]+/[^/]+$" }, "releasePage": { "type": "string", "format": "uri" }, "fallbackDownload": { "type": "string" }, "fallbackFileName": { "type": "string" }, "content": { "type": "object", "required": ["description", "changelog", "versions"], "properties": { "description": { "$ref": "#/$defs/localizedText" }, "changelog": { "$ref": "#/$defs/localizedText" }, "versions": { "$ref": "#/$defs/localizedText" } }, "additionalProperties": false }, "source": { "type": "object", "required": ["label", "url"], "properties": { "label": { "type": "string" }, "url": { "type": "string", "format": "uri" }, "retrieved": { "type": "string", "format": "date" } }, "additionalProperties": false } }, "additionalProperties": false }, "workflow": { "enum": ["draft", "ready", "archived"] }, "order": { "type": "integer", "minimum": 0, "maximum": 1e5 }, "createdAt": { "type": "string", "format": "date-time" }, "updatedAt": { "type": "string", "format": "date-time" }, "coverId": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{0,79}$" }, "markdown": { "type": "object", "required": ["description", "changelog", "versions"], "additionalProperties": false, "properties": { "description": { "type": "object", "additionalProperties": false, "maxProperties": 3, "properties": { "zh": { "type": "string", "maxLength": 2e5 }, "en": { "type": "string", "maxLength": 2e5 }, "ja": { "type": "string", "maxLength": 2e5 } } }, "changelog": { "type": "object", "additionalProperties": false, "maxProperties": 3, "properties": { "zh": { "type": "string", "maxLength": 2e5 }, "en": { "type": "string", "maxLength": 2e5 }, "ja": { "type": "string", "maxLength": 2e5 } } }, "versions": { "type": "object", "additionalProperties": false, "maxProperties": 3, "properties": { "zh": { "type": "string", "maxLength": 2e5 }, "en": { "type": "string", "maxLength": 2e5 }, "ja": { "type": "string", "maxLength": 2e5 } } } } }, "gallery": { "type": "array", "maxItems": 100, "items": { "type": "object", "additionalProperties": false, "required": ["id", "name", "size", "mime", "sha256"], "properties": { "id": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{0,79}$" }, "name": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,149}$" }, "displayName": { "type": "string", "minLength": 1, "maxLength": 200, "pattern": "^[^\0-\x7F]+$" }, "size": { "type": "integer", "minimum": 1, "maximum": 1073741824 }, "mime": { "type": "string" }, "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "privateKey": { "type": "string", "pattern": "^uploads/verified/[a-zA-Z0-9-]+/[a-zA-Z0-9._-]+$" }, "publicUrl": { "type": "string", "format": "uri" }, "primary": { "type": "boolean" } } } }, "versions": { "type": "array", "maxItems": 100, "items": { "type": "object", "additionalProperties": false, "required": ["id", "label", "date", "gameVersions", "status", "changelog", "files"], "properties": { "id": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{0,79}$" }, "label": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._+-]{0,79}$" }, "date": { "type": "string", "format": "date" }, "gameVersions": { "type": "array", "maxItems": 30, "items": { "type": "string", "maxLength": 80 } }, "status": { "enum": ["draft", "released"] }, "loaders": { "type": "array", "maxItems": 30, "items": { "type": "string", "maxLength": 80 } }, "platforms": { "type": "array", "maxItems": 30, "items": { "type": "string", "maxLength": 80 } }, "changelog": { "anyOf": [{ "type": "string", "maxLength": 2e5 }, { "type": "object", "properties": { "zh": { "type": "string", "maxLength": 2e5 }, "en": { "type": "string", "maxLength": 2e5 }, "ja": { "type": "string", "maxLength": 2e5 } }, "minProperties": 1, "additionalProperties": false }] }, "files": { "type": "array", "maxItems": 30, "items": { "type": "object", "additionalProperties": false, "required": ["id", "name", "size", "mime", "sha256"], "properties": { "id": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{0,79}$" }, "name": { "type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,149}$" }, "displayName": { "type": "string", "minLength": 1, "maxLength": 200, "pattern": "^[^\0-\x7F]+$" }, "size": { "type": "integer", "minimum": 1, "maximum": 1073741824 }, "mime": { "type": "string" }, "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }, "privateKey": { "type": "string", "pattern": "^uploads/verified/[a-zA-Z0-9-]+/[a-zA-Z0-9._-]+$" }, "publicUrl": { "type": "string", "format": "uri" }, "primary": { "type": "boolean" } } } } } } } } } } }, "$defs": { "localizedText": { "oneOf": [{ "type": "string", "minLength": 1 }, { "type": "object", "properties": { "zh": { "type": "string", "minLength": 1 }, "en": { "type": "string", "minLength": 1 }, "ja": { "type": "string", "minLength": 1 } }, "minProperties": 1, "additionalProperties": false }] }, "project": { "type": "object", "required": ["slug", "type", "title", "image", "status", "platform", "creators", "content", "tags"], "properties": { "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" }, "type": { "enum": ["bedrock", "java", "datapacks", "tools", "mods"] }, "title": { "$ref": "#/$defs/localizedText" }, "summary": { "$ref": "#/$defs/localizedText" }, "translations": { "type": "object", "properties": { "title": { "type": "string" }, "summary": { "type": "string" } }, "additionalProperties": false }, "tags": { "type": "array", "maxItems": 4, "uniqueItems": true, "description": "Explicit genre/purpose IDs from src/content/project-tags.json. Leave empty when the genre is not verified.", "items": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" } }, "image": { "type": "string", "minLength": 1 }, "imageFit": { "enum": ["cover", "contain"] }, "status": { "enum": ["released", "development", "planned"] }, "platform": { "type": "array", "items": { "type": "string" }, "minItems": 1 }, "creators": { "type": "array", "minItems": 1, "items": { "type": "object", "required": ["name"], "properties": { "name": { "type": "string", "minLength": 1 }, "url": { "type": "string", "format": "uri" } }, "additionalProperties": false } }, "published": { "type": "string", "format": "date" }, "updated": { "type": "string", "format": "date" }, "version": { "type": "string" }, "size": { "type": "string" }, "downloads": { "type": "integer", "minimum": 0 }, "rating": { "type": "string" }, "store": { "type": "string", "format": "uri" }, "repository": { "type": "string", "format": "uri" }, "issues": { "type": "string", "format": "uri" }, "download": { "type": "string" }, "downloadUrl": { "type": "string", "format": "uri", "pattern": "^https://download\\.studiofimel\\.com/works/(bedrock|java|datapacks|tools|mods)/" }, "downloadSlug": { "type": "string" }, "latestReleaseRepo": { "type": "string", "pattern": "^[^/]+/[^/]+$" }, "releasePage": { "type": "string", "format": "uri" }, "fallbackDownload": { "type": "string" }, "fallbackFileName": { "type": "string" }, "content": { "type": "object", "required": ["description", "changelog", "versions"], "properties": { "description": { "$ref": "#/$defs/localizedText" }, "changelog": { "$ref": "#/$defs/localizedText" }, "versions": { "$ref": "#/$defs/localizedText" } }, "additionalProperties": false }, "source": { "type": "object", "required": ["label", "url"], "properties": { "label": { "type": "string" }, "url": { "type": "string", "format": "uri" }, "retrieved": { "type": "string", "format": "date" } }, "additionalProperties": false } }, "additionalProperties": false } } };
     var func1 = Object.prototype.hasOwnProperty;
     var func3 = require_ucs2length().default;
     var pattern4 = new RegExp("^[a-zA-Z0-9][a-zA-Z0-9-]{0,79}$", "u");
@@ -4564,7 +4564,7 @@ var require_stdin = __commonJS({
                           errors++;
                         }
                         for (const key27 in data150) {
-                          if (!(key27 === "id" || key27 === "label" || key27 === "date" || key27 === "gameVersions" || key27 === "status" || key27 === "changelog" || key27 === "files")) {
+                          if (!func1.call(schema31.properties.works.items.properties.versions.items.properties, key27)) {
                             const err373 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10, schemaPath: "#/properties/works/items/properties/versions/items/additionalProperties", keyword: "additionalProperties", params: { additionalProperty: key27 }, message: "must NOT have additional properties" };
                             if (vErrors === null) {
                               vErrors = [err373];
@@ -4697,14 +4697,11 @@ var require_stdin = __commonJS({
                             errors++;
                           }
                         }
-                        if (data150.changelog !== void 0) {
-                          let data157 = data150.changelog;
-                          const _errs385 = errors;
-                          let valid70 = false;
-                          const _errs386 = errors;
-                          if (typeof data157 === "string") {
-                            if (func3(data157) > 2e5) {
-                              const err385 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/0/maxLength", keyword: "maxLength", params: { limit: 2e5 }, message: "must NOT have more than 200000 characters" };
+                        if (data150.loaders !== void 0) {
+                          let data157 = data150.loaders;
+                          if (Array.isArray(data157)) {
+                            if (data157.length > 30) {
+                              const err385 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/loaders", schemaPath: "#/properties/works/items/properties/versions/items/properties/loaders/maxItems", keyword: "maxItems", params: { limit: 30 }, message: "must NOT have more than 30 items" };
                               if (vErrors === null) {
                                 vErrors = [err385];
                               } else {
@@ -4712,162 +4709,159 @@ var require_stdin = __commonJS({
                               }
                               errors++;
                             }
-                          } else {
-                            const err386 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/0/type", keyword: "type", params: { type: "string" }, message: "must be string" };
-                            if (vErrors === null) {
-                              vErrors = [err386];
-                            } else {
-                              vErrors.push(err386);
-                            }
-                            errors++;
-                          }
-                          var _valid10 = _errs386 === errors;
-                          valid70 = valid70 || _valid10;
-                          const _errs388 = errors;
-                          if (data157 && typeof data157 == "object" && !Array.isArray(data157)) {
-                            if (Object.keys(data157).length < 1) {
-                              const err387 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/minProperties", keyword: "minProperties", params: { limit: 1 }, message: "must NOT have fewer than 1 properties" };
-                              if (vErrors === null) {
-                                vErrors = [err387];
-                              } else {
-                                vErrors.push(err387);
-                              }
-                              errors++;
-                            }
-                            for (const key28 in data157) {
-                              if (!(key28 === "zh" || key28 === "en" || key28 === "ja")) {
-                                const err388 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/additionalProperties", keyword: "additionalProperties", params: { additionalProperty: key28 }, message: "must NOT have additional properties" };
-                                if (vErrors === null) {
-                                  vErrors = [err388];
-                                } else {
-                                  vErrors.push(err388);
-                                }
-                                errors++;
-                              }
-                            }
-                            if (data157.zh !== void 0) {
-                              let data158 = data157.zh;
+                            const len10 = data157.length;
+                            for (let i12 = 0; i12 < len10; i12++) {
+                              let data158 = data157[i12];
                               if (typeof data158 === "string") {
-                                if (func3(data158) > 2e5) {
-                                  const err389 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog/zh", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/properties/zh/maxLength", keyword: "maxLength", params: { limit: 2e5 }, message: "must NOT have more than 200000 characters" };
+                                if (func3(data158) > 80) {
+                                  const err386 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/loaders/" + i12, schemaPath: "#/properties/works/items/properties/versions/items/properties/loaders/items/maxLength", keyword: "maxLength", params: { limit: 80 }, message: "must NOT have more than 80 characters" };
                                   if (vErrors === null) {
-                                    vErrors = [err389];
+                                    vErrors = [err386];
                                   } else {
-                                    vErrors.push(err389);
+                                    vErrors.push(err386);
                                   }
                                   errors++;
                                 }
                               } else {
-                                const err390 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog/zh", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/properties/zh/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                                const err387 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/loaders/" + i12, schemaPath: "#/properties/works/items/properties/versions/items/properties/loaders/items/type", keyword: "type", params: { type: "string" }, message: "must be string" };
                                 if (vErrors === null) {
-                                  vErrors = [err390];
+                                  vErrors = [err387];
                                 } else {
-                                  vErrors.push(err390);
-                                }
-                                errors++;
-                              }
-                            }
-                            if (data157.en !== void 0) {
-                              let data159 = data157.en;
-                              if (typeof data159 === "string") {
-                                if (func3(data159) > 2e5) {
-                                  const err391 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog/en", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/properties/en/maxLength", keyword: "maxLength", params: { limit: 2e5 }, message: "must NOT have more than 200000 characters" };
-                                  if (vErrors === null) {
-                                    vErrors = [err391];
-                                  } else {
-                                    vErrors.push(err391);
-                                  }
-                                  errors++;
-                                }
-                              } else {
-                                const err392 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog/en", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/properties/en/type", keyword: "type", params: { type: "string" }, message: "must be string" };
-                                if (vErrors === null) {
-                                  vErrors = [err392];
-                                } else {
-                                  vErrors.push(err392);
-                                }
-                                errors++;
-                              }
-                            }
-                            if (data157.ja !== void 0) {
-                              let data160 = data157.ja;
-                              if (typeof data160 === "string") {
-                                if (func3(data160) > 2e5) {
-                                  const err393 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog/ja", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/properties/ja/maxLength", keyword: "maxLength", params: { limit: 2e5 }, message: "must NOT have more than 200000 characters" };
-                                  if (vErrors === null) {
-                                    vErrors = [err393];
-                                  } else {
-                                    vErrors.push(err393);
-                                  }
-                                  errors++;
-                                }
-                              } else {
-                                const err394 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog/ja", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/properties/ja/type", keyword: "type", params: { type: "string" }, message: "must be string" };
-                                if (vErrors === null) {
-                                  vErrors = [err394];
-                                } else {
-                                  vErrors.push(err394);
+                                  vErrors.push(err387);
                                 }
                                 errors++;
                               }
                             }
                           } else {
-                            const err395 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+                            const err388 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/loaders", schemaPath: "#/properties/works/items/properties/versions/items/properties/loaders/type", keyword: "type", params: { type: "array" }, message: "must be array" };
                             if (vErrors === null) {
-                              vErrors = [err395];
+                              vErrors = [err388];
                             } else {
-                              vErrors.push(err395);
+                              vErrors.push(err388);
                             }
                             errors++;
-                          }
-                          var _valid10 = _errs388 === errors;
-                          valid70 = valid70 || _valid10;
-                          if (!valid70) {
-                            const err396 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf", keyword: "anyOf", params: {}, message: "must match a schema in anyOf" };
-                            if (vErrors === null) {
-                              vErrors = [err396];
-                            } else {
-                              vErrors.push(err396);
-                            }
-                            errors++;
-                          } else {
-                            errors = _errs385;
-                            if (vErrors !== null) {
-                              if (_errs385) {
-                                vErrors.length = _errs385;
-                              } else {
-                                vErrors = null;
-                              }
-                            }
                           }
                         }
-                        if (data150.files !== void 0) {
-                          let data161 = data150.files;
-                          if (Array.isArray(data161)) {
-                            if (data161.length > 30) {
-                              const err397 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/maxItems", keyword: "maxItems", params: { limit: 30 }, message: "must NOT have more than 30 items" };
+                        if (data150.platforms !== void 0) {
+                          let data159 = data150.platforms;
+                          if (Array.isArray(data159)) {
+                            if (data159.length > 30) {
+                              const err389 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/platforms", schemaPath: "#/properties/works/items/properties/versions/items/properties/platforms/maxItems", keyword: "maxItems", params: { limit: 30 }, message: "must NOT have more than 30 items" };
                               if (vErrors === null) {
-                                vErrors = [err397];
+                                vErrors = [err389];
                               } else {
-                                vErrors.push(err397);
+                                vErrors.push(err389);
                               }
                               errors++;
                             }
-                            const len10 = data161.length;
-                            for (let i12 = 0; i12 < len10; i12++) {
-                              let data162 = data161[i12];
-                              if (data162 && typeof data162 == "object" && !Array.isArray(data162)) {
-                                if (data162.id === void 0) {
-                                  const err398 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12, schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/required", keyword: "required", params: { missingProperty: "id" }, message: "must have required property 'id'" };
+                            const len11 = data159.length;
+                            for (let i13 = 0; i13 < len11; i13++) {
+                              let data160 = data159[i13];
+                              if (typeof data160 === "string") {
+                                if (func3(data160) > 80) {
+                                  const err390 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/platforms/" + i13, schemaPath: "#/properties/works/items/properties/versions/items/properties/platforms/items/maxLength", keyword: "maxLength", params: { limit: 80 }, message: "must NOT have more than 80 characters" };
                                   if (vErrors === null) {
-                                    vErrors = [err398];
+                                    vErrors = [err390];
                                   } else {
-                                    vErrors.push(err398);
+                                    vErrors.push(err390);
                                   }
                                   errors++;
                                 }
-                                if (data162.name === void 0) {
-                                  const err399 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12, schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/required", keyword: "required", params: { missingProperty: "name" }, message: "must have required property 'name'" };
+                              } else {
+                                const err391 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/platforms/" + i13, schemaPath: "#/properties/works/items/properties/versions/items/properties/platforms/items/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                                if (vErrors === null) {
+                                  vErrors = [err391];
+                                } else {
+                                  vErrors.push(err391);
+                                }
+                                errors++;
+                              }
+                            }
+                          } else {
+                            const err392 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/platforms", schemaPath: "#/properties/works/items/properties/versions/items/properties/platforms/type", keyword: "type", params: { type: "array" }, message: "must be array" };
+                            if (vErrors === null) {
+                              vErrors = [err392];
+                            } else {
+                              vErrors.push(err392);
+                            }
+                            errors++;
+                          }
+                        }
+                        if (data150.changelog !== void 0) {
+                          let data161 = data150.changelog;
+                          const _errs393 = errors;
+                          let valid74 = false;
+                          const _errs394 = errors;
+                          if (typeof data161 === "string") {
+                            if (func3(data161) > 2e5) {
+                              const err393 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/0/maxLength", keyword: "maxLength", params: { limit: 2e5 }, message: "must NOT have more than 200000 characters" };
+                              if (vErrors === null) {
+                                vErrors = [err393];
+                              } else {
+                                vErrors.push(err393);
+                              }
+                              errors++;
+                            }
+                          } else {
+                            const err394 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/0/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                            if (vErrors === null) {
+                              vErrors = [err394];
+                            } else {
+                              vErrors.push(err394);
+                            }
+                            errors++;
+                          }
+                          var _valid10 = _errs394 === errors;
+                          valid74 = valid74 || _valid10;
+                          const _errs396 = errors;
+                          if (data161 && typeof data161 == "object" && !Array.isArray(data161)) {
+                            if (Object.keys(data161).length < 1) {
+                              const err395 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/minProperties", keyword: "minProperties", params: { limit: 1 }, message: "must NOT have fewer than 1 properties" };
+                              if (vErrors === null) {
+                                vErrors = [err395];
+                              } else {
+                                vErrors.push(err395);
+                              }
+                              errors++;
+                            }
+                            for (const key28 in data161) {
+                              if (!(key28 === "zh" || key28 === "en" || key28 === "ja")) {
+                                const err396 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/additionalProperties", keyword: "additionalProperties", params: { additionalProperty: key28 }, message: "must NOT have additional properties" };
+                                if (vErrors === null) {
+                                  vErrors = [err396];
+                                } else {
+                                  vErrors.push(err396);
+                                }
+                                errors++;
+                              }
+                            }
+                            if (data161.zh !== void 0) {
+                              let data162 = data161.zh;
+                              if (typeof data162 === "string") {
+                                if (func3(data162) > 2e5) {
+                                  const err397 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog/zh", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/properties/zh/maxLength", keyword: "maxLength", params: { limit: 2e5 }, message: "must NOT have more than 200000 characters" };
+                                  if (vErrors === null) {
+                                    vErrors = [err397];
+                                  } else {
+                                    vErrors.push(err397);
+                                  }
+                                  errors++;
+                                }
+                              } else {
+                                const err398 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog/zh", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/properties/zh/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                                if (vErrors === null) {
+                                  vErrors = [err398];
+                                } else {
+                                  vErrors.push(err398);
+                                }
+                                errors++;
+                              }
+                            }
+                            if (data161.en !== void 0) {
+                              let data163 = data161.en;
+                              if (typeof data163 === "string") {
+                                if (func3(data163) > 2e5) {
+                                  const err399 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog/en", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/properties/en/maxLength", keyword: "maxLength", params: { limit: 2e5 }, message: "must NOT have more than 200000 characters" };
                                   if (vErrors === null) {
                                     vErrors = [err399];
                                   } else {
@@ -4875,17 +4869,21 @@ var require_stdin = __commonJS({
                                   }
                                   errors++;
                                 }
-                                if (data162.size === void 0) {
-                                  const err400 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12, schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/required", keyword: "required", params: { missingProperty: "size" }, message: "must have required property 'size'" };
-                                  if (vErrors === null) {
-                                    vErrors = [err400];
-                                  } else {
-                                    vErrors.push(err400);
-                                  }
-                                  errors++;
+                              } else {
+                                const err400 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog/en", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/properties/en/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                                if (vErrors === null) {
+                                  vErrors = [err400];
+                                } else {
+                                  vErrors.push(err400);
                                 }
-                                if (data162.mime === void 0) {
-                                  const err401 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12, schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/required", keyword: "required", params: { missingProperty: "mime" }, message: "must have required property 'mime'" };
+                                errors++;
+                              }
+                            }
+                            if (data161.ja !== void 0) {
+                              let data164 = data161.ja;
+                              if (typeof data164 === "string") {
+                                if (func3(data164) > 2e5) {
+                                  const err401 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog/ja", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/properties/ja/maxLength", keyword: "maxLength", params: { limit: 2e5 }, message: "must NOT have more than 200000 characters" };
                                   if (vErrors === null) {
                                     vErrors = [err401];
                                   } else {
@@ -4893,102 +4891,110 @@ var require_stdin = __commonJS({
                                   }
                                   errors++;
                                 }
-                                if (data162.sha256 === void 0) {
-                                  const err402 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12, schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/required", keyword: "required", params: { missingProperty: "sha256" }, message: "must have required property 'sha256'" };
+                              } else {
+                                const err402 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog/ja", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/properties/ja/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                                if (vErrors === null) {
+                                  vErrors = [err402];
+                                } else {
+                                  vErrors.push(err402);
+                                }
+                                errors++;
+                              }
+                            }
+                          } else {
+                            const err403 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf/1/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+                            if (vErrors === null) {
+                              vErrors = [err403];
+                            } else {
+                              vErrors.push(err403);
+                            }
+                            errors++;
+                          }
+                          var _valid10 = _errs396 === errors;
+                          valid74 = valid74 || _valid10;
+                          if (!valid74) {
+                            const err404 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/changelog", schemaPath: "#/properties/works/items/properties/versions/items/properties/changelog/anyOf", keyword: "anyOf", params: {}, message: "must match a schema in anyOf" };
+                            if (vErrors === null) {
+                              vErrors = [err404];
+                            } else {
+                              vErrors.push(err404);
+                            }
+                            errors++;
+                          } else {
+                            errors = _errs393;
+                            if (vErrors !== null) {
+                              if (_errs393) {
+                                vErrors.length = _errs393;
+                              } else {
+                                vErrors = null;
+                              }
+                            }
+                          }
+                        }
+                        if (data150.files !== void 0) {
+                          let data165 = data150.files;
+                          if (Array.isArray(data165)) {
+                            if (data165.length > 30) {
+                              const err405 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/maxItems", keyword: "maxItems", params: { limit: 30 }, message: "must NOT have more than 30 items" };
+                              if (vErrors === null) {
+                                vErrors = [err405];
+                              } else {
+                                vErrors.push(err405);
+                              }
+                              errors++;
+                            }
+                            const len12 = data165.length;
+                            for (let i14 = 0; i14 < len12; i14++) {
+                              let data166 = data165[i14];
+                              if (data166 && typeof data166 == "object" && !Array.isArray(data166)) {
+                                if (data166.id === void 0) {
+                                  const err406 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14, schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/required", keyword: "required", params: { missingProperty: "id" }, message: "must have required property 'id'" };
                                   if (vErrors === null) {
-                                    vErrors = [err402];
+                                    vErrors = [err406];
                                   } else {
-                                    vErrors.push(err402);
+                                    vErrors.push(err406);
                                   }
                                   errors++;
                                 }
-                                for (const key29 in data162) {
+                                if (data166.name === void 0) {
+                                  const err407 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14, schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/required", keyword: "required", params: { missingProperty: "name" }, message: "must have required property 'name'" };
+                                  if (vErrors === null) {
+                                    vErrors = [err407];
+                                  } else {
+                                    vErrors.push(err407);
+                                  }
+                                  errors++;
+                                }
+                                if (data166.size === void 0) {
+                                  const err408 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14, schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/required", keyword: "required", params: { missingProperty: "size" }, message: "must have required property 'size'" };
+                                  if (vErrors === null) {
+                                    vErrors = [err408];
+                                  } else {
+                                    vErrors.push(err408);
+                                  }
+                                  errors++;
+                                }
+                                if (data166.mime === void 0) {
+                                  const err409 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14, schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/required", keyword: "required", params: { missingProperty: "mime" }, message: "must have required property 'mime'" };
+                                  if (vErrors === null) {
+                                    vErrors = [err409];
+                                  } else {
+                                    vErrors.push(err409);
+                                  }
+                                  errors++;
+                                }
+                                if (data166.sha256 === void 0) {
+                                  const err410 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14, schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/required", keyword: "required", params: { missingProperty: "sha256" }, message: "must have required property 'sha256'" };
+                                  if (vErrors === null) {
+                                    vErrors = [err410];
+                                  } else {
+                                    vErrors.push(err410);
+                                  }
+                                  errors++;
+                                }
+                                for (const key29 in data166) {
                                   if (!func1.call(schema31.properties.works.items.properties.versions.items.properties.files.items.properties, key29)) {
-                                    const err403 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12, schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/additionalProperties", keyword: "additionalProperties", params: { additionalProperty: key29 }, message: "must NOT have additional properties" };
-                                    if (vErrors === null) {
-                                      vErrors = [err403];
-                                    } else {
-                                      vErrors.push(err403);
-                                    }
-                                    errors++;
-                                  }
-                                }
-                                if (data162.id !== void 0) {
-                                  let data163 = data162.id;
-                                  if (typeof data163 === "string") {
-                                    if (!pattern4.test(data163)) {
-                                      const err404 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/id", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/id/pattern", keyword: "pattern", params: { pattern: "^[a-zA-Z0-9][a-zA-Z0-9-]{0,79}$" }, message: 'must match pattern "^[a-zA-Z0-9][a-zA-Z0-9-]{0,79}$"' };
-                                      if (vErrors === null) {
-                                        vErrors = [err404];
-                                      } else {
-                                        vErrors.push(err404);
-                                      }
-                                      errors++;
-                                    }
-                                  } else {
-                                    const err405 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/id", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/id/type", keyword: "type", params: { type: "string" }, message: "must be string" };
-                                    if (vErrors === null) {
-                                      vErrors = [err405];
-                                    } else {
-                                      vErrors.push(err405);
-                                    }
-                                    errors++;
-                                  }
-                                }
-                                if (data162.name !== void 0) {
-                                  let data164 = data162.name;
-                                  if (typeof data164 === "string") {
-                                    if (!pattern15.test(data164)) {
-                                      const err406 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/name", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/name/pattern", keyword: "pattern", params: { pattern: "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,149}$" }, message: 'must match pattern "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,149}$"' };
-                                      if (vErrors === null) {
-                                        vErrors = [err406];
-                                      } else {
-                                        vErrors.push(err406);
-                                      }
-                                      errors++;
-                                    }
-                                  } else {
-                                    const err407 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/name", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/name/type", keyword: "type", params: { type: "string" }, message: "must be string" };
-                                    if (vErrors === null) {
-                                      vErrors = [err407];
-                                    } else {
-                                      vErrors.push(err407);
-                                    }
-                                    errors++;
-                                  }
-                                }
-                                if (data162.displayName !== void 0) {
-                                  let data165 = data162.displayName;
-                                  if (typeof data165 === "string") {
-                                    if (func3(data165) > 200) {
-                                      const err408 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/displayName", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/displayName/maxLength", keyword: "maxLength", params: { limit: 200 }, message: "must NOT have more than 200 characters" };
-                                      if (vErrors === null) {
-                                        vErrors = [err408];
-                                      } else {
-                                        vErrors.push(err408);
-                                      }
-                                      errors++;
-                                    }
-                                    if (func3(data165) < 1) {
-                                      const err409 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/displayName", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/displayName/minLength", keyword: "minLength", params: { limit: 1 }, message: "must NOT have fewer than 1 characters" };
-                                      if (vErrors === null) {
-                                        vErrors = [err409];
-                                      } else {
-                                        vErrors.push(err409);
-                                      }
-                                      errors++;
-                                    }
-                                    if (!pattern16.test(data165)) {
-                                      const err410 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/displayName", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/displayName/pattern", keyword: "pattern", params: { pattern: "^[^\0-\x7F]+$" }, message: 'must match pattern "^[^\0-\x7F]+$"' };
-                                      if (vErrors === null) {
-                                        vErrors = [err410];
-                                      } else {
-                                        vErrors.push(err410);
-                                      }
-                                      errors++;
-                                    }
-                                  } else {
-                                    const err411 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/displayName", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/displayName/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                                    const err411 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14, schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/additionalProperties", keyword: "additionalProperties", params: { additionalProperty: key29 }, message: "must NOT have additional properties" };
                                     if (vErrors === null) {
                                       vErrors = [err411];
                                     } else {
@@ -4997,29 +5003,33 @@ var require_stdin = __commonJS({
                                     errors++;
                                   }
                                 }
-                                if (data162.size !== void 0) {
-                                  let data166 = data162.size;
-                                  if (!(typeof data166 == "number" && (!(data166 % 1) && !isNaN(data166)))) {
-                                    const err412 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/size", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/size/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
-                                    if (vErrors === null) {
-                                      vErrors = [err412];
-                                    } else {
-                                      vErrors.push(err412);
-                                    }
-                                    errors++;
-                                  }
-                                  if (typeof data166 == "number") {
-                                    if (data166 > 1073741824 || isNaN(data166)) {
-                                      const err413 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/size", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/size/maximum", keyword: "maximum", params: { comparison: "<=", limit: 1073741824 }, message: "must be <= 1073741824" };
+                                if (data166.id !== void 0) {
+                                  let data167 = data166.id;
+                                  if (typeof data167 === "string") {
+                                    if (!pattern4.test(data167)) {
+                                      const err412 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/id", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/id/pattern", keyword: "pattern", params: { pattern: "^[a-zA-Z0-9][a-zA-Z0-9-]{0,79}$" }, message: 'must match pattern "^[a-zA-Z0-9][a-zA-Z0-9-]{0,79}$"' };
                                       if (vErrors === null) {
-                                        vErrors = [err413];
+                                        vErrors = [err412];
                                       } else {
-                                        vErrors.push(err413);
+                                        vErrors.push(err412);
                                       }
                                       errors++;
                                     }
-                                    if (data166 < 1 || isNaN(data166)) {
-                                      const err414 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/size", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/size/minimum", keyword: "minimum", params: { comparison: ">=", limit: 1 }, message: "must be >= 1" };
+                                  } else {
+                                    const err413 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/id", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/id/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                                    if (vErrors === null) {
+                                      vErrors = [err413];
+                                    } else {
+                                      vErrors.push(err413);
+                                    }
+                                    errors++;
+                                  }
+                                }
+                                if (data166.name !== void 0) {
+                                  let data168 = data166.name;
+                                  if (typeof data168 === "string") {
+                                    if (!pattern15.test(data168)) {
+                                      const err414 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/name", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/name/pattern", keyword: "pattern", params: { pattern: "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,149}$" }, message: 'must match pattern "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,149}$"' };
                                       if (vErrors === null) {
                                         vErrors = [err414];
                                       } else {
@@ -5027,11 +5037,8 @@ var require_stdin = __commonJS({
                                       }
                                       errors++;
                                     }
-                                  }
-                                }
-                                if (data162.mime !== void 0) {
-                                  if (typeof data162.mime !== "string") {
-                                    const err415 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/mime", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/mime/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                                  } else {
+                                    const err415 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/name", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/name/type", keyword: "type", params: { type: "string" }, message: "must be string" };
                                     if (vErrors === null) {
                                       vErrors = [err415];
                                     } else {
@@ -5040,11 +5047,11 @@ var require_stdin = __commonJS({
                                     errors++;
                                   }
                                 }
-                                if (data162.sha256 !== void 0) {
-                                  let data168 = data162.sha256;
-                                  if (typeof data168 === "string") {
-                                    if (!pattern17.test(data168)) {
-                                      const err416 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/sha256", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/sha256/pattern", keyword: "pattern", params: { pattern: "^[a-f0-9]{64}$" }, message: 'must match pattern "^[a-f0-9]{64}$"' };
+                                if (data166.displayName !== void 0) {
+                                  let data169 = data166.displayName;
+                                  if (typeof data169 === "string") {
+                                    if (func3(data169) > 200) {
+                                      const err416 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/displayName", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/displayName/maxLength", keyword: "maxLength", params: { limit: 200 }, message: "must NOT have more than 200 characters" };
                                       if (vErrors === null) {
                                         vErrors = [err416];
                                       } else {
@@ -5052,21 +5059,17 @@ var require_stdin = __commonJS({
                                       }
                                       errors++;
                                     }
-                                  } else {
-                                    const err417 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/sha256", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/sha256/type", keyword: "type", params: { type: "string" }, message: "must be string" };
-                                    if (vErrors === null) {
-                                      vErrors = [err417];
-                                    } else {
-                                      vErrors.push(err417);
+                                    if (func3(data169) < 1) {
+                                      const err417 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/displayName", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/displayName/minLength", keyword: "minLength", params: { limit: 1 }, message: "must NOT have fewer than 1 characters" };
+                                      if (vErrors === null) {
+                                        vErrors = [err417];
+                                      } else {
+                                        vErrors.push(err417);
+                                      }
+                                      errors++;
                                     }
-                                    errors++;
-                                  }
-                                }
-                                if (data162.privateKey !== void 0) {
-                                  let data169 = data162.privateKey;
-                                  if (typeof data169 === "string") {
-                                    if (!pattern18.test(data169)) {
-                                      const err418 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/privateKey", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/privateKey/pattern", keyword: "pattern", params: { pattern: "^uploads/verified/[a-zA-Z0-9-]+/[a-zA-Z0-9._-]+$" }, message: 'must match pattern "^uploads/verified/[a-zA-Z0-9-]+/[a-zA-Z0-9._-]+$"' };
+                                    if (!pattern16.test(data169)) {
+                                      const err418 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/displayName", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/displayName/pattern", keyword: "pattern", params: { pattern: "^[^\0-\x7F]+$" }, message: 'must match pattern "^[^\0-\x7F]+$"' };
                                       if (vErrors === null) {
                                         vErrors = [err418];
                                       } else {
@@ -5075,7 +5078,7 @@ var require_stdin = __commonJS({
                                       errors++;
                                     }
                                   } else {
-                                    const err419 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/privateKey", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/privateKey/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                                    const err419 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/displayName", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/displayName/type", keyword: "type", params: { type: "string" }, message: "must be string" };
                                     if (vErrors === null) {
                                       vErrors = [err419];
                                     } else {
@@ -5084,105 +5087,192 @@ var require_stdin = __commonJS({
                                     errors++;
                                   }
                                 }
-                                if (data162.publicUrl !== void 0) {
-                                  let data170 = data162.publicUrl;
-                                  if (typeof data170 === "string") {
-                                    if (!formats0(data170)) {
-                                      const err420 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/publicUrl", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/publicUrl/format", keyword: "format", params: { format: "uri" }, message: 'must match format "uri"' };
+                                if (data166.size !== void 0) {
+                                  let data170 = data166.size;
+                                  if (!(typeof data170 == "number" && (!(data170 % 1) && !isNaN(data170)))) {
+                                    const err420 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/size", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/size/type", keyword: "type", params: { type: "integer" }, message: "must be integer" };
+                                    if (vErrors === null) {
+                                      vErrors = [err420];
+                                    } else {
+                                      vErrors.push(err420);
+                                    }
+                                    errors++;
+                                  }
+                                  if (typeof data170 == "number") {
+                                    if (data170 > 1073741824 || isNaN(data170)) {
+                                      const err421 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/size", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/size/maximum", keyword: "maximum", params: { comparison: "<=", limit: 1073741824 }, message: "must be <= 1073741824" };
                                       if (vErrors === null) {
-                                        vErrors = [err420];
+                                        vErrors = [err421];
                                       } else {
-                                        vErrors.push(err420);
+                                        vErrors.push(err421);
                                       }
                                       errors++;
                                     }
-                                  } else {
-                                    const err421 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/publicUrl", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/publicUrl/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                                    if (data170 < 1 || isNaN(data170)) {
+                                      const err422 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/size", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/size/minimum", keyword: "minimum", params: { comparison: ">=", limit: 1 }, message: "must be >= 1" };
+                                      if (vErrors === null) {
+                                        vErrors = [err422];
+                                      } else {
+                                        vErrors.push(err422);
+                                      }
+                                      errors++;
+                                    }
+                                  }
+                                }
+                                if (data166.mime !== void 0) {
+                                  if (typeof data166.mime !== "string") {
+                                    const err423 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/mime", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/mime/type", keyword: "type", params: { type: "string" }, message: "must be string" };
                                     if (vErrors === null) {
-                                      vErrors = [err421];
+                                      vErrors = [err423];
                                     } else {
-                                      vErrors.push(err421);
+                                      vErrors.push(err423);
                                     }
                                     errors++;
                                   }
                                 }
-                                if (data162.primary !== void 0) {
-                                  if (typeof data162.primary !== "boolean") {
-                                    const err422 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12 + "/primary", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/primary/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" };
+                                if (data166.sha256 !== void 0) {
+                                  let data172 = data166.sha256;
+                                  if (typeof data172 === "string") {
+                                    if (!pattern17.test(data172)) {
+                                      const err424 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/sha256", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/sha256/pattern", keyword: "pattern", params: { pattern: "^[a-f0-9]{64}$" }, message: 'must match pattern "^[a-f0-9]{64}$"' };
+                                      if (vErrors === null) {
+                                        vErrors = [err424];
+                                      } else {
+                                        vErrors.push(err424);
+                                      }
+                                      errors++;
+                                    }
+                                  } else {
+                                    const err425 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/sha256", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/sha256/type", keyword: "type", params: { type: "string" }, message: "must be string" };
                                     if (vErrors === null) {
-                                      vErrors = [err422];
+                                      vErrors = [err425];
                                     } else {
-                                      vErrors.push(err422);
+                                      vErrors.push(err425);
+                                    }
+                                    errors++;
+                                  }
+                                }
+                                if (data166.privateKey !== void 0) {
+                                  let data173 = data166.privateKey;
+                                  if (typeof data173 === "string") {
+                                    if (!pattern18.test(data173)) {
+                                      const err426 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/privateKey", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/privateKey/pattern", keyword: "pattern", params: { pattern: "^uploads/verified/[a-zA-Z0-9-]+/[a-zA-Z0-9._-]+$" }, message: 'must match pattern "^uploads/verified/[a-zA-Z0-9-]+/[a-zA-Z0-9._-]+$"' };
+                                      if (vErrors === null) {
+                                        vErrors = [err426];
+                                      } else {
+                                        vErrors.push(err426);
+                                      }
+                                      errors++;
+                                    }
+                                  } else {
+                                    const err427 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/privateKey", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/privateKey/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                                    if (vErrors === null) {
+                                      vErrors = [err427];
+                                    } else {
+                                      vErrors.push(err427);
+                                    }
+                                    errors++;
+                                  }
+                                }
+                                if (data166.publicUrl !== void 0) {
+                                  let data174 = data166.publicUrl;
+                                  if (typeof data174 === "string") {
+                                    if (!formats0(data174)) {
+                                      const err428 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/publicUrl", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/publicUrl/format", keyword: "format", params: { format: "uri" }, message: 'must match format "uri"' };
+                                      if (vErrors === null) {
+                                        vErrors = [err428];
+                                      } else {
+                                        vErrors.push(err428);
+                                      }
+                                      errors++;
+                                    }
+                                  } else {
+                                    const err429 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/publicUrl", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/publicUrl/type", keyword: "type", params: { type: "string" }, message: "must be string" };
+                                    if (vErrors === null) {
+                                      vErrors = [err429];
+                                    } else {
+                                      vErrors.push(err429);
+                                    }
+                                    errors++;
+                                  }
+                                }
+                                if (data166.primary !== void 0) {
+                                  if (typeof data166.primary !== "boolean") {
+                                    const err430 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14 + "/primary", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/properties/primary/type", keyword: "type", params: { type: "boolean" }, message: "must be boolean" };
+                                    if (vErrors === null) {
+                                      vErrors = [err430];
+                                    } else {
+                                      vErrors.push(err430);
                                     }
                                     errors++;
                                   }
                                 }
                               } else {
-                                const err423 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i12, schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+                                const err431 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files/" + i14, schemaPath: "#/properties/works/items/properties/versions/items/properties/files/items/type", keyword: "type", params: { type: "object" }, message: "must be object" };
                                 if (vErrors === null) {
-                                  vErrors = [err423];
+                                  vErrors = [err431];
                                 } else {
-                                  vErrors.push(err423);
+                                  vErrors.push(err431);
                                 }
                                 errors++;
                               }
                             }
                           } else {
-                            const err424 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/type", keyword: "type", params: { type: "array" }, message: "must be array" };
+                            const err432 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10 + "/files", schemaPath: "#/properties/works/items/properties/versions/items/properties/files/type", keyword: "type", params: { type: "array" }, message: "must be array" };
                             if (vErrors === null) {
-                              vErrors = [err424];
+                              vErrors = [err432];
                             } else {
-                              vErrors.push(err424);
+                              vErrors.push(err432);
                             }
                             errors++;
                           }
                         }
                       } else {
-                        const err425 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10, schemaPath: "#/properties/works/items/properties/versions/items/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+                        const err433 = { instancePath: instancePath + "/works/" + i0 + "/versions/" + i10, schemaPath: "#/properties/works/items/properties/versions/items/type", keyword: "type", params: { type: "object" }, message: "must be object" };
                         if (vErrors === null) {
-                          vErrors = [err425];
+                          vErrors = [err433];
                         } else {
-                          vErrors.push(err425);
+                          vErrors.push(err433);
                         }
                         errors++;
                       }
                     }
                   } else {
-                    const err426 = { instancePath: instancePath + "/works/" + i0 + "/versions", schemaPath: "#/properties/works/items/properties/versions/type", keyword: "type", params: { type: "array" }, message: "must be array" };
+                    const err434 = { instancePath: instancePath + "/works/" + i0 + "/versions", schemaPath: "#/properties/works/items/properties/versions/type", keyword: "type", params: { type: "array" }, message: "must be array" };
                     if (vErrors === null) {
-                      vErrors = [err426];
+                      vErrors = [err434];
                     } else {
-                      vErrors.push(err426);
+                      vErrors.push(err434);
                     }
                     errors++;
                   }
                 }
               } else {
-                const err427 = { instancePath: instancePath + "/works/" + i0, schemaPath: "#/properties/works/items/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+                const err435 = { instancePath: instancePath + "/works/" + i0, schemaPath: "#/properties/works/items/type", keyword: "type", params: { type: "object" }, message: "must be object" };
                 if (vErrors === null) {
-                  vErrors = [err427];
+                  vErrors = [err435];
                 } else {
-                  vErrors.push(err427);
+                  vErrors.push(err435);
                 }
                 errors++;
               }
             }
           } else {
-            const err428 = { instancePath: instancePath + "/works", schemaPath: "#/properties/works/type", keyword: "type", params: { type: "array" }, message: "must be array" };
+            const err436 = { instancePath: instancePath + "/works", schemaPath: "#/properties/works/type", keyword: "type", params: { type: "array" }, message: "must be array" };
             if (vErrors === null) {
-              vErrors = [err428];
+              vErrors = [err436];
             } else {
-              vErrors.push(err428);
+              vErrors.push(err436);
             }
             errors++;
           }
         }
       } else {
-        const err429 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
+        const err437 = { instancePath, schemaPath: "#/type", keyword: "type", params: { type: "object" }, message: "must be object" };
         if (vErrors === null) {
-          vErrors = [err429];
+          vErrors = [err437];
         } else {
-          vErrors.push(err429);
+          vErrors.push(err437);
         }
         errors++;
       }

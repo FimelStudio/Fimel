@@ -12,6 +12,8 @@ import HotbarNav from './components/HotbarNav';
 import { CurtainLoading } from './components/CurtainLoading';
 import { PageTransition } from './components/PageTransition';
 import { SocialLinks } from './components/SocialLinks';
+import { useProjectCatalogue } from './hooks/useProjectCatalogue';
+import { DEFAULT_SITE_CONTENT } from './content/site-content';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -44,6 +46,7 @@ type RouteState = { scrollTo?: string } | null;
 
 export const Layout: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const { site } = useProjectCatalogue(); const contact=site?.contact??DEFAULT_SITE_CONTENT.contact;
   const location = useLocation();
   const navigate = useNavigate();
   const navigationType = useNavigationType();
@@ -334,7 +337,7 @@ export const Layout: React.FC = () => {
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs">
             {navigation.map(({ to, label }) => <Link key={to} to={to} className="hover-target inline-flex min-h-10 items-center hover:text-diamond focus-visible:outline-2 focus-visible:outline-diamond">{label}</Link>)}
             <Link to="/studio" state={{ scrollTo: '#contact' }} className="hover-target inline-flex min-h-10 items-center hover:text-diamond focus-visible:outline-2 focus-visible:outline-diamond">{t('nav.contact')}</Link>
-            <a href="https://discord.gg/X9aVJJVvA" target="_blank" rel="noopener noreferrer" className="hover-target inline-flex min-h-10 items-center hover:text-diamond focus-visible:outline-2 focus-visible:outline-diamond">Discord</a>
+            <a href={contact.discord} target="_blank" rel="noopener noreferrer" className="hover-target inline-flex min-h-10 items-center hover:text-diamond focus-visible:outline-2 focus-visible:outline-diamond">Discord</a>
           </div>
         </div>
       </footer>

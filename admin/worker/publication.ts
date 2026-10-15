@@ -1,10 +1,10 @@
 import { PUBLIC_ORIGIN } from '../shared/model';
 import type { Asset, PublicManifest, PublicRelease, Work } from '../shared/model';
 import type { Project, ProjectTab, LocalizedText } from '../../src/content/projects';
-import { localizedText } from '../../src/content/projects';
 import { ApiError, putJson } from './http';
 import { backup, MANIFEST_KEY } from './storage';
-import { referencedImages } from '../shared/markdown';
+import { referencedImages, versionMarkdown } from '../shared/markdown';
+import type { Locale } from '../shared/model';
 
 export async function publishedWork(work: Work, privateBucket: R2Bucket, publicBucket: R2Bucket, publicationId: string) {
   if (work.workflow === 'archived') throw new ApiError(422, '归档作品须先恢复为草稿。');
@@ -30,12 +30,7 @@ export async function publishedWork(work: Work, privateBucket: R2Bucket, publicB
       let body = markdown;
       for (const [id, url] of publicAssets) body = body.replaceAll(`fimel-asset:${id}`, url);
       if (/fimel-asset:/.test(body)) throw new ApiError(422, '正文引用了未发布资源。');
-      if (tab === 'versions') {
-        for (const release of work.versions.filter(v => v.status === 'released')) {
-          body += `\n\n## ${release.label} · ${release.date}\n\n${release.gameVersions.join(' / ')}\n\n${localizedText(release.changelog,locale)}\n\n`;
-          for (const file of release.files) body += `- [${markdownName(file)}](${publicAssets.get(file.id)}) · ${(file.size/1024**2).toFixed(1)} MiB\n  - SHA-256: \`${file.sha256}\`\n`;
-        }
-      }
+      if (tab === 'versions') body=versionMarkdown(body,work.versions,locale as Locale,file=>publicAssets.get(file.id)!);
       const key = `content/${project.slug}/${publicationId}/${tab}.${locale}.md`;
       const saved = await publicBucket.put(key, body, { onlyIf: { etagDoesNotMatch: '*' }, httpMetadata: { contentType: 'text/markdown; charset=utf-8', cacheControl: 'public, max-age=31536000, immutable' } });
       if (!saved) throw new ApiError(409, '正文快照已存在。');
@@ -48,8 +43,8 @@ export async function publishedWork(work: Work, privateBucket: R2Bucket, publicB
   const releases: PublicRelease[] = work.versions.filter(v => v.status === 'released').map(v => ({ ...v,
     files: v.files.map(a => ({ id: a.id, name: a.name, ...(a.displayName?{displayName:a.displayName}:{}), size: a.size, mime: a.mime, sha256: a.sha256, ...(a.primary ? { primary: true } : {}), publicUrl: publicAssets.get(a.id)! })),
   }));
-  const latest = releases[0]; const primary = latest?.files.find(f => f.primary) ?? latest?.files[0];
-  if (primary) { project.downloadUrl = primary.publicUrl; project.version = latest.label; project.size = `${(primary.size / 1024 ** 2).toFixed(1)} MiB`; }
+  const latest = releases.find(release => release.files.length); const primary = latest?.files.find(f => f.primary) ?? latest?.files[0];
+  if (primary && latest) { project.downloadUrl = primary.publicUrl; project.version = latest.label; project.size = `${(primary.size / 1024 ** 2).toFixed(1)} MiB`; }
   if (project.downloadUrl) {
     const key = new URL(project.downloadUrl).pathname.slice(1);
     if (!await publicBucket.head(key)) throw new ApiError(422, '主下载对象不存在，不能发布。');
@@ -84,4 +79,3 @@ export async function commitPublication(priv: R2Bucket, pub: R2Bucket, before: P
   // Last write is the public manifest; failed CAS leaves only unreachable immutable snapshots.
   return putJson(pub, MANIFEST_KEY, after, etag);
 }
-function markdownName(asset:Asset){return (asset.displayName??asset.name).replace(/[\\[\]()]/g,'\\$&');}

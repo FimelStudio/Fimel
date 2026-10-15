@@ -1,8 +1,12 @@
 import { useEffect, useSyncExternalStore } from 'react';
 import { assetUrl, parseCatalogue } from '../content/projects';
 import type { Project } from '../content/projects';
+import { parseReleases } from '../content/releases';
+import type { DownloadRelease } from '../content/releases';
+import { parseSiteContent } from '../content/site-content';
+import type { SiteContent } from '../content/site-content';
 
-type CatalogueState = { status: 'idle' | 'loading' | 'ready' | 'error'; projects: Project[]; fallback?: boolean };
+type CatalogueState = { status: 'idle' | 'loading' | 'ready' | 'error'; projects: Project[]; releases?: Record<string, DownloadRelease[]>; site?: SiteContent; fallback?: boolean };
 let snapshot: CatalogueState = { status: 'idle', projects: [] };
 const listeners = new Set<() => void>();
 // Enabled only after reviewed R2 migration. Existing deployments keep the local contract.
@@ -11,6 +15,9 @@ let lastValidated = 0;
 let loading = false;
 let remoteSucceeded = false;
 let responseEtag: string | null = null;
+let mountedReaders = 0;
+let refreshTimer: number | undefined;
+const refreshWhenStale = () => { if (document.visibilityState === 'visible' && Date.now() - lastValidated >= 60_000) void loadCatalogue(); };
 
 const subscribe = (listener: () => void) => {
   listeners.add(listener);
@@ -33,10 +40,13 @@ const loadCatalogue = async () => {
     });
     if (response.status === 304 && snapshot.status === 'ready') { lastValidated = Date.now(); return; }
     if (!response.ok) throw new Error(`Catalogue returned HTTP ${response.status}`);
-    const projects = parseCatalogue(await response.json());
+    const data = await response.json();
+    const projects = parseCatalogue(data);
+    const releases = parseReleases(data, projects);
+    const site = parseSiteContent(data);
     if (remoteUrl) { remoteSucceeded = true; responseEtag = response.headers.get('etag'); }
     lastValidated = Date.now();
-    publish({ status: 'ready', projects, fallback: false });
+    publish({ status: 'ready', projects, releases, site, fallback: false });
   } catch (error) {
     console.warn('Unable to load work catalogue:', error);
     // Never resurrect removed projects from the Git snapshot after any successful R2 read.
@@ -55,15 +65,12 @@ export function useProjectCatalogue() {
   useEffect(() => {
     if (getSnapshot().status === 'idle') void loadCatalogue();
     if (!remoteUrl) return;
-    const refresh = () => { if (document.visibilityState === 'visible' && Date.now() - lastValidated >= 60_000) void loadCatalogue(); };
-    // The first read can finish after this timer starts. Do not skip its first
-    // minute tick merely because that response is slightly less than a minute old.
-    const interval = window.setInterval(() => {
-      if (document.visibilityState === 'visible') void loadCatalogue();
-    }, 60_000);
-    window.addEventListener('focus', refresh);
-    window.addEventListener('online', refresh);
-    return () => { window.clearInterval(interval); window.removeEventListener('focus', refresh); window.removeEventListener('online', refresh); };
+    if (++mountedReaders === 1) {
+      // One timer serves all catalogue, homepage and header readers.
+      refreshTimer = window.setInterval(() => { if (document.visibilityState === 'visible') void loadCatalogue(); }, 60_000);
+      window.addEventListener('focus', refreshWhenStale);window.addEventListener('online', refreshWhenStale);
+    }
+    return () => { if (--mountedReaders === 0) { window.clearInterval(refreshTimer);window.removeEventListener('focus', refreshWhenStale);window.removeEventListener('online', refreshWhenStale); } };
   }, []);
   return { ...state, retry: loadCatalogue };
 }

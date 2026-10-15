@@ -7,10 +7,15 @@ import { ScrollTextReveal } from '../components/ScrollTextReveal';
 import { TeamHoverRoster } from '../components/TeamHoverRoster';
 import { DeferredParticleScene, DeferredWorldCore } from '../components/DeferredScene';
 import { useWorksData } from '../hooks/useWorksData';
+import { useProjectCatalogue } from '../hooks/useProjectCatalogue';
+import { DEFAULT_SITE_CONTENT } from '../content/site-content';
+import { localizedText } from '../content/projects';
 
 export const Studio: React.FC = () => {
   const { isDark, basePath } = useOutletContext<{ isDark: boolean; basePath: string }>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { site } = useProjectCatalogue();const contact=site?.contact??DEFAULT_SITE_CONTENT.contact;
+  const studioText=(key:'title'|'description'|'contactTitle'|'contactIntro',fallback:string)=>localizedText(site?.studio[key],i18n.resolvedLanguage??'zh')||t(fallback);
   const { siteMeta } = useWorksData();
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -22,7 +27,7 @@ export const Studio: React.FC = () => {
   const copyQQ = async () => {
     if (copyTimer.current) clearTimeout(copyTimer.current);
     try {
-      await navigator.clipboard.writeText('937760015');
+      await navigator.clipboard.writeText(contact.qqGroup);
       setCopyState('copied');
     } catch {
       setCopyState('error');
@@ -56,8 +61,8 @@ export const Studio: React.FC = () => {
             <ArrowLeft className="w-4 h-4" /> {t('workPages.back_home')}
           </Link>
           <p className="hero-sub font-mono text-sm uppercase tracking-[0.35em] mb-6 text-amethyst">{t('about.tag')}</p>
-          <h1 className="hero-title text-[13vw] md:text-[9vw] lg:text-[7vw] leading-[0.95] font-black tracking-tighter max-w-6xl"><Trans i18nKey="about.title" /></h1>
-          <p className="hero-sub mt-10 max-w-3xl text-lg md:text-2xl leading-relaxed text-content-muted font-light">{t('about.desc')}</p>
+          <h1 className="hero-title text-[13vw] md:text-[9vw] lg:text-[7vw] leading-[0.95] font-black tracking-tighter max-w-6xl">{localizedText(site?.studio.title,i18n.resolvedLanguage??'zh')||<Trans i18nKey="about.title" />}</h1>
+          <p className="hero-sub mt-10 max-w-3xl text-lg md:text-2xl leading-relaxed text-content-muted font-light">{studioText('description','about.desc')}</p>
           <div className="hero-sub mt-8 flex flex-wrap items-center gap-4 text-sm">
             <Link to="/works" className="hover-target inline-flex min-h-11 items-center gap-3 border border-line bg-surface px-5 py-3 font-bold transition-colors hover:border-diamond hover:bg-diamond/10 focus-visible:outline-2 focus-visible:outline-diamond">
               {t('studioContact.view_works')} <ArrowUpRight size={17} />
@@ -115,19 +120,19 @@ export const Studio: React.FC = () => {
       </section>
       <section id="contact" className="relative scroll-mt-28 border-t border-line bg-canvas px-6 py-20 text-content md:px-16 md:py-28 lg:px-24">
         <div className="mx-auto max-w-screen-xl">
-          <h2 className="text-4xl font-black leading-tight tracking-tighter sm:text-5xl md:text-7xl">{t('studioContact.title')}</h2>
-          <p className="mt-6 max-w-2xl text-base leading-relaxed text-content-muted md:text-lg">{t('studioContact.intro')}</p>
+          <h2 className="text-4xl font-black leading-tight tracking-tighter sm:text-5xl md:text-7xl">{studioText('contactTitle','studioContact.title')}</h2>
+          <p className="mt-6 max-w-2xl text-base leading-relaxed text-content-muted md:text-lg">{studioText('contactIntro','studioContact.intro')}</p>
 
           <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-20">
             <div>
               {contactIntents.map((intent) => (
-                <a key={intent} href={`mailto:fimel.studio.mc@gmail.com?subject=${encodeURIComponent(`Fimel / ${t(`studioContact.${intent}`)}`)}`} className="hover-target group flex min-h-20 items-center justify-between gap-5 border-b border-line py-6 transition-colors hover:text-brand focus-visible:outline-2 focus-visible:outline-diamond">
+                <a key={intent} href={`mailto:${contact.email}?subject=${encodeURIComponent(`Fimel / ${t(`studioContact.${intent}`)}`)}`} className="hover-target group flex min-h-20 items-center justify-between gap-5 border-b border-line py-6 transition-colors hover:text-brand focus-visible:outline-2 focus-visible:outline-diamond">
                   <span className="text-xl font-bold tracking-tight sm:text-2xl">{t(`studioContact.${intent}`)}</span>
                   <ArrowUpRight size={23} strokeWidth={1.5} className="shrink-0 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1 motion-reduce:transition-none" />
                 </a>
               ))}
               <div className="mt-9 flex flex-wrap gap-6 text-sm">
-                <a href="https://x.com/FimelStudio" target="_blank" rel="noopener noreferrer" className="hover-target inline-flex min-h-11 items-center gap-2 hover:text-brand focus-visible:outline-2 focus-visible:outline-diamond">X / @FimelStudio <ArrowUpRight size={15} /></a>
+                <a href={contact.x} target="_blank" rel="noopener noreferrer" className="hover-target inline-flex min-h-11 items-center gap-2 hover:text-brand focus-visible:outline-2 focus-visible:outline-diamond">{contact.x===DEFAULT_SITE_CONTENT.contact.x?'X / @FimelStudio':'X'} <ArrowUpRight size={15} /></a>
               </div>
             </div>
 
@@ -135,12 +140,12 @@ export const Studio: React.FC = () => {
               <h3 className="text-lg font-bold">{t('studioContact.connect')}</h3>
               <div className="mt-6">
                 <p className="text-xs text-content-muted">{t('studioContact.email')}</p>
-                <a href="mailto:fimel.studio.mc@gmail.com" className="hover-target mt-2 inline-flex min-h-11 max-w-full items-center gap-2 break-all text-base font-semibold hover:text-brand focus-visible:outline-2 focus-visible:outline-diamond sm:text-xl">fimel.studio.mc@gmail.com</a>
+                <a href={`mailto:${contact.email}`} className="hover-target mt-2 inline-flex min-h-11 max-w-full items-center gap-2 break-all text-base font-semibold hover:text-brand focus-visible:outline-2 focus-visible:outline-diamond sm:text-xl">{contact.email}</a>
               </div>
               <div className="mt-7 border-t border-line pt-6">
                 <p className="text-xs text-content-muted">{t('studioContact.qq_group')}</p>
                 <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                  <span className="select-text font-mono text-xl font-bold">937760015</span>
+                  <span className="select-text font-mono text-xl font-bold">{contact.qqGroup}</span>
                   <button onClick={() => void copyQQ()} className="hover-target inline-flex min-h-11 items-center gap-2 px-2 text-sm hover:text-brand focus-visible:outline-2 focus-visible:outline-diamond">
                     {copyState === 'copied' ? <Check size={16} /> : <Copy size={16} />}
                     {t(copyState === 'copied' ? 'studioContact.copied' : 'studioContact.copy_qq')}
@@ -148,7 +153,7 @@ export const Studio: React.FC = () => {
                 </div>
                 <p role="status" aria-live="polite" className="mt-1 min-h-5 text-xs text-content-muted">{copyState === 'error' ? t('studioContact.copy_failed') : copyState === 'copied' ? t('studioContact.copied') : ''}</p>
               </div>
-              <a href="https://discord.gg/X9aVJJVvA" target="_blank" rel="noopener noreferrer" className="hover-target group mt-6 flex items-start gap-4 border-t border-line pt-6 transition-colors hover:text-brand focus-visible:outline-2 focus-visible:outline-diamond">
+              <a href={contact.discord} target="_blank" rel="noopener noreferrer" className="hover-target group mt-6 flex items-start gap-4 border-t border-line pt-6 transition-colors hover:text-brand focus-visible:outline-2 focus-visible:outline-diamond">
                 <MessageCircle size={24} strokeWidth={1.6} className="mt-1 shrink-0" />
                 <span className="min-w-0 flex-1"><span className="block text-xl font-bold">{t('studioContact.discord')}</span><span className="mt-2 block text-sm leading-relaxed text-content-muted">{t('studioContact.discord_desc')}</span></span>
                 <ArrowUpRight size={18} className="mt-1 shrink-0" />

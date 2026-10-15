@@ -1,4 +1,5 @@
 import type { Project, ProjectTab, LocalizedText } from '../../src/content/projects';
+import type { SiteContent } from '../../src/content/site-content';
 
 export const PUBLIC_ORIGIN = 'https://download.studiofimel.com';
 export const PART_SIZE = 16 * 1024 * 1024;
@@ -11,7 +12,7 @@ export type Asset = {
   privateKey?: string; publicUrl?: string; primary?: boolean;
 };
 export type Release = {
-  id: string; label: string; date: string; gameVersions: string[];
+  id: string; label: string; date: string; gameVersions: string[]; loaders?: string[]; platforms?: string[];
   status: 'draft' | 'released'; changelog: LocalizedText; files: Asset[];
 };
 export type Work = {
@@ -25,6 +26,8 @@ export type PublicRelease = Omit<Release, 'files'> & { files: Omit<Asset, 'priva
 export type PublicManifest = {
   schemaVersion: 2; publicationId: string; projects: Project[];
   releases: Record<string, PublicRelease[]>;
+  publicationStates?: Record<string, { fingerprint: string; publishedAt: string; savedAt: string }>;
+  site?: SiteContent;
 };
 export type Upload = {
   id: string; workId: string; versionId?: string; kind: 'image' | 'file';

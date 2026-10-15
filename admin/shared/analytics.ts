@@ -5,4 +5,6 @@ export type MetricsFeed = {
   downloadDays:{date:string;requests:number;bytes:number}[];
   files:{date:string;path:string;slug:string;requests:number;bytes:number}[];
   filesTruncated:boolean;
+  workEvents?:{date:string;slug:string;views:number;downloadClicks:number}[];
+  workEventsAvailable?:boolean;
 };
