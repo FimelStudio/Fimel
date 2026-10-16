@@ -78,7 +78,7 @@
         }
       ],
       "published": "2026-05-16",
-      "updated": "2026-05-19",
+      "updated": "2026-10-16",
       "version": "1.4.0",
       "size": "52.5 KB",
       "repository": "https://github.com/Ylong4004/minecraft_obj_cubizer",
@@ -93,10 +93,14 @@
           "ja": "works/minecraft-obj-cubizer/description.ja.md"
         },
         "changelog": {
-          "zh": "works/minecraft-obj-cubizer/changelog.md"
+          "zh": "works/minecraft-obj-cubizer/changelog.md",
+          "en": "works/minecraft-obj-cubizer/changelog.en.md",
+          "ja": "works/minecraft-obj-cubizer/changelog.ja.md"
         },
         "versions": {
-          "zh": "works/minecraft-obj-cubizer/versions.md"
+          "zh": "works/minecraft-obj-cubizer/versions.md",
+          "en": "works/minecraft-obj-cubizer/versions.en.md",
+          "ja": "works/minecraft-obj-cubizer/versions.ja.md"
         }
       },
       "tags": [

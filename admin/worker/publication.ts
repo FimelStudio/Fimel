@@ -1,10 +1,10 @@
 import { PUBLIC_ORIGIN } from '../shared/model';
-import type { Asset, PublicManifest, PublicRelease, Work } from '../shared/model';
+import type { Asset, PublicManifest, Work } from '../shared/model';
 import type { Project, ProjectTab, LocalizedText } from '../../src/content/projects';
 import { ApiError, putJson } from './http';
 import { backup, MANIFEST_KEY } from './storage';
-import { referencedImages, versionMarkdown } from '../shared/markdown';
-import type { Locale } from '../shared/model';
+import { referencedImages } from '../shared/markdown';
+import { releaseProject } from '../../src/content/releases';
 
 export async function publishedWork(work: Work, privateBucket: R2Bucket, publicBucket: R2Bucket, publicationId: string) {
   if (work.workflow === 'archived') throw new ApiError(422, '归档作品须先恢复为草稿。');
@@ -30,7 +30,6 @@ export async function publishedWork(work: Work, privateBucket: R2Bucket, publicB
       let body = markdown;
       for (const [id, url] of publicAssets) body = body.replaceAll(`fimel-asset:${id}`, url);
       if (/fimel-asset:/.test(body)) throw new ApiError(422, '正文引用了未发布资源。');
-      if (tab === 'versions') body=versionMarkdown(body,work.versions,locale as Locale,file=>publicAssets.get(file.id)!);
       const key = `content/${project.slug}/${publicationId}/${tab}.${locale}.md`;
       const saved = await publicBucket.put(key, body, { onlyIf: { etagDoesNotMatch: '*' }, httpMetadata: { contentType: 'text/markdown; charset=utf-8', cacheControl: 'public, max-age=31536000, immutable' } });
       if (!saved) throw new ApiError(409, '正文快照已存在。');
@@ -40,11 +39,10 @@ export async function publishedWork(work: Work, privateBucket: R2Bucket, publicB
     content[tab] = paths as LocalizedText;
   }
   project.content = content;
-  const releases: PublicRelease[] = work.versions.filter(v => v.status === 'released').map(v => ({ ...v,
+  const releases = work.versions.filter(v => v.status === 'released').map(v => ({ ...v,status:'released' as const,
     files: v.files.map(a => ({ id: a.id, name: a.name, ...(a.displayName?{displayName:a.displayName}:{}), size: a.size, mime: a.mime, sha256: a.sha256, ...(a.primary ? { primary: true } : {}), publicUrl: publicAssets.get(a.id)! })),
   }));
-  const latest = releases.find(release => release.files.length); const primary = latest?.files.find(f => f.primary) ?? latest?.files[0];
-  if (primary && latest) { project.downloadUrl = primary.publicUrl; project.version = latest.label; project.size = `${(primary.size / 1024 ** 2).toFixed(1)} MiB`; }
+  Object.assign(project,releaseProject(project,releases,new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Shanghai'})));
   if (project.downloadUrl) {
     const key = new URL(project.downloadUrl).pathname.slice(1);
     if (!await publicBucket.head(key)) throw new ApiError(422, '主下载对象不存在，不能发布。');

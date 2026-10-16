@@ -6,7 +6,7 @@ import {makeWork} from '../shared/model';
 import type {Library,Work,PublicManifest} from '../shared/model';
 import {publicationFingerprint,mergeWork} from '../shared/revisions';
 import {DEFAULT_SITE_CONTENT} from '../../src/content/site-content';
-import {parseReleases} from '../../src/content/releases';
+import {parseReleases,releaseProject,fileSize} from '../../src/content/releases';
 let mf:Miniflare;
 before(async()=>{const bundle=await build({entryPoints:['admin/worker/local.ts'],bundle:true,write:false,format:'esm',platform:'browser'});mf=new Miniflare(convertV4MiniflareOptions({modules:true,script:bundle.outputFiles[0].text,compatibilityDate:'2026-10-12',r2Buckets:['PRIVATE','PUBLIC'],bindings:{ADMIN_ORIGIN:'http://127.0.0.1:5174',ACCESS_AUD:'local-test',ACCESS_ISSUER:'https://local.invalid',ADMIN_EMAILS:'local-admin@example.invalid'}}));await mf.ready;});
 after(async()=>{await mf?.dispose();});
@@ -62,5 +62,11 @@ test('无文件的较新版本不会遮挡现有实际下载，主下载与官�
   const base={date:'2026-10-16',gameVersions:['1.21'],status:'released' as const,changelog:{zh:''}};
   const changed={...work,project:{...work.project,status:'released' as const},versions:[{...base,id:'empty-release',label:'2.0',files:[]},{...base,id:'available-release',label:'1.0',files:[{id:'archive-file',name:'archive.zip',size:4,mime:'application/zip',sha256:'a'.repeat(64),publicUrl:`https://download.studiofimel.com/${key}`}]}]};
   const saved=await save(work,changed);assert.equal(saved.status,200,await saved.text());const before=await state();const response=await request(`publish/${work.id}`,'POST',{}, {'If-Match':before.etag,'X-Public-ETag':before.publicEtag});assert.equal(response.status,200,await response.text());
-  const published=(await state()).public.projects.find(p=>p.slug===work.project.slug)!;assert.equal(published.version,'1.0');assert.equal(published.downloadUrl,`https://download.studiofimel.com/${key}`);
+  const published=(await state()).public.projects.find(p=>p.slug===work.project.slug)!;assert.equal(published.version,'1.0');assert.equal(published.downloadUrl,`https://download.studiofimel.com/${key}`);assert.equal(published.updated,new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Shanghai'}));assert.equal(published.size,'1 KiB');
+  const notes=await(await bucket.get(new URL(typeof published.content.versions==='object'?published.content.versions.zh!:published.content.versions!).pathname.slice(1)))!.text();assert.ok(!notes.includes('SHA-256'));assert.ok(!notes.includes('archive.zip'));
+});
+
+test('发行元数据修正旧时间和平台，浏览不会按当天更改时间',()=>{
+  const project=makeWork().project;project.updated='2026-05-19';project.published='2026-05-16';const release={id:'v1',label:'v1.6.1',date:'2026-10-16',status:'released' as const,gameVersions:[],platforms:['Blockbench Desktop ≥ 5.2.0'],files:[{id:'f1',name:'a.zip',size:78929,mime:'application/zip',sha256:'a'.repeat(64),publicUrl:'https://download.studiofimel.com/works/bedrock/test/v1/a.zip'}]};
+  const view=releaseProject(project,[release]);assert.equal(view.updated,'2026-10-16');assert.equal(view.published,'2026-05-16');assert.equal(view.size,fileSize(78929));assert.deepEqual(view.platform,release.platforms);assert.equal(releaseProject(project,[]).updated,'2026-05-19');assert.equal(releaseProject(project,[release],'2026-10-17').updated,'2026-10-17');assert.equal(project.updated,'2026-05-19');
 });

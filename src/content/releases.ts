@@ -1,7 +1,14 @@
-import type { Project } from './projects';
+import type { Project, LocalizedText } from './projects';
 
 export type DownloadFile = { id: string; name: string; displayName?: string; size: number; sha256: string; mime: string; publicUrl: string; primary?: boolean };
-export type DownloadRelease = { id: string; label: string; date: string; gameVersions: string[]; loaders?: string[]; platforms?: string[]; status: 'released'; files: DownloadFile[] };
+export type DownloadRelease = { id: string; label: string; date: string; gameVersions: string[]; loaders?: string[]; platforms?: string[]; status: 'released'; changelog?:LocalizedText; files: DownloadFile[] };
+
+/** Shared by the page, Admin preview and publisher. Browsing never advances dates. */
+export function releaseProject(project:Project,releases:DownloadRelease[],publicationDate?:string):Project {
+  const latest=releases.find(r=>r.files.length);const primary=latest?.files.find(f=>f.primary)??latest?.files[0];
+  const updated=[project.updated,...releases.map(r=>r.date),publicationDate].filter((date):date is string=>!!date&&/^\d{4}-\d{2}-\d{2}$/.test(date)).sort().at(-1);
+  return {...project,...(updated?{updated}:{}),...(latest&&primary?{version:latest.label,size:fileSize(primary.size),downloadUrl:primary.publicUrl,...(latest.platforms?.length?{platform:latest.platforms}:{})}:{})};
+}
 export function parseReleases(value: unknown, projects: Project[]): Record<string, DownloadRelease[]> {
   if (!value || typeof value !== 'object' || !('releases' in value)) return {};
   const records = value.releases;
@@ -18,6 +25,7 @@ export function parseReleases(value: unknown, projects: Project[]): Record<strin
         typeof r.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(r.date) || !strings(r.gameVersions) ||
         r.loaders !== undefined && !strings(r.loaders) || r.platforms !== undefined && !strings(r.platforms) || !Array.isArray(r.files) || r.files.length > 30) throw Error('Invalid release.');
       ids.add(r.id);
+      if(r.changelog!==undefined){const text=(v:unknown)=>typeof v==='string'&&v.length<=200_000;if(!text(r.changelog)&&(!r.changelog||typeof r.changelog!=='object'||Array.isArray(r.changelog)||Object.entries(r.changelog).some(([k,v])=>!['zh','en','ja'].includes(k)||!text(v))))throw Error('Invalid release notes.');}
       const fileIds = new Set<string>();
       for (const f of r.files) {
         if (!f || typeof f.id !== 'string' || fileIds.has(f.id) || typeof f.name !== 'string' || !f.name || f.displayName !== undefined && typeof f.displayName !== 'string' ||

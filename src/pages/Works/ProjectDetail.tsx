@@ -7,12 +7,16 @@ import { useDownloadCounters } from '../../hooks/useDownloadCounters';
 import { PROJECT_TABS, assetUrl, formatProjectDate, localizedText, projectCopy, projectStatus } from '../../content/projects';
 import type { Project, ProjectTab } from '../../content/projects';
 import { ProjectDownloads } from '../../components/ProjectDownloads';
+import { ProjectVersions } from '../../components/ProjectVersions';
+import { releaseProject } from '../../content/releases';
 import type { DownloadRelease } from '../../content/releases';
 import { recordWorkEvent } from '../../lib/work-events';
 
 const ProjectMarkdown = lazy(() => import('../../components/ProjectMarkdown').then((module) => ({ default: module.ProjectMarkdown })));
+const ProjectMarkdownBody = lazy(() => import('../../components/ProjectMarkdown').then((module) => ({ default: module.ProjectMarkdownBody })));
 
-function Detail({ project, releases, discordUrl }: { project: Project; releases?: DownloadRelease[]; discordUrl?:string }) {
+function Detail({ project: source, releases, discordUrl }: { project: Project; releases?: DownloadRelease[]; discordUrl?:string }) {
+  const project=releaseProject(source,releases??[]);
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage ?? i18n.language;
   const locale = language.split('-')[0];
@@ -21,7 +25,7 @@ function Detail({ project, releases, discordUrl }: { project: Project; releases?
   const tabParam = params.get('tab');
   const activeTab: ProjectTab = PROJECT_TABS.includes(tabParam as ProjectTab) ? tabParam as ProjectTab : 'description';
   const { title, summary, tags } = projectCopy(project, t, language);
-  const trackedDownloads = useMemo(() => project.downloadSlug ? [project.downloadSlug] : [], [project.downloadSlug]);
+  const trackedDownloads = useMemo(() => source.downloadSlug ? [source.downloadSlug] : [], [source.downloadSlug]);
   const { configured, counts, loading, recordDownload } = useDownloadCounters(trackedDownloads);
   const returnSearch = typeof location.state?.catalogueSearch === 'string' ? location.state.catalogueSearch : `?type=${project.type}`;
   const markdownSource = project.content[activeTab];
@@ -36,6 +40,11 @@ function Detail({ project, releases, discordUrl }: { project: Project; releases?
   }, [title]);
   const buttonBase = 'hover-target inline-flex items-center gap-2 min-h-12 px-4 rounded-sm border border-obsidian/20 dark:border-line text-sm hover:border-obsidian dark:hover:border-content-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link transition-colors';
   const secondaryButton = `${buttonBase} dark:bg-surface-raised`;
+  const trackDownload=()=>{recordWorkEvent(project.slug,'download');if(project.downloadSlug)void recordDownload(project.downloadSlug);};
+  const content=markdownPath?<>
+    {locale!=='zh'&&!hasTranslation&&<p className="mb-5 border-l-2 border-line pl-3 text-xs text-gray-600 dark:text-content-muted">{t('project.translation_notice')}</p>}
+    <Suspense fallback={<p role="status" className="text-gray-600 dark:text-content-muted">{t('project.loading')}</p>}><ProjectMarkdown key={markdownPath} path={markdownPath}/></Suspense>
+  </>:null;
 
   return <div className="px-5 sm:px-8 lg:px-12 pt-36 md:pt-28 pb-24 text-obsidian dark:text-content min-h-[75dvh]">
     <div className="max-w-[1320px] mx-auto">
@@ -49,7 +58,7 @@ function Detail({ project, releases, discordUrl }: { project: Project; releases?
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter leading-[1.1] break-words">{title}</h1>
           <p className="mt-4 max-w-[75ch] text-sm sm:text-base leading-relaxed text-gray-600 dark:text-content-muted">{summary}</p>
           <div className="flex flex-wrap gap-3 mt-6 items-start">
-            <ProjectDownloads project={project} releases={releases} onDownload={() => { recordWorkEvent(project.slug,'download');if(project.downloadSlug)void recordDownload(project.downloadSlug); }} />
+            <ProjectDownloads project={project} releases={releases} onDownload={trackDownload} />
             {project.store && <a href={project.store} target="_blank" rel="noopener noreferrer" className={`${buttonBase} bg-obsidian dark:bg-diamond text-white dark:text-obsidian`}><ExternalLink size={16} aria-hidden />{t('project.store')}</a>}
             {project.repository && <a href={project.repository} target="_blank" rel="noopener noreferrer" className={secondaryButton}><Code size={16} aria-hidden />{t('project.repository')}</a>}
           </div>
@@ -80,10 +89,7 @@ function Detail({ project, releases, discordUrl }: { project: Project; releases?
             </button>)}
           </div>
           <div role="tabpanel" id="project-content" aria-labelledby={`tab-${activeTab}`} tabIndex={0} className="min-h-56 focus-visible:outline-2 focus-visible:outline-link">
-            {markdownPath ? <>
-              {locale !== 'zh' && !hasTranslation && <p className="mb-5 text-xs text-gray-600 dark:text-content-muted border-l-2 border-obsidian/20 dark:border-line pl-3">{t('project.translation_notice')}</p>}
-              <Suspense fallback={<p role="status" className="text-gray-600 dark:text-content-muted">{t('project.loading')}</p>}><ProjectMarkdown key={markdownPath} path={markdownPath} /></Suspense>
-            </> : <p className="py-10 text-gray-600 dark:text-content-muted">{t('project.unavailable')}</p>}
+            {activeTab==='versions'?<ProjectVersions key={project.slug} project={project} releases={releases} onDownload={trackDownload} notes={content??undefined} renderNotes={text=><Suspense fallback={<p role="status">{t('project.loading')}</p>}><ProjectMarkdownBody content={text} fileUrl={new URL('https://studiofimel.com/')}/></Suspense>}/>:content??<p className="py-10 text-gray-600 dark:text-content-muted">{t('project.unavailable')}</p>}
           </div>
         </section>
 

@@ -66,8 +66,8 @@ test('official import previews all 28 works, keeps existing edits and saves only
 test('生产构建发现新版本时保留编辑，保存成功后才刷新',async({page})=>{
   let writes=0;
   await page.route('**/api/works/*',async route=>{writes++;const {work}=route.request().postDataJSON();await route.fulfill({json:{saved:true,etag:'"new-version"',library:{schemaVersion:1,works:[work]},public:{schemaVersion:2,publicationId:'empty',projects:[],releases:{}},publicEtag:'"empty"'}});});
-  await page.goto('/');await page.getByRole('button',{name:'新建作品',exact:true}).click();await page.getByLabel('作品名称',{exact:true}).fill('刷新前保留的编辑');await page.getByLabel('稳定 slug').fill('retain-on-update');
-  await page.route('http://127.0.0.1:4177/',async route=>{if(route.request().isNavigationRequest())return route.continue();const r=await route.fetch();const html=await r.text();await route.fulfill({response:r,body:html.replace(/src="[^"]+\.js"/,'src="/assets/new-release.js"')});});
+  const startup=await page.goto('/');const html=await startup!.text();await page.getByRole('button',{name:'新建作品',exact:true}).click();await page.getByLabel('作品名称',{exact:true}).fill('刷新前保留的编辑');await page.getByLabel('稳定 slug').fill('retain-on-update');
+  await page.route('http://127.0.0.1:4177/',async route=>{if(route.request().isNavigationRequest())return route.continue();await route.fulfill({status:200,contentType:'text/html',body:html.replace(/src="[^"]+\.js"/,'src="/assets/new-release.js"')});});
   await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
   await expect(page.getByText('后台已有新版本。',{exact:false})).toBeVisible();await expect(page.getByLabel('作品名称',{exact:true})).toHaveValue('刷新前保留的编辑');expect(writes).toBe(0);
   await page.getByRole('button',{name:'保存全部草稿并刷新',exact:true}).click();await expect(page.getByRole('heading',{name:'作品库',exact:true})).toBeVisible();expect(writes).toBe(1);
