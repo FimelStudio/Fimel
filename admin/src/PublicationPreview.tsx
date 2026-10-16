@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { I18nextProvider, useTranslation } from 'react-i18next';
 import type { Project, ProjectTab } from '../../src/content/projects';
-import { assetUrl, localizedText, projectCopy } from '../../src/content/projects';
+import { assetUrl, localizedText, projectCopy, projectDownloadUrl } from '../../src/content/projects';
 import { ProjectMarkdownBody } from '../../src/components/ProjectMarkdown';
 import { ProjectDownloads } from '../../src/components/ProjectDownloads';
 import { ProjectVersions } from '../../src/components/ProjectVersions';
@@ -42,7 +42,7 @@ export function PublicationPreview({ work, before, busy, onClose, onPublish }: {
     <div className="button-row preview-controls"><button aria-pressed={!viewingPublished} onClick={()=>setVersion('draft')}>即将发布</button><button disabled={!previous||!published} aria-pressed={viewingPublished} onClick={()=>setVersion('published')}>当前官网</button><label>预览宽度<select value={device} onChange={e=>setDevice(e.target.value)}><option value="desktop">桌面</option><option value="mobile">手机 · 390 px</option></select></label><label>正文语言<select value={locale} onChange={e=>setLocale(e.target.value as Locale)}>{LOCALES.map(l=><option key={l} value={l}>{l}</option>)}</select></label></div>
     {error&&<p role="alert" className="error">{error}，无法核对旧正文；当前草稿预览仍可使用。</p>}
     {!!published?.unavailable?.length&&<p className="notice">部分历史正文无法读取，差异可能不完整：{published.unavailable.join('、')}</p>}
-    <details className="publication-changes" open><summary>本次变化</summary><p>{changes.length?changes.join('、'):'作品元数据未改动。'}</p><p>{bodyChanges.length?`正文需核对：${bodyChanges.join('、')}（旧正文中的图片地址可能已转换，请结合预览比较）`:'正文加载完成后可比较当前官网和草稿。'}</p><p>本次公开 {releases.length} 个已发行版本、{releases.reduce((sum,r)=>sum+r.files.length,0)} 个文件。未发行版本保持私有。</p></details>
+    <details className="publication-changes" open><summary>本次变化</summary><p>{changes.length?changes.join('、'):'作品元数据未改动。'}</p><p>{bodyChanges.length?`正文需核对：${bodyChanges.join('、')}（旧正文中的图片地址可能已转换，请结合预览比较）`:'正文加载完成后可比较当前官网和草稿。'}</p><p>本次公开 {releases.length} 个已登记发行版本、{releases.reduce((sum,r)=>sum+r.files.length,0)} 个文件。未发行版本保持私有。{!releases.some(r=>r.files.length)&&source&&(projectDownloadUrl(source)||source.latestReleaseRepo||source.store||source.releasePage)?'既有下载或平台入口继续保留，并在版本列表显示。':''}</p></details>
     {published?.markdown&&<TextChanges before={localizedText(published.markdown[tab],locale)} after={localizedText(work.markdown[tab],locale)}/>}
     <I18nextProvider i18n={previewI18n}><div className={`publication-canvas ${device==='mobile'?'is-mobile':''}`} onClickCapture={event=>{if((event.target as HTMLElement).closest('a'))event.preventDefault();}}>
       {project&&display?<article className="publication-article"><header className="publication-heading"><img src={cover?assetUrl(cover):undefined} alt="封面预览"/><div><h1>{display.title}</h1><p>{display.summary}</p><small>{project.platform.join(' / ')} · {project.status==='released'?'已发行':project.status==='development'?'制作中':'计划中'}</small></div></header>
