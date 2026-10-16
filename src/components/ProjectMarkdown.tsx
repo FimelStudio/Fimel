@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Markdown, { defaultUrlTransform } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Link } from 'react-router-dom';
+import { Link, useInRouterContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { assetUrl } from '../content/projects';
 import { ProjectGallery, type ProjectGalleryImage } from './ProjectGallery';
@@ -59,6 +59,7 @@ export function ProjectMarkdown({ path }: { path: string }) {
 export function ProjectMarkdownBody({ content, fileUrl, resolveAsset }: {
   content: string; fileUrl: URL; resolveAsset?: (id: string) => string | undefined;
 }) {
+  const inRouter = useInRouterContext();
   return <div className="project-markdown"><Markdown remarkPlugins={[remarkGfm]} skipHtml
     urlTransform={(url, key) => url.startsWith('fimel-asset:') ? key === 'src' ? resolveAsset?.(url.slice('fimel-asset:'.length)) ?? '' : '' : defaultUrlTransform(url)} components={{
     p: ({ node, children }) => {
@@ -82,7 +83,7 @@ export function ProjectMarkdownBody({ content, fileUrl, resolveAsset }: {
       return <p>{children}</p>;
     },
     a: ({ href, children }) => {
-      if (!resolveAsset && href?.startsWith('#/')) return <Link to={href.slice(1)}>{children}</Link>;
+      if (inRouter && !resolveAsset && href?.startsWith('#/')) return <Link to={href.slice(1)}>{children}</Link>;
       const resolved = resolveContentUrl(href, fileUrl);
       const external = resolved ? new URL(resolved).origin !== window.location.origin : false;
       return <a href={resolved} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined} download={resolved && /\.(jar|zip)(?:\?|$)/i.test(resolved) && !external ? true : undefined}>{children}</a>;

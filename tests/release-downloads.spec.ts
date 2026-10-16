@@ -48,6 +48,7 @@ test('平台分发与未发行版在三语和手机布局中保持明确的入�
     for(const width of [1440,390,320]){await page.setViewportSize({width,height:1000});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}
     await page.screenshot({path:`.artifacts/all-versions-${language}-${theme}-mobile.png`,fullPage:true});await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:`.artifacts/all-versions-${language}-${theme}-desktop.png`,fullPage:true});
     await page.goto('/#/works/island-escape-java?tab=versions');await expect(page.locator('.project-versions')).toContainText(empty);await expect(page.locator('.project-versions .version-row')).toHaveCount(0);
+    await page.locator('.project-versions>details summary').click();const contact=page.locator('.project-versions').getByRole('link',{name:'联系 Fimel',exact:true});await expect(contact).toHaveAttribute('href','#/studio');await contact.click();await expect(page).toHaveURL(/#\/studio$/);
     await context.close();
   }
 });
