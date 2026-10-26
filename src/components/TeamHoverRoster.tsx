@@ -7,6 +7,7 @@ interface TeamMember {
   letter: string;
   color: string; // Tailwind text color class, e.g. text-blue-500
   avatar: string;
+  profileUrl: string;
 }
 
 function TeamAvatar({ member, isHovered }: { member: TeamMember; isHovered: boolean }) {
@@ -62,15 +63,24 @@ export function TeamHoverRoster({ team }: { team: TeamMember[] }) {
             data-team-member={member.name}
             onMouseEnter={() => setHoveredIdx(idx)}
             onMouseLeave={() => setHoveredIdx(null)}
-            className="group relative flex flex-col md:flex-row md:items-center justify-between py-8 md:py-12 border-b border-obsidian/10 dark:border-line transition-colors duration-500 hover:bg-obsidian hover:text-white dark:hover:bg-surface-raised dark:hover:text-content px-6 md:px-12 cursor-default overflow-hidden"
+            onFocusCapture={() => setHoveredIdx(idx)}
+            onBlurCapture={() => setHoveredIdx(null)}
+            className="group relative flex flex-col md:flex-row md:items-center justify-between py-8 md:py-12 border-b border-obsidian/10 dark:border-line transition-colors duration-500 hover:bg-obsidian hover:text-white focus-within:bg-obsidian focus-within:text-white dark:hover:bg-surface-raised dark:hover:text-content dark:focus-within:bg-surface-raised dark:focus-within:text-content px-6 md:px-12 cursor-default overflow-hidden"
           >
             {/* Background wipe effect on hover */}
-            <div className="absolute inset-0 bg-obsidian dark:bg-surface-raised origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] z-0"></div>
+            <div className="absolute inset-0 bg-obsidian dark:bg-surface-raised origin-left scale-x-0 group-hover:scale-x-100 group-focus-within:scale-x-100 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none z-0"></div>
             
             <div className="relative z-10 flex min-w-0 items-center gap-4 md:gap-8 lg:gap-16">
               <span className={`font-mono text-sm tracking-widest ${isHovered ? 'text-white/70 dark:text-content-muted' : 'text-gray-400'}`}>0{idx + 1}</span>
               <h3 className="min-w-0 break-words text-3xl md:text-5xl lg:text-6xl font-black tracking-tighter uppercase leading-none">
-                {member.name}
+                <a
+                  href={member.profileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover-target inline-block underline decoration-transparent decoration-[0.08em] underline-offset-[0.16em] transition-[color,text-decoration-color] duration-300 hover:decoration-current focus-visible:decoration-current focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-diamond motion-reduce:transition-none"
+                >
+                  {member.name}
+                </a>
               </h3>
             </div>
             

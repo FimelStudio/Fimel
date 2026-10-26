@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 const members = [
-  { name: 'Ylong', filename: 'YYYlong.png' },
-  { name: 'TreeHey', filename: 'TreeHey.png' },
-  { name: 'crystal215', filename: 'crystal215.png' },
-  { name: 'chengzi', filename: 'chengzi_bucheng.png' },
+  { name: 'Ylong', filename: 'YYYlong.png', profileUrl: 'https://space.bilibili.com/313686648' },
+  { name: 'TreeHey', filename: 'TreeHey.png', profileUrl: 'https://space.bilibili.com/106320936' },
+  { name: 'crystal215', filename: 'crystal215.png', profileUrl: 'https://space.bilibili.com/437420546' },
+  { name: 'chengzi', filename: 'chengzi_bucheng.png', profileUrl: 'https://space.bilibili.com/516536087' },
 ];
 
 test.beforeEach(async ({ page }) => {
@@ -13,6 +13,22 @@ test.beforeEach(async ({ page }) => {
     localStorage.setItem('fimel_user_lang', 'zh');
     localStorage.setItem('fimel_theme', 'dark');
   });
+});
+
+test('member names link to their Bilibili profiles in roster order', async ({ page }) => {
+  await page.goto('/#/studio');
+
+  const rows = page.locator('[data-team-member]');
+  await expect(rows).toHaveCount(members.length);
+
+  for (const [index, member] of members.entries()) {
+    const row = rows.nth(index);
+    await expect(row).toHaveAttribute('data-team-member', member.name);
+    const link = row.getByRole('link', { name: member.name, exact: true });
+    await expect(link).toHaveAttribute('href', member.profileUrl);
+    await expect(link).toHaveAttribute('target', '_blank');
+    await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  }
 });
 
 test('all four member portraits use their own pixel PNGs in both desktop themes', async ({ page, request }) => {

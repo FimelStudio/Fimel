@@ -44,10 +44,10 @@ export const Studio: React.FC = () => {
   ];
 
   const team = [
-    { name: 'Ylong', role: t('team.role1'), letter: 'Y', color: 'text-brand', avatar: `${basePath}assets/images/team/YYYlong.png` },
-    { name: 'TreeHey', role: t('team.role2'), letter: 'T', color: 'text-amethyst', avatar: `${basePath}assets/images/team/TreeHey.png` },
-    { name: 'crystal215', role: t('team.role4'), letter: 'C', color: 'text-brand', avatar: `${basePath}assets/images/team/crystal215.png` },
-    { name: 'chengzi', role: t('team.role3'), letter: 'C', color: 'text-[#ffa500]', avatar: `${basePath}assets/images/team/chengzi_bucheng.png` }
+    { name: 'Ylong', role: t('team.role1'), letter: 'Y', color: 'text-brand', avatar: `${basePath}assets/images/team/YYYlong.png`, profileUrl: 'https://space.bilibili.com/313686648' },
+    { name: 'TreeHey', role: t('team.role2'), letter: 'T', color: 'text-amethyst', avatar: `${basePath}assets/images/team/TreeHey.png`, profileUrl: 'https://space.bilibili.com/106320936' },
+    { name: 'crystal215', role: t('team.role4'), letter: 'C', color: 'text-brand', avatar: `${basePath}assets/images/team/crystal215.png`, profileUrl: 'https://space.bilibili.com/437420546' },
+    { name: 'chengzi', role: t('team.role3'), letter: 'C', color: 'text-[#ffa500]', avatar: `${basePath}assets/images/team/chengzi_bucheng.png`, profileUrl: 'https://space.bilibili.com/516536087' }
   ];
 
   return (
