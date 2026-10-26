@@ -1,5 +1,6 @@
 import catalogueSchema from '../../public/works/catalogue.schema.json';
 import { MAX_FILE_SIZE } from './model';
+import { RELEASE_LABEL_PATTERN } from './releases';
 
 const text = { type: 'string', maxLength: 200_000 };
 const localized = { anyOf: [text, { type: 'object', properties: { zh: text, en: text, ja: text }, minProperties: 1, additionalProperties: false }] };
@@ -27,11 +28,12 @@ const schema = {
           properties: Object.fromEntries(['description', 'changelog', 'versions'].map(k => [k, { type: 'object', additionalProperties: false, maxProperties: 3, properties: { zh: text, en: text, ja: text } }])) },
         gallery: { type: 'array', maxItems: 100, items: asset }, versions: { type: 'array', maxItems: 100, items: {
           type: 'object', additionalProperties: false, required: ['id', 'label', 'date', 'gameVersions', 'status', 'changelog', 'files'],
-          properties: { id, label: { type: 'string', pattern: '^[a-zA-Z0-9][a-zA-Z0-9._+-]{0,79}$' }, date: { type: 'string', format: 'date' },
+          properties: { id, label: { type: 'string', anyOf: [{ const: '' }, { pattern: RELEASE_LABEL_PATTERN }] }, date: { type: 'string', format: 'date' },
             gameVersions: { type: 'array', maxItems: 30, items: { type: 'string', maxLength: 80 } }, status: { enum: ['draft', 'released'] },
             loaders: { type: 'array', maxItems: 30, items: { type: 'string', maxLength: 80 } }, platforms: { type: 'array', maxItems: 30, items: { type: 'string', maxLength: 80 } },
             changelog: localized, files: { type: 'array', maxItems: 30, items: asset },
           },
+          allOf: [{ if: { properties: { status: { const: 'released' } } }, then: { properties: { label: { minLength: 1 } } } }],
         } },
       },
     },

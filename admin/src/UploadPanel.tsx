@@ -5,13 +5,15 @@ import { MAX_FILE_SIZE, MAX_IMAGE_SIZE, MIME_TYPES, PART_SIZE } from '../shared/
 import type { Asset, Upload } from '../shared/model';
 
 export type UploadHandle = { start(files: File[]): Promise<void> };
-type Props = { workId: string; versionId?: string; kind: 'image' | 'file'; disabled?: boolean; compact?: boolean; uploadRef?: Ref<UploadHandle>; onUploaded(asset: Asset): void; onBusyChange?(id:string,active:boolean):void };
+type Props = { workId: string; versionId?: string; kind: 'image' | 'file'; disabled?: boolean; disabledHint?: string; compact?: boolean; uploadRef?: Ref<UploadHandle>; beforeUpload?(files: File[]): Promise<boolean>; onUploaded(asset: Asset): void; onBusyChange?(id:string,active:boolean):void };
 type UploadState = { upload: Upload; parts: { partNumber: number; size: number; sha256: string }[] };
-export function UploadPanel({ workId, versionId, kind, disabled, compact, uploadRef, onUploaded, onBusyChange }: Props) {
+export function UploadPanel({ workId, versionId, kind, disabled, disabledHint, compact, uploadRef, beforeUpload, onUploaded, onBusyChange }: Props) {
   const [progress, setProgress] = useState(0); const [label, setLabel] = useState('');
   const [busy, setBusy] = useState(false); const [error, setError] = useState('');
   const controller = useRef<AbortController | null>(null); const session = useRef<string | null>(null);
   const pending = useRef<File[]>([]); const hashing = useRef<Worker | null>(null);
+  const running = useRef(false);
+  const [dragging, setDragging] = useState(false);
   const onUploadedRef = useRef(onUploaded);
   useImperativeHandle(uploadRef, () => ({ start }));
   useEffect(() => { onUploadedRef.current = onUploaded; }, [onUploaded]);
@@ -43,13 +45,25 @@ export function UploadPanel({ workId, versionId, kind, disabled, compact, upload
     xhr.send(bytes);
   });
   async function start(files: File[]) {
-    if(!files.length)return;
-    onBusyChange?.(`${workId}:${versionId??kind}`,true);
+    if(!files.length || running.current || disabled)return;
+    running.current = true;
     setLabel(`准备校验 ${files[0].name}…`);
     setBusy(true); setError(''); pending.current = files;
+    session.current = null;
     const abort = new AbortController(); controller.current = abort;
     try {
+      for (const file of files) {
+        const ext = file.name.split('.').pop()!.toLowerCase();
+        if (!MIME_TYPES[ext] || file.size < 1 || file.size > (kind === 'image' ? MAX_IMAGE_SIZE : MAX_FILE_SIZE) || (kind === 'image') !== ['png','jpg','jpeg','webp'].includes(ext)) throw new Error('格式不支持或文件超过限制。');
+      }
+      if (beforeUpload) {
+        setLabel('正在保存私有草稿，随后开始上传…');
+        if (!await beforeUpload(files)) throw new Error('草稿未能保存，尚未开始上传。请修正提示的问题，再重试上传。');
+      }
+      if (abort.signal.aborted) throw new Error('上传已暂停，尚未创建上传会话。');
+      onBusyChange?.(`${workId}:${versionId??kind}`,true);
       for (const [index, file] of files.entries()) {
+        if (abort.signal.aborted) throw new Error('上传已暂停，可重新选择同一文件续传。');
         setProgress(0); session.current = null;
         const ext = file.name.split('.').pop()!.toLowerCase();
         if (!MIME_TYPES[ext] || file.size < 1 || file.size > (kind === 'image' ? MAX_IMAGE_SIZE : MAX_FILE_SIZE) || (kind === 'image') !== ['png','jpg','jpeg','webp'].includes(ext)) throw new Error('格式不支持或文件超过限制。');
@@ -96,20 +110,21 @@ export function UploadPanel({ workId, versionId, kind, disabled, compact, upload
       }
       setLabel('文件已验证并关联，请保存作品草稿。'); pending.current = [];
     } catch (cause) { setError(cause instanceof Error ? cause.message : '上传失败。'); }
-    finally { setBusy(false);onBusyChange?.(`${workId}:${versionId??kind}`,false); }
+    finally { running.current=false;setBusy(false);onBusyChange?.(`${workId}:${versionId??kind}`,false); }
   }
   async function cancel() {
     controller.current?.abort();
     if (session.current) { try { await api(`uploads/${session.current}`, { method: 'DELETE' }); setLabel('会话已取消，未发布文件。'); } catch (cause) { setError(String(cause)); } }
   }
   if (compact && !label && !error && !busy) return null;
-  return <div className="upload-panel">
+  return <div className={`upload-panel${dragging?' upload-drag-over':''}`} onDragOver={event=>{if(kind==='file'&&event.dataTransfer.types.includes('Files')){event.preventDefault();event.dataTransfer.dropEffect=busy||disabled?'none':'copy';if(!busy&&!disabled)setDragging(true);}}} onDragLeave={()=>setDragging(false)} onDrop={event=>{if(kind!=='file')return;event.preventDefault();setDragging(false);if(!busy&&!disabled)void start(Array.from(event.dataTransfer.files));}}>
     {!compact && <label className="upload-picker"><UploadCloud size={22}/><span>{kind === 'image' ? '添加封面图片' : '上传发行文件'}<small>{kind === 'image' ? 'PNG / JPEG / WebP · 每张 ≤ 10 MiB' : 'ZIP / JAR / EXE / MCWORLD / MCPACK · ≤ 1 GiB'}</small></span>
-      <input aria-label={kind === 'image' ? '选择图片' : '选择发行文件'} type="file" multiple={kind === 'image'} accept={kind === 'image' ? '.png,.jpg,.jpeg,.webp' : '.zip,.jar,.exe,.mcworld,.mcpack,.mctemplate'} disabled={busy || disabled} onChange={e => { const files = Array.from(e.target.files ?? []); if (files.length) void start(files); e.target.value = ''; }}/>
+      <input aria-label={kind === 'image' ? '选择图片' : '选择发行文件'} type="file" multiple accept={kind === 'image' ? '.png,.jpg,.jpeg,.webp' : '.zip,.jar,.exe,.mcworld,.mcpack,.mctemplate'} disabled={busy || disabled} onChange={e => { const files = Array.from(e.target.files ?? []); if (files.length) void start(files); e.target.value = ''; }}/>
     </label>}
-    {disabled && <p className="hint">先保存作品与版本，上传后仍须发布才会公开。</p>}
+    {disabled && !busy && <p className="hint">{disabledHint ?? '先保存作品与版本，上传后仍须发布才会公开。'}</p>}
+    {kind==='file'&&!disabled&&!compact&&<p className="hint">可拖入文件或一次选择多个文件。上传前自动保存当前作品草稿；上传完成后请保存文件关联，再通过发布预览公开。</p>}
     {label && <p role="status">{label}</p>}
-    {busy && <><progress max={1} value={progress}/><div className="button-row"><button type="button" onClick={() => controller.current?.abort()}>暂停</button><button type="button" onClick={() => void cancel()}><X size={15}/>取消会话</button></div></>}
+    {busy && <><progress aria-label="上传进度" max={1} value={progress}/><div className="button-row"><button type="button" onClick={() => controller.current?.abort()}>暂停</button><button type="button" onClick={() => void cancel()}><X size={15}/>取消会话</button></div></>}
     {error && <div role="alert" className="error"><p>{error}</p><button type="button" onClick={() => void start(pending.current)}><RotateCcw size={15}/>重试续传</button></div>}
   </div>;
 }

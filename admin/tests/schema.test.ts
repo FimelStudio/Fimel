@@ -6,6 +6,7 @@ import { validateLibrary } from '../shared/validation';
 import { authenticate, protectWrite } from '../worker/auth';
 import {generateKeyPair,exportJWK,SignJWT} from 'jose';
 import { referencedImages, imageMarkdown } from '../shared/markdown';
+import { releaseLabelError } from '../shared/releases';
 
 function fixture() { const work=makeWork(); work.project.slug='test-map'; work.project.title={zh:'测试地图',en:'Test Map',ja:'テスト'}; return {schemaVersion:1,works:[work]}; }
 test('valid existing migration retains all 28 records',async()=>{const library=JSON.parse(await readFile('.artifacts/admin-migration/library.json','utf8'));assert.equal(library.works.length,28);assert.deepEqual(validateLibrary(library),[]);for(const work of library.works)assert.equal(work.legacy.slug,work.project.slug);});
@@ -30,6 +31,29 @@ test('only explicit references across languages and tabs select body images',()=
   w.markdown.changelog.en=imageMarkdown(second);assert.deepEqual([...referencedImages(w.markdown)],['second']);
 });
 test('schema rejects duplicate versions and unpublished downloads',()=>{const x=fixture();const v={id:'v1',label:'1.0',date:'2026-10-14',gameVersions:[],status:'draft' as const,changelog:'',files:[]};x.works[0].versions=[v,v];assert.ok(validateLibrary(x).length);x.works[0].versions=[];x.works[0].project.downloadUrl='https://download.studiofimel.com/works/bedrock/test-map/1.0/test.zip';assert.ok(validateLibrary(x).length);});
+
+test('未命名的私有版本可保存多个，已发行版本仍须安全版本号且报错能定位',()=>{
+  const x=fixture();const base={label:'',date:'2026-10-26',gameVersions:[],status:'draft' as const,changelog:'',files:[]};
+  x.works[0].versions=[{...base,id:'first'},{...base,id:'second'}];
+  assert.deepEqual(validateLibrary(x),[]);
+  assert.equal(releaseLabelError('', 'draft'),null);
+  for(const label of ['v1.0','1.21.11-v1.0','1.0_beta+build.2'])assert.equal(releaseLabelError(label,'released'),null);
+  for(const label of ['../escape','版本一','1.0/next',' v1.0','1.0?file','1.0%2Fbad','v'.repeat(81)]){
+    x.works[0].versions[0].label=label;
+    const errors=validateLibrary(x);
+    assert.equal(errors.length,1);
+    assert.match(errors[0],/测试地图.*test-map.*第 1 个版本.*版本号格式不正确/);
+    assert.doesNotMatch(errors[0],/\/works\/|must match pattern|anyOf/);
+  }
+  x.works[0].versions[0].label='';
+  x.works[0].versions[0].status='released';
+  assert.match(validateLibrary(x).join('\n'),/第 1 个版本（未命名）.*已发行版本必须填写版本号/);
+  x.works[0].versions[0].status='draft';
+  x.works[0].versions[0].label='1.0';x.works[0].versions[1].label='1.0';
+  assert.match(validateLibrary(x).join('\n'),/第 2 个版本.*版本号重复/);
+  x.works[0].versions[0].label='';x.works[0].versions[1].label='';x.works[0].versions[1].id='first';
+  assert.match(validateLibrary(x).join('\n'),/版本记录重复/);
+});
 const env={ACCESS_AUD:'test-aud',ACCESS_ISSUER:'https://team.cloudflareaccess.com',ADMIN_EMAILS:'test-admin@example.invalid'};
 test('production auth rejects missing configuration, forged email and forged JWT',async()=>{
   await assert.rejects(authenticate(new Request('https://admin.studiofimel.com/api/library'),{},{}));

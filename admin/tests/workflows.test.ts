@@ -57,6 +57,53 @@ test('下载版本解析拒绝草稿和私有地址，兼容无版本的旧目�
   for(const altered of [{...release,status:'draft'},{...release,files:[{...file,publicUrl:'https://evil.invalid/a.zip'}]},{...release,files:[{...file,privateKey:'secret'}]}])assert.throws(()=>parseReleases({releases:{'release-test':[altered]}},[project]));
 });
 
+test('未命名版本可保存和恢复并创建上传会话，发布只公开完成的发行版本',async()=>{
+  const work=await add('unfinished-releases');
+  const privateBucket=await mf.getR2Bucket('PRIVATE'),publicBucket=await mf.getR2Bucket('PUBLIC');
+  const privateKey='uploads/verified/private-release/private.zip';
+  await privateBucket.put(privateKey,'unfinished private file');
+  const publicKey='works/bedrock/unfinished-releases/1.0/stable.zip';
+  await publicBucket.put(publicKey,'stable file');
+  const draft={label:'',date:'2026-10-26',gameVersions:[],status:'draft' as const,changelog:{zh:''},files:[]};
+  const changed:Work={...work,project:{...work.project,status:'released'},versions:[
+    {...draft,id:'unfinished',files:[{id:'private-release',name:'private.zip',size:23,mime:'application/zip',sha256:'a'.repeat(64),privateKey}]},
+    {...draft,id:'another-unfinished'},
+    {...draft,id:'stable',label:'1.0',status:'released',files:[{id:'stable-file',name:'stable.zip',size:11,mime:'application/zip',sha256:'b'.repeat(64),publicUrl:`https://download.studiofimel.com/${publicKey}`}]},
+  ]};
+  const saved=await save(work,changed);assert.equal(saved.status,200,await saved.text());
+  const initial=await state();const stored=initial.library.works.find(w=>w.id===work.id)!;
+  assert.deepEqual(stored.versions.map(v=>v.label),['','','1.0']);
+  assert.equal(initial.public.projects.some(p=>p.slug===work.project.slug),false);
+  const upload=await request('uploads','POST',{name:'second.zip',size:32,kind:'file',workId:work.id,versionId:'another-unfinished'});
+  assert.equal(upload.status,201,await upload.clone().text());
+  const uploadId=(await upload.json() as {upload:{id:string}}).upload.id;
+  const savedAgain=await save(stored,{...stored,project:{...stored.project,summary:'只为创建恢复基线'}});
+  assert.equal(savedAgain.status,200,await savedAgain.text());
+  const snapshots=await privateBucket.list({prefix:'backups/library/'});let restoreId:string|undefined;
+  for(const object of snapshots.objects){
+    const snapshot=await(await privateBucket.get(object.key))!.json() as {value:Library};
+    const candidate=snapshot.value.works.find(w=>w.id===work.id);
+    if(candidate?.versions.length===3&&!candidate.project.summary){restoreId=object.key.split('/').at(-1)!.replace('.json','');break;}
+  }
+  assert.ok(restoreId);
+  const beforeRestore=await state();const restored=await request(`restore/library/${restoreId}`,'POST',{}, {'If-Match':beforeRestore.etag});
+  assert.equal(restored.status,200,await restored.text());
+  const ready=await state();assert.deepEqual(ready.library.works.find(w=>w.id===work.id)!.versions.map(v=>v.label),['','','1.0']);
+  const blocked=await request(`publish/${work.id}`,'POST',{}, {'If-Match':ready.etag,'X-Public-ETag':ready.publicEtag});
+  assert.equal(blocked.status,409);assert.match(await blocked.text(),/仍有未完成上传/);
+  assert.equal((await request(`uploads/${uploadId}`,'DELETE')).status,200);
+  const published=await request(`publish/${work.id}`,'POST',{}, {'If-Match':ready.etag,'X-Public-ETag':ready.publicEtag});
+  assert.equal(published.status,200,await published.text());
+  const after=await state();assert.deepEqual(after.public.releases[work.project.slug].map(v=>v.label),['1.0']);
+  const manifest=await(await publicBucket.get('data/works.json'))!.text();
+  assert.ok(!manifest.includes('private-release'));assert.ok(!manifest.includes('privateKey'));assert.ok(!manifest.includes('another-unfinished'));
+  assert.deepEqual((await publicBucket.list({prefix:'works/bedrock/unfinished-releases/'})).objects.map(o=>o.key),[publicKey]);
+  assert.ok(await privateBucket.head(privateKey));
+  const base=after.library.works.find(w=>w.id===work.id)!;const invalid=structuredClone(base);invalid.versions[0].status='released';
+  const rejected=await save(base,invalid);assert.equal(rejected.status,422);assert.match(await rejected.text(),/第 1 个版本.*已发行版本必须填写版本号/);
+  const unchanged=await state();assert.equal(unchanged.publicEtag,after.publicEtag);assert.equal(unchanged.library.works.find(w=>w.id===work.id)!.versions[0].status,'draft');
+});
+
 test('无文件的较新版本不会遮挡现有实际下载，主下载与官网版本选择一致',async()=>{
   const work=await add('available-release');const key='works/bedrock/available-release/1/archive.zip';const bucket=await mf.getR2Bucket('PUBLIC');await bucket.put(key,'test');
   const base={date:'2026-10-16',gameVersions:['1.21'],status:'released' as const,changelog:{zh:''}};

@@ -1,5 +1,8 @@
 import tags from '../../src/content/project-tags.json';
 import { PUBLIC_ORIGIN } from './model';
+import type { Work } from './model';
+import type { ErrorObject } from 'ajv';
+import { releaseLabelError } from './releases';
 import validate from './generated/library-validator.js';
 export { librarySchema } from './schema';
 
@@ -8,13 +11,39 @@ export function safeUrl(value: string, local = false): boolean {
   try { const url = new URL(value); return url.protocol === 'https:' && !url.username && !url.password; } catch { return false; }
 }
 
+function releaseContext(work: Partial<Work> | undefined, workIndex: number, versionIndex: number, label: unknown): string {
+  const title = work?.project?.title;
+  const rawName = typeof title === 'string' ? title : [title?.zh, title?.en, title?.ja].find(value => typeof value === 'string');
+  const name = typeof rawName === 'string' ? rawName.slice(0, 80) : '';
+  const slug = typeof work?.project?.slug === 'string' ? work.project.slug : '';
+  const identity = name ? `作品「${name}」${slug ? `（${slug}）` : ''}` : slug || `第 ${workIndex + 1} 个作品`;
+  const version = typeof label === 'string' && label ? `（${label.slice(0, 80)}）` : '（未命名）';
+  return `${identity} · 第 ${versionIndex + 1} 个版本${version}`;
+}
+
+function schemaErrors(value: unknown, errors: ErrorObject[]): string[] {
+  const works = value && typeof value === 'object' && 'works' in value && Array.isArray(value.works) ? value.works : [];
+  return [...new Set(errors.map(error => {
+    const path = /^\/works\/(\d+)\/versions\/(\d+)(?:\/label)?$/.exec(error.instancePath);
+    if (path) {
+      const workIndex = Number(path[1]), versionIndex = Number(path[2]);
+      const work = works[workIndex];
+      const release = work?.versions?.[versionIndex];
+      const labelError = typeof release?.label === 'string' ? releaseLabelError(release.label, release.status) : '版本号必须为文本。';
+      const isLabelError = error.instancePath.endsWith('/label') || error.keyword === 'required' && error.params.missingProperty === 'label' || error.keyword === 'if' && labelError;
+      if (isLabelError && labelError) return `${releaseContext(work, workIndex, versionIndex, release?.label)}：${labelError}`;
+    }
+    return `${error.instancePath || '/'} ${error.message}`;
+  }))].slice(0, 15);
+}
+
 export function validateLibrary(value: unknown, boundedRequestBody = false): string[] {
   // Only the Worker may skip this serialization after readJson has enforced its byte limit.
   if (!boundedRequestBody && JSON.stringify(value).length > 4_000_000) return ['作品库超过 4 MB，请减少正文或拆分内容。'];
-  if (!validate(value)) return (validate.errors ?? []).map(e => `${e.instancePath || '/'} ${e.message}`).slice(0, 15);
+  if (!validate(value)) return schemaErrors(value, validate.errors ?? []);
   const errors: string[] = [];
   const ids = new Set<string>(), slugs = new Set<string>();
-  for (const work of value.works) {
+  for (const [workIndex, work] of value.works.entries()) {
     const p = work.project;
     if (!p.image.trim() && !work.gallery.some(a => a.id === work.coverId)) errors.push(`${p.slug}：请选择一张上传图片作为封面，或填写已有封面地址。`);
     if (ids.has(work.id) || slugs.has(p.slug)) errors.push('作品 ID / slug 重复。');
@@ -30,9 +59,13 @@ export function validateLibrary(value: unknown, boundedRequestBody = false): str
     for (const tab of Object.values(p.content)) for (const path of typeof tab === 'string' ? [tab] : Object.values(tab ?? {})) if (!safeUrl(path, true)) errors.push(`${p.slug} 正文路径不安全。`);
     const versionIds = new Set<string>(), labels = new Set<string>(), assetIds = new Set<string>();
     if(work.gallery.length+work.versions.reduce((sum,v)=>sum+v.files.length,0)>250)errors.push(`${p.slug} 单个作品最多关联 250 个资源文件。`);
-    for (const release of work.versions) {
-      if (versionIds.has(release.id) || labels.has(release.label)) errors.push(`${p.slug} 版本重复。`);
-      versionIds.add(release.id); labels.add(release.label);
+    for (const [versionIndex, release] of work.versions.entries()) {
+      const context = releaseContext(work, workIndex, versionIndex, release.label);
+      const labelError = releaseLabelError(release.label, release.status);
+      if (labelError) errors.push(`${context}：${labelError}`);
+      if (versionIds.has(release.id)) errors.push(`${context}：版本记录重复。`);
+      if (release.label && labels.has(release.label)) errors.push(`${context}：版本号重复，请使用不同的版本号。`);
+      versionIds.add(release.id); if (release.label) labels.add(release.label);
       if (release.files.filter(f => f.primary).length > 1) errors.push(`${p.slug} 每版本只能有一个主下载。`);
     }
     for (const a of [...work.gallery, ...work.versions.flatMap(v => v.files)]) {
