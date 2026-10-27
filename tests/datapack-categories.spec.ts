@@ -65,7 +65,7 @@ test('unreleased Fimel Card has its own cover, repository and keyboard-accessibl
   await page.goto('/#/works/fimel-card');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Fimel Card');
   await expect(page.locator('header').filter({ has: page.getByRole('heading', { level: 1 }) })).toContainText('制作中');
-  await expect(page.getByRole('link', { name: 'GitHub 仓库', exact: true })).toHaveAttribute('href', card.repository!);
+  await expect(page.getByRole('link', { name: '项目仓库', exact: true })).toHaveAttribute('href', card.repository!);
   await expect(page.locator('a[download]')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /^下载/ })).toHaveCount(0);
   await expect(page.locator('.project-markdown')).toContainText('卡牌');
@@ -83,9 +83,12 @@ test('unreleased Fimel Card has its own cover, repository and keyboard-accessibl
   await expect(page.locator('.project-markdown')).toContainText('暂未发布版本更新记录');
   await page.getByRole('tab', { name: '更新日志', exact: true }).press('End');
   await expect(page.getByRole('tab', { name: '版本', exact: true })).toBeFocused();
+  await page.getByRole('tabpanel').locator('details > summary').click();
   await expect(page.locator('.project-markdown')).toContainText('暂未发布可下载的版本');
   await page.reload();
   await expect(page.getByRole('tab', { name: '版本', exact: true })).toHaveAttribute('aria-selected', 'true');
+  // Version notes now live in the shared list's collapsed supplementary section.
+  await page.getByRole('tabpanel').locator('details > summary').click();
   await expect(page.locator('.project-markdown')).toBeVisible();
   await expect(page.getByRole('link', { name: '返回作品', exact: true })).toHaveAttribute('href', '#/works?type=datapacks');
   await page.getByRole('tab', { name: '版本', exact: true }).press('Home');
@@ -136,6 +139,7 @@ for (const language of ['zh', 'en', 'ja'] as const) {
     await expect(page.getByText(messages.project.translation_notice, { exact: true })).toHaveCount(0);
     for (const tab of ['changelog', 'versions'] as const) {
       await page.getByRole('tab', { name: messages.project[tab], exact: true }).click();
+      if (tab === 'versions') await page.getByRole('tabpanel').locator('details > summary').click();
       await expect(page.locator('.project-markdown')).toBeVisible();
       await expect(page.getByText(messages.project.translation_notice, { exact: true })).toHaveCount(0);
     }

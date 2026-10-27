@@ -19,6 +19,7 @@ import type { SiteContent } from '../../src/content/site-content';
 import { workEventKey } from '../../src/content/work-events';
 import type { WorkEventDay } from '../../src/content/work-events';
 import { publicationFingerprint } from '../shared/revisions';
+import { earliestReleaseDate } from '../../src/content/releases';
 export type AdminEnv = Env & ServerSecrets & AnalyticsSecrets;
 export async function handle(request: Request, env: AdminEnv, ctx: AccessContext): Promise<Response> {
   const requestId = crypto.randomUUID();
@@ -121,7 +122,10 @@ async function route(request: Request, env: AdminEnv, email: string, source?:Aud
     expectMatch(request, state.etag); expectMatch(request, published.etag, 'x-public-etag');
     const publicationId = crypto.randomUUID();
     const after: PublicManifest = structuredClone(published.value); after.publicationId = publicationId;
-    const slug = work.project.slug; after.projects = after.projects.filter(p => p.slug !== slug);
+    const slug = work.project.slug;
+    const priorProject = published.value.projects.find(p => p.slug === slug);
+    const existingPublishedDate = priorProject?.published ?? (priorProject?.status === 'released' ? earliestReleaseDate(published.value.releases[slug] ?? []) : undefined);
+    after.projects = after.projects.filter(p => p.slug !== slug);
     if (path[0] === 'publish') {
       const errors = validateLibrary(state.value); if (errors.length) throw new ApiError(422, errors.join('\n'));
       for (const object of await listAll(env.PRIVATE,'uploads/active/')) {
@@ -129,7 +133,7 @@ async function route(request: Request, env: AdminEnv, email: string, source?:Aud
         const upload=active?await active.json<Upload>():null;
         if(upload?.workId===work.id&&Date.parse(upload.expiresAt)>Date.now())throw new ApiError(409,'此作品仍有未完成上传，请完成或取消会话后再发布。');
       }
-      const prepared = await publishedWork(work, env.PRIVATE, env.PUBLIC, publicationId);
+      const prepared = await publishedWork(work, env.PRIVATE, env.PUBLIC, publicationId, existingPublishedDate);
       after.projects.push(prepared.project); after.releases[slug] = prepared.releases;
       after.publicationStates ??= {};
       after.publicationStates[slug] = { fingerprint: await publicationFingerprint(work), publishedAt: new Date().toISOString(), savedAt: work.updatedAt };

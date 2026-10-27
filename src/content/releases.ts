@@ -3,11 +3,20 @@ import type { Project, LocalizedText } from './projects';
 export type DownloadFile = { id: string; name: string; displayName?: string; size: number; sha256: string; mime: string; publicUrl: string; primary?: boolean };
 export type DownloadRelease = { id: string; label: string; date: string; gameVersions: string[]; loaders?: string[]; platforms?: string[]; status: 'released'; changelog?:LocalizedText; files: DownloadFile[] };
 
+export function earliestReleaseDate(releases: readonly { status: string; date: string; files: readonly unknown[] }[]): string | undefined {
+  return releases.filter(release => {
+    if (release.status !== 'released' || !release.files.length || !/^(?!0000)\d{4}-\d{2}-\d{2}$/.test(release.date)) return false;
+    const timestamp = Date.parse(`${release.date}T00:00:00.000Z`);
+    return Number.isFinite(timestamp) && new Date(timestamp).toISOString().slice(0, 10) === release.date;
+  }).map(release => release.date).sort()[0];
+}
+
 /** Shared by the page, Admin preview and publisher. Browsing never advances dates. */
 export function releaseProject(project:Project,releases:DownloadRelease[],publicationDate?:string):Project {
   const latest=releases.find(r=>r.files.length);const primary=latest?.files.find(f=>f.primary)??latest?.files[0];
   const updated=[project.updated,...releases.map(r=>r.date),publicationDate].filter((date):date is string=>!!date&&/^\d{4}-\d{2}-\d{2}$/.test(date)).sort().at(-1);
-  return {...project,...(updated?{updated}:{}),...(latest&&primary?{version:latest.label,size:fileSize(primary.size),downloadUrl:primary.publicUrl,...(latest.platforms?.length?{platform:latest.platforms}:{})}:{})};
+  const published=project.published??(project.status==='released'?earliestReleaseDate(releases):undefined);
+  return {...project,...(published?{published}:{}),...(updated?{updated}:{}),...(latest&&primary?{version:latest.label,size:fileSize(primary.size),downloadUrl:primary.publicUrl,...(latest.platforms?.length?{platform:latest.platforms}:{})}:{})};
 }
 export function parseReleases(value: unknown, projects: Project[]): Record<string, DownloadRelease[]> {
   if (!value || typeof value !== 'object' || !('releases' in value)) return {};

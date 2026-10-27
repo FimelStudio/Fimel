@@ -20,7 +20,7 @@ test('Explorer is discoverable in tools and downloads exactly the published EXE'
   await expect(page.locator('.work-row')).toHaveCount(1);
   await page.locator('.work-row').click();
   await expect(page.getByRole('heading', { name: 'Minecraft Explorer', level: 1 }).first()).toBeVisible();
-  await expect(page.getByRole('link', { name: 'GitHub 仓库', exact: true })).toHaveAttribute('href', repository);
+  await expect(page.getByRole('link', { name: '项目仓库', exact: true })).toHaveAttribute('href', repository);
   await expect(page.locator('.project-markdown')).toContainText('添加 Minecraft 根目录');
   const link = page.getByRole('link', { name: '下载', exact: true });
   await expect(link).toHaveAttribute('href', explorer.downloadUrl);

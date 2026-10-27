@@ -1,13 +1,14 @@
 import { lazy, Suspense, useEffect, useMemo } from 'react';
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ArrowUpRight, Code, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, ExternalLink } from 'lucide-react';
 import { useProjectCatalogue } from '../../hooks/useProjectCatalogue';
 import { useDownloadCounters } from '../../hooks/useDownloadCounters';
 import { PROJECT_TABS, assetUrl, formatProjectDate, localizedText, projectCopy, projectStatus } from '../../content/projects';
 import type { Project, ProjectTab } from '../../content/projects';
 import { ProjectDownloads } from '../../components/ProjectDownloads';
 import { ProjectVersions } from '../../components/ProjectVersions';
+import { ProjectRepository } from '../../components/ProjectRepository';
 import { releaseProject } from '../../content/releases';
 import type { DownloadRelease } from '../../content/releases';
 import { recordWorkEvent } from '../../lib/work-events';
@@ -60,7 +61,7 @@ function Detail({ project: source, releases, discordUrl }: { project: Project; r
           <div className="flex flex-wrap gap-3 mt-6 items-start">
             <ProjectDownloads project={project} releases={releases} onDownload={trackDownload} />
             {project.store && <a href={project.store} target="_blank" rel="noopener noreferrer" className={`${buttonBase} bg-obsidian dark:bg-diamond text-white dark:text-obsidian`}><ExternalLink size={16} aria-hidden />{t('project.store')}</a>}
-            {project.repository && <a href={project.repository} target="_blank" rel="noopener noreferrer" className={secondaryButton}><Code size={16} aria-hidden />{t('project.repository')}</a>}
+            <ProjectRepository repository={project.repository} className={secondaryButton}/>
           </div>
           {project.downloadSlug && configured && <p className="mt-3 text-xs text-gray-600 dark:text-content-muted font-mono">{loading ? t('workPages.download_count_loading') : t('workPages.download_count_metric', { count: new Intl.NumberFormat(language).format(counts[project.downloadSlug] ?? 0) })}</p>}
           {project.status !== 'released' && <p className="mt-4 text-sm text-gray-600 dark:text-content-muted">{t('project.developing')}</p>}

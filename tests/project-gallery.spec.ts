@@ -126,7 +126,7 @@ test('one failed gallery image leaves the description, repository and remaining 
   await page.locator(gallery).scrollIntoViewIfNeeded();
   await expect(page.locator('.project-gallery-error')).toContainText('图片暂时无法加载');
   await expect(page.locator('.project-markdown')).toContainText('图片之后的正文仍可阅读');
-  await expect(page.getByRole('link', { name: 'GitHub 仓库', exact: true })).toHaveAttribute('href', 'https://github.com/FimelStudio/fimelcard-dp');
+  await expect(page.getByRole('link', { name: '项目仓库', exact: true })).toHaveAttribute('href', 'https://github.com/FimelStudio/fimelcard-dp');
   await expect(page.getByRole('alert')).toHaveCount(0);
   await page.getByRole('button', { name: '下一张图片', exact: true }).click();
   const active = page.locator(`${slides}[data-active="true"] img`);

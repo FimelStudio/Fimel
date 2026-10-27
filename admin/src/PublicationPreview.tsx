@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { I18nextProvider, useTranslation } from 'react-i18next';
 import type { Project, ProjectTab } from '../../src/content/projects';
-import { assetUrl, localizedText, projectCopy, projectDownloadUrl } from '../../src/content/projects';
+import { assetUrl, formatProjectDate, localizedText, projectCopy, projectDownloadUrl } from '../../src/content/projects';
 import { ProjectMarkdownBody } from '../../src/components/ProjectMarkdown';
 import { ProjectDownloads } from '../../src/components/ProjectDownloads';
 import { ProjectVersions } from '../../src/components/ProjectVersions';
+import { ProjectRepository } from '../../src/components/ProjectRepository';
 import { releaseProject } from '../../src/content/releases';
 import type { DownloadRelease } from '../../src/content/releases';
 import type { Work, Locale } from '../shared/model';
@@ -23,8 +24,11 @@ export function PublicationPreview({ work, before, busy, onClose, onPublish }: {
   useEffect(()=>{const current=dialog.current;current?.showModal();return()=>current?.close();},[]);
   useEffect(()=>{const controller=new AbortController();void api<Published>(`published/${work.id}`,{signal:controller.signal}).then(r=>setPublished(r.data)).catch(e=>{if(!controller.signal.aborted)setError(e instanceof Error?e.message:'公开内容读取失败');});return()=>controller.abort();},[work.id]);
   const previous=published?.project??before;const viewingPublished=version==='published';
+  const previousPublished=previous?releaseProject(previous,published?.releases??[]).published:undefined;
+  const draftSource=work.project.status==='released'&&!work.project.published&&previousPublished?{...work.project,published:previousPublished}:work.project;
+  const draftPublished=releaseProject(draftSource,previewReleases(work)).published;
   const releases:DownloadRelease[]=viewingPublished?published?.releases??[]:previewReleases(work);
-  const source=viewingPublished?previous:work.project;
+  const source=viewingPublished?previous:draftSource;
   const project=source?releaseProject(source,releases,viewingPublished?undefined:new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Shanghai'})):null;
   const markdown=viewingPublished?published?.markdown:work.markdown;
   const selectedCover=work.gallery.find(a=>a.id===work.coverId);
@@ -32,8 +36,8 @@ export function PublicationPreview({ work, before, busy, onClose, onPublish }: {
   const rawText=localizedText(markdown?.[tab],locale);
   const text=rawText;
   const label={description:'详情',changelog:'更新日志',versions:'版本'};
-  const names:Record<string,string>={title:'作品名称',summary:'简介',platform:'平台',version:'版本',size:'文件大小',image:'封面',status:'发行状态',tags:'标签',creators:'作者'};
-  const changes=previous?Object.entries(work.project).filter(([key,value])=>key!=='content'&&!(key==='image'&&work.coverId)&&stable(value)!==stable(previous[key as keyof Project])).map(([key])=>names[key]??key):['新作品'];
+  const names:Record<string,string>={title:'作品名称',summary:'简介',platform:'平台',version:'版本',size:'文件大小',image:'封面',status:'发行状态',tags:'标签',creators:'作者',repository:'项目仓库',published:'首次发布日期',updated:'上次更新'};
+  const changes=previous?[...new Set([...Object.keys(previous),...Object.keys(work.project),'published'])].filter(key=>key!=='content'&&!(key==='image'&&work.coverId)&&(key==='published'?stable(draftPublished)!==stable(previousPublished):stable(work.project[key as keyof Project])!==stable(previous[key as keyof Project]))).map(key=>names[key]??key):['新作品'];
   if(work.coverId)changes.push('上传封面（请在预览中核对）');
   const bodyChanges=published?.markdown?(['description','changelog','versions'] as const).flatMap(key=>LOCALES.filter(l=>work.markdown[key][l]!==published.markdown?.[key][l]).map(l=>`${label[key]} · ${l}`)):[];
   const display=project?projectCopy(project,previewI18n.t.bind(previewI18n),locale):null;
@@ -47,6 +51,8 @@ export function PublicationPreview({ work, before, busy, onClose, onPublish }: {
     <I18nextProvider i18n={previewI18n}><div className={`publication-canvas ${device==='mobile'?'is-mobile':''}`} onClickCapture={event=>{if((event.target as HTMLElement).closest('a'))event.preventDefault();}}>
       {project&&display?<article className="publication-article"><header className="publication-heading"><img src={cover?assetUrl(cover):undefined} alt="封面预览"/><div><h1>{display.title}</h1><p>{display.summary}</p><small>{project.platform.join(' / ')} · {project.status==='released'?'已发行':project.status==='development'?'制作中':'计划中'}</small></div></header>
         <ProjectDownloads key={`download-${version}`} project={project} releases={releases} preview/>
+        <ProjectRepository repository={project.repository} preview/>
+        <dl className="publication-project-dates"><div><dt>{previewI18n.t('project.published')}</dt><dd>{formatProjectDate(project.published,locale,previewI18n.t('project.unknown'))}</dd></div><div><dt>{previewI18n.t('project.updated')}</dt><dd>{formatProjectDate(project.updated,locale,previewI18n.t('project.unknown'))}</dd></div></dl>
         <div className="button-row content-tabs">{(['description','changelog','versions']as const).map(key=><button key={key} aria-pressed={key===tab} onClick={()=>setTab(key)}>{label[key]}</button>)}</div>
         {tab==='versions'?<ProjectVersions key={`versions-${version}`} project={project} releases={releases} preview renderNotes={text=><ProjectMarkdownBody content={text} fileUrl={new URL('https://studiofimel.com/')}/>} notes={text?<ProjectMarkdownBody content={text} fileUrl={new URL('https://studiofimel.com/')}/>:undefined}/>:<ProjectMarkdownBody content={text||'此语言暂无正文。'} fileUrl={new URL('https://studiofimel.com/')} resolveAsset={id=>{const asset=work.gallery.find(a=>a.id===id);return asset?.privateKey?new URL(`/api/media/${id}`,location.origin).href:asset?.publicUrl;}}/>}
       </article>:<p>此作品尚未公开。</p>}

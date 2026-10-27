@@ -6,11 +6,12 @@ import { backup, MANIFEST_KEY } from './storage';
 import { referencedImages } from '../shared/markdown';
 import { releaseProject } from '../../src/content/releases';
 
-export async function publishedWork(work: Work, privateBucket: R2Bucket, publicBucket: R2Bucket, publicationId: string) {
+export async function publishedWork(work: Work, privateBucket: R2Bucket, publicBucket: R2Bucket, publicationId: string, existingPublishedDate?: string) {
   if (work.workflow === 'archived') throw new ApiError(422, '归档作品须先恢复为草稿。');
   if (!work.coverId && !work.project.image.trim()) throw new ApiError(422, '发布前请选择上传封面，或填写已有封面地址。');
   if(!Object.values(work.markdown.description).some(value=>value?.trim()))throw new ApiError(422,'发布前至少填写一种语言的作品详情。');
   const project: Project = structuredClone(work.project);
+  if (project.status === 'released' && !project.published && existingPublishedDate) project.published = existingPublishedDate;
   const releaseAssets = work.versions.filter(v => v.status === 'released').flatMap(v => v.files);
   const referenced = referencedImages(work.markdown);
   const images = work.gallery.filter(asset => asset.id === work.coverId || referenced.has(asset.id));
