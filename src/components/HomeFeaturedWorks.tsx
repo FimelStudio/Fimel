@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowUpRight, Download } from 'lucide-react';
 import { useProjectCatalogue } from '../hooks/useProjectCatalogue';
-import { HOME_FEATURED } from '../content/home-featured';
+import { HOME_FEATURED, matchesFeaturedGroup } from '../content/home-featured';
 import { assetUrl, projectCopy, projectStatus } from '../content/projects';
 import type { Project } from '../content/projects';
 
@@ -18,10 +18,7 @@ export function HomeFeaturedWorks({ onPreview, onPreviewEnd }: PreviewProps) {
   const language = i18n.resolvedLanguage ?? i18n.language;
   const select = (slugs: readonly string[], group: 'maps' | 'released' | 'development') => slugs
     .map(slug => projects.find(project => project.slug === slug))
-    .filter((project): project is Project => Boolean(project && (
-      group === 'maps' ? project.type === 'bedrock' && project.status === 'released'
-        : group === 'released' ? project.status === 'released' : project.status !== 'released'
-    )));
+    .filter((project): project is Project => Boolean(project && matchesFeaturedGroup(project, group)));
   const preview = (project: Project) => {
     const copy = projectCopy(project, t, language);
     onPreview(copy.title, t(`catalogue.types.${project.type}`), copy.summary);

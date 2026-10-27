@@ -50,6 +50,24 @@ test('网站内容独立条件保存、独立发布并保留作品和发布记�
   assert.equal((await request('site/publish','POST',{}, {'If-Match':invalidBody.etag,'X-Public-ETag':after.publicEtag})).status,422);
   assert.equal((await state()).publicEtag,after.publicEtag);
 });
+test('已公开数据包错组报告分类而非未公开，网站发布只使用公开信息且保留作品内容',async()=>{
+  const work=makeWork();work.project={...work.project,slug:'curated-datapack',title:{zh:'精选数据包'},type:'datapacks',status:'released'};work.markdown.description.zh='已经公开的正文';
+  const created=await request(`works/${work.id}`,'PUT',{base:null,work});assert.equal(created.status,200,await created.text());
+  const ready=await state();const first=await request(`publish/${work.id}`,'POST',{}, {'If-Match':ready.etag,'X-Public-ETag':ready.publicEtag});assert.equal(first.status,200,await first.text());
+  const stored=(await state()).library.works.find(w=>w.id===work.id)!;
+  assert.equal((await save(stored,{...stored,project:{...stored.project,status:'development'}})).status,200);
+  const get=await request('site');const initial=await get.json() as {site:typeof DEFAULT_SITE_CONTENT;etag:string;publicEtag:string;publicProjects:Work['project'][]};
+  assert.equal(initial.publicProjects.find(p=>p.slug===work.project.slug)!.status,'released');
+  const site={...initial.site,featured:{maps:[work.project.slug],released:[],development:[]},updates:[]};
+  const saved=await request('site','PUT',{site},{'If-Match':initial.etag});assert.equal(saved.status,200);const draft=await saved.json() as {etag:string};
+  const rejected=await request('site/publish','POST',{}, {'If-Match':draft.etag,'X-Public-ETag':initial.publicEtag});assert.equal(rejected.status,422);const error=await rejected.text();
+  assert.match(error,/作品已公开，但分类不适合.*精选地图.*curated-datapack.*数据包/);assert.doesNotMatch(error,/尚未公开/);
+  const corrected={...site,featured:{maps:[],released:[work.project.slug],development:[]}};
+  const savedAgain=await request('site','PUT',{site:corrected},{'If-Match':draft.etag});assert.equal(savedAgain.status,200);const revision=await savedAgain.json() as {etag:string};
+  const before=await state();const accepted=await request('site/publish','POST',{}, {'If-Match':revision.etag,'X-Public-ETag':before.publicEtag});assert.equal(accepted.status,200,await accepted.text());
+  const after=await state();assert.deepEqual(after.library,before.library);assert.deepEqual(after.public.projects,before.public.projects);assert.deepEqual(after.public.releases,before.public.releases);assert.deepEqual(after.public.publicationStates,before.public.publicationStates);assert.deepEqual(after.public.site!.featured,corrected.featured);
+});
+
 test('下载版本解析拒绝草稿和私有地址，兼容无版本的旧目录',()=>{
   const project=makeWork().project;project.slug='release-test';const file={id:'f1',name:'a.zip',mime:'application/zip',size:42,sha256:'a'.repeat(64),publicUrl:'https://download.studiofimel.com/works/bedrock/release-test/1/a.zip'};
   const release={id:'r1',label:'1.0',date:'2026-10-16',status:'released',gameVersions:['1.21'],loaders:['Fabric'],platforms:['Windows'],files:[file]};

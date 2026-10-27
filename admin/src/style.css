@@ -42,6 +42,7 @@
 .admin-shell textarea.image-drag-over{border-color:var(--color-link);outline:2px dashed var(--color-link);outline-offset:3px}
 .admin-main>fieldset{min-inline-size:0;max-width:100%}
 .report-controls{flex-wrap:wrap}.report-controls label{min-width:0}.report-controls select{width:100%;max-width:100%;min-width:0}
+.featured-selection{margin:12px 0 20px;min-width:0}.featured-selection>.hint{font-size:12px;margin-top:6px}.featured-warning{border-left:3px solid #cf5454;background:var(--color-canvas);padding:12px 14px;margin-top:10px;font-size:13px;overflow-wrap:anywhere}.featured-warning button{margin-top:10px;font-size:12px;min-height:34px}.site-featured-group>p.hint{font-size:12px}.featured-warning p+p{margin-top:8px}.site-featured-group select[aria-invalid=true]{border-color:#cf5454}
 .release-workflow-note{padding:12px 16px;border:1px solid var(--color-line);background:var(--color-canvas);color:var(--color-content-muted);font-size:13px;margin-bottom:24px;border-radius:4px}
 .release-workspace{display:grid;grid-template-columns:minmax(190px,250px) minmax(0,1fr);gap:28px;align-items:start}
 .release-list{display:grid;gap:8px;min-width:0;position:sticky;top:24px}
