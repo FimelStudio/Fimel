@@ -9,6 +9,7 @@ import { LOCALES } from '../shared/model';
 import { stable } from '../shared/revisions';
 import { api, RequestError } from './api';
 import { FeaturedSelector } from './FeaturedSelector';
+import { HomeContentEditor, HomeContentPreview } from './HomeContentEditor';
 import { FEATURED_GROUP_NAMES, sitePublicationIssues } from '../shared/featured';
 import { recoveryStore, browserTabId } from './draft-recovery';
 type State = { site: SiteContent; updatedAt: string | null; published: SiteContent | null; publicProjects: Project[]; publicEtag: string };
@@ -74,10 +75,11 @@ export function SiteEditor({library,actorId,onDirtyChange}:{library:Library;acto
   const groupNames=FEATURED_GROUP_NAMES;
   const news=(id:string,patch:Partial<SiteContent['updates'][number]>)=>editSite({...site,updates:site.updates.map(n=>n.id===id?{...n,...patch}:n)});
   return <section className="site-editor">
-    <p className="notice">网站文案、精选顺序和近期更新独立保存、独立发布，不会自动重发作品。留空的工作室文案沿用现有三语内容。</p>
+    <p className="notice">网站文案、精选顺序和近期更新独立保存、独立发布，不会自动重发作品。首页和工作室文案留空时沿用现有三语内容。</p>
     {local&&<div className="notice"><span>发现本机网站内容编辑：{new Date(local.at).toLocaleString('zh-CN')}</span><button disabled={dirty||busy} onClick={()=>{setSite(local.site);if(stable(local.site)!==original)setEtag(local.etag);void recoveryStore(local.key,'delete').catch(()=>{});setLocal(null);}}>恢复网站编辑</button><button onClick={()=>{if(window.confirm('放弃本机网站内容恢复记录？')){void recoveryStore(local.key,'delete').catch(()=>{});setLocal(null);}}}>放弃恢复</button></div>}
     {error&&<div className="error" role="alert"><p>{error}</p>{conflict&&<p>请先导出当前草稿，再刷新核对；不会覆盖其他人的内容。</p>}<button onClick={exportLocal}>导出网站草稿</button></div>}{message&&<p role="status" className="success">{message}</p>}
     <fieldset disabled={busy}><div className="locale-tabs">{LOCALES.map(l=><button key={l} aria-pressed={locale===l} onClick={()=>setLocale(l)}>{l}</button>)}</div>
+      <HomeContentEditor site={site} locale={locale} library={library} publicProjects={data?.publicProjects??[]} onChange={editSite}/>
       <FeaturedSelector site={site} library={library} publicProjects={data?.publicProjects??[]} onChange={editSite} onRefresh={()=>void refreshPublicState()} busy={busy}/>
       <h2>工作室与联系文案 · {locale}</h2><div className="form-grid">{([['title','工作室标题'],['description','工作室介绍'],['contactTitle','联系区标题'],['contactIntro','联系区介绍']]as const).map(([key,label])=><label key={key}>{label}<textarea aria-label={label} rows={key==='description'?4:2} value={localText(site.studio[key])} onChange={e=>studioField(key,e.target.value)} placeholder="留空使用官网现有文案"/></label>)}</div>
       <h2>公开联系方式</h2><div className="form-grid">{Object.entries({email:'公开联系邮箱',qqGroup:'QQ 群号',qqUrl:'QQ 入群链接',discord:'Discord 链接',x:'X 链接',github:'GitHub 链接'}).map(([key,label])=><label key={key}>{label}<input aria-label={label} value={site.contact[key as keyof SiteContent['contact']]} onChange={e=>setSite({...site,contact:{...site.contact,[key]:e.target.value}})}/></label>)}</div>
@@ -86,6 +88,6 @@ export function SiteEditor({library,actorId,onDirtyChange}:{library:Library;acto
       <button disabled={site.updates.length>=30} onClick={()=>setSite({...site,updates:[{id:crypto.randomUUID(),title:{zh:''},summary:{zh:''},date:new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Shanghai'})},...site.updates]})}>添加近期更新</button>
     </fieldset>
     <div className="publish-bar"><div><strong>{dirty?'有未保存的网站修改':data?.published&&stable(site)===stable(data.published)?'网站内容已同步':'网站内容有草稿待发布'}</strong><p>最近保存：{data?.updatedAt?new Date(data.updatedAt).toLocaleString('zh-CN'):'尚未保存'}</p></div><div className="button-row"><button disabled={busy} onClick={exportLocal}>导出网站草稿</button><button disabled={busy||(!dirty&&!!data?.updatedAt)} onClick={()=>void save()}>保存网站草稿</button><button disabled={busy||dirty||!data?.updatedAt} onClick={()=>void openPreview()}>预览网站发布</button></div></div>
-    {preview&&<div className="site-publish-preview"><h2>网站发布预览 · {locale}</h2><p>将替换官网精选顺序、工作室与联系文案，以及近期更新；作品正文、版本和文件不变。</p><h3>{localizedText(site.studio.title,locale)||'沿用现有工作室标题'}</h3><p>{localizedText(site.studio.description,locale)||'沿用现有工作室介绍'}</p><div className="form-grid">{Object.entries(site.featured).map(([group,slugs])=><div key={group}><h3>{groupNames[group as keyof typeof groupNames]}</h3><ol>{slugs.map(slug=><li key={slug}>{localizedText(library.works.find(w=>w.project.slug===slug)?.project.title,locale)||slug}</li>)}</ol></div>)}</div><RecentUpdatesList updates={site.updates} language={locale} preview/><div className="button-row"><button disabled={busy} onClick={()=>setPreview(false)}>返回网站编辑</button><button disabled={busy} onClick={()=>void publish()}>确认发布网站内容</button></div></div>}
+    {preview&&<div className="site-publish-preview"><h2>网站发布预览 · {locale}</h2><p>将替换官网快速推荐内容、精选顺序、工作室与联系文案，以及近期更新；作品正文、版本和文件不变。</p><HomeContentPreview site={site} projects={data?.publicProjects??[]} locale={locale}/><h3>{localizedText(site.studio.title,locale)||'沿用现有工作室标题'}</h3><p>{localizedText(site.studio.description,locale)||'沿用现有工作室介绍'}</p><div className="form-grid">{Object.entries(site.featured).map(([group,slugs])=><div key={group}><h3>{groupNames[group as keyof typeof groupNames]}</h3><ol>{slugs.map(slug=><li key={slug}>{localizedText(library.works.find(w=>w.project.slug===slug)?.project.title,locale)||slug}</li>)}</ol></div>)}</div><RecentUpdatesList updates={site.updates} language={locale} preview/><div className="button-row"><button disabled={busy} onClick={()=>setPreview(false)}>返回网站编辑</button><button disabled={busy} onClick={()=>void publish()}>确认发布网站内容</button></div></div>}
   </section>;
 }

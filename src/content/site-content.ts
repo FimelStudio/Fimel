@@ -1,7 +1,9 @@
 import type { LocalizedText } from './projects';
 import { HOME_FEATURED } from './home-featured';
+export type HomeSpotlight = { workSlug?: string; label?: LocalizedText; title?: LocalizedText; summary?: LocalizedText };
 export type SiteContent = {
   schemaVersion: 1;
+  home?: { quickTitle?: LocalizedText; spotlights?: { maps?: HomeSpotlight; mods?: HomeSpotlight; tools?: HomeSpotlight } };
   featured: { maps: string[]; released: string[]; development: string[] };
   studio: { title?: LocalizedText; description?: LocalizedText; contactTitle?: LocalizedText; contactIntro?: LocalizedText };
   contact: { email: string; qqGroup: string; qqUrl: string; discord: string; x: string; github: string };
@@ -21,11 +23,21 @@ export function siteContentErrors(value: unknown): string[] {
   const localized = (item: unknown) => typeof item === 'string' ? text(item) : exact(item, ['zh','en','ja']) && Object.values(item as object).every(v => text(v));
   const url = (item: unknown) => { try { const u = new URL(String(item)); return text(item, 500) && u.protocol === 'https:' && !u.username && !u.password; } catch { return false; } };
   const slug = (item: unknown) => typeof item === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item);
-  if (!exact(s, ['schemaVersion','featured','studio','contact','updates']) || s.schemaVersion !== 1 || !exact(s.featured, ['maps','released','development']) ||
+  if (!exact(s, ['schemaVersion','home','featured','studio','contact','updates']) || s.schemaVersion !== 1 || !exact(s.featured, ['maps','released','development']) ||
     !['maps','released','development'].every(k => { const a=s.featured[k as keyof SiteContent['featured']];return Array.isArray(a)&&a.length<=12&&new Set(a).size===a.length&&a.every(slug); }) ||
     !exact(s.studio, ['title','description','contactTitle','contactIntro']) || !Object.values(s.studio).every(localized) ||
     !exact(s.contact, ['email','qqGroup','qqUrl','discord','x','github']) || !text(s.contact.email,254) || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(s.contact.email) || !/^\d{5,15}$/.test(s.contact.qqGroup) ||
     !['qqUrl','discord','x','github'].every(k=>url(s.contact[k as keyof SiteContent['contact']])) || !Array.isArray(s.updates) || s.updates.length > 30) return bad;
+  if (s.home !== undefined) {
+    if (!exact(s.home, ['quickTitle','spotlights']) || s.home.quickTitle !== undefined && !localized(s.home.quickTitle)) return bad;
+    if (s.home.spotlights !== undefined) {
+      if (!exact(s.home.spotlights, ['maps','mods','tools'])) return bad;
+      for (const spotlight of Object.values(s.home.spotlights)) {
+        if (!exact(spotlight, ['workSlug','label','title','summary']) || spotlight.workSlug !== undefined && !slug(spotlight.workSlug) ||
+          !['label','title','summary'].every(key => spotlight[key as keyof HomeSpotlight] === undefined || localized(spotlight[key as keyof HomeSpotlight]))) return bad;
+      }
+    }
+  }
   const ids=new Set<string>();
   for(const update of s.updates){
     if(!exact(update,['id','title','summary','date','workSlug','url']) || typeof update.id!=='string' || !/^[a-zA-Z0-9-]{1,80}$/.test(update.id) || ids.has(update.id) ||

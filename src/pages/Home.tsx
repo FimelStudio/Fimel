@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useOutletContext, Link, useNavigate } from 'react-router-dom';
+import { useOutletContext, Link } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 import { Diamond, ArrowUpRight } from 'lucide-react';
 import { HeroTitleReveal } from '../components/HeroTitleReveal';
-import { DraggableCube } from '../components/DraggableCube';
-import { ScrollTextReveal } from '../components/ScrollTextReveal';
-import { TiltGlareCard } from '../components/TiltGlareCard';
-import { Magnetic } from '../components/Magnetic';
+import { InteractiveStudioImage } from '../components/InteractiveStudioImage';
+import { HomeSpotlights } from '../components/HomeSpotlights';
 import { HomeFeaturedWorks } from '../components/HomeFeaturedWorks';
 import { DeferredParticleScene } from '../components/DeferredScene';
 import { RecentUpdates } from '../components/RecentUpdates';
@@ -14,17 +12,11 @@ import { useProjectCatalogue } from '../hooks/useProjectCatalogue';
 import { localizedText } from '../content/projects';
 
 export const Home: React.FC = () => {
-  const navigate = useNavigate();
   const { isDark, basePath } = useOutletContext<{ isDark: boolean; basePath: string }>();
   const { t, i18n } = useTranslation();
   const { site } = useProjectCatalogue();
   const studioTitle=localizedText(site?.studio.title,i18n.resolvedLanguage??'zh');
   const [tooltipContent, setTooltipContent] = useState<{ visible: boolean; title: string; category: string; desc: string }>({ visible: false, title: '', category: '', desc: '' });
-  const openCategory = (event: React.MouseEvent<HTMLAnchorElement>, path: string) => {
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
-    event.preventDefault();
-    navigate(path);
-  };
 
   // Custom cursor follower logic for tooltip
   const tooltipRef = React.useRef<HTMLDivElement>(null);
@@ -133,133 +125,23 @@ export const Home: React.FC = () => {
         </div>
       </div>
 
-      <section id="quick-entry" className="scroll-mt-[136px] md:scroll-mt-[160px] py-20 md:py-28 px-6 md:px-16 lg:px-24 bg-[#e5e5e5] dark:bg-surface transition-colors duration-700">
-        <div className="max-w-screen-xl mx-auto">
-          <div className="mb-10 md:mb-14">
-            <h2 className="reveal-up max-w-3xl text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-obsidian dark:text-content">
-              {t('home.quick_title')}
+      <HomeSpotlights />
+
+      <section id="about" className="relative px-6 md:px-16 lg:px-24 py-20 md:py-28 bg-paper dark:bg-canvas transition-colors duration-700">
+        <div className="max-w-screen-xl mx-auto grid lg:grid-cols-[1fr_1.1fr] items-center gap-10 lg:gap-16">
+          <div className="min-w-0 space-y-7">
+            <h2 className="reveal-up text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tighter text-obsidian dark:text-content">
+              {studioTitle||<Trans i18nKey="about.title" />}
             </h2>
+            <p className="reveal-up text-lg md:text-xl leading-relaxed text-gray-700 dark:text-content-muted">
+              {localizedText(site?.studio.description,i18n.resolvedLanguage??'zh')||t('about.desc')}
+            </p>
+            <dl className="reveal-up grid grid-cols-2 gap-8 pt-8 border-t border-obsidian/10 dark:border-line">
+              <div><dd className="text-5xl md:text-6xl font-black text-brand tracking-tighter">{t('about.y1')}</dd><dt className="mt-3 text-sm text-gray-600 dark:text-content-muted">{t('about.y1_sub')}</dt></div>
+              <div><dd className="text-5xl md:text-6xl font-black text-brand tracking-tighter">{t('about.y2')}</dd><dt className="mt-3 text-sm text-gray-600 dark:text-content-muted">{t('about.y2_sub')}</dt></div>
+            </dl>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
-              <TiltGlareCard
-                href="#/works?type=bedrock"
-                onClick={(e) => openCategory(e, '/works?type=bedrock')}
-                className="hover-target reveal-up group relative min-h-[22rem] md:min-h-[30rem] overflow-hidden border border-white/10 bg-obsidian/70 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] text-white col-span-1 md:col-span-12 lg:col-span-7"
-              >
-                <img src={`${basePath}assets/images/works/island-escape-before-dawn/cover.png`} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover opacity-70 transition-transform duration-[1200ms] ease-out group-hover:scale-105" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
-                <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-10 pointer-events-none">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/60 mb-4">{t('home.maps_title')}</span>
-                  <h3 className="text-3xl md:text-4xl font-bold mb-4">{t('home.maps_featured')}</h3>
-                  <p className="text-base leading-relaxed text-white/70 mb-8 max-w-lg">{t('home.maps_desc')}</p>
-                  <div className="pointer-events-auto">
-                    <Magnetic intensity={0.3}>
-                      <span className="inline-flex items-center gap-2 px-6 py-3 border border-white/20 rounded-sm font-mono text-xs uppercase tracking-[0.18em] transition-colors hover:bg-white hover:text-black" data-cursor="EXPLORE">
-                        {t('home.enter')} <ArrowUpRight className="w-4 h-4" />
-                      </span>
-                    </Magnetic>
-                  </div>
-                </div>
-              </TiltGlareCard>
-
-              <TiltGlareCard
-                href="#/works?type=mods"
-                onClick={(e) => openCategory(e, '/works?type=mods')}
-                className="hover-target reveal-up group relative min-h-[20rem] md:min-h-[30rem] overflow-hidden border border-emerald-500/10 bg-[#07120a]/80 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] text-white col-span-1 md:col-span-6 lg:col-span-5"
-              >
-                <img src={`${basePath}assets/images/works/bingo-but-dont-do-it/cover.png`} alt="" loading="lazy" decoding="async" className="absolute inset-x-0 top-10 w-full h-[50%] object-contain p-6 opacity-80 transition-all duration-[1200ms] ease-out group-hover:scale-110 group-hover:opacity-100" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#07120a] via-[#07120a]/80 to-transparent"></div>
-                <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-10 pointer-events-none">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-emerald-300/70 mb-4">{t('home.mods_title')}</span>
-                  <h3 className="text-2xl md:text-3xl font-bold mb-4">{t('home.mods_featured')}</h3>
-                  <p className="text-base leading-relaxed text-white/70 mb-8 max-w-sm">{t('home.mods_desc')}</p>
-                  <div className="pointer-events-auto">
-                    <Magnetic intensity={0.3}>
-                      <span className="inline-flex items-center gap-2 px-6 py-3 border border-white/20 rounded-sm font-mono text-xs uppercase tracking-[0.18em] transition-colors hover:bg-white hover:text-black" data-cursor="EXPLORE">
-                        {t('home.enter')} <ArrowUpRight className="w-4 h-4" />
-                      </span>
-                    </Magnetic>
-                  </div>
-                </div>
-              </TiltGlareCard>
-
-              <TiltGlareCard
-                href="#/works?type=tools"
-                onClick={(e) => openCategory(e, '/works?type=tools')}
-                className="hover-target reveal-up group relative min-h-[16rem] md:min-h-[22rem] overflow-hidden border border-obsidian/10 dark:border-line bg-white/80 dark:bg-surface/80 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] text-obsidian dark:text-content col-span-1 md:col-span-6 lg:col-span-12"
-              >
-                <div className="absolute right-0 top-0 w-1/2 h-full hidden md:flex items-center justify-end pr-12 bg-[radial-gradient(circle_at_center,rgba(0,210,211,0.15),transparent_66%)]">
-                  <img src={`${basePath}assets/images/works/minecraft-obj-cubizer/cover.svg`} alt="" loading="lazy" decoding="async" className="w-[60%] h-[60%] object-contain opacity-85 transition-all duration-[1200ms] ease-out group-hover:scale-105 group-hover:opacity-100" />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-transparent dark:from-surface dark:via-surface/95 md:w-2/3"></div>
-                <div className="relative z-10 h-full flex flex-col justify-center p-8 md:p-12 w-full md:w-2/3 lg:w-1/2 pointer-events-none">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand mb-4">{t('home.tools_title')}</span>
-                  <h3 className="text-2xl md:text-4xl font-bold mb-4">{t('home.tools_featured')}</h3>
-                  <p className="text-base leading-relaxed text-gray-600 dark:text-content-muted mb-8 max-w-md">{t('home.tools_desc')}</p>
-                  <div className="pointer-events-auto">
-                    <Magnetic intensity={0.3}>
-                      <span className="inline-flex items-center gap-2 px-6 py-3 border border-obsidian/20 dark:border-line rounded-sm font-mono text-xs uppercase tracking-[0.18em] transition-colors hover:bg-obsidian hover:text-white dark:hover:bg-surface-raised dark:hover:text-content" data-cursor="EXPLORE">
-                        {t('home.enter')} <ArrowUpRight className="w-4 h-4" />
-                      </span>
-                    </Magnetic>
-                  </div>
-                </div>
-              </TiltGlareCard>
-            </div>
-          <div className="mt-7 flex flex-wrap gap-x-7 gap-y-2 font-mono text-sm text-obsidian dark:text-content">
-            <Link to="/works?type=java" className="hover-target inline-flex min-h-11 items-center gap-2 hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">{t('nav.nav_maps_je')} <ArrowUpRight aria-hidden className="h-4 w-4" /></Link>
-            <Link to="/works?type=datapacks" className="hover-target inline-flex min-h-11 items-center gap-2 hover:text-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">{t('nav.nav_datapacks')} <ArrowUpRight aria-hidden className="h-4 w-4" /></Link>
-          </div>
-        </div>
-      </section>
-
-      <section id="about" className="relative px-6 md:px-16 lg:px-24 bg-paper dark:bg-canvas transition-colors duration-700">
-        <div className="max-w-screen-xl mx-auto flex flex-col lg:flex-row relative">
-          
-          {/* Mobile Visual (Visible only on small screens) */}
-          <div className="w-full h-[36vh] sm:h-[45vh] lg:hidden relative mt-20 mb-8 overflow-hidden rounded-sm group bg-[#e5e5e5] dark:bg-surface p-4 flex flex-col items-center justify-center perspective-1000 touch-pan-y">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(155,89,182,0.15),transparent_70%)] opacity-50"></div>
-            <DraggableCube basePath={basePath} />
-          </div>
-
-          {/* Left Column: Scrolling Narrative */}
-          <div className="w-full lg:w-[55%] lg:py-[20vh] pt-16 pb-32 space-y-[15vh] lg:space-y-[35vh]">
-            <div className="min-h-[30vh] lg:min-h-[50vh] flex flex-col justify-center">
-              <h2 className="reveal-up text-5xl md:text-6xl lg:text-8xl font-bold leading-[1.1] tracking-tighter text-obsidian dark:text-content transition-colors duration-700 max-w-lg">
-                {studioTitle||<Trans i18nKey="about.title" />}
-              </h2>
-            </div>
-            
-            <div className="min-h-[30vh] lg:min-h-[50vh] flex flex-col justify-center">
-              <ScrollTextReveal className="text-2xl md:text-3xl lg:text-4xl text-obsidian dark:text-content font-bold leading-relaxed transition-colors duration-700">
-                {localizedText(site?.studio.description,i18n.resolvedLanguage??'zh')||t('about.desc')}
-              </ScrollTextReveal>
-            </div>
-
-            <div className="min-h-[30vh] lg:min-h-[50vh] flex flex-col justify-center pb-10 lg:pb-[10vh]">
-              <div className="reveal-up grid grid-cols-2 gap-12 lg:gap-20 pt-12 border-t border-obsidian/10 dark:border-line transition-colors duration-700">
-                <div>
-                  <div className="text-6xl lg:text-7xl font-black text-brand mb-3 tracking-tighter">{t('about.y1')}</div>
-                  <div className="text-xs md:text-sm tracking-widest font-mono text-gray-600 dark:text-content-muted uppercase">{t('about.y1_sub')}</div>
-                </div>
-                <div>
-                  <div className="text-6xl lg:text-7xl font-black text-brand mb-3 tracking-tighter">{t('about.y2')}</div>
-                  <div className="text-xs md:text-sm tracking-widest font-mono text-gray-600 dark:text-content-muted uppercase">{t('about.y2_sub')}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Desktop Pinned Visual */}
-          <div className="hidden lg:flex w-[45%] h-[100vh] sticky top-0 items-center justify-center pl-16">
-            <div className="w-full h-[70vh] relative overflow-hidden rounded-sm group bg-[#e5e5e5] dark:bg-surface p-10 flex items-center justify-center transition-colors duration-700 perspective-1000">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(155,89,182,0.15),transparent_70%)] opacity-50"></div>
-              
-              <DraggableCube basePath={basePath} />
-
-            </div>
-          </div>
+          <InteractiveStudioImage />
         </div>
       </section>
 

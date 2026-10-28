@@ -9,6 +9,7 @@ import type { Project, ProjectTab } from '../../content/projects';
 import { ProjectDownloads } from '../../components/ProjectDownloads';
 import { ProjectVersions } from '../../components/ProjectVersions';
 import { ProjectRepository } from '../../components/ProjectRepository';
+import { WorkDownloadMetric } from '../../components/WorkDownloadMetric';
 import { releaseProject } from '../../content/releases';
 import type { DownloadRelease } from '../../content/releases';
 import { recordWorkEvent } from '../../lib/work-events';
@@ -27,7 +28,7 @@ function Detail({ project: source, releases, discordUrl }: { project: Project; r
   const activeTab: ProjectTab = PROJECT_TABS.includes(tabParam as ProjectTab) ? tabParam as ProjectTab : 'description';
   const { title, summary, tags } = projectCopy(project, t, language);
   const trackedDownloads = useMemo(() => source.downloadSlug ? [source.downloadSlug] : [], [source.downloadSlug]);
-  const { configured, counts, loading, recordDownload } = useDownloadCounters(trackedDownloads);
+  const { recordDownload } = useDownloadCounters(trackedDownloads);
   const returnSearch = typeof location.state?.catalogueSearch === 'string' ? location.state.catalogueSearch : `?type=${project.type}`;
   const markdownSource = project.content[activeTab];
   const markdownPath = localizedText(markdownSource, language);
@@ -60,10 +61,9 @@ function Detail({ project: source, releases, discordUrl }: { project: Project; r
           <p className="mt-4 max-w-[75ch] text-sm sm:text-base leading-relaxed text-gray-600 dark:text-content-muted">{summary}</p>
           <div className="flex flex-wrap gap-3 mt-6 items-start">
             <ProjectDownloads project={project} releases={releases} onDownload={trackDownload} />
-            {project.store && <a href={project.store} target="_blank" rel="noopener noreferrer" className={`${buttonBase} bg-obsidian dark:bg-diamond text-white dark:text-obsidian`}><ExternalLink size={16} aria-hidden />{t('project.store')}</a>}
+            {project.store && <a href={project.store} onClick={trackDownload} target="_blank" rel="noopener noreferrer" className={`${buttonBase} bg-obsidian dark:bg-diamond text-white dark:text-obsidian`}><ExternalLink size={16} aria-hidden />{t('project.store')}</a>}
             <ProjectRepository repository={project.repository} className={secondaryButton}/>
           </div>
-          {project.downloadSlug && configured && <p className="mt-3 text-xs text-gray-600 dark:text-content-muted font-mono">{loading ? t('workPages.download_count_loading') : t('workPages.download_count_metric', { count: new Intl.NumberFormat(language).format(counts[project.downloadSlug] ?? 0) })}</p>}
           {project.status !== 'released' && <p className="mt-4 text-sm text-gray-600 dark:text-content-muted">{t('project.developing')}</p>}
         </div>
       </header>
@@ -95,6 +95,7 @@ function Detail({ project: source, releases, discordUrl }: { project: Project; r
         </section>
 
         <aside className="space-y-7 lg:border-l border-obsidian/10 dark:border-line lg:pl-7">
+          <WorkDownloadMetric slug={project.slug} detail/>
           <section>
             <h2 className="text-base font-bold mb-3">{t('project.compatibility')}</h2>
             <ul className="space-y-2 text-sm text-gray-600 dark:text-content-muted">{project.platform.map((platform) => <li key={platform}>{platform}</li>)}</ul>

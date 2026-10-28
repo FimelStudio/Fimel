@@ -10,6 +10,7 @@
     "not_found_handling": "single-page-application",
     "run_worker_first": [
       "/api/work-events",
+      "/api/work-downloads",
       "/mods/bingo-but-dont-do-it-1.21.11-v1.0.jar",
       "/plugins/minecraft-obj-cubizer/minecraft_obj_cubizer-1.4.0.zip",
       "/plugins/minecraft-explorer/MinecraftExplorer-1.0-win-x64.exe"

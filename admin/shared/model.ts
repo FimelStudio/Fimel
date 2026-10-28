@@ -18,7 +18,7 @@ export type Release = {
 export type Work = {
   id: string; project: Project; workflow: 'draft' | 'ready' | 'archived'; order: number;
   markdown: Record<ProjectTab, Partial<Record<Locale, string>>>;
-  gallery: Asset[]; coverId?: string; versions: Release[];
+  gallery: Asset[]; coverId?: string; featuredCoverId?: string; versions: Release[];
   createdAt: string; updatedAt: string; legacy?: Project;
 };
 export type Library = { schemaVersion: 1; works: Work[] };

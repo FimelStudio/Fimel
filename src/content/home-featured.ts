@@ -13,6 +13,6 @@ export type FeaturedGroup = keyof typeof HOME_FEATURED;
 
 // Shared by the homepage and Admin; publication visibility is checked separately.
 export function matchesFeaturedGroup(project: Pick<Project, 'type' | 'status'>, group: FeaturedGroup): boolean {
-  if (group === 'maps') return project.type === 'bedrock' && project.status === 'released';
+  if (group === 'maps') return (project.type === 'bedrock' || project.type === 'java') && project.status === 'released';
   return group === 'released' ? project.status === 'released' : project.status !== 'released';
 }

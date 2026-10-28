@@ -33,12 +33,16 @@ export function PublicationPreview({ work, before, busy, onClose, onPublish }: {
   const markdown=viewingPublished?published?.markdown:work.markdown;
   const selectedCover=work.gallery.find(a=>a.id===work.coverId);
   const cover=viewingPublished?previous?.image:selectedCover?.privateKey?new URL(`/api/media/${selectedCover.id}`,location.origin).href:selectedCover?.publicUrl??work.project.image;
+  const selectedFeatured=work.gallery.find(a=>a.id===work.featuredCoverId);
+  const featuredCover=viewingPublished?previous?.featuredImage??previous?.image:selectedFeatured?.privateKey?new URL(`/api/media/${selectedFeatured.id}`,location.origin).href:selectedFeatured?.publicUrl??work.project.featuredImage??cover;
   const rawText=localizedText(markdown?.[tab],locale);
   const text=rawText;
   const label={description:'详情',changelog:'更新日志',versions:'版本'};
-  const names:Record<string,string>={title:'作品名称',summary:'简介',platform:'平台',version:'版本',size:'文件大小',image:'封面',status:'发行状态',tags:'标签',creators:'作者',repository:'项目仓库',published:'首次发布日期',updated:'上次更新'};
+  const names:Record<string,string>={title:'作品名称',summary:'简介',platform:'平台',version:'版本',size:'文件大小',image:'封面',featuredImage:'精选封图',status:'发行状态',tags:'标签',creators:'作者',repository:'项目仓库',published:'首次发布日期',updated:'上次更新'};
   const changes=previous?[...new Set([...Object.keys(previous),...Object.keys(work.project),'published'])].filter(key=>key!=='content'&&!(key==='image'&&work.coverId)&&(key==='published'?stable(draftPublished)!==stable(previousPublished):stable(work.project[key as keyof Project])!==stable(previous[key as keyof Project]))).map(key=>names[key]??key):['新作品'];
   if(work.coverId)changes.push('上传封面（请在预览中核对）');
+  if(work.featuredCoverId)changes.push('精选封图（请在预览中核对）');
+  else if(previous?.featuredImage&&!work.project.featuredImage)changes.push('清除精选封图（沿用作品封面）');
   const bodyChanges=published?.markdown?(['description','changelog','versions'] as const).flatMap(key=>LOCALES.filter(l=>work.markdown[key][l]!==published.markdown?.[key][l]).map(l=>`${label[key]} · ${l}`)):[];
   const display=project?projectCopy(project,previewI18n.t.bind(previewI18n),locale):null;
   return <dialog ref={dialog} className="publication-dialog modal visual-publication" onCancel={onClose} aria-labelledby="preview-title">
@@ -53,6 +57,7 @@ export function PublicationPreview({ work, before, busy, onClose, onPublish }: {
         <ProjectDownloads key={`download-${version}`} project={project} releases={releases} preview/>
         <ProjectRepository repository={project.repository} preview/>
         <dl className="publication-project-dates"><div><dt>{previewI18n.t('project.published')}</dt><dd>{formatProjectDate(project.published,locale,previewI18n.t('project.unknown'))}</dd></div><div><dt>{previewI18n.t('project.updated')}</dt><dd>{formatProjectDate(project.updated,locale,previewI18n.t('project.unknown'))}</dd></div></dl>
+        <section className="publication-featured-cover" aria-label="首页精选封图预览"><h3>首页精选封图</h3><p className="hint">{viewingPublished?previous?.featuredImage?'官网使用独立精选封图。':'官网沿用作品封面。':work.featuredCoverId||work.project.featuredImage?'本次使用独立精选封图。':'未设置独立精选封图，沿用作品封面。'}</p>{featuredCover&&<img src={assetUrl(featuredCover)} alt="首页精选封图预览"/>}</section>
         <div className="button-row content-tabs">{(['description','changelog','versions']as const).map(key=><button key={key} aria-pressed={key===tab} onClick={()=>setTab(key)}>{label[key]}</button>)}</div>
         {tab==='versions'?<ProjectVersions key={`versions-${version}`} project={project} releases={releases} preview renderNotes={text=><ProjectMarkdownBody content={text} fileUrl={new URL('https://studiofimel.com/')}/>} notes={text?<ProjectMarkdownBody content={text} fileUrl={new URL('https://studiofimel.com/')}/>:undefined}/>:<ProjectMarkdownBody content={text||'此语言暂无正文。'} fileUrl={new URL('https://studiofimel.com/')} resolveAsset={id=>{const asset=work.gallery.find(a=>a.id===id);return asset?.privateKey?new URL(`/api/media/${id}`,location.origin).href:asset?.publicUrl;}}/>}
       </article>:<p>此作品尚未公开。</p>}

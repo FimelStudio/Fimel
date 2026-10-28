@@ -14,16 +14,24 @@ export async function publishedWork(work: Work, privateBucket: R2Bucket, publicB
   if (project.status === 'released' && !project.published && existingPublishedDate) project.published = existingPublishedDate;
   const releaseAssets = work.versions.filter(v => v.status === 'released').flatMap(v => v.files);
   const referenced = referencedImages(work.markdown);
-  const images = work.gallery.filter(asset => asset.id === work.coverId || referenced.has(asset.id));
+  const images = work.gallery.filter(asset => asset.id === work.coverId || asset.id === work.featuredCoverId || referenced.has(asset.id));
   const publicAssets = new Map<string, string>();
   for (const asset of [...images, ...releaseAssets]) {
     const release = work.versions.find(v => v.files.some(f => f.id === asset.id));
     const kind = release ? 'works' : 'images';
     const version = release ? `${release.label}-${asset.id}` : asset.id;
     const key = `${kind}/${project.type}/${project.slug}/${version}/${asset.name}`;
-    publicAssets.set(asset.id, await publishAsset(work, asset, privateBucket, publicBucket, key, release?.id));
+    publicAssets.set(asset.id, await publishAsset(work, asset, privateBucket, publicBucket, key, release?.id, asset.id === work.featuredCoverId));
   }
   if (work.coverId) project.image = publicAssets.get(work.coverId)!;
+  if (work.featuredCoverId) project.featuredImage = publicAssets.get(work.featuredCoverId)!;
+  else if (project.featuredImage) {
+    // Retained public artwork must still refer to a verified image owned by this work.
+    const prefix = `${PUBLIC_ORIGIN}/images/${project.type}/${project.slug}/`;
+    if (!project.featuredImage.startsWith(prefix)) throw new ApiError(422, '精选封图请从已验证的上传图片中选择。');
+    const existing = await publicBucket.head(new URL(project.featuredImage).pathname.slice(1));
+    if (!existing?.customMetadata?.assetId || !existing.customMetadata.sha256 || !existing.httpMetadata?.contentType?.startsWith('image/')) throw new ApiError(422, '精选封图未完成验证或不存在。');
+  }
   const content: Project['content'] = {};
   for (const tab of ['description', 'changelog', 'versions'] as ProjectTab[]) {
     const paths: Record<string, string> = {};
@@ -51,9 +59,11 @@ export async function publishedWork(work: Work, privateBucket: R2Bucket, publicB
   }
   return { project, releases };
 }
-async function publishAsset(work: Work, asset: Asset, priv: R2Bucket, pub: R2Bucket, key: string, versionId?: string) {
+async function publishAsset(work: Work, asset: Asset, priv: R2Bucket, pub: R2Bucket, key: string, versionId?: string, featured = false) {
   if (!asset.privateKey) {
-    if (!asset.publicUrl || !await pub.head(new URL(asset.publicUrl).pathname.slice(1))) throw new ApiError(422, '已发布资源不存在。');
+    const existing = asset.publicUrl ? await pub.head(new URL(asset.publicUrl).pathname.slice(1)) : null;
+    if (!asset.publicUrl || !existing) throw new ApiError(422, '已发布资源不存在。');
+    if (featured && (!asset.publicUrl.startsWith(`${PUBLIC_ORIGIN}/images/${work.project.type}/${work.project.slug}/`) || existing.customMetadata?.assetId !== asset.id || existing.customMetadata.sha256 !== asset.sha256 || existing.httpMetadata?.contentType !== asset.mime || !asset.mime.startsWith('image/'))) throw new ApiError(422, '精选封图未完成验证或不属于当前作品。');
     return asset.publicUrl;
   }
   const source = await priv.get(asset.privateKey);

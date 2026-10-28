@@ -114,6 +114,11 @@
             "contain"
           ]
         },
+        "featuredImage": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional homepage featured artwork; falls back to image when absent."
+        },
         "status": {
           "enum": [
             "released",

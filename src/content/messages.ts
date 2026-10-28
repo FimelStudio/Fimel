@@ -1,7 +1,7 @@
 export const contentMessages = {
   zh: {
     homeFeatured: {
-      maps: '精选地图', released: '模组与创作工具', development: '制作中的作品',
+      maps: '精选地图', released: '数据包、模组与创作工具', development: '制作中的作品',
       view_all: '查看全部作品', explore: '了解作品',
     },
     catalogue: {
@@ -43,7 +43,7 @@ export const contentMessages = {
   },
   en: {
     homeFeatured: {
-      maps: 'Selected maps', released: 'Mods & creator tools', development: 'In development',
+      maps: 'Selected maps', released: 'Data packs, mods & creator tools', development: 'In development',
       view_all: 'View all works', explore: 'Explore project',
     },
     catalogue: {
@@ -85,7 +85,7 @@ export const contentMessages = {
   },
   ja: {
     homeFeatured: {
-      maps: 'ピックアップマップ', released: 'Mod と制作ツール', development: '制作中の作品',
+      maps: 'ピックアップマップ', released: 'データパック・MOD・制作ツール', development: '制作中の作品',
       view_all: 'すべての作品を見る', explore: '作品を見る',
     },
     catalogue: {

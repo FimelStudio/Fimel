@@ -5,6 +5,7 @@ import { ArrowUpRight, CalendarDays, Download, Search, X } from 'lucide-react';
 import { useProjectCatalogue } from '../../hooks/useProjectCatalogue';
 import { PROJECT_TYPES, assetUrl, formatProjectDate, projectCopy, projectStatus, projectTagSearchText } from '../../content/projects';
 import type { ProjectType } from '../../content/projects';
+import { WorkDownloadMetric } from '../../components/WorkDownloadMetric';
 
 export function Catalogue() {
   const { t, i18n } = useTranslation();
@@ -139,8 +140,9 @@ export function Catalogue() {
               </ul>
             </div>
             <div className="col-span-2 sm:col-span-1 sm:col-start-2 lg:col-start-auto flex flex-wrap lg:flex-col gap-x-5 gap-y-2 lg:border-l border-obsidian/10 dark:border-line lg:pl-5 text-xs font-mono text-gray-600 dark:text-content-muted">
+              <WorkDownloadMetric slug={project.slug}/>
               <div className="flex items-center gap-2"><CalendarDays size={13} aria-hidden /><span><span className="lg:block text-[10px]">{t('catalogue.updated')} </span><time dateTime={project.updated}>{formatProjectDate(project.updated, language, t('catalogue.no_date'))}</time></span></div>
-              {project.downloads !== undefined && <div className="flex items-center gap-2"><Download size={13} aria-hidden /><span>{numberFormatter.format(project.downloads)} {t('catalogue.downloads')}</span></div>}
+              {project.downloads !== undefined && <div className="flex items-center gap-2" title={t('project.historical_metrics')}><Download size={13} aria-hidden /><span>{numberFormatter.format(project.downloads)} {t('project.downloads')}</span></div>}
               {project.version && <span>{t('catalogue.version')} {project.version}</span>}
               <span className={project.status === 'released' ? 'text-[#007d7e] dark:text-diamond' : ''}>{t(`catalogue.${projectStatus(project)}`)}</span>
             </div>

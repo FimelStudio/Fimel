@@ -26,9 +26,9 @@ function summary(value:unknown):string {
 export function libraryChanges(before:Library,after:Library):AuditChange[] {
   const fields=(old:Work|undefined,current:Work|undefined)=>{
     const output:AuditChange['fields']=[];const record=(name:string,a:unknown,b:unknown)=>{if(JSON.stringify(a)!==JSON.stringify(b))output.push({name,before:summary(a),after:summary(b)});};
-    const names:Record<string,string>={title:'作品名称',summary:'简短介绍',status:'发行状态',tags:'用途标签',platform:'游戏平台',creators:'作者',image:'封面地址',version:'版本号',size:'文件大小',published:'首次发布日期',updated:'更新日期',download:'下载地址',downloadUrl:'公开下载地址',store:'商店链接',repository:'仓库链接',issues:'反馈链接'};
+    const names:Record<string,string>={title:'作品名称',summary:'简短介绍',status:'发行状态',tags:'用途标签',platform:'游戏平台',creators:'作者',image:'封面地址',featuredImage:'精选封图地址',version:'版本号',size:'文件大小',published:'首次发布日期',updated:'更新日期',download:'下载地址',downloadUrl:'公开下载地址',store:'商店链接',repository:'仓库链接',issues:'反馈链接'};
     for(const key of new Set([...Object.keys(old?.project??{}),...Object.keys(current?.project??{})]))record(names[key]??key,old?.project[key as keyof Work['project']],current?.project[key as keyof Work['project']]);
-    record('编辑状态',old?.workflow,current?.workflow);record('列表顺序',old?.order,current?.order);record('选中的封面',old?.coverId,current?.coverId);
+    record('编辑状态',old?.workflow,current?.workflow);record('列表顺序',old?.order,current?.order);record('选中的封面',old?.coverId,current?.coverId);record('选中的精选封图',old?.featuredCoverId,current?.featuredCoverId);
     const textChange=(name:string,a:string|undefined,b:string|undefined)=>{if(a!==b)output.push({name,before:a===undefined?'未设置':`${a.length} 字符`,after:b===undefined?'未设置':`${b.length} 字符${a!==undefined&&a.length===b.length?'（内容已更改）':''}`});};
     for(const tab of ['description','changelog','versions']as const)for(const locale of ['zh','en','ja']as const)textChange(`${{description:'正文介绍',changelog:'更新日志',versions:'版本正文'}[tab]} · ${locale}`,old?.markdown[tab][locale],current?.markdown[tab][locale]);
     const previousVersions=new Map(old?.versions.map(v=>[v.id,v])??[]),nextVersions=new Map(current?.versions.map(v=>[v.id,v])??[]);
@@ -61,7 +61,7 @@ export async function runAudited(request:Request,bucket:R2Bucket,email:string,ru
   const prepared:AuditedSource={library:source};const changes:AuditChange[]=[];if(op==='save-library'){const value=await readJson(request);const errors=validateLibrary(value,true);prepared.candidate={value,errors};if(errors.length===0)changes.push(...libraryChanges(source.value,value as Library));}
   if(op==='save-work')prepared.recordWorkChange=(before,after)=>{changes.splice(0,changes.length,...libraryChanges({schemaVersion:1,works:before?[before]:[]},{schemaVersion:1,works:[after]}));};
   if(['save-site','publish-site','restore-site'].includes(op))prepared.recordSiteChange=(before,after)=>{
-    const names={featured:'首页精选与顺序',studio:'工作室与联系文案',contact:'公开联系方式',updates:'近期更新'};
+    const names={featured:'首页精选与顺序',home:'首页快速推荐文案',studio:'工作室与联系文案',contact:'公开联系方式',updates:'近期更新'};
     const fields=(Object.keys(names)as(keyof typeof names)[]).filter(k=>stable(before?.[k])!==stable(after[k])).map(k=>({name:names[k],before:before?summary(before[k]):'未发布',after:summary(after[k])}));
     changes.splice(0,changes.length,...(fields.length?[{workId:'site-content',slug:'site-content',title:'网站内容',action:'updated' as const,fields}]:[]));
   };

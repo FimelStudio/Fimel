@@ -8,8 +8,8 @@ export function stable(value: unknown): string {
 export const sameWork = (a: Work | null | undefined, b: Work | null | undefined) => stable(a ?? null) === stable(b ?? null);
 export function publicationPayload(work: Work) {
   const referenced = referencedImages(work.markdown);
-  return { project: work.project, order: work.order, markdown: work.markdown, coverId: work.coverId,
-    gallery: work.gallery.filter(a => a.id === work.coverId || referenced.has(a.id)), versions: work.versions.filter(v => v.status === 'released') };
+  return { project: work.project, order: work.order, markdown: work.markdown, coverId: work.coverId, ...(work.featuredCoverId ? { featuredCoverId: work.featuredCoverId } : {}),
+    gallery: work.gallery.filter(a => a.id === work.coverId || a.id === work.featuredCoverId || referenced.has(a.id)), versions: work.versions.filter(v => v.status === 'released') };
 }
 export async function publicationFingerprint(work: Work) {
   const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(stable(publicationPayload(work))));

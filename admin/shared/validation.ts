@@ -51,7 +51,7 @@ export function validateLibrary(value: unknown, boundedRequestBody = false): str
     if (!p.title || !Object.values(typeof p.title === 'string' ? { zh: p.title } : p.title).some(s => s.trim())) errors.push(`${p.slug} 名称不能为空。`);
     if (p.tags.some(tag => !Object.hasOwn(tags, tag))) errors.push(`${p.slug} 使用了未知标签。`);
     for (const [key, url] of Object.entries(p)) {
-      if (['image', 'download', 'fallbackDownload'].includes(key) && typeof url === 'string' && !(key === 'image' && url === '') && !safeUrl(url, true)) errors.push(`${p.slug} ${key} 地址不安全。`);
+      if (['image', 'featuredImage', 'download', 'fallbackDownload'].includes(key) && typeof url === 'string' && !(key === 'image' && url === '') && !safeUrl(url, true)) errors.push(`${p.slug} ${key} 地址不安全。`);
       if (['store', 'repository', 'issues', 'releasePage', 'downloadUrl'].includes(key) && typeof url === 'string' && !safeUrl(url)) errors.push(`${p.slug} ${key} 地址不安全。`);
     }
     if (p.creators.some(c => c.url && !safeUrl(c.url)) || p.source && !safeUrl(p.source.url)) errors.push(`${p.slug} 作者/来源链接不安全。`);
@@ -74,6 +74,7 @@ export function validateLibrary(value: unknown, boundedRequestBody = false): str
       if (!a.privateKey && !a.publicUrl || a.publicUrl && (!safeUrl(a.publicUrl) || new URL(a.publicUrl).origin !== PUBLIC_ORIGIN)) errors.push(`${p.slug} 文件来源不合法。`);
     }
     if (work.coverId && !work.gallery.some(a => a.id === work.coverId)) errors.push(`${p.slug} 封面不存在。`);
+    if (work.featuredCoverId && !work.gallery.some(a => a.id === work.featuredCoverId && a.mime.startsWith('image/'))) errors.push(`${p.slug} 精选封图不存在或不是图片。`);
     if (p.status !== 'released' && (p.downloadUrl || p.download || work.versions.some(v => v.status === 'released' && v.files.length))) errors.push(`${p.slug} 未发行作品不能提供下载。`);
   }
   return errors;

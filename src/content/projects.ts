@@ -17,6 +17,8 @@ export interface Project {
   tags: ProjectTag[];
   translations?: { title?: string; summary?: string };
   image: string;
+  /** Optional landscape artwork for homepage featured cards. */
+  featuredImage?: string;
   imageFit?: 'cover' | 'contain';
   status: 'released' | 'development' | 'planned';
   platform: string[];
@@ -94,6 +96,7 @@ export function parseCatalogue(value: unknown): Project[] {
       !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(entry.slug) || slugs.has(entry.slug) ||
       !PROJECT_TYPES.includes(entry.type) || !validLocalizedText(entry.title) || !localizedText(entry.title, 'zh').trim() || typeof entry.image !== 'string' ||
       (entry.summary !== undefined && !validLocalizedText(entry.summary)) ||
+      (entry.featuredImage !== undefined && (typeof entry.featuredImage !== 'string' || !entry.featuredImage.trim() || !validImagePath(entry.featuredImage))) ||
       !['released', 'development', 'planned'].includes(entry.status) ||
       !Array.isArray(entry.creators) || entry.creators.some((creator: unknown) => !creator || typeof creator !== 'object' || !('name' in creator) || typeof creator.name !== 'string' || ('url' in creator && typeof creator.url !== 'string')) ||
       !Array.isArray(entry.platform) || entry.platform.some((platform: unknown) => typeof platform !== 'string') ||
@@ -109,6 +112,11 @@ export function parseCatalogue(value: unknown): Project[] {
     slugs.add(entry.slug);
   }
   return value.projects as Project[];
+}
+
+function validImagePath(value: string): boolean {
+  if (/^(?:assets|works|mods|plugins)\/[a-zA-Z0-9_./-]+$/.test(value) && !value.split('/').includes('..')) return true;
+  try { const url = new URL(value); return url.protocol === 'https:' && !url.username && !url.password; } catch { return false; }
 }
 
 function validLocalizedText(value: unknown): value is LocalizedText {

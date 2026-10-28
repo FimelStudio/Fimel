@@ -19,7 +19,8 @@ import { usePublicationStatus } from './usePublicationStatus';
 import { useDraftRecovery } from './useDraftRecovery';
 import { useAppUpdate } from './useAppUpdate';
 import { ImageUsage } from './ImageUsage';
-import { imageUsage } from '../shared/image-usage';
+import { imageUsage, removeImage } from '../shared/image-usage';
+import { FeaturedCoverPicker } from './FeaturedCoverPicker';
 import { PublicationTimes } from './PublicationTimes';
 import { ReleaseEditor } from './ReleaseEditor';
 import { ProjectMetadataFields } from './ProjectMetadataFields';
@@ -111,8 +112,8 @@ export function App() {
   }
   function create(copy?: Work) {
     if (loading || busy || uploading || !original) return;
-    const next = copy ? { ...structuredClone(copy), id: crypto.randomUUID(), workflow: 'draft' as const, versions: [], gallery: [], coverId: undefined,
-      project: { ...copy.project, slug: `${copy.project.slug}-copy-${Date.now().toString(36)}`, downloadUrl: undefined, download: undefined }, legacy: undefined } : makeWork();
+    const next = copy ? { ...structuredClone(copy), id: crypto.randomUUID(), workflow: 'draft' as const, versions: [], gallery: [], coverId: undefined, featuredCoverId: undefined,
+      project: { ...copy.project, slug: `${copy.project.slug}-copy-${Date.now().toString(36)}`, downloadUrl: undefined, download: undefined, featuredImage: undefined }, legacy: undefined } : makeWork();
     next.order = Math.max(-1, ...library.works.map(w => w.order)) + 1; next.createdAt = next.updatedAt = new Date().toISOString();
     setLibrary(prev => ({ ...prev, works: [...prev.works, next] })); setSelected(next.id); setError('');
   }
@@ -201,7 +202,21 @@ function Editor({work,update,saved,publicUrls,uploading,onUploadBusy,onSave}:{wo
     </>}
     {section==='versions'&&(!work.versions.length||work.project.downloadUrl||work.project.download||work.project.store)&&!previewReleases(work).some(r=>r.files.length)&&<section className="existing-version-preview"><h3>现有下载与分发</h3><p className="hint">以下为已有作品字段中的入口预览；下载和平台地址可在“完整字段”中维护。新增版本请使用下方“添加版本”。预览不会下载文件或打开平台。</p><ProjectVersions project={work.project} preview/></section>}
     {section==='images'&&<div className="notice"><span>{work.coverId?'当前使用已选中的上传封面，已有封面地址可以留空。':'请填写已有封面地址，或上传图片后设为封面。'}本页上传的图片只作为封面候选，不会自动加入正文。正文图片请在“正文与预览”拖入、粘贴或明确插入。</span>{work.coverId&&<button disabled={!work.project.image.trim()} onClick={()=>update({...work,coverId:undefined})}>改用已有地址作为封面</button>}</div>}
-    {section==='images'&&<><UploadPanel onBusyChange={onUploadBusy} key={work.id} workId={work.id} kind="image" disabled={!saved} onUploaded={asset=>update({...work,gallery:[...work.gallery.filter(a=>a.id!==asset.id),asset],coverId:work.coverId??asset.id})}/><label className="external-image">已有封面 URL / 原路径<input value={work.project.image} onChange={e=>project({image:e.target.value})}/></label><div className="gallery-grid">{work.gallery.map((a,index)=><div key={a.id}><img src={a.privateKey?`/api/media/${a.id}`:a.publicUrl} alt={a.displayName??a.name}/><strong>{a.displayName??a.name}</strong><ImageUsage work={work} asset={a} locate={(nextTab,nextLocale)=>{setSection('content');setTab(nextTab);setLocale(nextLocale);}}/><small>{(a.size/1024).toFixed(1)} KiB</small><div className="button-row"><button aria-pressed={work.coverId===a.id} onClick={()=>update({...work,coverId:a.id})}>{work.coverId===a.id?'当前封面':'设为封面'}</button><button disabled={index===0} onClick={()=>{const next=[...work.gallery];[next[index-1],next[index]]=[next[index],next[index-1]];update({...work,gallery:next});}}>前移</button><button disabled={imageUsage(work,a).length>0} onClick={()=>{if(window.confirm('从草稿移除此图片关联？历史文件保留。'))update({...work,gallery:work.gallery.filter(x=>x.id!==a.id),coverId:work.coverId===a.id?undefined:work.coverId});}}>移除</button></div></div>)}</div></>}
+    {section==='images'&&<>
+      <FeaturedCoverPicker work={work} uploading={uploading} update={update} onSave={onSave} onUploadBusy={onUploadBusy}/>
+      <h2>作品封面与候选图片</h2>
+      <UploadPanel onBusyChange={onUploadBusy} key={work.id} workId={work.id} kind="image" disabled={!saved||uploading} onUploaded={asset=>update({...work,gallery:[...work.gallery.filter(a=>a.id!==asset.id),asset],coverId:work.coverId??asset.id})}/>
+      <label className="external-image">已有封面 URL / 原路径<input value={work.project.image} onChange={e=>project({image:e.target.value})}/></label>
+      <div className="gallery-grid">{work.gallery.map((a,index)=><div key={a.id}>
+        <img src={a.privateKey?`/api/media/${a.id}`:a.publicUrl} alt={a.displayName??a.name}/><strong>{a.displayName??a.name}</strong>
+        <ImageUsage work={work} asset={a} locate={(nextTab,nextLocale)=>{setSection('content');setTab(nextTab);setLocale(nextLocale);}}/><small>{(a.size/1024).toFixed(1)} KiB</small>
+        <div className="button-row"><button aria-pressed={work.coverId===a.id} onClick={()=>update({...work,coverId:a.id})}>{work.coverId===a.id?'当前封面':'设为封面'}</button>
+          <button disabled={uploading||work.featuredCoverId===a.id} aria-pressed={work.featuredCoverId===a.id} onClick={()=>update({...work,featuredCoverId:a.id,project:{...work.project,featuredImage:undefined}})}>{work.featuredCoverId===a.id?'当前精选封图':'设为精选封图'}</button>
+          <button disabled={index===0} onClick={()=>{const next=[...work.gallery];[next[index-1],next[index]]=[next[index],next[index-1]];update({...work,gallery:next});}}>前移</button>
+          <button disabled={imageUsage(work,a).length>0} onClick={()=>{if(window.confirm('从草稿移除此图片关联？历史文件保留。'))update(removeImage(work,a.id));}}>移除</button>
+        </div>
+      </div>)}</div>
+    </>}
     {section==='versions'&&<ReleaseEditor work={work} locale={locale} publicUrls={publicUrls} uploading={uploading} update={update} onSave={onSave} onUploadBusy={onUploadBusy}/>}
     {section==='advanced'&&<><h2>完整作品记录</h2><p className="hint">保留商店来源、作者链接、历史下载量、评分、旧下载地址等所有原字段。这里的 JSON 修改需先应用，再保存草稿。</p><label>Work JSON<textarea className="json-editor" rows={24} value={jsonDraft} onChange={e=>setJsonDraft(e.target.value)}/></label>{jsonError&&<p role="alert" className="error">{jsonError}</p>}<button onClick={()=>{try{const next=JSON.parse(jsonDraft);const errors=validateLibrary({schemaVersion:1,works:[next]});if(errors.length)throw new Error(errors.join('\n'));if(next.id!==work.id)throw new Error('作品 ID 不可修改。');update(next);setJsonError('');}catch(e){setJsonError(String(e));}}}>应用字段修改</button></>}
     </div></div>;

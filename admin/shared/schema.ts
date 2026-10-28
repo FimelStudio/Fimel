@@ -23,7 +23,7 @@ const schema = {
     type: 'array', maxItems: 500, items: { type: 'object', additionalProperties: false,
       required: ['id', 'project', 'workflow', 'order', 'markdown', 'gallery', 'versions', 'createdAt', 'updatedAt'],
       properties: { id, project: draftProject, legacy: project, workflow: { enum: ['draft', 'ready', 'archived'] },
-        order: { type: 'integer', minimum: 0, maximum: 100000 }, createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' }, coverId: id,
+        order: { type: 'integer', minimum: 0, maximum: 100000 }, createdAt: { type: 'string', format: 'date-time' }, updatedAt: { type: 'string', format: 'date-time' }, coverId: id, featuredCoverId: id,
         markdown: { type: 'object', required: ['description', 'changelog', 'versions'], additionalProperties: false,
           properties: Object.fromEntries(['description', 'changelog', 'versions'].map(k => [k, { type: 'object', additionalProperties: false, maxProperties: 3, properties: { zh: text, en: text, ja: text } }])) },
         gallery: { type: 'array', maxItems: 100, items: asset }, versions: { type: 'array', maxItems: 100, items: {

@@ -1,5 +1,6 @@
 import type { MetricsFeed } from '../shared/analytics';
 import { ApiError } from './http';
+import { workEventWindow } from '../../src/content/work-events';
 export type AnalyticsSecrets = { CF_ANALYTICS_TOKEN?:string; CF_ANALYTICS_ZONE?:string };
 type Group = { count:number; sum:{edgeResponseBytes:number;visits?:number}; dimensions:{date:string;clientRequestHTTPHost?:string;clientRequestPath?:string} };
 type Zone = { traffic:Group[]; downloads:Group[]; files:Group[]; visitors:{dimensions:{date:string};sum:{requests:number};uniq:{uniques:number}}[] };
@@ -25,8 +26,7 @@ export async function metrics(request:Request,env:AnalyticsSecrets):Promise<Metr
   const days=Number(new URL(request.url).searchParams.get('days')??7);if(![1,7,30].includes(days))throw new ApiError(422,'统计范围仅支持 1、7 或 30 天。');
   if(!env.CF_ANALYTICS_TOKEN||!env.CF_ANALYTICS_ZONE)throw new ApiError(503,'域名统计尚未连接：需要为 studiofimel.com 配置只读 Cloudflare 分析权限。');
   if(!/^[a-f0-9]{32}$/.test(env.CF_ANALYTICS_ZONE))throw new ApiError(503,'统计域名配置异常。');
-  const end=new Date();end.setUTCHours(0,0,0,0);end.setUTCDate(end.getUTCDate()+1);const start=new Date(end);start.setUTCDate(start.getUTCDate()-days);
-  const from=start.toISOString(),to=end.toISOString(),key=`${env.CF_ANALYTICS_ZONE}:${days}:${from}`;const previous=cache.get(key);if(previous&&Date.now()-previous.at<300000)return previous.data;
+  const {from,to}=workEventWindow(days as 1|7|30),end=new Date(to),key=`${env.CF_ANALYTICS_ZONE}:${days}:${from}`;const previous=cache.get(key);if(previous&&Date.now()-previous.at<300000)return previous.data;
   let response:Response;try{response=await fetch('https://api.cloudflare.com/client/v4/graphql',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${env.CF_ANALYTICS_TOKEN}`},body:JSON.stringify({query:METRICS_QUERY,variables:{zone:env.CF_ANALYTICS_ZONE,from,to,first:from.slice(0,10),last:new Date(end.getTime()-86400000).toISOString().slice(0,10)}}),signal:AbortSignal.timeout(20000)});}catch{throw new ApiError(503,'Cloudflare 统计服务暂时不可用，请稍后重试。');}
   if(!response.ok)throw new ApiError(503,'Cloudflare 统计访问被拒绝，请核对只读分析权限。');
   const body=await response.json()as{data?:{viewer?:{zones?:Zone[]}};errors?:unknown[]};if(body.errors?.length)throw new ApiError(503,'Cloudflare 查询未完成，可能超过当前统计窗口或权限范围。');

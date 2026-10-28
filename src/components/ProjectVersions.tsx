@@ -34,7 +34,7 @@ function ExistingVersion({project,language,preview,onDownload}:{project:Project;
     {(project.size||project.updated)&&<p className="mt-1 text-xs text-gray-600 dark:text-content-muted">{project.size}{project.size&&project.updated?' · ':''}{project.updated&&<>{labels.updated} <time dateTime={project.updated}>{formatProjectDate(project.updated,language,project.updated)}</time></>}</p>}
    </div>
    <div className="col-span-2 row-start-2 min-w-0 text-xs text-gray-600 dark:text-content-muted sm:col-span-1 sm:col-start-2 sm:row-start-1"><p className="break-words">{project.platform.join(' / ')}</p>{!downloadable&&project.store&&<p className="mt-2 leading-relaxed">{labels.platformNote}</p>}</div>
-   <div className="col-start-2 row-start-1 sm:col-start-3">{downloadable?<ProjectDownload project={project} preview={preview} onDownload={onDownload}/>:preview?<button type="button" disabled className={action}><ExternalLink size={16} aria-hidden/>{externalLabel}</button>:<a href={external} target="_blank" rel="noopener noreferrer" className={action}><ExternalLink size={16} aria-hidden/>{externalLabel}</a>}</div>
+   <div className="col-start-2 row-start-1 sm:col-start-3">{downloadable?<ProjectDownload project={project} preview={preview} onDownload={onDownload}/>:preview?<button type="button" disabled className={action}><ExternalLink size={16} aria-hidden/>{externalLabel}</button>:<a href={external} onClick={onDownload} target="_blank" rel="noopener noreferrer" className={action}><ExternalLink size={16} aria-hidden/>{externalLabel}</a>}</div>
   </div>
  </li>;
 }

@@ -6,7 +6,7 @@ import type { SiteContent } from '../../src/content/site-content';
 
 export const FEATURED_GROUP_NAMES = { maps: '精选地图', released: '已发行作品', development: '制作中的作品' };
 export const FEATURED_GROUP_HINTS = {
-  maps: '只展示已发行的基岩版地图。数据包、模组与工具请选“已发行作品”。',
+  maps: '展示已发行的基岩版与 Java 版地图。数据包、模组与工具请选“已发行作品”。',
   released: '展示已发行的作品，支持数据包、模组、插件与工具。',
   development: '展示制作中或企划中的作品；已发行作品请移至其他分组。',
 };
@@ -18,9 +18,10 @@ export function featuredIssue(group: FeaturedGroup, slug: string, project: Proje
   if (!project) return { group, slug, message: `精选作品尚未公开：${slug}。请先在作品编辑页确认发布，再刷新作品公开状态。` };
   if (matchesFeaturedGroup(project, group)) return;
   const identity = `${localizedText(project.title, 'zh') || slug}（${slug}）`;
-  const target: FeaturedGroup = project.status === 'released' ? group === 'development' && project.type === 'bedrock' ? 'maps' : 'released' : 'development';
-  const reason = group === 'maps' && project.type !== 'bedrock'
-    ? `作品已公开，但分类不适合“精选地图”：${identity} 是${PROJECT_TYPE_NAMES[project.type]}，此分组只接受已发行的基岩版地图。`
+  const map = project.type === 'bedrock' || project.type === 'java';
+  const target: FeaturedGroup = project.status === 'released' ? group === 'development' && map ? 'maps' : 'released' : 'development';
+  const reason = group === 'maps' && !map
+    ? `作品已公开，但分类不适合“精选地图”：${identity} 是${PROJECT_TYPE_NAMES[project.type]}，此分组只接受已发行的基岩版与 Java 版地图。`
     : `作品已公开，但发行状态不适合“${FEATURED_GROUP_NAMES[group]}”：${identity} 当前为${PROJECT_STATUS_NAMES[project.status]}。`;
   return { group, slug, target, message: `${reason}可移至“${FEATURED_GROUP_NAMES[target]}”。` };
 }
@@ -32,6 +33,10 @@ export function sitePublicationIssues(site: SiteContent, projects: Project[]): s
     return issue ? [issue.message] : [];
   }));
   for (const update of site.updates) if (update.workSlug && !bySlug.has(update.workSlug)) errors.push(`近期更新引用的作品尚未公开：${update.workSlug}`);
+  for (const [key, spotlight] of Object.entries(site.home?.spotlights ?? {})) if (spotlight.workSlug && !bySlug.has(spotlight.workSlug)) {
+    const name = { maps: '地图推荐卡', mods: '模组推荐卡', tools: '工具推荐卡' }[key as 'maps' | 'mods' | 'tools'];
+    errors.push(`首页快速推荐“${name}”关联的作品尚未公开：${spotlight.workSlug}。请先公开对应作品，再刷新作品公开状态。`);
+  }
   return errors;
 }
 

@@ -23,6 +23,7 @@ const resources = {
       },
       home: {
         studio_label: "Minecraft 创作工作室",
+        studio_image_alt: "Fimel Card 卡牌数据包中的多人桌游场景",
         featured_cta: "浏览作品",
         current_cta: "Java 版地图",
         status_java: "2 个 Java 版地图制作中",
@@ -235,6 +236,7 @@ const resources = {
       },
       home: {
         studio_label: "Minecraft creative studio",
+        studio_image_alt: "Players sharing a card game in Fimel Card",
         featured_cta: "Browse works",
         current_cta: "Java maps",
         status_java: "2 Java maps in development",
@@ -447,6 +449,7 @@ const resources = {
       },
       home: {
         studio_label: "Minecraft 制作スタジオ",
+        studio_image_alt: "Fimel Card のカードゲームを楽しむプレイヤーたち",
         featured_cta: "作品を見る",
         current_cta: "Java 版マップ",
         status_java: "Java 版マップ 2 本を制作中",

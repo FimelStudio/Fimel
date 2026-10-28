@@ -17,8 +17,23 @@ test('公开、发行状态和分类分别校验，数据包发布后仍不属�
   assert.equal(matchesFeaturedGroup(project, 'maps'), false);
   assert.equal(matchesFeaturedGroup(project, 'released'), true);
   assert.equal(matchesFeaturedGroup({ type: 'bedrock', status: 'released' }, 'maps'), true);
-  assert.equal(matchesFeaturedGroup({ type: 'java', status: 'released' }, 'maps'), false);
+  assert.equal(matchesFeaturedGroup({ type: 'java', status: 'released' }, 'maps'), true);
+  assert.equal(matchesFeaturedGroup({ type: 'java', status: 'development' }, 'maps'), false);
   assert.equal(matchesFeaturedGroup({ type: 'datapacks', status: 'development' }, 'development'), true);
+});
+
+test('Java 已发行地图可用于精选地图，制作中分组错放时指向地图且不接受数据包', () => {
+  const project = { ...makeWork().project, slug: 'java-map', type: 'java' as const, status: 'released' as const, title: { zh: 'Java 地图' } };
+  assert.equal(featuredIssue('maps', project.slug, project), undefined);
+  const issue = featuredIssue('development', project.slug, project)!;
+  assert.equal(issue.target, 'maps');
+  assert.match(issue.message, /可移至“精选地图”/);
+  const site = structuredClone(DEFAULT_SITE_CONTENT);
+  site.featured = { maps: [], released: [], development: [project.slug] };
+  const moved = moveFeaturedWork(site, project.slug, issue.target!);
+  assert.deepEqual(moved.featured, { maps: [project.slug], released: [], development: [] });
+  assert.deepEqual(sitePublicationIssues(moved, [project]), []);
+  assert.equal(matchesFeaturedGroup({ type: 'datapacks', status: 'released' }, 'maps'), false);
 });
 
 test('显式移组去重并保留其他推荐顺序，满额目标不丢现有选择', () => {

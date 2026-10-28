@@ -56,7 +56,7 @@ export function ProjectDownload({ project, onDownload, preview=false }: { projec
     <button type="button" onClick={() => void download()} disabled={status === 'loading'} aria-busy={status === 'loading'} className={`${className} disabled:opacity-60 disabled:cursor-wait`}>
       <Download size={17} aria-hidden />{t(status === 'loading' ? 'project.downloading' : 'project.download_latest')}
     </button>
-    {status === 'error' && <p role="status" className="mt-2 text-sm text-amber-700 dark:text-amber-400">{t('project.release_error')} <a className="underline" href={project.releasePage ?? `https://github.com/${project.latestReleaseRepo}/releases`} target="_blank" rel="noopener noreferrer">{t('project.releases')}</a></p>}
+    {status === 'error' && <p role="status" className="mt-2 text-sm text-amber-700 dark:text-amber-400">{t('project.release_error')} <a className="underline" onClick={onDownload} href={project.releasePage ?? `https://github.com/${project.latestReleaseRepo}/releases`} target="_blank" rel="noopener noreferrer">{t('project.releases')}</a></p>}
   </div>;
   if (directDownload) return <a href={assetUrl(directDownload)} download onClick={onDownload} className={className}><Download size={17} aria-hidden />{t('project.download')}</a>;
   return null;
