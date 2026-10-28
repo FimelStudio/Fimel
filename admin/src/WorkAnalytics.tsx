@@ -16,7 +16,7 @@ export function WorkAnalytics({data,names}:{data:MetricsFeed;names:Record<string
     const csv='\ufeff'+[['作品','slug','详情浏览','下载点击','文件请求','文件响应字节'],...rows.map(r=>[names[r.slug]??r.slug,r.slug,r.eventsAvailable?r.views:'暂无记录',r.eventsAvailable?r.clicks:'暂无记录',r.requests,r.bytes])].map(line=>line.map(cell).join(',')).join('\r\n');
     const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='fimel-work-statistics.csv';a.click();URL.revokeObjectURL(url);
   };
-  return <section className="work-analytics"><h2>按作品汇总</h2><p className="hint">详情浏览与下载点击从新采集接口启用后累计，不回填历史数据。下载点击包括下载按钮及发布平台入口；官网“总下载数”使用同一采集源的全部历史累计，这里仍按所选日期范围显示，官网数据约每5分钟更新。文件请求来自 Cloudflare，包含分片、续传及机器人请求；三种口径分别展示，均不代表完整下载人数。</p>
+  return <section className="work-analytics"><h2>按作品汇总</h2><p className="hint">详情浏览与下载点击从新采集接口启用后累计，不回填历史数据。下载点击包括下载按钮及发布平台入口；官网“下载数”可单独校正，校正不改变本报表按日期显示的真实采集记录。文件请求来自 Cloudflare，包含分片、续传及机器人请求；三种口径分别展示，均不代表完整下载人数。</p>
     {!data.workEventsAvailable&&<p className="notice">当前范围尚无详情浏览／下载点击采集记录，暂显示“暂无记录”；已有文件请求统计仍可查看。</p>}
     {data.filesTruncated&&<p className="notice">Cloudflare 文件明细已达到条数上限，下表文件请求与流量可能不完整。</p>}
     <div className="report-controls"><label>统计作品<select value={selected} onChange={e=>setSelected(e.target.value)}><option value="">全部作品</option>{Object.entries(names).map(([slug,title])=><option key={slug} value={slug}>{title}</option>)}</select></label><button onClick={exportCsv}>导出作品统计 CSV</button></div>

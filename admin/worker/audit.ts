@@ -7,6 +7,7 @@ import { libraryState } from './storage';
 import type { ServerSecrets } from './auth';
 import type { SiteContent } from '../../src/content/site-content';
 import { stable } from '../shared/revisions';
+import type { RecordDownloadCorrection } from './download-corrections';
 
 export async function actorKey(email:string):Promise<string> {
   const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(email.trim().toLowerCase()));
@@ -49,28 +50,49 @@ function operation(request:Request):string|undefined {
   const p=new URL(request.url).pathname.split('/').filter(Boolean).slice(1);
   if(p[0]==='library'&&p.length===1&&request.method==='PUT')return 'save-library';
   if(p[0]==='works'&&p.length===2&&request.method==='PUT')return 'save-work';
+  if(p[0]==='download-corrections'&&p.length===2&&request.method==='PUT')return 'calibrate-downloads';
   if(p[0]==='site'&&request.method==='PUT')return 'save-site';
   if(p[0]==='site'&&p[1]==='publish'&&request.method==='POST')return 'publish-site';
   if(['publish','unpublish','restore'].includes(p[0])&&request.method==='POST')return p[0]==='restore'?`restore-${p[1]}`:p[0];
   if(p[0]==='uploads'&&!(p[2]==='parts')){if(p[1]==='cleanup'&&request.method==='POST')return 'cleanup-temporary';if(p.length===1&&request.method==='POST')return 'start-upload';if(p[2]==='complete'&&request.method==='POST')return 'complete-upload';if(p.length===2&&request.method==='DELETE')return 'cancel-upload';}
 }
-export type AuditedSource={library:Awaited<ReturnType<typeof libraryState>>;candidate?:{value:unknown;errors:string[]};recordWorkChange?:(before:Work|null,after:Work)=>void;recordSiteChange?:(before:SiteContent|undefined,after:SiteContent)=>void};
+export type AuditedSource={library:Awaited<ReturnType<typeof libraryState>>;candidate?:{value:unknown;errors:string[]};recordWorkChange?:(before:Work|null,after:Work)=>void;recordSiteChange?:(before:SiteContent|undefined,after:SiteContent)=>void;recordDownloadCorrection?:RecordDownloadCorrection;downloadCorrectionInput?:{value:unknown}|{error:unknown}};
 export async function runAudited(request:Request,bucket:R2Bucket,email:string,run:(source?:AuditedSource)=>Promise<Response>):Promise<Response> {
   const op=operation(request);if(!op)return run();
   const source=await libraryState(bucket);const p=new URL(request.url).pathname.split('/').filter(Boolean).slice(1);
   const prepared:AuditedSource={library:source};const changes:AuditChange[]=[];if(op==='save-library'){const value=await readJson(request);const errors=validateLibrary(value,true);prepared.candidate={value,errors};if(errors.length===0)changes.push(...libraryChanges(source.value,value as Library));}
   if(op==='save-work')prepared.recordWorkChange=(before,after)=>{changes.splice(0,changes.length,...libraryChanges({schemaVersion:1,works:before?[before]:[]},{schemaVersion:1,works:[after]}));};
+  if(op==='calibrate-downloads')prepared.recordDownloadCorrection=(work,before,after,reason)=>{
+    const fields:AuditChange['fields']=[
+      {name:'校正基数',before:summary(before?.value),after:summary(after.value)},
+      {name:'校正日期（UTC）',before:summary(before?.date),after:summary(after.date)},
+      {name:'当日原始点击锚点',before:summary(before?.anchorClicks),after:summary(after.anchorClicks)},
+      ...(reason?[{name:'校正原因',before:'未设置',after:reason}]:[]),
+    ];
+    changes.splice(0,changes.length,{workId:work.id,slug:work.project.slug,title:localizedText(work.project.title,'zh'),action:'updated',fields});
+  };
   if(['save-site','publish-site','restore-site'].includes(op))prepared.recordSiteChange=(before,after)=>{
     const names={featured:'首页精选与顺序',home:'首页快速推荐文案',studio:'工作室与联系文案',contact:'公开联系方式',updates:'近期更新'};
     const fields=(Object.keys(names)as(keyof typeof names)[]).filter(k=>stable(before?.[k])!==stable(after[k])).map(k=>({name:names[k],before:before?summary(before[k]):'未发布',after:summary(after[k])}));
     changes.splice(0,changes.length,...(fields.length?[{workId:'site-content',slug:'site-content',title:'网站内容',action:'updated' as const,fields}]:[]));
   };
   if(op==='restore-library'&&/^[a-zA-Z0-9-]{1,80}$/.test(p[2]??'')){const stored=await bucket.get(`backups/library/${p[2]}.json`);if(stored){const snapshot=await stored.json<{value:Library}>();if(validateLibrary(snapshot.value).length===0)changes.push(...libraryChanges(source.value,snapshot.value));}}
-  let workId=['publish','unpublish','save-work'].includes(op)?p[1]:undefined;const uploadId=p[0]==='uploads'&&p[1]!=='cleanup'?p[1]:undefined;
+  let workId=['publish','unpublish','save-work','calibrate-downloads'].includes(op)?p[1]:undefined;const uploadId=p[0]==='uploads'&&p[1]!=='cleanup'?p[1]:undefined;
   if(op==='start-upload'){const input=await readJson(request.clone(),4096) as {workId?:string};if(source.value.works.some(w=>w.id===input.workId))workId=input.workId;}
   if(uploadId&&/^[a-zA-Z0-9-]{1,80}$/.test(uploadId)){const stored=await bucket.get(`uploads/sessions/${uploadId}.json`);if(stored)workId=(await stored.json<{workId:string}>()).workId;}
+  let downloadCorrectionRequest:{value:number;operationId:string;reason?:string}|undefined;
+  if(op==='calibrate-downloads'){
+    // Keep the requested target in the prepared record too: a finalization
+    // outage must not hide what this successful conditional write requested.
+    // Invalid requests are still rejected/logged by the route, not here.
+    try{const value=await readJson(request,4096);prepared.downloadCorrectionInput={value};const input=value as {value?:unknown;operationId?:unknown;reason?:unknown};
+      if(input&&typeof input.value==='number'&&Number.isSafeInteger(input.value)&&input.value>=0&&typeof input.operationId==='string'&&input.operationId.length<=80){
+        downloadCorrectionRequest={value:input.value,operationId:input.operationId,...(typeof input.reason==='string'&&input.reason.length<=200&&input.reason.trim()?{reason:input.reason.trim()}:{})};
+      }
+    }catch(error){prepared.downloadCorrectionInput={error};/* The route records the original malformed/oversized request failure. */}
+  }
   const time=new Date().toISOString(),id=crypto.randomUUID();const key=`audit/${time.slice(0,10)}/${time.replaceAll(':','-')}-${id}.json`;
-  const event:AuditEvent={schemaVersion:2,id,actorId:await actorKey(email),operation:op,time,status:'prepared',changes,...(workId?{workId}:{}),...(uploadId?{uploadId}:{}),beforeEtag:source.etag};
+  const event:AuditEvent&{downloadCorrectionRequest?:typeof downloadCorrectionRequest}={schemaVersion:2,id,actorId:await actorKey(email),operation:op,time,status:'prepared',changes,...(workId?{workId}:{}),...(uploadId?{uploadId}:{}),...(downloadCorrectionRequest?{downloadCorrectionRequest}:{}),beforeEtag:source.etag};
   const stored=await putJson(bucket,key,event);
   const finish=async(status:AuditEvent['status'],httpStatus:number,afterEtag?:string)=>{
     try{await putJson(bucket,key,{...event,status,httpStatus,finishedAt:new Date().toISOString(),...(afterEtag?{afterEtag}:{})},stored.httpEtag);return true;}

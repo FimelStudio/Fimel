@@ -20,6 +20,8 @@ import { workEventKey } from '../../src/content/work-events';
 import type { WorkEventDay } from '../../src/content/work-events';
 import { publicationFingerprint } from '../shared/revisions';
 import { earliestReleaseDate } from '../../src/content/releases';
+import { downloadCorrectionRoute } from './download-corrections';
+import { workDownloadHistoryPage } from '../../src/lib/work-event-worker';
 export type AdminEnv = Env & ServerSecrets & AnalyticsSecrets;
 export async function handle(request: Request, env: AdminEnv, ctx: AccessContext): Promise<Response> {
   const requestId = crypto.randomUUID();
@@ -47,6 +49,8 @@ export async function handle(request: Request, env: AdminEnv, ctx: AccessContext
 async function route(request: Request, env: AdminEnv, email: string, source?:AuditedSource): Promise<Response> {
   const path = new URL(request.url).pathname.split('/').filter(Boolean).slice(1);
   const method = request.method;
+  if (path[0] === 'download-corrections' && path.length === 2 && /^[a-zA-Z0-9-]{1,80}$/.test(path[1])) return downloadCorrectionRoute(request, env.PRIVATE, env.PUBLIC, path[1], source?.recordDownloadCorrection, source?.downloadCorrectionInput);
+  if (path[0] === 'work-downloads' && path.length === 1) return workDownloadHistoryPage(request, env.PUBLIC);
   if(path[0]==='site'&&(path.length===1||path.length===2&&path[1]==='publish'))return siteRoute(request,env.PRIVATE,env.PUBLIC,path.length===2,source?.recordSiteChange);
   if (path[0] === 'published' && path.length === 2 && method === 'GET' && /^[a-zA-Z0-9-]{1,80}$/.test(path[1])) return publishedPreview(path[1],env.PRIVATE,env.PUBLIC);
   if (path[0] === 'works' && path.length === 2 && method === 'PUT' && /^[a-zA-Z0-9-]{1,80}$/.test(path[1])) return saveWork(request, env.PRIVATE, env.PUBLIC, path[1],source?.recordWorkChange);
