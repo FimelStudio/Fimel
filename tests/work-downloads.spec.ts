@@ -9,8 +9,8 @@ const project=(slug:string,changes:Partial<Project>={}):Project=>({
   image:'assets/brand/fimel-logo.svg',status:'released',platform:['Minecraft Java'],creators:[{name:'Fimel Studio'}],tags:[],
   updated:'2026-10-27',content:{description:'works/fimel-card/description.zh.md'},...changes,
 });
-const projects=[project('downloaded-work'),project('no-records',{downloads:39999}),project('zero-clicks',{status:'development'})];
-const feed={generatedAt:'2026-10-28T12:00:00.000Z',scope:'all-time',revision:'public-revision-1',segment:{objects:4,records:4,complete:true},works:{'downloaded-work':{downloadClicks:1234},'no-records':{downloadClicks:null},'zero-clicks':{downloadClicks:0}}};
+const projects=[project('downloaded-work'),project('no-records'),project('zero-clicks',{status:'development'}),project('bedrock-store',{type:'bedrock',downloads:39999,platform:['Minecraft Bedrock']})];
+const feed={generatedAt:'2026-10-28T12:00:00.000Z',scope:'all-time',revision:'public-revision-1',segment:{objects:4,records:4,complete:true},works:{'downloaded-work':{downloadClicks:1234},'no-records':{downloadClicks:null},'zero-clicks':{downloadClicks:0},'bedrock-store':{downloadClicks:987654}}};
 
 async function setup(page:Page,language='zh'){
   await page.addInitScript(lang=>{sessionStorage.setItem('fimel_intro_seen','1');localStorage.setItem('fimel_user_lang',lang);localStorage.setItem('fimel_theme','light');},language);
@@ -19,7 +19,7 @@ async function setup(page:Page,language='zh'){
   await page.route('https://download.studiofimel.com/data/works.json',route=>route.fulfill({json:catalogue}));
 }
 
-test('每个作品显示累计总下载数，全部历史段完成才显示数字，列表和详情共享请求且历史商店数据另列',async({page})=>{
+test('完整历史读取后显示下载数，零值隐藏，列表和详情共享请求且不再显示口径说明',async({page})=>{
   await setup(page);let requests=0;
   let allowSecond:()=>void=()=>{};const continuation=new Promise<void>(resolve=>{allowSecond=resolve;});
   const cursor=await encodeHistoryCursor('second-history-page');
@@ -33,13 +33,39 @@ test('每个作品显示累计总下载数，全部历史段完成才显示数�
   await expect.poll(()=>requests).toBe(2);
   await expect(page.locator('.work-row .work-download-metric dd')).toHaveText(['加载中…','加载中…','加载中…']);
   allowSecond();
-  await expect(page.locator('.work-row .work-download-metric dd')).toHaveText(['1,234','暂无记录','0']);
-  await expect(page.locator('.work-row .work-download-metric dt')).toHaveText(['总下载数','总下载数','总下载数']);
-  await expect(page.locator('.work-row').nth(1)).toContainText('39,999 商店下载量');
+  await expect(page.locator('.work-row .work-download-metric dd')).toHaveText(['1,234','暂无记录']);
+  await expect(page.locator('.work-row .work-download-metric dt')).toHaveText(['下载数','下载数']);
+  await expect(page.locator('.work-row[href="#/works/zero-clicks"] .work-download-metric')).toHaveCount(0);
+  await expect(page.locator('.work-download-metric[title]')).toHaveCount(0);
+  await expect(page.locator('.work-download-metric p')).toHaveCount(0);
   await page.locator('.work-row').first().click();
   await expect(page.locator('aside .work-download-metric dd')).toHaveText('1,234');
-  await expect(page.locator('aside .work-download-metric')).toContainText('不代表完整下载人数');
+  await expect(page.locator('aside .work-download-metric dt')).toHaveText('下载数');
+  await expect(page.locator('aside .work-download-metric[title]')).toHaveCount(0);
+  await expect(page.locator('aside .work-download-metric p')).toHaveCount(0);
+  await expect(page.locator('aside')).not.toContainText('不代表完整下载人数');
+  await expect(page.locator('aside')).not.toContainText('数据约每5分钟更新');
+  await page.getByRole('link',{name:'返回作品',exact:true}).click();
+  await page.locator('.work-row[href="#/works/zero-clicks"]').click();
+  await expect(page.getByRole('heading',{level:1,name:'zero-clicks',exact:true})).toBeVisible();
+  await expect(page.locator('aside .work-download-metric')).toHaveCount(0);
   expect(requests).toBe(2);
+});
+
+test('网易基岩版地图列表和详情只保留历史商店下载量，即使新接口非零也不显示新指标',async({page})=>{
+  await setup(page);await page.route('**/api/work-downloads*',route=>route.fulfill({json:feed}));
+  await page.goto('/#/works');
+  await expect(page.locator('.work-row[href="#/works/downloaded-work"] .work-download-metric dd')).toHaveText('1,234');
+  const row=page.locator('.work-row[href="#/works/bedrock-store"]');
+  await expect(row).toContainText('39,999 商店下载量');
+  await expect(row.locator('.work-download-metric')).toHaveCount(0);
+  await expect(row).not.toContainText('987,654');
+  await row.click();
+  await expect(page.getByRole('heading',{level:1,name:'bedrock-store',exact:true})).toBeVisible();
+  await expect(page.locator('aside .work-download-metric')).toHaveCount(0);
+  const storeRow=page.locator('aside dt').filter({hasText:/^商店下载量$/}).locator('..');
+  await expect(storeRow.locator('dd')).toHaveText('39,999');
+  await expect(page.locator('aside')).not.toContainText('987,654');
 });
 
 test('统计服务失败显示不可用，不将失败伪装成零下载',async({page})=>{
@@ -54,12 +80,15 @@ test('损坏或负数统计不能进入官网指标',async({page})=>{
   await expect(page.locator('aside .work-download-metric dd')).toHaveText('暂不可用');
 });
 
-for(const [language,label]of [['en','Total downloads'],['ja','総ダウンロード数']]as const){
+for(const [language,label]of [['en','Downloads'],['ja','ダウンロード数']]as const){
   test(`${language} 下载指标本地化并保留数字格式`,async({page})=>{
     await setup(page,language);await page.route('**/api/work-downloads',route=>route.fulfill({json:feed}));
     await page.goto('/#/works/downloaded-work');
     await expect(page.locator('aside .work-download-metric dt')).toHaveText(label);
     await expect(page.locator('aside .work-download-metric dd')).toHaveText('1,234');
+    await expect(page.locator('aside .work-download-metric[title]')).toHaveCount(0);
+    await expect(page.locator('aside .work-download-metric p')).toHaveCount(0);
+    await expect(page.locator('aside')).not.toContainText(/All-time clicks|Figures update|公式サイトの統計開始以来|約5分ごとに更新/);
   });
 }
 

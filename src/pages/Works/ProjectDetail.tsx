@@ -95,7 +95,7 @@ function Detail({ project: source, releases, discordUrl }: { project: Project; r
         </section>
 
         <aside className="space-y-7 lg:border-l border-obsidian/10 dark:border-line lg:pl-7">
-          <WorkDownloadMetric slug={project.slug} detail/>
+          {project.type!=='bedrock'&&<WorkDownloadMetric slug={project.slug} detail/>}
           <section>
             <h2 className="text-base font-bold mb-3">{t('project.compatibility')}</h2>
             <ul className="space-y-2 text-sm text-gray-600 dark:text-content-muted">{project.platform.map((platform) => <li key={platform}>{platform}</li>)}</ul>
