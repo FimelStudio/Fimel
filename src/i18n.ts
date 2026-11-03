@@ -6,7 +6,7 @@ const resources = {
   zh: {
     translation: {
       ...contentMessages.zh,
-      nav: { home: "主页", about: "关于我们", works: "作品", primary: "主导航", language: "切换语言", theme_light: "切换至亮色", theme_dark: "切换至暗色", skip_content: "跳转到内容", contact: "联络合作", menu: "菜单", nav_maps: "地图作品", nav_maps_all: "全部地图", nav_maps_be: "基岩版 / 网易版", nav_maps_je: "Java 版地图", nav_datapacks: "数据包", nav_mods: "模组 / MODS", nav_tools: "插件与工具" },
+      nav: { home: "主页", about: "关于我们", works: "作品", docs: "文档", primary: "主导航", language: "切换语言", theme_light: "切换至亮色", theme_dark: "切换至暗色", skip_content: "跳转到内容", contact: "联络合作", menu: "菜单", nav_maps: "地图作品", nav_maps_all: "全部地图", nav_maps_be: "基岩版 / 网易版", nav_maps_je: "Java 版地图", nav_datapacks: "数据包", nav_mods: "模组 / MODS", nav_tools: "插件与工具" },
       hero: { gen: "世界生成中...", crafting: "构筑", worlds: "无限", sub: "期盼在 MC 中玩到任何游戏", scroll: "向下滑动" },
       siteMeta: {
         bingoCategory: 'Minecraft 1.21.11 · Fabric 模组',
@@ -219,7 +219,7 @@ const resources = {
   en: {
     translation: {
       ...contentMessages.en,
-      nav: { home: "Home", about: "About", works: "Works", primary: "Main navigation", language: "Change language", theme_light: "Use light theme", theme_dark: "Use dark theme", skip_content: "Skip to content", contact: "Contact", menu: "Menu", nav_maps: "Maps", nav_maps_all: "All Maps", nav_maps_be: "Bedrock / NetEase", nav_maps_je: "Java Maps", nav_datapacks: "Data Packs", nav_mods: "Mods", nav_tools: "Tools & Plugins" },
+      nav: { home: "Home", about: "About", works: "Works", docs: "Docs", primary: "Main navigation", language: "Change language", theme_light: "Use light theme", theme_dark: "Use dark theme", skip_content: "Skip to content", contact: "Contact", menu: "Menu", nav_maps: "Maps", nav_maps_all: "All Maps", nav_maps_be: "Bedrock / NetEase", nav_maps_je: "Java Maps", nav_datapacks: "Data Packs", nav_mods: "Mods", nav_tools: "Tools & Plugins" },
       hero: { gen: "GENERATING WORLD...", crafting: "CRAFTING", worlds: "WORLDS", sub: "We make Minecraft maps, mods and tools for creators.", scroll: "Scroll" },
       siteMeta: {
         bingoCategory: 'Minecraft 1.21.11 · Fabric Mod',
@@ -432,7 +432,7 @@ const resources = {
   ja: {
     translation: {
       ...contentMessages.ja,
-      nav: { home: "ホーム", about: "私たちについて", works: "作品", primary: "メインナビゲーション", language: "言語を変更", theme_light: "ライトテーマに変更", theme_dark: "ダークテーマに変更", skip_content: "コンテンツへ移動", contact: "お問い合わせ", menu: "メニュー", nav_maps: "マップ作品", nav_maps_all: "すべてのマップ", nav_maps_be: "統合版 / NetEase版", nav_maps_je: "Java版マップ", nav_datapacks: "データパック", nav_mods: "MOD", nav_tools: "プラグイン・ツール" },
+      nav: { home: "ホーム", about: "私たちについて", works: "作品", docs: "ドキュメント", primary: "メインナビゲーション", language: "言語を変更", theme_light: "ライトテーマに変更", theme_dark: "ダークテーマに変更", skip_content: "コンテンツへ移動", contact: "お問い合わせ", menu: "メニュー", nav_maps: "マップ作品", nav_maps_all: "すべてのマップ", nav_maps_be: "統合版 / NetEase版", nav_maps_je: "Java版マップ", nav_datapacks: "データパック", nav_mods: "MOD", nav_tools: "プラグイン・ツール" },
       hero: { gen: "世界を生成中...", crafting: "創造", worlds: "無限", sub: "Minecraft のマップ、MOD、クリエイター向けツールを制作しています。", scroll: "スクロール" },
       siteMeta: {
         bingoCategory: 'Minecraft 1.21.11 · Fabric MOD',

@@ -48,6 +48,7 @@ export const Layout: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { site } = useProjectCatalogue(); const contact=site?.contact??DEFAULT_SITE_CONTENT.contact;
   const location = useLocation();
+  const isDocs = location.pathname === '/docs' || location.pathname.startsWith('/docs/');
   const navigate = useNavigate();
   const navigationType = useNavigationType();
   const reducedMotion = useReducedMotion();
@@ -64,7 +65,7 @@ export const Layout: React.FC = () => {
 
   const [loading, setLoading] = useState(() => {
     try {
-      return !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      return !isDocs && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
         && window.sessionStorage.getItem('fimel_intro_seen') !== '1';
     } catch {
       return false;
@@ -133,6 +134,11 @@ export const Layout: React.FC = () => {
 
   useEffect(() => {
     if (loading) return;
+    if (isDocs) {
+      const onScroll = () => { currentScrollPosition.current = window.scrollY; };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      return () => window.removeEventListener('scroll', onScroll);
+    }
     const useNativeScroll = reducedMotion || !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     if (useNativeScroll) {
       const progressTrigger = ScrollTrigger.create({
@@ -165,7 +171,7 @@ export const Layout: React.FC = () => {
       lenis.destroy();
       lenisRef.current = null;
     };
-  }, [loading, reducedMotion, updateScrollProgress]);
+  }, [isDocs, loading, reducedMotion, updateScrollProgress]);
 
   useEffect(() => {
     const previousRestoration = window.history.scrollRestoration;
@@ -263,6 +269,7 @@ export const Layout: React.FC = () => {
   const navigation = [
     { to: '/', label: t('nav.home'), end: true },
     { to: '/works', label: t('nav.works'), end: false },
+    { to: '/docs', label: t('nav.docs'), end: false },
     { to: '/studio', label: t('nav.about'), end: false },
   ];
   const activePage = location.pathname.startsWith('/works') ? 'works' : location.pathname === '/studio' ? 'studio' : 'home';
@@ -276,7 +283,7 @@ export const Layout: React.FC = () => {
         {t('nav.skip_content')}
       </a>
       <div className="noise-overlay" />
-      <CustomCursor isDark={isDark} />
+      {!isDocs && <CustomCursor isDark={isDark} />}
       <CurtainLoading isLoading={loading} />
 
       <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-canvas/95 text-content transition-colors duration-300">
@@ -323,12 +330,12 @@ export const Layout: React.FC = () => {
         </div>
       </header>
 
-      <ScrollProgressHud ref={hudRef} activePage={activePage} handleNavClick={handleNavClick} />
+      {!isDocs && <ScrollProgressHud ref={hudRef} activePage={activePage} handleNavClick={handleNavClick} />}
 
       <main ref={mainRef} id="main-content" tabIndex={-1} className="relative z-10 min-h-[70dvh] bg-canvas text-content outline-none md:max-lg:pt-10">
-        <PageTransition pageKey={location.pathname}>
+        {isDocs ? <Outlet context={{ isDark, basePath }} /> : <PageTransition pageKey={location.pathname}>
           <Outlet context={{ isDark, basePath }} />
-        </PageTransition>
+        </PageTransition>}
       </main>
 
       <footer className="relative border-t border-line bg-canvas px-6 py-9 text-content md:px-12">

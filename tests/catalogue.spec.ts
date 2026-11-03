@@ -24,10 +24,10 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test('three visible navigation links, category search, tabs and browser return', async ({ page }) => {
+test('four visible navigation links, category search, tabs and browser return', async ({ page }) => {
   await page.goto('/#/works');
   const navigation = page.getByRole('navigation', { name: '主导航' });
-  await expect(navigation.getByRole('link')).toHaveText(['主页', '作品', '关于我们']);
+  await expect(navigation.getByRole('link')).toHaveText(['主页', '作品', '文档', '关于我们']);
   await expect(page.locator('.work-row')).toHaveCount(projectCount);
   await page.getByRole('navigation', { name: '作品', exact: true }).getByRole('link', { name: /^模组/ }).click();
   await expect(page.locator('.work-row')).toHaveCount(modCount);
@@ -111,7 +111,7 @@ test('catalogue and Markdown failure states can be retried without a blank page'
 test('home entry links and contact deep links remain usable on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  await expect(page.getByRole('navigation', { name: '主导航' }).getByRole('link')).toHaveCount(3);
+  await expect(page.getByRole('navigation', { name: '主导航' }).getByRole('link')).toHaveCount(4);
   await expect(page.locator('#hero')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.locator('#hero a[href="#/"]').click();
@@ -127,7 +127,7 @@ test('mobile categories, project Markdown and merged contacts fit 320px', async 
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto('/#/works');
   const nav = page.getByRole('navigation', { name: '主导航' });
-  for (const label of ['主页', '作品', '关于我们']) await expect(nav.getByRole('link', { name: label, exact: true })).toBeVisible();
+  for (const label of ['主页', '作品', '文档', '关于我们']) await expect(nav.getByRole('link', { name: label, exact: true })).toBeVisible();
   await expect(page.locator('.work-row')).toHaveCount(projectCount);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: '.artifacts/works-mobile.png', fullPage: true });
@@ -166,7 +166,7 @@ test('desktop views stay legible in light and dark themes', async ({ page }) => 
   await page.getByRole('button', { name: '切换至暗色' }).click();
   await page.screenshot({ path: '.artifacts/works-dark.png', fullPage: true });
   await page.goto('/#/works/minecraft-obj-cubizer');
-  await expect(page.locator('.project-markdown')).toContainText('功能');
+  await expect(page.locator('.project-markdown').getByRole('heading', { name: 'Minecraft OBJ 方块转换器', exact: true })).toBeVisible();
   await page.screenshot({ path: '.artifacts/project-desktop.png', fullPage: true });
 });
 

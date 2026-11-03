@@ -34,7 +34,7 @@ test('navigation uses a real vector mark and a small local pixel font', async ({
 });
 
 for (const width of [320, 390, 768, 1024, 1440]) {
-  test(`brand and three visible navigation links fit ${width}px in both themes`, async ({ page }) => {
+  test(`brand and four visible navigation links fit ${width}px in both themes`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/#/works');
     await page.evaluate(() => document.fonts.ready);
@@ -43,7 +43,7 @@ for (const width of [320, 390, 768, 1024, 1440]) {
       const brand = page.locator('.brand-link');
       const nav = page.getByRole('navigation', { name: '主导航' });
       await expect(brand.locator('.brand-wordmark')).toBeVisible();
-      await expect(nav.getByRole('link')).toHaveText(['主页', '作品', '关于我们']);
+      await expect(nav.getByRole('link')).toHaveText(['主页', '作品', '文档', '关于我们']);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       const mark = await brand.locator('.brand-mark').boundingBox();
       expect(mark!.width).toBe(width >= 1024 ? 56 : width >= 768 ? 52 : 44);

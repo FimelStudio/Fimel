@@ -8,6 +8,7 @@ const Home = lazy(() => import('./pages/Home').then((module) => ({ default: modu
 const Studio = lazy(() => import('./pages/Studio').then((module) => ({ default: module.Studio })));
 const Catalogue = lazy(() => import('./pages/Works/Catalogue').then((module) => ({ default: module.Catalogue })));
 const ProjectDetail = lazy(() => import('./pages/Works/ProjectDetail').then((module) => ({ default: module.ProjectDetail })));
+const Documentation = lazy(() => import('./pages/Documentation').then((module) => ({ default: module.Documentation })));
 
 function RoutePage({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
@@ -21,6 +22,8 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<RoutePage><Home /></RoutePage>} />
           <Route path="studio" element={<RoutePage><Studio /></RoutePage>} />
+          <Route path="docs" element={<RoutePage><Documentation /></RoutePage>} />
+          <Route path="docs/:slug" element={<RoutePage><Documentation /></RoutePage>} />
           <Route path="works" element={<RoutePage><Catalogue /></RoutePage>} />
           <Route path="works/maps" element={<Navigate to="/works?type=bedrock" replace />} />
           <Route path="works/mods" element={<Navigate to="/works?type=mods" replace />} />
