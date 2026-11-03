@@ -1,5 +1,5 @@
 import { DOCS_MANIFEST_KEY, DOCS_MAX_BYTES, docsId, docsKeys, docsRecord, docsSlug, parseDocsManifest } from '../../src/content/docs';
-import type { DocsManifest, PublicDoc } from '../../src/content/docs';
+import type { DocsManifest, PublicDoc, DocsImageCache } from '../../src/content/docs';
 import { DOCS_LIBRARY_KEY, docsImageRefs, docsLibraryErrors, replaceDocsImages, validDocsImage } from '../shared/docs';
 import type { DocDraft, DocsExampleSource, DocsLibrary, DocsPreview, DocsState } from '../shared/docs';
 import type { Asset } from '../shared/model';
@@ -9,7 +9,7 @@ import { stable } from '../shared/revisions';
 import { actorKey } from './audit';
 import { ApiError, EMPTY_ETAG, expectMatch, json, putJson, readJson } from './http';
 
-type DocsEnv = { PRIVATE: R2Bucket; PUBLIC: R2Bucket; ASSETS: Fetcher };
+type DocsEnv = { PRIVATE: R2Bucket; PUBLIC: R2Bucket; ASSETS: Fetcher; imageCache?: DocsImageCache };
 const MAX_IMAGE = 10 * 1024 * 1024;
 const emptyLibrary = (): DocsLibrary => ({ schemaVersion: 1, categories: [], documents: [] });
 async function sha256(bytes: BufferSource) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), byte => byte.toString(16).padStart(2, '0')).join(''); }
@@ -27,12 +27,12 @@ async function storedJson(bucket: R2Bucket, key: string): Promise<{ value: unkno
 async function state(env: DocsEnv): Promise<DocsState> {
   const [draft, visible] = await Promise.all([storedJson(env.PRIVATE, DOCS_LIBRARY_KEY), storedJson(env.PUBLIC, DOCS_MANIFEST_KEY)]);
   const library = draft?.value ?? emptyLibrary();
-  if (docsLibraryErrors(library).length) throw new ApiError(503, '私有文档库校验失败，未修改现有数据。');
+  if (docsLibraryErrors(library, env.imageCache).length) throw new ApiError(503, '私有文档库校验失败，未修改现有数据。');
   let published: DocsManifest | null = null;
-  try { if (visible) published = parseDocsManifest(visible.value); } catch { throw new ApiError(503, '公开文档目录校验失败，未修改现有数据。'); }
+  try { if (visible) published = parseDocsManifest(visible.value, env.imageCache); } catch { throw new ApiError(503, '公开文档目录校验失败，未修改现有数据。'); }
   return { library: library as DocsLibrary, published, etag: draft?.etag ?? EMPTY_ETAG, publicEtag: visible?.etag ?? EMPTY_ETAG, updatedAt: draft?.updatedAt ?? null };
 }
-function checkedLibrary(value: unknown): DocsLibrary { const errors = docsLibraryErrors(value); if (errors.length) throw new ApiError(422, errors.join('\n')); return value as DocsLibrary; }
+function checkedLibrary(value: unknown, cache?: DocsImageCache): DocsLibrary { const errors = docsLibraryErrors(value, cache); if (errors.length) throw new ApiError(422, errors.join('\n')); return value as DocsLibrary; }
 function transition(before: DocsLibrary, after: DocsLibrary) {
   for (const old of before.documents) { const doc = after.documents.find(doc => doc.id === old.id); if (!doc) throw new ApiError(422, '删除文档请使用归档，历史文档可以恢复。'); if (doc.slug !== old.slug || doc.createdAt !== old.createdAt) throw new ApiError(422, '已保存文档的编号、slug 和创建日期保持固定。'); }
   for (const old of before.categories) { const category = after.categories.find(category => category.id === old.id); if (category && category.slug !== old.slug) throw new ApiError(422, '已保存分类的 slug 保持固定。'); }
@@ -49,9 +49,9 @@ async function validateNewAssets(bucket: R2Bucket, before: DocsLibrary, after: D
   for (const doc of after.documents) for (const asset of doc.images) { const old = before.documents.find(item => item.id === doc.id)?.images.find(item => item.id === asset.id); if (old && stable(old) !== stable(asset)) throw new ApiError(422, '已上传图片信息保持固定，请重新上传图片。'); if (!old) await verifyAsset(bucket, doc.id, asset); }
 }
 async function backupDocs(bucket: R2Bucket, value: DocsLibrary | DocsManifest | null, kind: 'docs' | 'docs-public') { const id = crypto.randomUUID(); await putJson(bucket, `backups/${kind}/${id}.json`, { id, kind, time: new Date().toISOString(), value }); }
-function summarizeChanges(before: DocsLibrary, after: DocsLibrary): AuditChange[] {
+function summarizeChanges(before: DocsLibrary, after: DocsLibrary, changedIds?: Set<string>): AuditChange[] {
   const changes: AuditChange[] = [];
-  for (const doc of after.documents) { const old = before.documents.find(item => item.id === doc.id); if (stable(old) === stable(doc)) continue; changes.push({ workId: doc.id, slug: doc.slug, title: typeof doc.title === 'string' ? doc.title : doc.title.zh ?? doc.title.en ?? doc.title.ja ?? doc.slug, action: old ? 'updated' : 'created', fields: [{ name: '文档名称', before: old ? JSON.stringify(old.title).slice(0, 180) : '未创建', after: JSON.stringify(doc.title).slice(0, 180) }, { name: '文档状态', before: old?.workflow ?? '未创建', after: doc.workflow }, { name: '所属分类', before: old?.categoryId ?? '未创建', after: doc.categoryId }, { name: '正文', before: old ? `${Object.values(old.body).join('').length} 字符` : '未创建', after: `${Object.values(doc.body).join('').length} 字符（内容与元数据已保存）` }] }); }
+  for (const doc of after.documents) { const old = before.documents.find(item => item.id === doc.id); if (changedIds ? !changedIds.has(doc.id) : stable(old) === stable(doc)) continue; changes.push({ workId: doc.id, slug: doc.slug, title: typeof doc.title === 'string' ? doc.title : doc.title.zh ?? doc.title.en ?? doc.title.ja ?? doc.slug, action: old ? 'updated' : 'created', fields: [{ name: '文档名称', before: old ? JSON.stringify(old.title).slice(0, 180) : '未创建', after: JSON.stringify(doc.title).slice(0, 180) }, { name: '文档状态', before: old?.workflow ?? '未创建', after: doc.workflow }, { name: '所属分类', before: old?.categoryId ?? '未创建', after: doc.categoryId }, { name: '正文', before: old ? `${Object.values(old.body).join('').length} 字符` : '未创建', after: `${Object.values(doc.body).join('').length} 字符（内容与元数据已保存）` }] }); }
   if (stable(before.categories) !== stable(after.categories)) changes.push({ workId: 'docs-categories', slug: 'docs-categories', title: '文档分类', action: 'updated', fields: [{ name: '分类与顺序', before: `${before.categories.length} 个分类`, after: `${after.categories.length} 个分类（含合并、移动或重命名）` }] });
   return changes.slice(0, 301);
 }
@@ -68,32 +68,33 @@ async function save(request: Request, env: DocsEnv, changes: AuditChange[]) {
   const current = await state(env); expectMatch(request, current.etag);
   const input = await readJson(request, DOCS_MAX_BYTES);
   if (!docsRecord(input) || !docsKeys(input, ['library'])) throw new ApiError(422, '需要文档草稿库。');
-  const library = checkedLibrary(input.library); transition(current.library, library);
+  const library = checkedLibrary(input.library, env.imageCache); transition(current.library, library);
   await validateNewAssets(env.PRIVATE, current.library, library);
-  const now = new Date().toISOString();
-  for (const doc of library.documents) { const old = current.library.documents.find(item => item.id === doc.id); doc.updatedAt = !old || stable({ ...old, updatedAt: '' }) !== stable({ ...doc, updatedAt: '' }) ? now : old.updatedAt; }
-  checkedLibrary(library); changes.push(...summarizeChanges(current.library, library));
+  const now = new Date().toISOString(), changedIds = new Set<string>();
+  for (const doc of library.documents) { const old = current.library.documents.find(item => item.id === doc.id); const changed = !old || stable({ ...old, updatedAt: '' }) !== stable({ ...doc, updatedAt: '' }); if (changed) changedIds.add(doc.id); doc.updatedAt = changed ? now : old!.updatedAt; }
+  // Incoming fields are already strictly validated; only server-controlled valid dates changed.
+  changes.push(...summarizeChanges(current.library, library, changedIds));
   await backupDocs(env.PRIVATE, current.library, 'docs');
   const written = await putJson(env.PRIVATE, DOCS_LIBRARY_KEY, library, current.etag);
   return json({ ...current, library, updatedAt: now }, 200, written.httpEtag);
 }
-export async function docsSourceRevision(doc: DocDraft) { const { id, slug, categoryId, title, summary, body, order } = doc; return sha256(new TextEncoder().encode(stable({ id, slug, categoryId, title, summary, body, order, images: doc.images.filter(asset => docsImageRefs(doc.body).has(asset.id)) }))); }
-async function preview(current: DocsState): Promise<DocsPreview> {
+export async function docsSourceRevision(doc: DocDraft, cache?: DocsImageCache) { const { id, slug, categoryId, title, summary, body, order } = doc; const refs = docsImageRefs(body, cache); return sha256(new TextEncoder().encode(stable({ id, slug, categoryId, title, summary, body, order, images: doc.images.filter(asset => refs.has(asset.id)) }))); }
+async function preview(current: DocsState, cache?: DocsImageCache): Promise<DocsPreview> {
   const ready = current.library.documents.filter(doc => doc.workflow === 'ready');
   const ordered = (categories: DocsLibrary['categories']) => [...categories].sort((a, b) => a.order - b.order || a.slug.localeCompare(b.slug));
   const result: DocsPreview = { added: [], changed: [], removed: [], categoriesChanged: stable(ordered(current.library.categories)) !== stable(ordered(current.published?.categories ?? [])) };
-  for (const doc of ready) { const entry = { id: doc.id, slug: doc.slug, title: doc.title }, old = current.published?.documents.find(item => item.id === doc.id); if (!old) result.added.push(entry); else if (old.sourceRevision !== await docsSourceRevision(doc)) result.changed.push(entry); }
+  for (const doc of ready) { const entry = { id: doc.id, slug: doc.slug, title: doc.title }, old = current.published?.documents.find(item => item.id === doc.id); if (!old) result.added.push(entry); else if (old.sourceRevision !== await docsSourceRevision(doc, cache)) result.changed.push(entry); }
   for (const old of current.published?.documents ?? []) if (!ready.some(doc => doc.id === old.id)) result.removed.push({ id: old.id, slug: old.slug, title: old.title });
   return result;
 }
 async function publication(request: Request, env: DocsEnv, onlyPreview: boolean, changes: AuditChange[]) {
   const current = await state(env); expectMatch(request, current.etag); expectMatch(request, current.publicEtag, 'x-public-etag');
-  const diff = await preview(current); if (onlyPreview) return json(diff);
+  const diff = await preview(current, env.imageCache); if (onlyPreview) return json(diff);
   const input = await readJson(request, 1024); if (!docsRecord(input) || Object.keys(input).length) throw new ApiError(422, '发布请求格式不正确。');
   const publicationId = crypto.randomUUID(), publishedAt = new Date().toISOString(), documents: PublicDoc[] = [];
   for (const doc of current.library.documents.filter(item => item.workflow === 'ready')) {
     const urls = new Map<string, string>();
-    for (const id of docsImageRefs(doc.body)) {
+    for (const id of docsImageRefs(doc.body, env.imageCache)) {
       const asset = doc.images.find(item => item.id === id)!; const source = await verifyAsset(env.PRIVATE, doc.id, asset, true);
       if (!('body' in source)) throw new ApiError(422, '图片不存在。');
       const key = `docs/images/${doc.slug}/${asset.id}/${asset.name}`, existing = await env.PUBLIC.head(key);
@@ -101,11 +102,11 @@ async function publication(request: Request, env: DocsEnv, onlyPreview: boolean,
       else { const saved = await env.PUBLIC.put(key, source.body, { sha256: asset.sha256, onlyIf: { etagDoesNotMatch: '*' }, httpMetadata: { contentType: asset.mime, cacheControl: 'public, max-age=31536000, immutable' }, customMetadata: { docId: doc.id, assetId: asset.id, sha256: asset.sha256 } }); if (!saved) throw new ApiError(409, '发布图片发生版本冲突，未覆盖。'); }
       urls.set(id, `${PUBLIC_ORIGIN}/${key}`);
     }
-    documents.push({ id: doc.id, slug: doc.slug, categoryId: doc.categoryId, title: doc.title, summary: doc.summary, body: replaceDocsImages(doc.body, urls), order: doc.order, updatedAt: doc.updatedAt, sourceRevision: await docsSourceRevision(doc) });
+    documents.push({ id: doc.id, slug: doc.slug, categoryId: doc.categoryId, title: doc.title, summary: doc.summary, body: replaceDocsImages(doc.body, urls, env.imageCache), order: doc.order, updatedAt: doc.updatedAt, sourceRevision: await docsSourceRevision(doc, env.imageCache) });
   }
   documents.sort((a, b) => a.order - b.order || a.slug.localeCompare(b.slug));
   const manifest: DocsManifest = { schemaVersion: 1, publicationId, publishedAt, categories: [...current.library.categories].sort((a, b) => a.order - b.order || a.slug.localeCompare(b.slug)), documents };
-  try { parseDocsManifest(manifest); } catch { throw new ApiError(422, '公开文档目录过大或仍有私有图片标记，请检查文档。'); }
+  try { parseDocsManifest(manifest, env.imageCache); } catch { throw new ApiError(422, '公开文档目录过大或仍有私有图片标记，请检查文档。'); }
   changes.push(...[...diff.added.map(doc => ({ ...doc, action: 'created' as const })), ...diff.changed.map(doc => ({ ...doc, action: 'updated' as const })), ...diff.removed.map(doc => ({ ...doc, action: 'removed' as const }))].map(doc => ({ workId: doc.id, slug: doc.slug, title: typeof doc.title === 'string' ? doc.title : doc.title.zh ?? doc.title.en ?? doc.title.ja ?? doc.slug, action: doc.action, fields: [{ name: '公开文档', before: '前一公开版本', after: doc.action === 'removed' ? '本次下架' : '本次发布' }] })));
   if (diff.categoriesChanged) changes.push({ workId: 'docs-categories', slug: 'docs-categories', title: '文档分类', action: 'updated', fields: [{ name: '公开分类', before: `${current.published?.categories.length ?? 0} 个分类`, after: `${manifest.categories.length} 个分类（含名称、顺序或归并修改）` }] });
   await backupDocs(env.PRIVATE, current.published, 'docs-public');
@@ -153,7 +154,7 @@ async function example(request: Request, env: DocsEnv): Promise<DocsExampleSourc
   if (!docsRecord(input) || !docsKeys(input, ['schemaVersion', 'category', 'documents']) || input.schemaVersion !== 1 || !Array.isArray(input.documents)) throw new ApiError(503, '示例清单格式错误。');
   const value = input as DocsExampleSource;
   const candidate: DocsLibrary = { schemaVersion: 1, categories: [value.category], documents: value.documents.map(doc => ({ ...doc, categoryId: value.category?.id, workflow: 'draft', createdAt: '2026-11-03T00:00:00.000Z', updatedAt: '2026-11-03T00:00:00.000Z', images: doc.images.map(asset => ({ id: asset.id, name: asset.name, ...(asset.displayName ? { displayName: asset.displayName } : {}), size: asset.size, mime: asset.mime, sha256: asset.sha256, privateKey: `docs/uploads/${doc.id}/${asset.id}/${asset.name}` })) })) };
-  if (docsLibraryErrors(candidate).length || value.documents.some(doc => doc.images.some(asset => !/^\/migration\/docs-example\/images\/[a-zA-Z0-9/_.-]+$/.test(asset.url) || asset.url.split('/').includes('..')))) throw new ApiError(503, '示例清单校验失败。');
+  if (docsLibraryErrors(candidate, env.imageCache).length || value.documents.some(doc => doc.images.some(asset => !/^\/migration\/docs-example\/images\/[a-zA-Z0-9/_.-]+$/.test(asset.url) || asset.url.split('/').includes('..')))) throw new ApiError(503, '示例清单校验失败。');
   return value;
 }
 async function importExample(request: Request, env: DocsEnv, slug: string, changes: AuditChange[]) {
@@ -165,12 +166,14 @@ async function importExample(request: Request, env: DocsEnv, slug: string, chang
   if (!category) { if (library.categories.some(item => item.id === source.category.id)) throw new ApiError(409, '示例分类编号已被其他分类使用。'); library.categories.push(source.category); }
   const id = crypto.randomUUID(), now = new Date().toISOString(), urls = new Map<string, string>(), images: Asset[] = [];
   for (const image of sourceDoc.images) { const response = await env.ASSETS.fetch(new Request(new URL(image.url, request.url))); if (!response.ok) throw new ApiError(503, '示例图片缺失，当前文档尚未导入。'); const bytes = await boundedBytes(response.body, MAX_IMAGE); if (bytes.byteLength !== image.size) throw new ApiError(503, '示例图片大小校验失败。'); const asset = await storeImage(env, id, image.displayName ?? image.name, bytes, image.mime, image.sha256); images.push(asset); urls.set(image.id, `fimel-doc-image:${asset.id}`); }
-  library.documents.push({ id, slug, categoryId: category?.id ?? source.category.id, title: sourceDoc.title, summary: sourceDoc.summary, body: replaceDocsImages(sourceDoc.body, urls), order: sourceDoc.order, workflow: 'draft', images, createdAt: now, updatedAt: now });
-  checkedLibrary(library); changes.push(...summarizeChanges(current.library, library));
+  library.documents.push({ id, slug, categoryId: category?.id ?? source.category.id, title: sourceDoc.title, summary: sourceDoc.summary, body: replaceDocsImages(sourceDoc.body, urls, env.imageCache), order: sourceDoc.order, workflow: 'draft', images, createdAt: now, updatedAt: now });
+  checkedLibrary(library, env.imageCache); changes.push(...summarizeChanges(current.library, library));
   await backupDocs(env.PRIVATE, current.library, 'docs'); const saved = await putJson(env.PRIVATE, DOCS_LIBRARY_KEY, library, current.etag);
   return json({ ...current, library, updatedAt: now }, 200, saved.httpEtag);
 }
 export async function docsRoute(request: Request, env: DocsEnv, segments: string[], email: string): Promise<Response> {
+  // This cache is scoped to this invocation and released with its private document state.
+  env = { ...env, imageCache: new Map() };
   const method = request.method;
   if (!segments.length && method === 'GET') { const current = await state(env); return json(current, 200, current.etag); }
   if (!segments.length && method === 'PUT') return audited(env, email, 'save-docs', changes => save(request, env, changes));
