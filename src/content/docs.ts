@@ -5,6 +5,7 @@ export const DOCS_MAX_BYTES = 4 * 1024 * 1024;
 export const DOCS_LOCALES = ['zh', 'en', 'ja'] as const;
 export type DocsBody = Partial<Record<typeof DOCS_LOCALES[number], string>>;
 export type DocsCategory = { id: string; slug: string; title: LocalizedText; summary: LocalizedText; order: number; workSlug?: string };
+/** An empty categoryId keeps the document directly at the documentation root. */
 export type PublicDoc = { id: string; slug: string; categoryId: string; title: LocalizedText; summary: LocalizedText; body: DocsBody; order: number; updatedAt: string; sourceRevision: string };
 export type PublishedDoc = PublicDoc;
 export type DocsManifest = { schemaVersion: 1; publicationId: string; publishedAt: string; categories: DocsCategory[]; documents: PublicDoc[] };
@@ -37,6 +38,10 @@ export function docsBody(value: unknown): value is DocsBody {
 }
 export function docsCategory(value: unknown): value is DocsCategory {
   return docsRecord(value) && docsKeys(value, ['id', 'slug', 'title', 'summary', 'order', 'workSlug']) && docsId(value.id) && docsSlug(value.slug) && docsText(value.title, 160, true) && docsText(value.summary, 600) && Number.isSafeInteger(value.order) && Math.abs(value.order as number) <= 100000 && (value.workSlug === undefined || docsSlug(value.workSlug));
+}
+/** Root is represented by an explicit empty string; other IDs must exist. */
+export function docsCategoryMember(value: unknown, categories: readonly DocsCategory[]): value is string {
+  return typeof value === 'string' && (value === '' || categories.some(category => category.id === value));
 }
 /** Source offsets for actual Markdown image destinations; code examples stay literal. */
 export function docsMarkdownImages(source: string, cache?: DocsImageCache): DocsMarkdownImage[] {
@@ -88,7 +93,7 @@ export function parseDocsManifest(value: unknown, cache?: DocsImageCache): DocsM
   const categories = value.categories as DocsCategory[], ids = new Set<string>(), slugs = new Set<string>();
   if (new Set(categories.map(category => category.id)).size !== categories.length || new Set(categories.map(category => category.slug)).size !== categories.length) throw new Error('文档分类重复。');
   for (const doc of value.documents) {
-    if (!docsRecord(doc) || !docsKeys(doc, ['id', 'slug', 'categoryId', 'title', 'summary', 'body', 'order', 'updatedAt', 'sourceRevision']) || !docsId(doc.id) || !docsSlug(doc.slug) || ids.has(doc.id) || slugs.has(doc.slug) || !categories.some(category => category.id === doc.categoryId) || !docsText(doc.title, 160, true) || !docsText(doc.summary, 600) || !docsBody(doc.body) || !Object.values(doc.body).some(text => text?.trim()) || !Number.isSafeInteger(doc.order) || Math.abs(doc.order as number) > 100000 || !docsDate(doc.updatedAt) || typeof doc.sourceRevision !== 'string' || !/^[a-f0-9]{64}$/.test(doc.sourceRevision) || Object.values(doc.body).some(text => docsMarkdownImages(text ?? '', cache).some(image => privateDocsImageUrl(image.url)))) throw new Error('公开文档格式错误。');
+    if (!docsRecord(doc) || !docsKeys(doc, ['id', 'slug', 'categoryId', 'title', 'summary', 'body', 'order', 'updatedAt', 'sourceRevision']) || !docsId(doc.id) || !docsSlug(doc.slug) || ids.has(doc.id) || slugs.has(doc.slug) || !docsCategoryMember(doc.categoryId, categories) || !docsText(doc.title, 160, true) || !docsText(doc.summary, 600) || !docsBody(doc.body) || !Object.values(doc.body).some(text => text?.trim()) || !Number.isSafeInteger(doc.order) || Math.abs(doc.order as number) > 100000 || !docsDate(doc.updatedAt) || typeof doc.sourceRevision !== 'string' || !/^[a-f0-9]{64}$/.test(doc.sourceRevision) || Object.values(doc.body).some(text => docsMarkdownImages(text ?? '', cache).some(image => privateDocsImageUrl(image.url)))) throw new Error('公开文档格式错误。');
     ids.add(doc.id); slugs.add(doc.slug);
   }
   if (new TextEncoder().encode(JSON.stringify(value)).byteLength > DOCS_MAX_BYTES) throw new Error('文档目录过大。');

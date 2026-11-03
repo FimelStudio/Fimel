@@ -4,8 +4,9 @@ import { documentationFixture, docsFixtureOrigin } from './fixtures/documentatio
 import type { DocsManifest } from '../src/content/docs';
 
 const artifactRoot = '.artifacts/documentation-review/public';
+const treeArtifactRoot = '.artifacts/docs-explorer-tree/public';
 let fixture: DocsManifest;
-test.beforeAll(async () => { fixture = await documentationFixture(); await mkdir(artifactRoot, { recursive: true }); });
+test.beforeAll(async () => { fixture = await documentationFixture(); await mkdir(artifactRoot, { recursive: true }); await mkdir(treeArtifactRoot, { recursive: true }); });
 
 async function setup(page: Page, options: { theme?: string; language?: string; response?: DocsManifest; status?: number } = {}) {
   await page.addInitScript(({ theme, language }) => {
@@ -122,6 +123,10 @@ for (const [language, notice] of [['en', 'This document is not available in the 
     await expect(page.locator('.docs-notice')).toContainText(notice);
     await expect(page.locator('.documentation-body')).toContainText('游戏设置');
     await expect(page.locator('.docs-meta a')).toHaveAttribute('href', '#/works/fimel-card');
+    const category = page.getByRole('button', { name: language === 'en' ? 'Collapse category Fimel Card' : 'カテゴリーを折りたたむ Fimel Card', exact: true });
+    await expect(category).toHaveAttribute('aria-expanded', 'true');
+    await category.click();
+    await expect(page.getByRole('button', { name: language === 'en' ? 'Expand category Fimel Card' : 'カテゴリーを展開 Fimel Card', exact: true })).toHaveAttribute('aria-expanded', 'false');
   });
 }
 
@@ -210,3 +215,118 @@ test('损坏索引或包含私有图片的公开正文会被拒绝，不暴露�
   await expect(page.getByRole('heading', { name: '暂时无法读取文档' })).toBeVisible();
   await expect(page.locator('img[src*="/api/docs/media"]')).toHaveCount(0);
 });
+
+test('分类折叠按钮独立于分类导航，记住偏好且直达文章自动展开，键盘可操作', async ({ page }) => {
+  await setup(page);
+  await page.goto('/#/docs');
+  const toggle = page.locator('.docs-nav-category').filter({ has: page.locator('a[href="#/docs?category=fimel-card"]') }).getByRole('button');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  const controls = await toggle.getAttribute('aria-controls');
+  expect(controls).toBeTruthy();
+  const children = page.locator(`#${controls}`);
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(children).not.toBeVisible();
+  await expect(page).toHaveURL(/#\/docs$/);
+  await expect(page.locator('.docs-index-list > a')).toHaveCount(24);
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('fimel_docs_collapsed_categories') ?? '{}').collapsed)).toEqual(['fimel-card']);
+  await page.reload();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await page.locator('a.docs-category-title[href="#/docs?category=fimel-card"]').click();
+  await expect(page).toHaveURL(/category=fimel-card/);
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  await page.locator('.docs-all-link').click();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await page.goto('/#/docs/fimel-card-fast-card');
+  await expect(page.locator('.docs-document-header h1')).toHaveText('Fast Card');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(children.locator('[aria-current="page"]')).toHaveText('Fast Card');
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(page).toHaveURL(/#\/docs\/fimel-card-fast-card$/);
+  await expect(page.locator('.docs-document-header h1')).toHaveText('Fast Card');
+  await toggle.press('ArrowRight');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  await toggle.press('ArrowLeft');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await toggle.press('Space');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  await toggle.press('Enter');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+});
+
+test('搜索会展开匹配分类且清空后恢复折叠偏好，损坏的偏好不会阻止阅读', async ({ page }) => {
+  await setup(page);
+  await page.addInitScript(() => localStorage.setItem('fimel_docs_collapsed_categories', 'broken-json'));
+  await page.goto('/#/docs');
+  const toggles = page.locator('.docs-category-toggle');
+  await expect(toggles).toHaveCount(2);
+  await toggles.nth(0).click(); await toggles.nth(1).click();
+  await expect(toggles.nth(0)).toHaveAttribute('aria-expanded', 'false');
+  await expect(toggles.nth(1)).toHaveAttribute('aria-expanded', 'false');
+  const search = page.getByRole('searchbox', { name: '搜索文档标题与正文' });
+  await search.fill('四张同点数牌＋小丑牌');
+  await expect(toggles.nth(0)).toHaveAttribute('aria-expanded', 'true');
+  await expect(toggles.nth(1)).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.locator('.docs-category-documents a[href="#/docs/fimel-card-fast-card"]')).toBeVisible();
+  await expect(page.locator('.docs-search-results a')).toHaveText('Fast Card');
+  await page.getByRole('button', { name: '清除搜索', exact: true }).click();
+  await expect(toggles.nth(0)).toHaveAttribute('aria-expanded', 'false');
+  await search.fill('右图左文示例');
+  await expect(toggles.nth(1)).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('.docs-search-results a')).toHaveText('排版与安全示例');
+});
+
+test('根级文档与分类同级显示，没有虚构文件夹，面包屑和上下篇仅在根级间导航', async ({ page }) => {
+  const response = await documentationFixture({ includeRootDocuments: true });
+  await setup(page, { response });
+  await page.goto('/#/docs');
+  await expect(page.locator('.docs-index-list > a')).toHaveCount(26);
+  await expect(page.locator('#docs-sidebar nav > .docs-root-document')).toHaveCount(2);
+  await expect(page.locator('.docs-nav-category')).toHaveCount(2);
+  await expect(page.locator('.docs-sidebar')).not.toContainText('未分类');
+  await expect(page.locator('.docs-index-list > a[href="#/docs/documentation-guide"] > div > span')).toHaveCount(0);
+  await page.locator('.docs-root-document[href="#/docs/documentation-guide"]').click();
+  await expect(page.locator('.docs-document-header h1')).toHaveText('文档使用说明');
+  await expect(page.locator('.docs-breadcrumb')).toHaveText('文档');
+  await expect(page.locator('.docs-breadcrumb a')).toHaveCount(1);
+  await expect(page.locator('.docs-meta a')).toHaveCount(0);
+  await expect(page.locator('.docs-root-document[aria-current="page"]')).toHaveText('文档使用说明');
+  await expect(page.locator('.docs-pagination a')).toHaveCount(1);
+  await expect(page.locator('.docs-pagination a')).toHaveAttribute('href', '#/docs/documentation-faq');
+  await page.locator('.docs-pagination a').click();
+  await expect(page.locator('.docs-document-header h1')).toHaveText('常见问题');
+  await expect(page.locator('.docs-pagination a')).toHaveCount(1);
+  await expect(page.locator('.docs-pagination a')).toHaveAttribute('href', '#/docs/documentation-guide');
+  await page.locator('.docs-pagination a').click();
+  await page.getByRole('link', { name: '查看常见问题', exact: true }).click();
+  await expect(page.locator('.docs-document-header h1')).toHaveText('常见问题');
+  await page.locator('a.docs-category-title[href="#/docs?category=fimel-card"]').click();
+  await expect(page.locator('.docs-index-list > a')).toHaveCount(23);
+  await expect(page.locator('.docs-index-list > a[href="#/docs/documentation-guide"]')).toHaveCount(0);
+});
+
+for (const theme of ['light', 'dark'] as const) {
+  test(`${theme} 文档树与根级独立文档在桌面和手机保持清晰可用`, async ({ page }) => {
+    const response = await documentationFixture({ includeRootDocuments: true });
+    await setup(page, { theme, response });
+    await page.goto('/#/docs/documentation-guide');
+    await expect(page.locator('.docs-document-header h1')).toHaveText('文档使用说明');
+    const toggle = page.getByRole('button', { name: '收起分类 Fimel Card', exact: true });
+    await toggle.click();
+    await expect(page.getByRole('button', { name: '展开分类 Fimel Card', exact: true })).toHaveAttribute('aria-expanded', 'false');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    await page.screenshot({ path: `${treeArtifactRoot}/tree-desktop-${theme}.png`, fullPage: false });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.getByRole('button', { name: '文档分类', exact: true }).click();
+    await expect(page.locator('.docs-sidebar')).toBeVisible();
+    await expect(page.locator('.docs-root-document')).toHaveCount(2);
+    await expect(page.getByRole('button', { name: '展开分类 Fimel Card', exact: true })).toHaveAttribute('aria-expanded', 'false');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    await page.screenshot({ path: `${treeArtifactRoot}/tree-mobile-${theme}.png`, fullPage: false });
+    await page.getByRole('button', { name: '展开分类 Fimel Card', exact: true }).click();
+    await page.locator('.docs-category-documents a[href="#/docs/fimel-card-fast-card"]').click();
+    await expect(page.locator('.docs-document-header h1')).toHaveText('Fast Card');
+    await expect(page.locator('.docs-sidebar')).not.toBeVisible();
+  });
+}

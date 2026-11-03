@@ -2,6 +2,8 @@
 
 2026-11-03。代码基线 `578d2c4`，首批功能提交 `a837ee4`，回滚标签 `baseline/documentation-center-20261103`。用户已授权完成后直接合并、推送，并在获知后台与正式文档尚未上线后要求继续完成；本次已部署现有 Admin、导入并公开发布 23 篇 Fimel Card 规则。官网使用现有 main 自动构建通道，两份用户交接文件保持未跟踪。生产验收中另发现文档重复解析开销，修复提交为 `df8b23c`，详见下方正式上线记录。
 
+后续分类折叠、VS Code 式新建／改名／删除，以及根级独立文档的改进与上线边界，见[目录树交付记录](documentation-tree-review.md)。下文生产版本与发布 ID 记录首批文档上线，不表示后续每轮 Admin 代码已自动部署。
+
 ## 已核实与方案
 
 旧交接中“没有 Admin”的描述已经过时。当前是 React／Vite／HashRouter 官网、独立 Access 保护的 Admin Worker，以及 PUBLIC／PRIVATE R2。文档使用独立 `state/docs.json` 与 `data/docs.json`，不挤入作品或网站内容索引，不改作品上传归属。

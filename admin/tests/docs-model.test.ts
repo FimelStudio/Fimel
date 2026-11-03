@@ -11,6 +11,20 @@ test('文档模型严格拒绝重复/未知字段、错误分类、过大正文�
   assert.ok(docsLibraryErrors({ ...library, extra: true }).length);
   assert.ok(docsLibraryErrors({ ...library, documents: [{ ...library.documents[0], workflow: 'published' }] }).length);
 });
+test('根级独立文档不需要分类，空串之外的缺失、空白或孤儿分类均严格拒绝', () => {
+  const library = fixture(), doc = library.documents[0];
+  library.categories = []; doc.categoryId = ''; doc.workflow = 'ready';
+  assert.deepEqual(docsLibraryErrors(library), []);
+  const manifest = { schemaVersion: 1 as const, publicationId: crypto.randomUUID(), publishedAt: doc.updatedAt, categories: [], documents: [{ id: doc.id, slug: doc.slug, categoryId: '', title: doc.title, summary: doc.summary, body: doc.body, order: doc.order, updatedAt: doc.updatedAt, sourceRevision: 'a'.repeat(64) }] };
+  assert.deepEqual(parseDocsManifest(manifest).categories, []);
+  assert.equal(parseDocsManifest(manifest).documents[0].categoryId, '');
+  for (const categoryId of [undefined, null, false, 0, ' ', 'unknown-category']) {
+    assert.ok(docsLibraryErrors({ ...library, documents: [{ ...doc, categoryId }] }).length, `私有分类应拒绝 ${String(categoryId)}`);
+    assert.throws(() => parseDocsManifest({ ...manifest, documents: [{ ...manifest.documents[0], categoryId }] }), `公开分类应拒绝 ${String(categoryId)}`);
+  }
+  const grouped = fixture(); grouped.documents.push({ ...doc, id: crypto.randomUUID(), slug: 'root-overview' });
+  assert.deepEqual(docsLibraryErrors(grouped), []);
+});
 test('只识别实际图片目标：围栏/行内/缩进代码和转义教学示例不被替换，引用式图片也支持', () => {
   const marker = 'fimel-doc-image:owned-image';
   const source = `![${marker}](${marker})\n\n![引用][pic]\n\n[pic]: <${marker}>\n\n\`![代码](${marker})\`\n\n\`\`\`md\n![代码](${marker})\n/api/docs docs/uploads/anything\n\`\`\`\n\n    ![缩进](${marker})\n\n\\![转义](${marker})`;

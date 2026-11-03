@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ArrowRight, BookOpen, ChevronDown, FileText, Search, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, ChevronDown, ChevronRight, FileText, Folder, Search, X } from 'lucide-react';
 import { docsLocalizedText as localizedText } from '../content/docs';
 import { documentationHeadings } from '../content/documentation-markdown';
 import { DocumentationBody } from '../components/DocumentationBody';
@@ -14,19 +14,47 @@ const labels = {
   ja: { title: 'ドキュメント', intro: 'ゲームルール、導入ガイドと制作のための資料。', search: 'タイトルと本文を検索', clear: '検索をクリア', categories: 'カテゴリー', all: 'すべてのドキュメント', empty: 'ドキュメントを準備しています', emptyText: '公開されたガイドとゲームルールがここに表示されます。', failed: 'ドキュメントを読み込めません', failedText: 'しばらくしてから再試行してください。公開内容をサンプルに置き換えることはありません。', retry: '再試行', missing: 'ドキュメントが見つかりません', missingText: 'まだ公開されていないか、一覧から削除された可能性があります。', back: 'ドキュメント一覧へ', contents: 'このページの内容', previous: '前へ', next: '次へ', noResults: '一致するドキュメントはありません', count: '件のドキュメント', updated: '更新日', work: '作品を見る', fallback: 'この言語の翻訳はまだありません。既存の言語を表示します。', stale: '更新を確認できません。最後に読み込んだ内容を表示しています。', navigation: 'ナビゲーションを開く' },
 };
 
+const collapsedStorageKey = 'fimel_docs_collapsed_categories';
+function readCollapsedCategories(): Set<string> {
+  try {
+    const stored: unknown = JSON.parse(localStorage.getItem(collapsedStorageKey) ?? 'null');
+    if (stored && typeof stored === 'object' && 'version' in stored && stored.version === 1 && 'collapsed' in stored && Array.isArray(stored.collapsed) && stored.collapsed.length <= 50 && stored.collapsed.every(value => typeof value === 'string' && /^[a-zA-Z0-9-]{1,80}$/.test(value))) return new Set(stored.collapsed as string[]);
+  } catch { /* Navigation remains usable when storage is unavailable or invalid. */ }
+  return new Set();
+}
+const categoryToggleLabels = {
+  zh: { expand: '展开分类', collapse: '收起分类' },
+  en: { expand: 'Expand category', collapse: 'Collapse category' },
+  ja: { expand: 'カテゴリーを展開', collapse: 'カテゴリーを折りたたむ' },
+};
+
 export function Documentation() {
+  const location = useLocation();
   const { slug } = useParams(); const [params, setParams] = useSearchParams();
   const { i18n } = useTranslation(); const language = i18n.resolvedLanguage?.split('-')[0] ?? 'zh';
   const copy = labels[language as keyof typeof labels] ?? labels.zh;
   const { data, error, retry } = useDocumentation();
   const [query, setQuery] = useState(''); const [menu, setMenu] = useState(false);
+  const [collapsedCategories, setCollapsedCategories] = useState(readCollapsedCategories);
+  const [manuallyClosed, setManuallyClosed] = useState(() => new Map<string, string>());
   const searchRef = useRef<HTMLInputElement>(null); const contentRef = useRef<HTMLElement>(null);
   const doc = data?.documents.find(value => value.slug === slug);
   const category = data?.categories.find(value => value.id === doc?.categoryId);
   const categoryFilter = params.get('category');
   const sorted = useMemo(() => [...(data?.documents ?? [])].sort((a, b) => a.order - b.order || localizedText(a.title, language).localeCompare(localizedText(b.title, language))), [data, language]);
   const categories = useMemo(() => [...(data?.categories ?? [])].sort((a, b) => a.order - b.order), [data]);
-  const list = sorted.filter(value => (!categoryFilter || data?.categories.find(c => c.id === value.categoryId)?.slug === categoryFilter) && (!query.trim() || JSON.stringify([value.title, value.summary, value.body, value.slug]).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())));
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const matchesQuery = (value: typeof sorted[number]) => !normalizedQuery || JSON.stringify([value.title, value.summary, value.body, value.slug]).toLocaleLowerCase().includes(normalizedQuery);
+  const list = sorted.filter(value => (!categoryFilter || data?.categories.find(c => c.id === value.categoryId)?.slug === categoryFilter) && matchesQuery(value));
+  const navigationContext = `${location.key}:${normalizedQuery}`;
+  const toggleLabels = categoryToggleLabels[language as keyof typeof categoryToggleLabels] ?? categoryToggleLabels.zh;
+  function setCategoryExpanded(id: string, expanded: boolean) {
+    setCollapsedCategories(previous => { const next = new Set(previous); if (expanded) next.delete(id); else next.add(id); return next; });
+    setManuallyClosed(previous => { const next = new Map(previous); if (expanded) next.delete(id); else next.set(id, navigationContext); return next; });
+  }
+  useEffect(() => {
+    try { localStorage.setItem(collapsedStorageKey, JSON.stringify({ version: 1, collapsed: [...collapsedCategories].sort() })); } catch { /* Browser storage is optional. */ }
+  }, [collapsedCategories]);
   const inCategory = sorted.filter(value => value.categoryId === doc?.categoryId); const position = inCategory.findIndex(value => value.id === doc?.id);
   const body = doc ? localizedText(doc.body, language) : '';
   const headings = useMemo(() => documentationHeadings(body).filter(item => item.depth === 2 || item.depth === 3), [body]);
@@ -51,20 +79,34 @@ export function Documentation() {
         {query && <div className="docs-search-results" role="region" aria-label={copy.search}>{list.length ? list.map(value => <Link key={value.id} to={`/docs/${value.slug}`} className={value.id === doc?.id ? 'current' : ''}><FileText size={14}/>{localizedText(value.title, language)}</Link>) : <p>{copy.noResults}</p>}</div>}
         <nav aria-label={copy.categories}>
           <Link to="/docs" className={`docs-all-link ${!slug && !categoryFilter ? 'current' : ''}`}>{copy.all}<span>{data.documents.length}</span></Link>
-          {categories.map(value => { const children = sorted.filter(page => page.categoryId === value.id); return <div className="docs-nav-category" key={value.id}><Link to={`/docs?category=${value.slug}`} className="docs-category-title">{localizedText(value.title, language)}<span>{children.length}</span></Link>{children.map(page => <Link key={page.id} to={`/docs/${page.slug}`} aria-current={page.id === doc?.id ? 'page' : undefined} className={page.id === doc?.id ? 'current' : ''}>{localizedText(page.title, language)}</Link>)}</div>; })}
+          {sorted.filter(page => page.categoryId === '').map(page => <Link key={page.id} to={`/docs/${page.slug}`} aria-current={page.id === doc?.id ? 'page' : undefined} className={`docs-root-document ${page.id === doc?.id ? 'current' : ''}`}><FileText size={15} aria-hidden="true"/><span>{localizedText(page.title, language)}</span></Link>)}
+          {categories.map(value => {
+            const children = sorted.filter(page => page.categoryId === value.id);
+            const title = localizedText(value.title, language);
+            const revealCurrent = doc?.categoryId === value.id || categoryFilter === value.slug || !!normalizedQuery && children.some(matchesQuery);
+            const expanded = !collapsedCategories.has(value.id) || revealCurrent && manuallyClosed.get(value.id) !== navigationContext;
+            const controls = `docs-category-children-${value.id}`;
+            return <div className="docs-nav-category" key={value.id}>
+              <div className="docs-category-row">
+                <button type="button" className="docs-category-toggle" aria-label={`${expanded ? toggleLabels.collapse : toggleLabels.expand} ${title}`} aria-expanded={expanded} aria-controls={controls} onClick={() => setCategoryExpanded(value.id, !expanded)} onKeyDown={event => { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); setCategoryExpanded(value.id, event.key === 'ArrowRight'); } }}><ChevronRight size={15} aria-hidden="true" className={expanded ? 'docs-chevron-open' : ''}/></button>
+                <Link to={`/docs?category=${value.slug}`} className={`docs-category-title ${!slug && categoryFilter === value.slug ? 'current' : ''}`} aria-current={!slug && categoryFilter === value.slug ? 'page' : undefined}><Folder size={15} aria-hidden="true"/><span className="docs-category-name">{title}</span><span className="docs-category-count">{children.length}</span></Link>
+              </div>
+              <div id={controls} className="docs-category-documents" hidden={!expanded}>{children.map(page => <Link key={page.id} to={`/docs/${page.slug}`} aria-current={page.id === doc?.id ? 'page' : undefined} className={page.id === doc?.id ? 'current' : ''}>{localizedText(page.title, language)}</Link>)}</div>
+            </div>;
+          })}
         </nav>
       </aside>
       <article ref={contentRef} className="docs-article" aria-label={doc ? localizedText(doc.title, language) : copy.title}>
         {error && <p className="docs-notice" role="status">{copy.stale} <button type="button" onClick={retry}>{copy.retry}</button></p>}
         {slug && !doc ? <div className="docs-empty"><FileText size={28}/><h1>{copy.missing}</h1><p>{copy.missingText}</p><Link to="/docs">{copy.back}<ArrowRight size={16}/></Link></div> : doc ? <>
-          <div className="docs-breadcrumb"><Link to="/docs">{copy.title}</Link><span>/</span>{category && <Link to={`/docs?category=${category.slug}`}>{localizedText(category.title, language)}</Link>}</div>
+          <div className="docs-breadcrumb"><Link to="/docs">{copy.title}</Link>{category && <><span>/</span><Link to={`/docs?category=${category.slug}`}>{localizedText(category.title, language)}</Link></>}</div>
           <header className="docs-document-header"><h1>{localizedText(doc.title, language)}</h1>{localizedText(doc.summary, language) && <p>{localizedText(doc.summary, language)}</p>}<div className="docs-meta"><span>{copy.updated} {new Intl.DateTimeFormat(language, { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'Asia/Shanghai' }).format(new Date(doc.updatedAt))}</span>{category?.workSlug && <Link to={`/works/${category.workSlug}`}>{copy.work}<ArrowRight size={14}/></Link>}</div></header>
           {!doc.body[language as keyof typeof doc.body]?.trim() && <p className="docs-notice">{copy.fallback}</p>}
           <DocumentationBody content={body} fileUrl={new URL(import.meta.env.BASE_URL, window.location.origin)}/>
           <nav className="docs-pagination" aria-label={`${copy.previous} / ${copy.next}`}>{position > 0 ? <Link to={`/docs/${inCategory[position - 1].slug}`}><ArrowLeft size={17}/><span><small>{copy.previous}</small>{localizedText(inCategory[position - 1].title, language)}</span></Link> : <span/>}{position + 1 < inCategory.length && <Link to={`/docs/${inCategory[position + 1].slug}`}><span><small>{copy.next}</small>{localizedText(inCategory[position + 1].title, language)}</span><ArrowRight size={17}/></Link>}</nav>
         </> : <>
           <header className="docs-document-header"><h1>{categoryFilter ? localizedText(categories.find(value => value.slug === categoryFilter)?.title, language) || copy.title : copy.title}</h1><p>{categoryFilter ? localizedText(categories.find(value => value.slug === categoryFilter)?.summary, language) || copy.intro : copy.intro}</p></header>
-          {!data.documents.length ? <div className="docs-empty"><BookOpen size={32}/><h2>{copy.empty}</h2><p>{copy.emptyText}</p></div> : !list.length ? <p className="docs-notice">{copy.noResults}</p> : <div className="docs-index-list">{list.map(value => <Link to={`/docs/${value.slug}`} key={value.id}><FileText size={20}/><div><span>{localizedText(categories.find(item => item.id === value.categoryId)?.title, language)}</span><h2>{localizedText(value.title, language)}</h2>{localizedText(value.summary, language) && <p>{localizedText(value.summary, language)}</p>}</div><ArrowRight size={18}/></Link>)}</div>}
+          {!data.documents.length ? <div className="docs-empty"><BookOpen size={32}/><h2>{copy.empty}</h2><p>{copy.emptyText}</p></div> : !list.length ? <p className="docs-notice">{copy.noResults}</p> : <div className="docs-index-list">{list.map(value => <Link to={`/docs/${value.slug}`} key={value.id}><FileText size={20}/><div>{value.categoryId && <span>{localizedText(categories.find(item => item.id === value.categoryId)?.title, language)}</span>}<h2>{localizedText(value.title, language)}</h2>{localizedText(value.summary, language) && <p>{localizedText(value.summary, language)}</p>}</div><ArrowRight size={18}/></Link>)}</div>}
         </>}
       </article>
       <aside className="docs-toc" aria-label={copy.contents}>{doc && headings.length > 0 && <><strong>{copy.contents}</strong><nav>{headings.map(value => <button key={value.id} type="button" className={`${value.depth === 3 ? 'docs-toc-child' : ''} ${section === value.id ? 'current' : ''}`} onClick={() => setParams({ section: value.id })}>{value.text}</button>)}</nav></>}</aside>

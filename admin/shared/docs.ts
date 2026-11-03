@@ -1,7 +1,8 @@
 import type { Asset } from './model';
 import type { DocsBody, DocsCategory, DocsManifest, DocsImageCache } from '../../src/content/docs';
-import { DOCS_MAX_BYTES, docsBody, docsCategory, docsDate, docsId, docsKeys, docsMarkdownImages, docsRecord, docsSlug, docsText, privateDocsImageUrl } from '../../src/content/docs';
+import { DOCS_MAX_BYTES, docsBody, docsCategory, docsCategoryMember, docsDate, docsId, docsKeys, docsMarkdownImages, docsRecord, docsSlug, docsText, privateDocsImageUrl } from '../../src/content/docs';
 export type { DocsBody, DocsCategory, DocsManifest, PublicDoc } from '../../src/content/docs';
+/** categoryId === '' is an independent root document, without a synthetic category. */
 export type DocDraft = { id: string; slug: string; categoryId: string; title: import('../../src/content/projects').LocalizedText; summary: import('../../src/content/projects').LocalizedText; body: DocsBody; order: number; workflow: 'draft' | 'ready' | 'archived'; images: Asset[]; createdAt: string; updatedAt: string };
 export type DocsLibrary = { schemaVersion: 1; categories: DocsCategory[]; documents: DocDraft[] };
 export type DocsState = { library: DocsLibrary; published: DocsManifest | null; publicEtag: string; updatedAt: string | null; etag: string };
@@ -23,7 +24,7 @@ export function docsLibraryErrors(value: unknown, cache?: DocsImageCache): strin
   const categories = value.categories as DocsCategory[], ids = new Set<string>(), slugs = new Set<string>(), assets = new Set<string>();
   if (new Set(categories.map(category => category.id)).size !== categories.length || new Set(categories.map(category => category.slug)).size !== categories.length) return ['分类编号或 slug 重复。'];
   for (const doc of value.documents) {
-    if (!docsRecord(doc) || !docsKeys(doc, ['id', 'slug', 'categoryId', 'title', 'summary', 'body', 'order', 'workflow', 'images', 'createdAt', 'updatedAt']) || !docsId(doc.id) || !docsSlug(doc.slug) || ids.has(doc.id) || slugs.has(doc.slug) || !categories.some(category => category.id === doc.categoryId) || !docsText(doc.title, 160, true) || !docsText(doc.summary, 600) || !docsBody(doc.body) || !Number.isSafeInteger(doc.order) || Math.abs(doc.order as number) > 100000 || !['draft', 'ready', 'archived'].includes(doc.workflow as string) || !Array.isArray(doc.images) || doc.images.length > 40 || !doc.images.every(asset => validDocsImage(asset, doc.id as string)) || !docsDate(doc.createdAt) || !docsDate(doc.updatedAt)) return ['文档字段不合法，请检查名称、稳定 slug、分类、正文长度和图片。'];
+    if (!docsRecord(doc) || !docsKeys(doc, ['id', 'slug', 'categoryId', 'title', 'summary', 'body', 'order', 'workflow', 'images', 'createdAt', 'updatedAt']) || !docsId(doc.id) || !docsSlug(doc.slug) || ids.has(doc.id) || slugs.has(doc.slug) || !docsCategoryMember(doc.categoryId, categories) || !docsText(doc.title, 160, true) || !docsText(doc.summary, 600) || !docsBody(doc.body) || !Number.isSafeInteger(doc.order) || Math.abs(doc.order as number) > 100000 || !['draft', 'ready', 'archived'].includes(doc.workflow as string) || !Array.isArray(doc.images) || doc.images.length > 40 || !doc.images.every(asset => validDocsImage(asset, doc.id as string)) || !docsDate(doc.createdAt) || !docsDate(doc.updatedAt)) return ['文档字段不合法，请检查名称、稳定 slug、分类、正文长度和图片。'];
     if (doc.workflow === 'ready' && !Object.values(doc.body).some(text => text?.trim())) return ['待发布文档至少需要一种语言正文。'];
     const refs = new Set<string>();
     for (const text of Object.values(doc.body)) for (const image of docsMarkdownImages(text ?? '', cache)) {

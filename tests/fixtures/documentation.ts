@@ -4,7 +4,7 @@ import { parseDocsManifest, type DocsManifest, type PublicDoc } from '../../src/
 import type { DocsExampleSource } from '../../admin/shared/docs';
 
 export const docsFixtureOrigin = 'https://download.studiofimel.com/docs/test-images/';
-export async function documentationFixture(): Promise<DocsManifest> {
+export async function documentationFixture(options: { includeRootDocuments?: boolean } = {}): Promise<DocsManifest> {
   const example = JSON.parse(await readFile('admin/examples/docs-example.json', 'utf8')) as DocsExampleSource;
   const documents: PublicDoc[] = example.documents.map(document => {
     let zh = document.body.zh!;
@@ -20,5 +20,11 @@ export async function documentationFixture(): Promise<DocsManifest> {
     '[Fast Card 规则](#/docs/fimel-card-fast-card)',
   ].join('\n');
   documents.push({ id: 'layout-guide', slug: 'layout-guide', categoryId: 'guides', title: { zh: '排版与安全示例', en: 'Layout and safety', ja: 'レイアウトと安全' }, summary: { zh: '用于核对左右图文、目录定位与安全渲染。' }, body: { zh: demonstration, en: demonstration }, order: 0, updatedAt: '2026-11-03T00:00:00.000Z', sourceRevision: createHash('sha256').update(demonstration).digest('hex') });
-  return parseDocsManifest({ schemaVersion: 1, publicationId: 'local-documentation-fixture', publishedAt: '2026-11-03T00:00:00.000Z', categories: [example.category, { id: 'guides', slug: 'guides', title: { zh: '使用指南', en: 'Guides', ja: 'ガイド' }, summary: { zh: '独立分类与布局示例。' }, order: 1 }], documents });
+  if (options.includeRootDocuments) {
+    for (const [id, title, order, body] of [
+      ['documentation-guide', '文档使用说明', -2, '## 开始阅读\n\n在左侧选择文档，分类可以收起。\n\n[查看常见问题](#/docs/documentation-faq)'],
+      ['documentation-faq', '常见问题', -1, '## 如何查找\n\n使用搜索查找标题和正文。'],
+    ] as const) documents.push({ id, slug: id, categoryId: '', title: { zh: title }, summary: { zh: `${title}的独立文档。` }, body: { zh: body }, order, updatedAt: '2026-11-03T00:00:00.000Z', sourceRevision: createHash('sha256').update(body).digest('hex') });
+  }
+  return parseDocsManifest({ schemaVersion: 1, publicationId: options.includeRootDocuments ? 'local-documentation-root-fixture' : 'local-documentation-fixture', publishedAt: '2026-11-03T00:00:00.000Z', categories: [example.category, { id: 'guides', slug: 'guides', title: { zh: '使用指南', en: 'Guides', ja: 'ガイド' }, summary: { zh: '独立分类与布局示例。' }, order: 1 }], documents });
 }
