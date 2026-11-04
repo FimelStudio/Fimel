@@ -66,7 +66,7 @@ test('an imported project can be searched, opened, refreshed and visited without
   await expect.poll(() => page.locator(`header img[src$="${project.image}"]`).evaluate((image) => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
   await page.reload();
   await expect(page.locator('.project-markdown')).toBeVisible();
-  await page.getByRole('tab', { name: '版本', exact: true }).click();
+  await page.getByRole('tab', { name: '版本与下载', exact: true }).click();
   await expect(page.locator('.project-markdown')).toContainText('本站不根据平台内部字段推测版本');
   expect(externalRequests).toEqual([]);
 });
@@ -87,7 +87,7 @@ test('music stays in the NetEase category and only source-confirmed work version
   await page.goto('/#/works?type=bedrock&q=音乐');
   await expect(page.locator('.work-row[href="#/works/music-command-pack"]')).toContainText('音乐');
   await page.locator('.work-row[href="#/works/music-command-pack"]').click();
-  await page.getByRole('tab', { name: '版本', exact: true }).click();
+  await page.getByRole('tab', { name: '版本与下载', exact: true }).click();
   await expect(page.locator('.project-markdown')).toContainText('2021-06-06');
 });
 

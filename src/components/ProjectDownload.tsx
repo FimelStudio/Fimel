@@ -4,7 +4,7 @@ import { Download } from 'lucide-react';
 import { assetUrl, projectDownloadUrl } from '../content/projects';
 import type { Project } from '../content/projects';
 
-export function ProjectDownload({ project, onDownload, preview=false }: { project: Project; onDownload?: () => void; preview?:boolean }) {
+export function ProjectDownload({ project, onDownload, selectVersion=false, onSelectVersion, preview=false }: { project: Project; onDownload?: () => void; selectVersion?:boolean; onSelectVersion?:()=>void; preview?:boolean }) {
   const { t } = useTranslation();
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
   const requestRef = useRef<AbortController | null>(null);
@@ -50,6 +50,7 @@ export function ProjectDownload({ project, onDownload, preview=false }: { projec
   };
   const className = 'hover-target inline-flex items-center justify-center gap-2 min-h-12 px-5 bg-obsidian dark:bg-diamond text-white dark:text-obsidian border border-obsidian dark:border-diamond rounded-sm text-sm font-semibold hover:bg-[#007d7e] dark:hover:bg-[#35dddd] hover:border-[#007d7e] dark:hover:border-diamond focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link transition-colors whitespace-nowrap';
   const directDownload = projectDownloadUrl(project);
+  if (selectVersion) return <button type="button" onClick={onSelectVersion} disabled={preview || !onSelectVersion} aria-controls={preview ? undefined : 'project-content'} className={className}><Download size={17} aria-hidden />{t('project.select_version_download')}</button>;
   if(preview)return directDownload||project.latestReleaseRepo?<button type="button" disabled className={className}><Download size={17} aria-hidden />{t('project.download')}</button>:null;
   if (project.downloadUrl) return <a href={directDownload} download onClick={onDownload} className={className}><Download size={17} aria-hidden />{t('project.download')}</a>;
   if (project.latestReleaseRepo) return <div>

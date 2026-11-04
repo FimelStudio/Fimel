@@ -82,16 +82,16 @@ test('unreleased Fimel Card has its own cover, repository and keyboard-accessibl
   await expect(page.getByRole('tab', { name: '更新日志', exact: true })).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('.project-markdown')).toContainText('暂未发布版本更新记录');
   await page.getByRole('tab', { name: '更新日志', exact: true }).press('End');
-  await expect(page.getByRole('tab', { name: '版本', exact: true })).toBeFocused();
+  await expect(page.getByRole('tab', { name: '版本与下载', exact: true })).toBeFocused();
   await page.getByRole('tabpanel').locator('details > summary').click();
   await expect(page.locator('.project-markdown')).toContainText('暂未发布可下载的版本');
   await page.reload();
-  await expect(page.getByRole('tab', { name: '版本', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tab', { name: '版本与下载', exact: true })).toHaveAttribute('aria-selected', 'true');
   // Version notes now live in the shared list's collapsed supplementary section.
   await page.getByRole('tabpanel').locator('details > summary').click();
   await expect(page.locator('.project-markdown')).toBeVisible();
   await expect(page.getByRole('link', { name: '返回作品', exact: true })).toHaveAttribute('href', '#/works?type=datapacks');
-  await page.getByRole('tab', { name: '版本', exact: true }).press('Home');
+  await page.getByRole('tab', { name: '版本与下载', exact: true }).press('Home');
   await expect(page.getByRole('tab', { name: '概述', exact: true })).toBeFocused();
 });
 

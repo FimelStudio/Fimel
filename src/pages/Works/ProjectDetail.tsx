@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ArrowUpRight, ExternalLink } from 'lucide-react';
@@ -26,6 +26,21 @@ function Detail({ project: source, releases, discordUrl }: { project: Project; r
   const [params, setParams] = useSearchParams();
   const tabParam = params.get('tab');
   const activeTab: ProjectTab = PROJECT_TABS.includes(tabParam as ProjectTab) ? tabParam as ProjectTab : 'description';
+  const versionsTabRef = useRef<HTMLButtonElement>(null);
+  const [versionNavigation, setVersionNavigation] = useState(0);
+  useEffect(() => {
+    if (!versionNavigation) return;
+    versionsTabRef.current?.focus({ preventScroll: true });
+    versionsTabRef.current?.scrollIntoView({ block: 'start', behavior: 'instant' });
+  }, [versionNavigation]);
+  const selectVersion = () => {
+    setParams(previous => {
+      const next = new URLSearchParams(previous);
+      next.set('tab', 'versions');
+      return next;
+    }, { replace: true, state: location.state });
+    setVersionNavigation(previous => previous + 1);
+  };
   const { title, summary, tags } = projectCopy(project, t, language);
   const trackedDownloads = useMemo(() => source.downloadSlug ? [source.downloadSlug] : [], [source.downloadSlug]);
   const { recordDownload } = useDownloadCounters(trackedDownloads);
@@ -60,7 +75,7 @@ function Detail({ project: source, releases, discordUrl }: { project: Project; r
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter leading-[1.1] break-words">{title}</h1>
           <p className="mt-4 max-w-[75ch] text-sm sm:text-base leading-relaxed text-gray-600 dark:text-content-muted">{summary}</p>
           <div className="flex flex-wrap gap-3 mt-6 items-start">
-            <ProjectDownloads project={project} releases={releases} onDownload={trackDownload} />
+            <ProjectDownloads project={project} releases={releases} onDownload={trackDownload} onSelectVersion={selectVersion} />
             {project.store && <a href={project.store} onClick={trackDownload} target="_blank" rel="noopener noreferrer" className={`${buttonBase} bg-obsidian dark:bg-diamond text-white dark:text-obsidian`}><ExternalLink size={16} aria-hidden />{t('project.store')}</a>}
             <ProjectRepository repository={project.repository} className={secondaryButton}/>
           </div>
@@ -71,7 +86,7 @@ function Detail({ project: source, releases, discordUrl }: { project: Project; r
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_18rem] gap-8 lg:gap-12 mt-7">
         <section className="min-w-0">
           <div role="tablist" aria-label={title} className="flex overflow-x-auto border-b border-obsidian/15 dark:border-line gap-2 mb-7">
-            {PROJECT_TABS.map((tab, index) => <button type="button" role="tab" id={`tab-${tab}`} key={tab} aria-selected={activeTab === tab} aria-controls="project-content" tabIndex={activeTab === tab ? 0 : -1}
+            {PROJECT_TABS.map((tab, index) => <button type="button" role="tab" id={`tab-${tab}`} key={tab} ref={tab === 'versions' ? versionsTabRef : undefined} aria-selected={activeTab === tab} aria-controls="project-content" tabIndex={activeTab === tab ? 0 : -1}
               onClick={() => setParams(tab === 'description' ? {} : { tab }, { replace: true, state: location.state })}
               onKeyDown={(event) => {
                 let nextIndex: number | undefined;
@@ -85,7 +100,7 @@ function Detail({ project: source, releases, discordUrl }: { project: Project; r
                   document.getElementById(`tab-${next}`)?.focus();
                 }
               }}
-              className={`hover-target min-h-12 shrink-0 px-4 sm:px-6 border-b-2 font-mono text-sm transition-colors focus-visible:outline-2 focus-visible:outline-link focus-visible:-outline-offset-2 ${activeTab === tab ? 'border-obsidian dark:border-diamond text-obsidian dark:text-diamond' : 'border-transparent text-gray-600 dark:text-content-muted hover:text-obsidian dark:hover:text-content'}`}>
+              className={`hover-target scroll-mt-28 min-h-12 shrink-0 px-4 sm:px-6 border-b-2 font-mono text-sm transition-colors focus-visible:outline-2 focus-visible:outline-link focus-visible:-outline-offset-2 ${activeTab === tab ? 'border-obsidian dark:border-diamond text-obsidian dark:text-diamond' : 'border-transparent text-gray-600 dark:text-content-muted hover:text-obsidian dark:hover:text-content'}`}>
               {t(`project.${tab}`)}
             </button>)}
           </div>

@@ -17,8 +17,9 @@ export const contentMessages = {
       live: '已发布', development: '制作中', planned: '企划中',
     },
     project: {
-      back: '返回作品', description: '概述', changelog: '更新日志', versions: '版本',
+      back: '返回作品', description: '概述', changelog: '更新日志', versions: '版本与下载',
       download: '下载', download_latest: '下载最新版', downloading: '正在获取最新版',
+      select_version_download: '选择版本下载', download_environment: '适用：{{environment}}',
       release_error: '自动获取失败，可前往发布页下载。', releases: '发布页',
       repository: '项目仓库', issues: '问题反馈', store: '前往网易资源中心',
       details: '项目信息', creators: '创作者', compatibility: '适用平台',
@@ -59,8 +60,9 @@ export const contentMessages = {
       live: 'Released', development: 'In development', planned: 'In planning',
     },
     project: {
-      back: 'Back to works', description: 'Description', changelog: 'Changelog', versions: 'Versions',
+      back: 'Back to works', description: 'Description', changelog: 'Changelog', versions: 'Versions & downloads',
       download: 'Download', download_latest: 'Download latest', downloading: 'Finding latest release',
+      select_version_download: 'Choose a version', download_environment: 'For: {{environment}}',
       release_error: 'Automatic download failed. Please use the releases page.', releases: 'Releases',
       repository: 'Project repository', issues: 'Report an issue', store: 'Open NetEase store',
       details: 'Project details', creators: 'Creators', compatibility: 'Compatibility',
@@ -101,8 +103,9 @@ export const contentMessages = {
       live: '公開済み', development: '制作中', planned: '企画中',
     },
     project: {
-      back: '作品一覧に戻る', description: '概要', changelog: '更新履歴', versions: 'バージョン',
+      back: '作品一覧に戻る', description: '概要', changelog: '更新履歴', versions: 'バージョンとダウンロード',
       download: 'ダウンロード', download_latest: '最新版をダウンロード', downloading: '最新版を取得中',
+      select_version_download: 'バージョンを選んでダウンロード', download_environment: '対応：{{environment}}',
       release_error: '自動取得に失敗しました。リリースページをご利用ください。', releases: 'リリース',
       repository: 'プロジェクトリポジトリ', issues: '不具合を報告', store: 'NetEase ストアを開く',
       details: '作品情報', creators: '制作者', compatibility: '対応環境',

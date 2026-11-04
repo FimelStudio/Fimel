@@ -41,6 +41,8 @@ Fimel/
 
 `dist/`、`node_modules/`、Playwright 报告和构建缓存由工具生成，不手工维护，也不作为网站内容来源。
 
+浏览器审查截图与临时记录放在 `.artifacts/` 或 `output/playwright/`，均由 Git 忽略；需要长期维护的行为约定与验证结论整理到 `docs/`。
+
 ## 图片、音效和图标
 
 - 工作室标识：`public/assets/brand/fimel-logo.svg` 为从现有图形轮廓描摹的导航矢量版；`fimel-logo.png` 保留原图，用于备用显示、favicon 和分享预览。

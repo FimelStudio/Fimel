@@ -234,6 +234,16 @@ JSON 中的 `image`、`download` 和 Markdown 路径都相对于 `public/`，不
 
 ## 下载与部署路径
 
+### 多版本与多文件的下载入口
+
+公开发行列表中，有两个及以上包含文件的版本，或任一版本包含多个文件时，详情顶部显示「选择版本下载」。点击后进入「版本与下载」页签，定位并聚焦该页签；再次点击保留已经选择的游戏版本和加载器筛选。这个入口不直接下载，也不计入下载次数。
+
+只有一个包含文件的版本且仅有一个文件时，保留直接下载，并在按钮旁显示已登记的平台、游戏版本和加载器。没有结构化发行记录的旧作品继续使用原下载或平台入口，不猜测兼容性；空的发行记录不产生额外选择。
+
+文件从版本列表的对应下载入口获取。筛选无匹配时显示空状态与「清除筛选」，不自动改下其他游戏版本的包。后台发布预览沿用同一判断，选择版本和文件下载按钮都禁用。三语名称与提示同步维护。
+
+### 文件地址与发布
+
 网站发行文件统一通过 R2 下载，发布后的 canonical 地址维护在 `public/works/catalogue.json` 的 `downloadUrl`。它优先于旧本地 `download`、`fallbackDownload` 或 GitHub `latestReleaseRepo`；未迁移且没有 `downloadUrl` 的旧记录仍兼容原下载逻辑。只给已发布作品填写 R2 地址，不给制作中的项目伪造下载。
 
 当前已迁移 OBJ Cubizer 1.4.0 ZIP、Minecraft Explorer 1.0.2 EXE 与 Bingo 发行标签 1.0 JAR。文件不重新打包，公开域名为 `https://download.studiofimel.com`，路径为 `works/{type}/{slug}/{version}/{filename}`。上传操作、确认、校验与正式迁移哈希见 [R2 上传说明](r2-uploads.md) 和 [发行清单](r2-release-manifest.json)。不把密钥写入目录、前端 VITE_ 变量或 GitHub Pages。

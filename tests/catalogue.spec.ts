@@ -38,11 +38,11 @@ test('four visible navigation links, category search, tabs and browser return', 
   await page.getByRole('tab', { name: '概述' }).press('ArrowRight');
   await expect(page.getByRole('tab', { name: '更新日志' })).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('.project-markdown')).toContainText('2026-09-26');
-  await page.getByRole('tab', { name: '版本', exact: true }).click();
+  await page.getByRole('tab', { name: '版本与下载', exact: true }).click();
   await expect(page.locator('.project-markdown')).toContainText('Fabric Loader');
   await expect(page.getByRole('link', { name: '返回作品', exact: true })).toHaveAttribute('href', '#/works?type=mods&q=Bingo');
   await page.reload();
-  await expect(page.getByRole('tab', { name: '版本', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tab', { name: '版本与下载', exact: true })).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('.project-markdown')).toContainText('Fabric Loader');
   await page.goBack();
   await expect(page.getByRole('searchbox', { name: '搜索作品' })).toHaveValue('Bingo');
@@ -57,7 +57,7 @@ test('all NetEase maps have original description, creators and correct outbound 
   await expect(page.getByRole('link', { name: '前往网易资源中心' })).toHaveAttribute('href', 'https://resource-minecraft.h5.163.com/#/detail?id=4657291854883079467');
   await page.getByRole('tab', { name: '更新日志' }).click();
   await expect(page.locator('.project-markdown')).toContainText('2.0');
-  await page.getByRole('tab', { name: '版本', exact: true }).click();
+  await page.getByRole('tab', { name: '版本与下载', exact: true }).click();
   await expect(page.locator('.project-markdown')).toContainText('作品版本号暂未确认');
   await expect(page.locator('.project-markdown')).toContainText('v2.0');
 });
@@ -153,7 +153,7 @@ test('language and theme remain usable after refresh and legacy URLs redirect', 
   await expect(page.locator('html')).toHaveClass(/dark/);
   await page.goto('/#/works/bingo-but-dont-do-it');
   await expect(page.locator('.project-markdown')).toContainText('チームでライフを共有');
-  await page.getByRole('tab', { name: 'バージョン', exact: true }).click();
+  await page.getByRole('tab', { name: 'バージョンとダウンロード', exact: true }).click();
   await expect(page.locator('.project-markdown')).toContainText('依存関係');
   await page.getByRole('tab', { name: '更新履歴', exact: true }).click();
   await expect(page.locator('.project-markdown')).toContainText('リリースノート');
