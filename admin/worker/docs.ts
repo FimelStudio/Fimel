@@ -1,7 +1,7 @@
-import { DOCS_MANIFEST_KEY, DOCS_MAX_BYTES, docsId, docsKeys, docsRecord, docsSlug, parseDocsManifest } from '../../src/content/docs';
+import { DOCS_MANIFEST_KEY, DOCS_MAX_BYTES, DOCS_MAX_IMAGES, docsId, docsKeys, docsRecord, docsSlug, parseDocsManifest } from '../../src/content/docs';
 import type { DocsManifest, PublicDoc, DocsImageCache } from '../../src/content/docs';
 import { DOCS_LIBRARY_KEY, docsImageRefs, docsLibraryErrors, replaceDocsImages, validDocsImage } from '../shared/docs';
-import type { DocDraft, DocsExampleSource, DocsLibrary, DocsPreview, DocsState } from '../shared/docs';
+import type { DocDraft, DocsExampleSource, DocsLibrary, DocsPreview, DocsState, DocsPreparation } from '../shared/docs';
 import type { Asset } from '../shared/model';
 import { PUBLIC_ORIGIN } from '../shared/model';
 import type { AuditChange, AuditEvent } from '../shared/audit';
@@ -88,19 +88,54 @@ async function preview(current: DocsState, cache?: DocsImageCache): Promise<Docs
   for (const old of current.published?.documents ?? []) if (!ready.some(doc => doc.id === old.id)) result.removed.push({ id: old.id, slug: old.slug, title: old.title });
   return result;
 }
+const PREPARE_BATCH = 24;
+const MAX_PUBLIC_IMAGES = 800;
+function readyImages(current: DocsState, cache?: DocsImageCache) {
+  const images = current.library.documents.filter(doc => doc.workflow === 'ready').flatMap(doc => [...docsImageRefs(doc.body, cache)].map(id => ({ doc, asset: doc.images.find(asset => asset.id === id)! })));
+  if (images.length > MAX_PUBLIC_IMAGES) throw new ApiError(422, `一次公开文档库最多引用 ${MAX_PUBLIC_IMAGES} 张上传图片，请先精简正文图片。`);
+  return images;
+}
+async function publishImage(env: DocsEnv, doc: DocDraft, asset: Asset, requirePrepared = false) {
+  const key = `docs/images/${doc.slug}/${asset.id}/${asset.name}`, existing = await env.PUBLIC.head(key);
+  if (existing) {
+    if (existing.size !== asset.size || existing.customMetadata?.sha256 !== asset.sha256 || existing.customMetadata?.docId !== doc.id || existing.customMetadata?.assetId !== asset.id || existing.httpMetadata?.contentType !== asset.mime) throw new ApiError(409, '公开图片已存在且校验信息不同，禁止覆盖。');
+    return;
+  }
+  if (requirePrepared) throw new ApiError(409, '图片尚未准备完成，请重新确认文档发布。');
+  const source = await verifyAsset(env.PRIVATE, doc.id, asset, true);
+  const saved = await env.PUBLIC.put(key, source.body, { sha256: asset.sha256, onlyIf: { etagDoesNotMatch: '*' }, httpMetadata: { contentType: asset.mime, cacheControl: 'public, max-age=31536000, immutable' }, customMetadata: { docId: doc.id, assetId: asset.id, sha256: asset.sha256 } });
+  if (!saved) throw new ApiError(409, '发布图片发生版本冲突，未覆盖。');
+}
+async function prepare(request: Request, env: DocsEnv, changes: AuditChange[]) {
+  const current = await state(env); expectMatch(request, current.etag); expectMatch(request, current.publicEtag, 'x-public-etag');
+  const input = await readJson(request, 1024);
+  if (!docsRecord(input) || !docsKeys(input, ['cursor']) || !Number.isSafeInteger(input.cursor) || (input.cursor as number) < 0) throw new ApiError(422, '图片准备位置不正确。');
+  const images = readyImages(current, env.imageCache), cursor = input.cursor as number;
+  if (cursor > images.length) throw new ApiError(422, '图片准备位置超过文档图片数量。');
+  const batch = images.slice(cursor, cursor + PREPARE_BATCH);
+  // Bounded R2 work per request; no public manifest is switched until publish.
+  for (const { doc, asset } of batch) await publishImage(env, doc, asset);
+  const prepared = cursor + batch.length;
+  changes.push({ workId: 'docs-images', slug: 'docs-images', title: '文档图片', action: 'updated', fields: [{ name: '发布图片准备', before: `${cursor} / ${images.length}`, after: `${prepared} / ${images.length}（正文尚未发布）` }] });
+  const result: DocsPreparation = { prepared, total: images.length, nextCursor: prepared < images.length ? prepared : null };
+  return json(result);
+}
 async function publication(request: Request, env: DocsEnv, onlyPreview: boolean, changes: AuditChange[]) {
   const current = await state(env); expectMatch(request, current.etag); expectMatch(request, current.publicEtag, 'x-public-etag');
   const diff = await preview(current, env.imageCache); if (onlyPreview) return json(diff);
   const input = await readJson(request, 1024); if (!docsRecord(input) || Object.keys(input).length) throw new ApiError(422, '发布请求格式不正确。');
   const publicationId = crypto.randomUUID(), publishedAt = new Date().toISOString(), documents: PublicDoc[] = [];
+  const images = readyImages(current, env.imageCache);
+  // Large libraries must be prepared in batches to stay below internal service limits.
+  for (let offset = 0; offset < images.length; offset += 4) {
+    const results = await Promise.allSettled(images.slice(offset, offset + 4).map(({ doc, asset }) => publishImage(env, doc, asset, images.length > 240)));
+    for (const result of results) if (result.status === 'rejected') throw result.reason;
+  }
   for (const doc of current.library.documents.filter(item => item.workflow === 'ready')) {
     const urls = new Map<string, string>();
     for (const id of docsImageRefs(doc.body, env.imageCache)) {
-      const asset = doc.images.find(item => item.id === id)!; const source = await verifyAsset(env.PRIVATE, doc.id, asset, true);
-      if (!('body' in source)) throw new ApiError(422, '图片不存在。');
-      const key = `docs/images/${doc.slug}/${asset.id}/${asset.name}`, existing = await env.PUBLIC.head(key);
-      if (existing) { await source.body.cancel(); if (existing.size !== asset.size || existing.customMetadata?.sha256 !== asset.sha256 || existing.customMetadata?.docId !== doc.id || existing.customMetadata?.assetId !== asset.id || existing.httpMetadata?.contentType !== asset.mime) throw new ApiError(409, '公开图片已存在且校验信息不同，禁止覆盖。'); }
-      else { const saved = await env.PUBLIC.put(key, source.body, { sha256: asset.sha256, onlyIf: { etagDoesNotMatch: '*' }, httpMetadata: { contentType: asset.mime, cacheControl: 'public, max-age=31536000, immutable' }, customMetadata: { docId: doc.id, assetId: asset.id, sha256: asset.sha256 } }); if (!saved) throw new ApiError(409, '发布图片发生版本冲突，未覆盖。'); }
+      const asset = doc.images.find(item => item.id === id)!;
+      const key = `docs/images/${doc.slug}/${asset.id}/${asset.name}`;
       urls.set(id, `${PUBLIC_ORIGIN}/${key}`);
     }
     documents.push({ id: doc.id, slug: doc.slug, categoryId: doc.categoryId, title: doc.title, summary: doc.summary, body: replaceDocsImages(doc.body, urls, env.imageCache), order: doc.order, updatedAt: doc.updatedAt, sourceRevision: await docsSourceRevision(doc, env.imageCache) });
@@ -135,7 +170,7 @@ async function storeImage(env: DocsEnv, docId: string, name: string, bytes: Uint
 }
 async function upload(request: Request, env: DocsEnv, docId: string, changes: AuditChange[]) {
   const current = await state(env), doc = current.library.documents.find(item => item.id === docId); if (!doc || doc.workflow === 'archived') throw new ApiError(422, '请先保存文档草稿，归档文档请先恢复。');
-  if (doc.images.length >= 40) throw new ApiError(422, '每篇文档最多 40 张图片。');
+  if (doc.images.length >= DOCS_MAX_IMAGES) throw new ApiError(422, `每篇文档最多 ${DOCS_MAX_IMAGES} 张图片。`);
   let name: string; try { name = decodeURIComponent(request.headers.get('x-file-name') ?? ''); } catch { throw new ApiError(422, '图片名称编码错误。'); }
   if (!name.trim() || name.length > 200 || [...name].some(character => character.charCodeAt(0) < 32) || name.includes('/') || name.includes('\\')) throw new ApiError(422, '图片名称不正确。');
   const asset = await storeImage(env, docId, name, await boundedBytes(request.body, MAX_IMAGE), request.headers.get('content-type')?.split(';')[0] ?? '', request.headers.get('x-image-sha256') ?? '');
@@ -179,6 +214,7 @@ export async function docsRoute(request: Request, env: DocsEnv, segments: string
   if (!segments.length && method === 'GET') { const current = await state(env); return json(current, 200, current.etag); }
   if (!segments.length && method === 'PUT') return audited(env, email, 'save-docs', changes => save(request, env, changes));
   if (segments.length === 1 && ['preview', 'publish'].includes(segments[0]) && method === 'POST') return segments[0] === 'preview' ? publication(request, env, true, []) : audited(env, email, 'publish-docs', changes => publication(request, env, false, changes));
+  if (segments.length === 1 && segments[0] === 'prepare' && method === 'POST') return audited(env, email, 'prepare-docs-images', changes => prepare(request, env, changes));
   if (segments.length === 2 && segments[0] === 'images' && docsId(segments[1]) && method === 'POST') return audited(env, email, 'upload-docs-image', changes => upload(request, env, segments[1], changes));
   if (segments.length === 4 && segments[0] === 'media' && method === 'GET') return media(env, segments[1], segments[2], segments[3]);
   if (segments.length === 1 && segments[0] === 'example' && method === 'GET') return json(await example(request, env));

@@ -56,6 +56,36 @@ test('真实Admin身份/CSRF入口保护所有文档与示例，空库不创建�
   assert.equal((await save(fixture(), '"stale"')).status, 409);
   assert.equal(await (await runtime.getR2Bucket('PUBLIC')).get(DOCS_MANIFEST_KEY), null);
 });
+
+test('多图文档按批准备且仅最终切换正文，断点可重试、并发条件和图片校验保持', async () => {
+  let state = await seed(); const library = state.library, first = library.documents[0];
+  const second = { ...makeDoc(first.categoryId), slug: 'many-pictures', title: '大量图片', body: { zh: '' }, workflow: 'ready' as const };
+  first.workflow = 'ready'; library.documents.push(second);
+  const bucket = await runtime.getR2Bucket('PRIVATE'), digest = await hash(png);
+  for (let index = 0; index < 250; index++) {
+    const doc = index < 125 ? first : second, id = `image-${index}`, name = `${id}.png`, privateKey = `docs/uploads/${doc.id}/${id}/${name}`;
+    const asset = { id, name, privateKey, size: png.length, mime: 'image/png', sha256: digest };
+    await bucket.put(privateKey, png, { httpMetadata: { contentType: asset.mime }, customMetadata: { docId: doc.id, assetId: id, sha256: digest } });
+    doc.images.push(asset); doc.body.zh += `\n![图 ${index}](fimel-doc-image:${id})\n`;
+  }
+  let response = await save(library, state.etag); assert.equal(response.status, 200, await response.clone().text()); state = await response.json() as DocsState;
+  assert.equal((await publish(state)).status, 409); assert.equal(await (await runtime.getR2Bucket('PUBLIC')).get(DOCS_MANIFEST_KEY), null);
+  const prepare = (cursor: number, etag = state.etag) => request('prepare', 'POST', { cursor }, { 'If-Match': etag, 'X-Public-ETag': state.publicEtag });
+  assert.equal((await prepare(-1)).status, 422); assert.equal((await prepare(251)).status, 422); assert.equal((await prepare(0, '"stale"')).status, 409);
+  response = await prepare(0); assert.equal(response.status, 200); assert.deepEqual(await response.json(), { prepared: 24, total: 250, nextCursor: 24 });
+  assert.equal((await (await runtime.getR2Bucket('PUBLIC')).list({ prefix: 'docs/images/' })).objects.length, 24);
+  assert.equal((await prepare(0)).status, 200);
+  for (let cursor = 24; cursor < 250; cursor += 24) { response = await prepare(cursor); assert.equal(response.status, 200, await response.clone().text()); }
+  assert.equal(await (await runtime.getR2Bucket('PUBLIC')).get(DOCS_MANIFEST_KEY), null);
+  assert.equal((await publish(state)).status, 200); state = await getState(); assert.equal(state.published!.documents.length, 2);
+  assert.ok(state.published!.documents[1].body.zh?.includes('https://download.studiofimel.com/docs/images/'));
+  assert.ok((await events()).some(event => event.operation === 'prepare-docs-images' && event.status === 'success'));
+  const visible = await (await (await runtime.getR2Bucket('PUBLIC')).get(DOCS_MANIFEST_KEY))!.text();
+  const asset = first.images[0], publicBucket = await runtime.getR2Bucket('PUBLIC');
+  await publicBucket.put(`docs/images/${first.slug}/${asset.id}/${asset.name}`, png, { httpMetadata: { contentType: 'image/png' }, customMetadata: { docId: 'wrong-owner', assetId: asset.id, sha256: digest } });
+  assert.equal((await request('prepare', 'POST', { cursor: 0 }, { 'If-Match': state.etag, 'X-Public-ETag': state.publicEtag })).status, 409);
+  assert.equal((await publish(state)).status, 409); assert.equal(await (await publicBucket.get(DOCS_MANIFEST_KEY))!.text(), visible);
+});
 test('草稿CRUD、分类重命名/合并/排序、文档归档恢复在单一CAS保存，永久删除和稳定地址修改拒绝', async () => {
   let state = await seed(); const initial = structuredClone(state);
   const category = { ...makeDocsCategory(1), slug: 'tutorials', title: { zh: '教程' } }; state.library.categories.push(category); state.library.documents[0].categoryId = category.id; state.library.documents[0].title = { zh: '重命名游戏规则' }; state.library.categories = [category];

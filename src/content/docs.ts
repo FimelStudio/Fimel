@@ -2,6 +2,7 @@ import type { LocalizedText } from './projects';
 
 export const DOCS_MANIFEST_KEY = 'data/docs.json';
 export const DOCS_MAX_BYTES = 4 * 1024 * 1024;
+export const DOCS_MAX_IMAGES = 200;
 export const DOCS_LOCALES = ['zh', 'en', 'ja'] as const;
 export type DocsBody = Partial<Record<typeof DOCS_LOCALES[number], string>>;
 export type DocsCategory = { id: string; slug: string; title: LocalizedText; summary: LocalizedText; order: number; workSlug?: string };

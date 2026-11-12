@@ -3,11 +3,11 @@ import type { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Archive, ArrowDown, ArrowUp, BookOpen, Check, FilePlus, FolderPlus, ImagePlus, Search, Upload } from 'lucide-react';
 import type { DocsCategory } from '../../src/content/docs';
-import { DOCS_MAX_BYTES, docsBody, docsDate, docsId, docsKeys, docsLocalizedText, docsRecord, docsText } from '../../src/content/docs';
+import { DOCS_MAX_BYTES, DOCS_MAX_IMAGES, docsBody, docsDate, docsId, docsKeys, docsLocalizedText, docsRecord, docsText } from '../../src/content/docs';
 import { DocumentationBody } from '../../src/components/DocumentationBody';
 import type { LocalizedText } from '../../src/content/projects';
 import { docsLibraryErrors, makeDoc, makeDocsCategory, replaceDocsImages, validDocsImage } from '../shared/docs';
-import type { DocDraft, DocsExampleSource, DocsLibrary, DocsPreview, DocsState, PublicDoc } from '../shared/docs';
+import type { DocDraft, DocsExampleSource, DocsLibrary, DocsPreview, DocsState, PublicDoc, DocsPreparation } from '../shared/docs';
 import { LOCALES, MAX_IMAGE_SIZE, PUBLIC_ORIGIN } from '../shared/model';
 import type { Asset, Locale } from '../shared/model';
 import { stable } from '../shared/revisions';
@@ -61,7 +61,7 @@ function recoverable(record: unknown): record is Recovery {
       categoryIds.add(category.id);
     }
     for (const doc of value.documents) {
-      if (!docsRecord(doc) || !docsKeys(doc, ['id', 'slug', 'categoryId', 'title', 'summary', 'body', 'order', 'workflow', 'images', 'createdAt', 'updatedAt']) || !docsId(doc.id) || documentIds.has(doc.id) || !(doc.categoryId === '' || docsId(doc.categoryId) && categoryIds.has(doc.categoryId)) || !slugInput(doc.slug) || !docsText(doc.title, 160) || !docsText(doc.summary, 600) || !docsBody(doc.body) || !order(doc.order) || !['draft', 'ready', 'archived'].includes(doc.workflow as string) || !docsDate(doc.createdAt) || !docsDate(doc.updatedAt) || !Array.isArray(doc.images) || doc.images.length > 40) return false;
+      if (!docsRecord(doc) || !docsKeys(doc, ['id', 'slug', 'categoryId', 'title', 'summary', 'body', 'order', 'workflow', 'images', 'createdAt', 'updatedAt']) || !docsId(doc.id) || documentIds.has(doc.id) || !(doc.categoryId === '' || docsId(doc.categoryId) && categoryIds.has(doc.categoryId)) || !slugInput(doc.slug) || !docsText(doc.title, 160) || !docsText(doc.summary, 600) || !docsBody(doc.body) || !order(doc.order) || !['draft', 'ready', 'archived'].includes(doc.workflow as string) || !docsDate(doc.createdAt) || !docsDate(doc.updatedAt) || !Array.isArray(doc.images) || doc.images.length > DOCS_MAX_IMAGES) return false;
       for (const asset of doc.images) { if (!validDocsImage(asset, doc.id) || imageIds.has(asset.id)) return false; imageIds.add(asset.id); }
       documentIds.add(doc.id);
     }
@@ -243,6 +243,13 @@ export function DocsEditor({ actorId, onDirtyChange, onBusyChange }: Props) {
     if (!preview || !state || dirty || requestLock.current) return;
     requestLock.current = true; setBusy(true); setError('');
     try {
+      let cursor: number | null = 0;
+      do {
+        const result: { data: DocsPreparation } = await api<DocsPreparation>('docs/prepare', { method: 'POST', headers: { 'If-Match': etag, 'X-Public-ETag': state.publicEtag }, body: JSON.stringify({ cursor }), signal: AbortSignal.timeout(60000) });
+        if (active.current) setMessage(`正在准备发布图片：${result.data.prepared} / ${result.data.total}。`);
+        if (result.data.nextCursor !== null && result.data.nextCursor <= cursor) throw new Error('图片准备未能继续，请重新预览后重试。');
+        cursor = result.data.nextCursor;
+      } while (cursor !== null);
       await api('docs/publish', { method: 'POST', headers: { 'If-Match': etag, 'X-Public-ETag': state.publicEtag }, body: '{}', signal: AbortSignal.timeout(60000) });
       if (active.current) { setPreview(null); setMessage('文档已发布，官网文档中心将读取新的公开内容。'); }
       const refreshed = await api<DocsState>('docs', { signal: AbortSignal.timeout(20000) }); if (active.current) accept(refreshed.data, refreshed.etag);
@@ -287,7 +294,7 @@ export function DocsEditor({ actorId, onDirtyChange, onBusyChange }: Props) {
     if (!selectedDoc || !library || locked || requestLock.current || !files.length) return;
     const validTypes = new Set(['image/png', 'image/jpeg', 'image/webp']);
     if (files.some(file => !validTypes.has(file.type) || file.size <= 0 || file.size > MAX_IMAGE_SIZE)) { setError('图片仅支持 PNG、JPEG、WebP，每张须大于 0 且不超过 10 MiB。'); return; }
-    if (files.length + selectedDoc.images.length > 40) { setError('每篇文档最多保存 40 张图片。'); return; }
+    if (files.length + selectedDoc.images.length > DOCS_MAX_IMAGES) { setError(`每篇文档最多保存 ${DOCS_MAX_IMAGES} 张图片。`); return; }
     requestLock.current = true; setUploading('正在保存草稿…'); setError(''); setMessage('');
     const docId = selectedDoc.id, selectedLocale = locale, start = bodyInput.current?.selectionStart ?? (selectedDoc.body[locale] ?? '').length, end = bodyInput.current?.selectionEnd ?? start;
     let next = library, revision = etag, cursor = start, replaceEnd = end;

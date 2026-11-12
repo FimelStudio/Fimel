@@ -1,4 +1,5 @@
 .documentation-body { min-width: 0; }
+.documentation-body td img { display: block; width: 88px; min-width: 64px; max-width: 88px; max-height: 140px; height: auto; object-fit: contain; margin: 0 auto; }
 .documentation-body .docs-prose > :first-child { margin-top: 0; }
 .documentation-body .docs-prose + .docs-prose { margin-top: 1.5rem; }
 .documentation-body :is(h1,h2,h3,h4,h5,h6) { scroll-margin-top: 110px; }
