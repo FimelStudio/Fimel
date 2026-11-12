@@ -4,6 +4,8 @@
 
 后续分类折叠、VS Code 式新建／改名／删除，以及根级独立文档的改进与上线边界，见[目录树交付记录](documentation-tree-review.md)。下文生产版本与发布 ID 记录首批文档上线，不表示后续每轮 Admin 代码已自动部署。
 
+2026-11-13：已按新数据包的规则覆盖原 23 篇中文文档，补充完整组件图鉴及左右图文；432 张独立图片使用像素一致的无损 WebP，体积减少 34.79%。排除新手指南与 README，保留原有文档地址；多图分批发布、正式目录与全量图片校验记录见[规则替换交付记录](fimel-card-rules-update-review.md)。下文 25 张图片和占位截图数量属于首批内容的历史记录。
+
 ## 已核实与方案
 
 旧交接中“没有 Admin”的描述已经过时。当前是 React／Vite／HashRouter 官网、独立 Access 保护的 Admin Worker，以及 PUBLIC／PRIVATE R2。文档使用独立 `state/docs.json` 与 `data/docs.json`，不挤入作品或网站内容索引，不改作品上传归属。
