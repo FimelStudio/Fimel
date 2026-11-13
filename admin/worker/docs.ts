@@ -80,28 +80,42 @@ async function save(request: Request, env: DocsEnv, changes: AuditChange[]) {
   return json({ ...current, library, updatedAt: now }, 200, written.httpEtag);
 }
 export async function docsSourceRevision(doc: DocDraft, cache?: DocsImageCache) { const { id, slug, categoryId, title, summary, body, order } = doc; const refs = docsImageRefs(body, cache); return sha256(new TextEncoder().encode(stable({ id, slug, categoryId, title, summary, body, order, images: doc.images.filter(asset => refs.has(asset.id)) }))); }
-async function preview(current: DocsState, cache?: DocsImageCache): Promise<DocsPreview> {
+async function publicationPlan(current: DocsState, cache?: DocsImageCache) {
   const ready = current.library.documents.filter(doc => doc.workflow === 'ready');
   const ordered = (categories: DocsLibrary['categories']) => [...categories].sort((a, b) => a.order - b.order || a.slug.localeCompare(b.slug));
   const result: DocsPreview = { added: [], changed: [], removed: [], categoriesChanged: stable(ordered(current.library.categories)) !== stable(ordered(current.published?.categories ?? [])) };
-  for (const doc of ready) { const entry = { id: doc.id, slug: doc.slug, title: doc.title }, old = current.published?.documents.find(item => item.id === doc.id); if (!old) result.added.push(entry); else if (old.sourceRevision !== await docsSourceRevision(doc, cache)) result.changed.push(entry); }
+  const revisions = new Map<string, string>();
+  for (const doc of ready) { const revision = await docsSourceRevision(doc, cache); revisions.set(doc.id, revision); const entry = { id: doc.id, slug: doc.slug, title: doc.title }, old = current.published?.documents.find(item => item.id === doc.id); if (!old) result.added.push(entry); else if (old.sourceRevision !== revision) result.changed.push(entry); }
   for (const old of current.published?.documents ?? []) if (!ready.some(doc => doc.id === old.id)) result.removed.push({ id: old.id, slug: old.slug, title: old.title });
-  return result;
+  return { diff: result, revisions, changedIds: new Set([...result.added, ...result.changed].map(doc => doc.id)) };
 }
 const PREPARE_BATCH = 24;
 const MAX_PUBLIC_IMAGES = 800;
-function readyImages(current: DocsState, cache?: DocsImageCache) {
+const PREPARATION_TTL = 30 * 60 * 1000;
+type Preparation = { schemaVersion: 1; etag: string; publicEtag: string; prepared: number; total: number; expiresAt: string };
+async function preparationState(env: DocsEnv, current: DocsState, total: number) {
+  const id = await sha256(new TextEncoder().encode(`${current.etag}\n${current.publicEtag}`));
+  const key = `state/docs-preparations/${id}.json`, stored = await env.PRIVATE.get(key);
+  let progress: Preparation | null = null;
+  if (stored) {
+    if (stored.size > 2048) { await stored.body.cancel(); throw new ApiError(503, '文档图片准备记录异常，未切换公开内容。'); }
+    const value = await stored.json<unknown>();
+    if (!docsRecord(value) || !docsKeys(value, ['schemaVersion', 'etag', 'publicEtag', 'prepared', 'total', 'expiresAt']) || value.schemaVersion !== 1 || value.etag !== current.etag || value.publicEtag !== current.publicEtag || value.total !== total || !Number.isSafeInteger(value.prepared) || (value.prepared as number) < 0 || (value.prepared as number) > total || typeof value.expiresAt !== 'string' || !Number.isFinite(Date.parse(value.expiresAt))) throw new ApiError(503, '文档图片准备记录异常，未切换公开内容。');
+    if (Date.parse(value.expiresAt) > Date.now()) progress = value as Preparation;
+  }
+  return { key, etag: stored?.httpEtag ?? EMPTY_ETAG, progress };
+}
+function readyImages(current: DocsState, changedIds: Set<string>, cache?: DocsImageCache) {
   const images = current.library.documents.filter(doc => doc.workflow === 'ready').flatMap(doc => [...docsImageRefs(doc.body, cache)].map(id => ({ doc, asset: doc.images.find(asset => asset.id === id)! })));
   if (images.length > MAX_PUBLIC_IMAGES) throw new ApiError(422, `一次公开文档库最多引用 ${MAX_PUBLIC_IMAGES} 张上传图片，请先精简正文图片。`);
-  return images;
+  return images.filter(({ doc }) => changedIds.has(doc.id));
 }
-async function publishImage(env: DocsEnv, doc: DocDraft, asset: Asset, requirePrepared = false) {
+async function publishImage(env: DocsEnv, doc: DocDraft, asset: Asset) {
   const key = `docs/images/${doc.slug}/${asset.id}/${asset.name}`, existing = await env.PUBLIC.head(key);
   if (existing) {
     if (existing.size !== asset.size || existing.customMetadata?.sha256 !== asset.sha256 || existing.customMetadata?.docId !== doc.id || existing.customMetadata?.assetId !== asset.id || existing.httpMetadata?.contentType !== asset.mime) throw new ApiError(409, '公开图片已存在且校验信息不同，禁止覆盖。');
     return;
   }
-  if (requirePrepared) throw new ApiError(409, '图片尚未准备完成，请重新确认文档发布。');
   const source = await verifyAsset(env.PRIVATE, doc.id, asset, true);
   const saved = await env.PUBLIC.put(key, source.body, { sha256: asset.sha256, onlyIf: { etagDoesNotMatch: '*' }, httpMetadata: { contentType: asset.mime, cacheControl: 'public, max-age=31536000, immutable' }, customMetadata: { docId: doc.id, assetId: asset.id, sha256: asset.sha256 } });
   if (!saved) throw new ApiError(409, '发布图片发生版本冲突，未覆盖。');
@@ -110,35 +124,47 @@ async function prepare(request: Request, env: DocsEnv, changes: AuditChange[]) {
   const current = await state(env); expectMatch(request, current.etag); expectMatch(request, current.publicEtag, 'x-public-etag');
   const input = await readJson(request, 1024);
   if (!docsRecord(input) || !docsKeys(input, ['cursor']) || !Number.isSafeInteger(input.cursor) || (input.cursor as number) < 0) throw new ApiError(422, '图片准备位置不正确。');
-  const images = readyImages(current, env.imageCache), cursor = input.cursor as number;
+  const plan = await publicationPlan(current, env.imageCache), images = readyImages(current, plan.changedIds, env.imageCache), cursor = input.cursor as number;
   if (cursor > images.length) throw new ApiError(422, '图片准备位置超过文档图片数量。');
+  const receipt = await preparationState(env, current, images.length), completed = receipt.progress?.prepared ?? 0;
+  if (cursor > completed) throw new ApiError(409, '前一批图片尚未准备完成，请从已完成的位置重试。');
+  if (cursor < completed || receipt.progress && completed === images.length) return json({ prepared: completed, total: images.length, nextCursor: completed < images.length ? completed : null } satisfies DocsPreparation);
   const batch = images.slice(cursor, cursor + PREPARE_BATCH);
   // Bounded R2 work per request; no public manifest is switched until publish.
   for (const { doc, asset } of batch) await publishImage(env, doc, asset);
   const prepared = cursor + batch.length;
+  // A receipt is written only after every image in this contiguous batch passed verification.
+  // It is bound to both source revisions and expires; clients cannot claim skipped batches.
+  await putJson(env.PRIVATE, receipt.key, { schemaVersion: 1, etag: current.etag, publicEtag: current.publicEtag, prepared, total: images.length, expiresAt: new Date(Date.now() + PREPARATION_TTL).toISOString() } satisfies Preparation, receipt.etag);
   changes.push({ workId: 'docs-images', slug: 'docs-images', title: '文档图片', action: 'updated', fields: [{ name: '发布图片准备', before: `${cursor} / ${images.length}`, after: `${prepared} / ${images.length}（正文尚未发布）` }] });
   const result: DocsPreparation = { prepared, total: images.length, nextCursor: prepared < images.length ? prepared : null };
   return json(result);
 }
 async function publication(request: Request, env: DocsEnv, onlyPreview: boolean, changes: AuditChange[]) {
   const current = await state(env); expectMatch(request, current.etag); expectMatch(request, current.publicEtag, 'x-public-etag');
-  const diff = await preview(current, env.imageCache); if (onlyPreview) return json(diff);
+  const plan = await publicationPlan(current, env.imageCache), { diff } = plan; if (onlyPreview) return json(diff);
   const input = await readJson(request, 1024); if (!docsRecord(input) || Object.keys(input).length) throw new ApiError(422, '发布请求格式不正确。');
   const publicationId = crypto.randomUUID(), publishedAt = new Date().toISOString(), documents: PublicDoc[] = [];
-  const images = readyImages(current, env.imageCache);
-  // Large libraries must be prepared in batches to stay below internal service limits.
-  for (let offset = 0; offset < images.length; offset += 4) {
-    const results = await Promise.allSettled(images.slice(offset, offset + 4).map(({ doc, asset }) => publishImage(env, doc, asset, images.length > 240)));
-    for (const result of results) if (result.status === 'rejected') throw result.reason;
+  const images = readyImages(current, plan.changedIds, env.imageCache);
+  const receipt = images.length ? await preparationState(env, current, images.length) : null;
+  if (images.length && receipt?.progress?.prepared !== images.length) {
+    if (images.length > 240 || receipt?.etag !== EMPTY_ETAG) throw new ApiError(409, '图片尚未准备完成，请重新确认文档发布。');
+    // Preserve small-library API compatibility; the editor always prepares first.
+    for (let offset = 0; offset < images.length; offset += 4) {
+      const results = await Promise.allSettled(images.slice(offset, offset + 4).map(({ doc, asset }) => publishImage(env, doc, asset)));
+      for (const result of results) if (result.status === 'rejected') throw result.reason;
+    }
   }
   for (const doc of current.library.documents.filter(item => item.workflow === 'ready')) {
+    const old = current.published?.documents.find(item => item.id === doc.id);
+    if (old && !plan.changedIds.has(doc.id)) { documents.push(old); continue; }
     const urls = new Map<string, string>();
     for (const id of docsImageRefs(doc.body, env.imageCache)) {
       const asset = doc.images.find(item => item.id === id)!;
       const key = `docs/images/${doc.slug}/${asset.id}/${asset.name}`;
       urls.set(id, `${PUBLIC_ORIGIN}/${key}`);
     }
-    documents.push({ id: doc.id, slug: doc.slug, categoryId: doc.categoryId, title: doc.title, summary: doc.summary, body: replaceDocsImages(doc.body, urls, env.imageCache), order: doc.order, updatedAt: doc.updatedAt, sourceRevision: await docsSourceRevision(doc, env.imageCache) });
+    documents.push({ id: doc.id, slug: doc.slug, categoryId: doc.categoryId, title: doc.title, summary: doc.summary, body: replaceDocsImages(doc.body, urls, env.imageCache), order: doc.order, updatedAt: doc.updatedAt, sourceRevision: plan.revisions.get(doc.id)! });
   }
   documents.sort((a, b) => a.order - b.order || a.slug.localeCompare(b.slug));
   const manifest: DocsManifest = { schemaVersion: 1, publicationId, publishedAt, categories: [...current.library.categories].sort((a, b) => a.order - b.order || a.slug.localeCompare(b.slug)), documents };

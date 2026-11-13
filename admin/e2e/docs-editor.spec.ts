@@ -67,6 +67,28 @@ test('文档改名与正文草稿不公开，标记待发布后先预览差异�
   await page.getByLabel('文档名称', { exact: true }).fill('再次修改的规则名称'); await expect(page.getByTestId('doc-publication-status')).toHaveText('已公开 · 有修改待发布'); await expect(page.locator('.docs-list .docs-file-open')).toContainText('已公开 · 有修改待发布');
 });
 
+test('HTML平台故障显示服务错误而非失效登录，发布差异与正文保留并可重试', async ({ page }) => {
+  await openRule(page);
+  await page.getByLabel('文档 Markdown 正文', { exact: true }).fill('# 修改后的正文\n\n保留这次修改。');
+  await page.getByLabel('文档状态', { exact: true }).selectOption('ready'); await save(page);
+  let failures = 0;
+  await page.route('**/api/docs/prepare', async route => {
+    if (failures++ === 0) return route.fulfill({ status: 500, contentType: 'text/html', body: '<html>Worker exceeded resource limits</html>' });
+    return route.fallback();
+  });
+  await page.getByRole('button', { name: '预览文档发布', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: '确认文档发布差异' });
+  await dialog.getByRole('button', { name: '确认发布文档', exact: true }).click();
+  await expect(dialog.getByRole('alert')).toContainText('HTTP 500');
+  await expect(dialog.getByRole('alert')).not.toContainText('登录');
+  expect(await publicManifest()).toBeNull();
+  await expect(page.getByLabel('文档 Markdown 正文', { exact: true })).toHaveValue('# 修改后的正文\n\n保留这次修改。');
+  await dialog.getByRole('button', { name: '确认发布文档', exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByTestId('doc-publication-status')).toHaveText('已公开 · 已同步');
+  expect((await (await publicManifest())!.json<DocsManifest>()).documents[0].body.zh).toContain('保留这次修改');
+});
+
 test('新建分类和文档、改名排序移动、非空分类合并一次保存、归档与恢复', async ({ page }) => {
   await openDocs(page); await page.getByRole('button', { name: '管理分类', exact: true }).click();
   const manager = page.getByRole('dialog', { name: '管理文档分类' });

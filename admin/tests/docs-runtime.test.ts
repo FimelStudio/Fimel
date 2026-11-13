@@ -21,7 +21,9 @@ before(async () => {
         if(key==='put')return (name,value,options)=>{if(name.startsWith('audit/')&&(fail==='audit-prepare'||fail==='audit-finish'&&options?.onlyIf?.etagMatches))throw Error('Injected audit failure');return bucket.put(name,value,options);};
         const value=Reflect.get(bucket,key);return typeof value==='function'?value.bind(bucket):value;
       }});
+      let imageHeads=0;
       const publicBucket=new Proxy(env.PUBLIC,{get(bucket,key){
+        if(key==='head')return (name,...args)=>{if(name.startsWith('docs/images/'))imageHeads++;return bucket.head(name,...args);};
         if(key==='put')return async(name,value,options)=>{
           if(fail==='image'&&name.startsWith('docs/images/')||fail==='snapshot'&&name.startsWith('data/docs-snapshots/')||fail==='commit'&&name==='data/docs.json')throw Error('Injected publication failure');
           if(fail==='draft-race'&&name.startsWith('data/docs-snapshots/')){const stored=await env.PRIVATE.get('state/docs.json');const library=await stored.json();library.documents[0].body.zh+='\\n竞态新草稿';await env.PRIVATE.put('state/docs.json',JSON.stringify(library));}
@@ -31,7 +33,7 @@ before(async () => {
         const value=Reflect.get(bucket,key);return typeof value==='function'?value.bind(bucket):value;
       }});
       const assets={async fetch(request){const object=await env.PRIVATE.get('test-assets'+new URL(request.url).pathname);return object?new Response(object.body,{headers:{'Content-Type':object.httpMetadata?.contentType||'application/octet-stream'}}):new Response('missing',{status:404});}};
-      return local.fetch(request,{...env,PRIVATE:privateBucket,PUBLIC:publicBucket,ASSETS:assets},ctx);
+      const response=await local.fetch(request,{...env,PRIVATE:privateBucket,PUBLIC:publicBucket,ASSETS:assets},ctx);response.headers.set('X-Test-Image-Heads',String(imageHeads));return response;
     }};`, resolveDir: process.cwd() }, bundle: true, write: false, format: 'esm', platform: 'browser' });
   runtime = new Miniflare(convertV4MiniflareOptions({ modules: true, script: bundle.outputFiles[0].text, compatibilityDate: '2026-10-14', r2Buckets: ['PRIVATE', 'PUBLIC'], bindings: { ADMIN_ORIGIN: origin, ACCESS_AUD: 'local-test', ACCESS_ISSUER: 'https://local.invalid', ADMIN_EMAILS: 'local-admin@example.invalid' } })); await runtime.ready;
 });
@@ -72,19 +74,34 @@ test('多图文档按批准备且仅最终切换正文，断点可重试、并�
   assert.equal((await publish(state)).status, 409); assert.equal(await (await runtime.getR2Bucket('PUBLIC')).get(DOCS_MANIFEST_KEY), null);
   const prepare = (cursor: number, etag = state.etag) => request('prepare', 'POST', { cursor }, { 'If-Match': etag, 'X-Public-ETag': state.publicEtag });
   assert.equal((await prepare(-1)).status, 422); assert.equal((await prepare(251)).status, 422); assert.equal((await prepare(0, '"stale"')).status, 409);
+  assert.equal((await prepare(24)).status, 409, '不能跳过前一批');
   response = await prepare(0); assert.equal(response.status, 200); assert.deepEqual(await response.json(), { prepared: 24, total: 250, nextCursor: 24 });
   assert.equal((await (await runtime.getR2Bucket('PUBLIC')).list({ prefix: 'docs/images/' })).objects.length, 24);
-  assert.equal((await prepare(0)).status, 200);
+  response = await prepare(0); assert.equal(response.status, 200); assert.deepEqual(await response.json(), { prepared: 24, total: 250, nextCursor: 24 }); assert.equal(response.headers.get('X-Test-Image-Heads'), '0', '重试从服务端完成位置继续');
   for (let cursor = 24; cursor < 250; cursor += 24) { response = await prepare(cursor); assert.equal(response.status, 200, await response.clone().text()); }
   assert.equal(await (await runtime.getR2Bucket('PUBLIC')).get(DOCS_MANIFEST_KEY), null);
-  assert.equal((await publish(state)).status, 200); state = await getState(); assert.equal(state.published!.documents.length, 2);
+  response = await publish(state); assert.equal(response.status, 200); assert.equal(response.headers.get('X-Test-Image-Heads'), '0', '最终发布使用绑定双ETag的批次凭证'); state = await getState(); assert.equal(state.published!.documents.length, 2);
   assert.ok(state.published!.documents[1].body.zh?.includes('https://download.studiofimel.com/docs/images/'));
   assert.ok((await events()).some(event => event.operation === 'prepare-docs-images' && event.status === 'success'));
   const visible = await (await (await runtime.getR2Bucket('PUBLIC')).get(DOCS_MANIFEST_KEY))!.text();
+  const unchanged = structuredClone(state.published!.documents[1]);
+  state.library.documents[0].body.zh += '\n只修改第一篇文字';
+  response = await save(state.library, state.etag); state = await response.json() as DocsState;
+  response = await prepare(0); assert.equal(response.status, 200); assert.deepEqual(await response.json(), { prepared: 24, total: 125, nextCursor: 24 }, '只检查改动文章的图片');
+  assert.equal((await publish(state)).status, 409, '未完成批次不能发布');
+  for (let cursor = 24; cursor < 125; cursor += 24) assert.equal((await prepare(cursor)).status, 200);
+  const privateBucket = await runtime.getR2Bucket('PRIVATE');
+  const preparation = (await privateBucket.list({ prefix: 'state/docs-preparations/' })).objects;
+  for (const object of preparation) { const record = await (await privateBucket.get(object.key))!.json() as Record<string, unknown>; if (record.etag === state.etag && record.publicEtag === state.publicEtag) await privateBucket.put(object.key, JSON.stringify({ ...record, expiresAt: '2020-01-01T00:00:00.000Z' })); }
+  assert.equal((await publish(state)).status, 409, '过期凭证必须重新准备');
+  for (let cursor = 0; cursor < 125; cursor += 24) assert.equal((await prepare(cursor)).status, 200);
+  response = await publish(state); assert.equal(response.status, 200); assert.equal(response.headers.get('X-Test-Image-Heads'), '0'); state = await getState(); assert.deepEqual(state.published!.documents[1], unchanged, '未改动文章保留原正文与日期');
+  const latestVisible = await (await (await runtime.getR2Bucket('PUBLIC')).get(DOCS_MANIFEST_KEY))!.text(); assert.notEqual(latestVisible, visible);
+  state.library.documents[0].body.zh += '\n再次修改'; response = await save(state.library, state.etag); state = await response.json() as DocsState;
   const asset = first.images[0], publicBucket = await runtime.getR2Bucket('PUBLIC');
   await publicBucket.put(`docs/images/${first.slug}/${asset.id}/${asset.name}`, png, { httpMetadata: { contentType: 'image/png' }, customMetadata: { docId: 'wrong-owner', assetId: asset.id, sha256: digest } });
   assert.equal((await request('prepare', 'POST', { cursor: 0 }, { 'If-Match': state.etag, 'X-Public-ETag': state.publicEtag })).status, 409);
-  assert.equal((await publish(state)).status, 409); assert.equal(await (await publicBucket.get(DOCS_MANIFEST_KEY))!.text(), visible);
+  assert.equal((await publish(state)).status, 409); assert.equal(await (await publicBucket.get(DOCS_MANIFEST_KEY))!.text(), latestVisible);
 });
 test('草稿CRUD、分类重命名/合并/排序、文档归档恢复在单一CAS保存，永久删除和稳定地址修改拒绝', async () => {
   let state = await seed(); const initial = structuredClone(state);
