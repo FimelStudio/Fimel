@@ -1,4 +1,5 @@
 import type { LocalizedText } from './projects';
+import { inlineImages } from './markdown-images';
 
 export const DOCS_MANIFEST_KEY = 'data/docs.json';
 export const DOCS_MAX_BYTES = 4 * 1024 * 1024;
@@ -50,7 +51,7 @@ export function docsMarkdownImages(source: string, cache?: DocsImageCache): Docs
   const images = findDocsMarkdownImages(source); cache?.set(source, images); return images;
 }
 function findDocsMarkdownImages(source: string): DocsMarkdownImage[] {
-  if (!source.includes('![')) return [];
+  if (!source.includes('![') && !/<img\b/i.test(source)) return [];
   // Preserve offsets with string ranges instead of allocating one entry per character.
   const blank = (value: string) => value.replace(/[^\r\n]+/g, part => ' '.repeat(part.length));
   let fence: { character: string; length: number } | undefined;
@@ -65,7 +66,7 @@ function findDocsMarkdownImages(source: string): DocsMarkdownImage[] {
   const tokens = /\\[\s\S]|`+/g;
   for (let match = tokens.exec(prose); match; match = tokens.exec(prose)) {
     const index = match.index, token = match[0];
-    if (token[0] === '\\') { if (token[1] === '!' || token[1] === '`') ranges.push({ start: index, end: index + 2 }); continue; }
+    if (token[0] === '\\') { if (token[1] === '!' || token[1] === '`' || token[1] === '<') ranges.push({ start: index, end: index + 2 }); continue; }
     const length = token.length; let end = prose.indexOf(token, index + length);
     while (end >= 0 && (prose[end - 1] === '`' || prose[end + length] === '`')) end = prose.indexOf(token, end + length);
     if (end >= 0) { ranges.push({ start: index, end: end + length }); tokens.lastIndex = end + length; }
@@ -75,9 +76,10 @@ function findDocsMarkdownImages(source: string): DocsMarkdownImage[] {
     for (const range of ranges) { parts.push(prose.slice(offset, range.start), blank(prose.slice(range.start, range.end))); offset = range.end; }
     parts.push(prose.slice(offset)); prose = parts.join('');
   }
-  if (!prose.includes('![')) return [];
+  // HTML comments and raw-text elements are never rendered as image markup.
+  prose = prose.replace(/<!--[\s\S]*?(?:-->|$)|<(script|style|textarea|pre)\b[^>]*>[\s\S]*?(?:<\/\1\s*>|$)/gi, blank);
   const decode = (value: string) => value.replace(/\\([!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~])/g, '$1').replace(/&#(?:x([a-f\d]+)|(\d+));?/gi, (full, hex, decimal) => { const code = Number.parseInt(hex ?? decimal, hex ? 16 : 10); return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : full; }).replace(/&colon;/gi, ':');
-  const output: { url: string; start: number; end: number }[] = [];
+  const output: { url: string; start: number; end: number }[] = inlineImages(prose).map(image => ({ url: image.src, start: image.start, end: image.end }));
   const destination = (match: RegExpMatchArray, value: string) => { const local = match[0].lastIndexOf(value); const start = match.index! + local; output.push({ url: decode(value.startsWith('<') ? value.slice(1, -1) : value), start, end: start + value.length }); };
   for (const match of prose.matchAll(/!\[(?:[^\]\\]|\\.)*\]\(\s*(<[^>\r\n]*>|[^\s)]*)/g)) if (match[1]) destination(match, match[1]);
   const labels = new Set<string>(), normalize = (value: string) => value.trim().replace(/\s+/g, ' ').toLowerCase();

@@ -6,6 +6,8 @@
 
 2026-11-13：已按新数据包的规则覆盖原 23 篇中文文档，补充完整组件图鉴及左右图文；432 张独立图片使用像素一致的无损 WebP，体积减少 34.79%。排除新手指南与 README，保留原有文档地址；多图分批发布、正式目录与全量图片校验记录见[规则替换交付记录](fimel-card-rules-update-review.md)。下文 25 张图片和占位截图数量属于首批内容的历史记录。
 
+2026-11-14：新增静态 SVG 上传及 Markdown 表格内 img 图片兼容，官网与 Admin 共享渲染，并支持按原文件名匹配正文相对路径。以 v1.1 发布正文的 23 个实际 SVG 验收；本轮上线状态、使用方法及边界见[SVG 与表格图片交付记录](markdown-svg-tables-review.md)。
+
 ## 已核实与方案
 
 旧交接中“没有 Admin”的描述已经过时。当前是 React／Vite／HashRouter 官网、独立 Access 保护的 Admin Worker，以及 PUBLIC／PRIVATE R2。文档使用独立 `state/docs.json` 与 `data/docs.json`，不挤入作品或网站内容索引，不改作品上传归属。

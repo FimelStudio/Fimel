@@ -127,7 +127,8 @@ test('图片拖入和粘贴均保存草稿且保留归属，非法图片不发�
   await expect(page.getByRole('status')).toContainText('图片已上传并插入正文');
   await target.evaluate((element, bytes) => { const data = new DataTransfer(); data.items.add(new File([new Uint8Array(bytes)], 'paste.png', { type: 'image/png' })); element.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true })); }, [...image]);
   await expect.poll(async () => (await storedLibrary()).documents[0].images.length).toBe(2); await expect(page.getByRole('status')).toContainText('图片已上传并插入正文'); expect(uploads).toBe(2);
-  await page.getByLabel('选择文档正文图片').setInputFiles({ name: 'test.svg', mimeType: 'image/svg+xml', buffer: Buffer.from('<svg/>') }); await expect(page.getByRole('alert')).toContainText('仅支持'); expect(uploads).toBe(2);
+  await expect(target).toBeEditable();
+  await page.getByLabel('选择文档正文图片').setInputFiles({ name: 'test.gif', mimeType: 'image/gif', buffer: Buffer.from('GIF89a') }); await expect(page.getByRole('alert')).toContainText('仅支持'); expect(uploads).toBe(2);
 });
 
 test('保存409保留正文并可导出，本机恢复按操作者保留', async ({ page }) => {

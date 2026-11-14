@@ -2,6 +2,7 @@ import { MAX_FILE_SIZE, MAX_IMAGE_SIZE, MIME_TYPES, PART_SIZE } from '../shared/
 import type { Asset, Upload } from '../shared/model';
 import { ApiError, json, putJson, readJson } from './http';
 import { libraryState, listAll } from './storage';
+import { MAX_SVG_SIZE, validateSvg } from '../shared/svg';
 
 const sessionKey = (id: string) => `uploads/sessions/${id}.json`;
 const receiptKey = (id: string, part: number) => `uploads/receipts/${id}/${String(part).padStart(3, '0')}.json`;
@@ -44,8 +45,8 @@ export async function uploadRoute(request: Request, bucket: R2Bucket, segments: 
     const extension = input.name.split('.').pop()!.toLowerCase();
     if(!input.name.includes('.')||input.displayName!==undefined&&(typeof input.displayName!=='string'||input.displayName.length>200||Array.from(input.displayName).some(char=>char.charCodeAt(0)<32||char.charCodeAt(0)===127)))throw new ApiError(422,'文件名称格式不合法或超过 200 字符。');
     const mime = MIME_TYPES[extension];
-    const image = ['png', 'jpg', 'jpeg', 'webp'].includes(extension);
-    if (!mime || input.kind !== (image ? 'image' : 'file') || !Number.isInteger(input.size) || input.size! < 1 || input.size! > (image ? MAX_IMAGE_SIZE : MAX_FILE_SIZE)) throw new ApiError(422, '文件类型或大小不符合要求。');
+    const image = ['png', 'jpg', 'jpeg', 'webp', 'svg'].includes(extension);
+    if (!mime || input.kind !== (image ? 'image' : 'file') || !Number.isInteger(input.size) || input.size! < 1 || input.size! > (extension === 'svg' ? MAX_SVG_SIZE : image ? MAX_IMAGE_SIZE : MAX_FILE_SIZE)) throw new ApiError(422, '文件类型或大小不符合要求（SVG ≤1 MiB，其他图片 ≤10 MiB）。');
     if (input.sha256 !== undefined && (typeof input.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(input.sha256))) throw new ApiError(422, '完整 SHA-256 格式错误。');
     const state = await libraryState(bucket); const work = state.value.works.find(w => w.id === input.workId);
     if (!work || !image && !work.versions.some(v => v.id === input.versionId)) throw new ApiError(422, '先保存作品与版本，再上传文件。');
@@ -132,9 +133,16 @@ export async function uploadRoute(request: Request, bucket: R2Bucket, segments: 
       if (!await bucket.head(upload.key)) await multipart.complete(parts);
       const source = await bucket.get(upload.key);
       if (!source || source.size !== upload.size) throw new ApiError(422, 'R2 对象大小不匹配。');
+      // SVG is bounded separately: inspect the complete XML before any verified object exists.
+      let svg: ArrayBuffer | undefined;
+      if (upload.mime === 'image/svg+xml') {
+        if (source.size > MAX_SVG_SIZE) throw new ApiError(422, 'SVG 不能超过 1 MiB。');
+        svg = await source.arrayBuffer();
+        try { validateSvg(new Uint8Array(svg)); } catch (cause) { throw new ApiError(422, cause instanceof Error ? cause.message : 'SVG 校验失败。'); }
+      }
       const verifiedKey = `uploads/verified/${id}/${upload.name}`;
       let verified = await bucket.head(verifiedKey);
-      if (!verified) verified = await bucket.put(verifiedKey, source.body, { onlyIf: { etagDoesNotMatch: '*' }, sha256: input.sha256,
+      if (!verified) verified = await bucket.put(verifiedKey, svg ?? source.body, { onlyIf: { etagDoesNotMatch: '*' }, sha256: input.sha256,
         httpMetadata: { contentType: upload.mime, cacheControl: 'no-store' },
         customMetadata: { workId: upload.workId, versionId: upload.versionId ?? '', kind: upload.kind, sha256: input.sha256, assetId: id } });
       if (!verified || verified.size !== upload.size || verified.customMetadata?.sha256 !== input.sha256) throw new ApiError(422, '文件完整性验证失败。');
@@ -154,6 +162,7 @@ function checkSignature(bytes: Uint8Array, name: string) {
   const ext = name.split('.').pop()!.toLowerCase();
   const zip = bytes[0] === 0x50 && bytes[1] === 0x4b && [3, 5, 7].includes(bytes[2]);
   const ok = ext === 'png' ? [137,80,78,71,13,10,26,10].every((b,i) => bytes[i] === b) :
+    ext === 'svg' ? true : // Full, strict XML validation happens before completion, not on this 12-byte prefix.
     ['jpg', 'jpeg'].includes(ext) ? bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255 :
     ext === 'webp' ? new TextDecoder().decode(bytes.slice(0,4)) === 'RIFF' && new TextDecoder().decode(bytes.slice(8,12)) === 'WEBP' :
     ext === 'exe' ? bytes[0] === 77 && bytes[1] === 90 : zip;

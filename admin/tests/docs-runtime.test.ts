@@ -59,6 +59,26 @@ test('真实Admin身份/CSRF入口保护所有文档与示例，空库不创建�
   assert.equal(await (await runtime.getR2Bucket('PUBLIC')).get(DOCS_MANIFEST_KEY), null);
 });
 
+test('SVG 文档表格从私有上传、归属校验到公开投影保持尺寸与哈希，主动内容拒绝', async () => {
+  let state = await seed();
+  const svg = new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" fill="#00ffff"/></svg>');
+  const headers = { 'Content-Type': 'image/svg+xml', 'X-File-Name': encodeURIComponent('游戏图标.svg') };
+  for (const text of ['<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>', '<svg xmlns="http://www.w3.org/2000/svg"><use href="https://example.com/icon.svg"/></svg>']) {
+    const response = await upload(state, 0, headers, new TextEncoder().encode(text)); assert.equal(response.status, 422);
+  }
+  assert.equal((await (await runtime.getR2Bucket('PRIVATE')).list({ prefix: 'docs/uploads/' })).objects.length, 0);
+  let response = await upload(state, 0, headers, svg); assert.equal(response.status, 200, await response.clone().text());
+  const { asset } = await response.json() as { asset: Asset }; assert.equal(asset.mime, 'image/svg+xml'); assert.equal(asset.sha256, await hash(svg));
+  const doc = state.library.documents[0]; doc.images.push(asset); doc.workflow = 'ready'; doc.body.zh = `| 图标 | 名称 |\n| --- | --- |\n| <img src="fimel-doc-image:${asset.id}" width="40" height="40" alt="游戏图标"> | 牌类 |`;
+  response = await save(state.library, state.etag); assert.equal(response.status, 200, await response.clone().text()); state = await response.json() as DocsState;
+  response = await request(`media/${doc.id}/${asset.id}/${asset.name}`); assert.equal(response.headers.get('Content-Type'), 'image/svg+xml'); assert.match(response.headers.get('Content-Security-Policy')!, /sandbox/); assert.deepEqual(new Uint8Array(await response.arrayBuffer()), svg);
+  response = await publish(state); assert.equal(response.status, 200, await response.clone().text()); state = await getState();
+  const published = state.published!.documents[0].body.zh!; assert.ok(!published.includes('fimel-doc-image:')); assert.match(published, /width="40" height="40"/);
+  const image = (await (await runtime.getR2Bucket('PUBLIC')).list({ prefix: 'docs/images/' })).objects[0];
+  assert.deepEqual(new Uint8Array(await (await (await runtime.getR2Bucket('PUBLIC')).get(image.key))!.arrayBuffer()), svg);
+  const foreign = structuredClone(state.library); foreign.documents[0].images = []; assert.equal((await save(foreign, state.etag)).status, 422);
+});
+
 test('多图文档按批准备且仅最终切换正文，断点可重试、并发条件和图片校验保持', async () => {
   let state = await seed(); const library = state.library, first = library.documents[0];
   const second = { ...makeDoc(first.categoryId), slug: 'many-pictures', title: '大量图片', body: { zh: '' }, workflow: 'ready' as const };

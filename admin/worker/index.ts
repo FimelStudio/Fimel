@@ -44,7 +44,8 @@ export async function handle(request: Request, env: AdminEnv, ctx: AccessContext
   secured.headers.set('Referrer-Policy', 'same-origin');
   secured.headers.set('X-Frame-Options', 'DENY');
   secured.headers.set('Cache-Control', 'no-store');
-  secured.headers.set('Content-Security-Policy', ADMIN_CSP);
+  // Keep the stricter SVG policy as well as the normal Admin policy.
+  secured.headers.append('Content-Security-Policy', ADMIN_CSP);
   return secured;
 }
 async function route(request: Request, env: AdminEnv, email: string, source?:AuditedSource): Promise<Response> {
@@ -97,7 +98,7 @@ async function route(request: Request, env: AdminEnv, email: string, source?:Aud
     const upload = session ? await session.json<Upload>() : null;
     if (!upload?.asset?.privateKey || upload.kind !== 'image') throw new ApiError(404, '图片不存在。');
     const object = await env.PRIVATE.get(upload.asset.privateKey); if (!object) throw new ApiError(404, '图片不存在。');
-    return new Response(object.body, { headers: { 'Content-Type': upload.mime, 'Cache-Control': 'no-store' } });
+    return new Response(object.body, { headers: { 'Content-Type': upload.mime, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', ...(upload.mime === 'image/svg+xml' ? { 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; sandbox" } : {}) } });
   }
   if (path[0] === 'library' && path.length === 1) {
     const state = source?.library ?? await libraryState(env.PRIVATE);

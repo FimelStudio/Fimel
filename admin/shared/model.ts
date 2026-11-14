@@ -49,6 +49,7 @@ export function makeWork(): Work {
 }
 
 export const MIME_TYPES: Record<string, string> = {
+  svg: 'image/svg+xml',
   png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp',
   zip: 'application/zip', jar: 'application/java-archive', exe: 'application/vnd.microsoft.portable-executable',
   mcworld: 'application/zip', mcpack: 'application/zip', mctemplate: 'application/zip',

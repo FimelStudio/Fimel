@@ -2,6 +2,7 @@ import { useEffect, useImperativeHandle, useRef, useState, type Ref } from 'reac
 import { UploadCloud, X, RotateCcw } from 'lucide-react';
 import { api, RequestError } from './api';
 import { MAX_FILE_SIZE, MAX_IMAGE_SIZE, MIME_TYPES, PART_SIZE } from '../shared/model';
+import { MAX_SVG_SIZE, validateSvg } from '../shared/svg';
 import type { Asset, Upload } from '../shared/model';
 
 export type UploadHandle = { start(files: File[]): Promise<void> };
@@ -54,8 +55,9 @@ export function UploadPanel({ workId, versionId, kind, disabled, disabledHint, c
     try {
       for (const file of files) {
         const ext = file.name.split('.').pop()!.toLowerCase();
-        if (!MIME_TYPES[ext] || file.size < 1 || file.size > (kind === 'image' ? MAX_IMAGE_SIZE : MAX_FILE_SIZE) || (kind === 'image') !== ['png','jpg','jpeg','webp'].includes(ext)) throw new Error('格式不支持或文件超过限制。');
+        if (!MIME_TYPES[ext] || file.size < 1 || file.size > (ext === 'svg' ? MAX_SVG_SIZE : kind === 'image' ? MAX_IMAGE_SIZE : MAX_FILE_SIZE) || (kind === 'image') !== ['png','jpg','jpeg','webp','svg'].includes(ext)) throw new Error('格式不支持或文件超过限制。');
       }
+      for (const file of files) if (/\.svg$/i.test(file.name)) validateSvg(new Uint8Array(await file.arrayBuffer()));
       if (beforeUpload) {
         setLabel('正在保存私有草稿，随后开始上传…');
         if (!await beforeUpload(files)) throw new Error('草稿未能保存，尚未开始上传。请修正提示的问题，再重试上传。');
@@ -66,7 +68,7 @@ export function UploadPanel({ workId, versionId, kind, disabled, disabledHint, c
         if (abort.signal.aborted) throw new Error('上传已暂停，可重新选择同一文件续传。');
         setProgress(0); session.current = null;
         const ext = file.name.split('.').pop()!.toLowerCase();
-        if (!MIME_TYPES[ext] || file.size < 1 || file.size > (kind === 'image' ? MAX_IMAGE_SIZE : MAX_FILE_SIZE) || (kind === 'image') !== ['png','jpg','jpeg','webp'].includes(ext)) throw new Error('格式不支持或文件超过限制。');
+        if (!MIME_TYPES[ext] || file.size < 1 || file.size > (ext === 'svg' ? MAX_SVG_SIZE : kind === 'image' ? MAX_IMAGE_SIZE : MAX_FILE_SIZE) || (kind === 'image') !== ['png','jpg','jpeg','webp','svg'].includes(ext)) throw new Error('格式不支持或文件超过限制。');
         const checked = await hash(file, abort.signal);
         const stem=file.name.slice(0,-ext.length-1).replace(/[^a-zA-Z0-9_-]/g,'-').replace(/^[^a-zA-Z0-9]+/,'').slice(0,120)||'file';
         const name=`${stem}.${ext}`;
@@ -118,8 +120,8 @@ export function UploadPanel({ workId, versionId, kind, disabled, disabledHint, c
   }
   if (compact && !label && !error && !busy) return null;
   return <div className={`upload-panel${dragging?' upload-drag-over':''}`} onDragOver={event=>{if(kind==='file'&&event.dataTransfer.types.includes('Files')){event.preventDefault();event.dataTransfer.dropEffect=busy||disabled?'none':'copy';if(!busy&&!disabled)setDragging(true);}}} onDragLeave={()=>setDragging(false)} onDrop={event=>{if(kind!=='file')return;event.preventDefault();setDragging(false);if(!busy&&!disabled)void start(Array.from(event.dataTransfer.files));}}>
-    {!compact && <label className="upload-picker"><UploadCloud size={22}/><span>{kind === 'image' ? '添加封面图片' : '上传发行文件'}<small>{kind === 'image' ? 'PNG / JPEG / WebP · 每张 ≤ 10 MiB' : 'ZIP / JAR / EXE / MCWORLD / MCPACK · ≤ 1 GiB'}</small></span>
-      <input aria-label={kind === 'image' ? '选择图片' : '选择发行文件'} type="file" multiple accept={kind === 'image' ? '.png,.jpg,.jpeg,.webp' : '.zip,.jar,.exe,.mcworld,.mcpack,.mctemplate'} disabled={busy || disabled} onChange={e => { const files = Array.from(e.target.files ?? []); if (files.length) void start(files); e.target.value = ''; }}/>
+    {!compact && <label className="upload-picker"><UploadCloud size={22}/><span>{kind === 'image' ? '添加封面图片' : '上传发行文件'}<small>{kind === 'image' ? 'PNG / JPEG / WebP ≤10 MiB；SVG ≤1 MiB' : 'ZIP / JAR / EXE / MCWORLD / MCPACK · ≤ 1 GiB'}</small></span>
+      <input aria-label={kind === 'image' ? '选择图片' : '选择发行文件'} type="file" multiple accept={kind === 'image' ? '.png,.jpg,.jpeg,.webp,.svg' : '.zip,.jar,.exe,.mcworld,.mcpack,.mctemplate'} disabled={busy || disabled} onChange={e => { const files = Array.from(e.target.files ?? []); if (files.length) void start(files); e.target.value = ''; }}/>
     </label>}
     {disabled && !busy && <p className="hint">{disabledHint ?? '先保存作品与版本，上传后仍须发布才会公开。'}</p>}
     {kind==='file'&&!disabled&&!compact&&<p className="hint">可拖入文件或一次选择多个文件。上传前自动保存当前作品草稿；上传完成后请保存文件关联，再通过发布预览公开。</p>}

@@ -6,6 +6,7 @@ import type { Asset } from '../shared/model';
 import { PUBLIC_ORIGIN } from '../shared/model';
 import type { AuditChange, AuditEvent } from '../shared/audit';
 import { stable } from '../shared/revisions';
+import { MAX_SVG_SIZE, validateSvg } from '../shared/svg';
 import { actorKey } from './audit';
 import { ApiError, EMPTY_ETAG, expectMatch, json, putJson, readJson } from './http';
 
@@ -183,10 +184,12 @@ function imageType(bytes: Uint8Array) {
   if (bytes.length >= 24 && bytes.slice(0, 8).every((byte, index) => byte === [137, 80, 78, 71, 13, 10, 26, 10][index])) return { mime: 'image/png', extension: 'png' };
   if (bytes.length >= 4 && bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255) return { mime: 'image/jpeg', extension: 'jpg' };
   if (bytes.length >= 16 && new TextDecoder().decode(bytes.slice(0, 4)) === 'RIFF' && new TextDecoder().decode(bytes.slice(8, 12)) === 'WEBP') return { mime: 'image/webp', extension: 'webp' };
-  throw new ApiError(422, '只接受有正确文件签名的 PNG、JPEG 或 WebP 图片。');
+  try { validateSvg(bytes); return { mime: 'image/svg+xml', extension: 'svg' }; }
+  catch { throw new ApiError(422, '只接受有效的 PNG、JPEG、WebP 或静态 SVG（≤1 MiB），SVG 不得含脚本、动画或外部引用。'); }
 }
 async function storeImage(env: DocsEnv, docId: string, name: string, bytes: Uint8Array<ArrayBuffer>, declaredMime: string, expectedHash: string): Promise<Asset> {
   if (!bytes.byteLength || bytes.byteLength > MAX_IMAGE) throw new ApiError(413, '图片大小必须为 1 字节至 10 MiB。');
+  if (declaredMime === 'image/svg+xml' && bytes.byteLength > MAX_SVG_SIZE) throw new ApiError(413, 'SVG 不能超过 1 MiB。');
   const detected = imageType(bytes); if (detected.mime !== declaredMime) throw new ApiError(422, '图片类型与文件签名不一致。');
   if (!/^[a-f0-9]{64}$/.test(expectedHash) || await sha256(bytes) !== expectedHash) throw new ApiError(422, '图片 SHA-256 校验失败。');
   const id = crypto.randomUUID(), fileName = `${id}.${detected.extension}`, key = `docs/uploads/${docId}/${id}/${fileName}`;
@@ -206,8 +209,8 @@ async function media(env: DocsEnv, docId: string, assetId: string, name: string)
   if (!docsId(docId) || !docsId(assetId) || !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,119}$/.test(name)) throw new ApiError(404, '文档图片不存在。');
   const current = await state(env); if (!current.library.documents.some(doc => doc.id === docId)) throw new ApiError(404, '文档不存在。');
   const object = await env.PRIVATE.get(`docs/uploads/${docId}/${assetId}/${name}`);
-  if (!object || object.size > MAX_IMAGE || object.customMetadata?.docId !== docId || object.customMetadata?.assetId !== assetId || !/^[a-f0-9]{64}$/.test(object.customMetadata?.sha256 ?? '') || !['image/png', 'image/jpeg', 'image/webp'].includes(object.httpMetadata?.contentType ?? '')) throw new ApiError(404, '图片归属或验证信息不正确。');
-  return new Response(object.body, { headers: { 'Content-Type': object.httpMetadata!.contentType!, 'Cache-Control': 'no-store' } });
+  if (!object || object.size > MAX_IMAGE || object.customMetadata?.docId !== docId || object.customMetadata?.assetId !== assetId || !/^[a-f0-9]{64}$/.test(object.customMetadata?.sha256 ?? '') || !['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'].includes(object.httpMetadata?.contentType ?? '')) throw new ApiError(404, '图片归属或验证信息不正确。');
+  return new Response(object.body, { headers: { 'Content-Type': object.httpMetadata!.contentType!, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', ...(object.httpMetadata!.contentType === 'image/svg+xml' ? { 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; sandbox" } : {}) } });
 }
 async function example(request: Request, env: DocsEnv): Promise<DocsExampleSource> {
   const response = await env.ASSETS.fetch(new Request(new URL('/migration/docs-example/docs-example.json', request.url)));

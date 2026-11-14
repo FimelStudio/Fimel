@@ -25,7 +25,7 @@ test('new draft is private; publish → public manifest → unpublish → republ
   const off=await state();assert.equal(off.data.public.projects.length,0);assert.equal((await req(`publish/${w.id}`,'POST',{}, {'If-Match':off.etag,'X-Public-ETag':off.data.publicEtag})).status,200);
 });
 test('private snapshots and restore create backup before update',async()=>{const history=await req('history');const items=await history.json() as {snapshots:{key:string}[]};const snapshot=items.snapshots.find(x=>x.key.startsWith('backups/library/'))!;assert.ok(snapshot);const s=await state();const [ ,kind,id ]=snapshot.key.split('/');const r=await req(`restore/${kind}/${id.replace('.json','')}`,'POST',{}, {'If-Match':s.etag});assert.equal(r.status,200,await r.text());});
-test('upload validates limits, filename, extension and association',async()=>{const w=await add('upload-tests');for(const input of [{name:'a.svg',size:10,kind:'image'},{name:123,size:10,kind:'file'},{name:'a.png',displayName:'bad\u0000name.png',size:10,kind:'image'},{name:'../a.zip',size:10,kind:'file'},{name:'a.zip',size:MAX_FILE_SIZE+1,kind:'file'},{name:'a.zip',size:10,kind:'file'}]){assert.equal((await req('uploads','POST',{...input,workId:w.id})).status,422);}});
+test('upload validates limits, filename, extension and association',async()=>{const w=await add('upload-tests');for(const input of [{name:'a.svg',size:1024*1024+1,kind:'image'},{name:'a.svg',size:10,kind:'file'},{name:123,size:10,kind:'file'},{name:'a.png',displayName:'bad\u0000name.png',size:10,kind:'image'},{name:'../a.zip',size:10,kind:'file'},{name:'a.zip',size:MAX_FILE_SIZE+1,kind:'file'},{name:'a.zip',size:10,kind:'file'}]){assert.equal((await req('uploads','POST',{...input,workId:w.id})).status,422);}});
 
 test('uploaded cover stays separate from body images and deleted images never reappear after republishing',async()=>{
   const w=await add('uploaded-cover');const priv=await mf.getR2Bucket('PRIVATE');const pub=await mf.getR2Bucket('PUBLIC');
@@ -91,6 +91,27 @@ async function upload(size:number, options:{wrongHash?:boolean;cancel?:boolean}=
   const full=createHash('sha256');for await(const bytes of downloaded!.body)full.update(bytes);assert.equal(full.digest('hex'),hash);
 }
 test('multipart completion checks SHA-256 in actual local R2',async()=>{await upload(1024);await upload(1024,{wrongHash:true});await upload(1024,{cancel:true});});
+
+test('SVG 完成接口在写入验证区前检查全文件，合法图标可通过作品表格发布',async()=>{
+  const w=await add('svg-table'); const bucket=await mf.getR2Bucket('PRIVATE');
+  let asset:Asset|undefined;
+  for(const content of ['<script>alert(1)</script>','<use href="https://example.com/external.svg#x"/>','<rect width="40" height="40" fill="#0ff"/>']){
+    const bytes=Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">${content}</svg>`);
+    const digest=createHash('sha256').update(bytes).digest('hex');
+    const created=await req('uploads','POST',{name:'icon.svg',displayName:'游戏图标.svg',size:bytes.length,kind:'image',workId:w.id,sha256:digest}); assert.equal(created.status,201,await created.clone().text());
+    const {upload:s}=await created.json()as{upload:Upload};
+    const part=await mf.dispatchFetch(`http://127.0.0.1/api/uploads/${s.id}/parts/1`,{method:'PUT',headers:{Origin:origin,'X-Fimel-CSRF':'1','Content-Type':'application/octet-stream','Content-Length':String(bytes.length),'X-Part-SHA256':digest},body:bytes});assert.equal(part.status,200,await part.clone().text());
+    const complete=await req(`uploads/${s.id}/complete`,'POST',{sha256:digest});
+    if(!content.startsWith('<rect')){assert.equal(complete.status,422);assert.equal(await bucket.head(`uploads/verified/${s.id}/icon.svg`),null);assert.equal((await req(`media/${s.id}`)).status,404);assert.equal((await req(`uploads/${s.id}`,'DELETE')).status,200);continue;}
+    assert.equal(complete.status,200,await complete.clone().text());asset=(await complete.json()as{asset:Asset}).asset;
+    const media=await req(`media/${s.id}`);assert.equal(media.headers.get('Content-Type'),'image/svg+xml');assert.deepEqual(Buffer.from(await media.arrayBuffer()),bytes);
+  }
+  assert.ok(asset);const current=await state();const target=current.data.library.works.find(item=>item.id===w.id)!;target.gallery=[asset];target.markdown.description.zh=`| 图标 | 名称 |\n| --- | --- |\n| <img src="fimel-asset:${asset.id}" width="40" height="40"> | SVG |`;
+  assert.equal((await req('library','PUT',current.data.library,{'If-Match':current.etag})).status,200);
+  const ready=await state();const published=await req(`publish/${w.id}`,'POST',{}, {'If-Match':ready.etag,'X-Public-ETag':ready.data.publicEtag});assert.equal(published.status,200,await published.clone().text());
+  const pub=await mf.getR2Bucket('PUBLIC'),manifest=await(await pub.get('data/works.json'))!.json()as{projects:Array<typeof w.project>};const project=manifest.projects.find(item=>item.slug===w.project.slug)!;
+  const content=project.content.description;const url=typeof content==='string'?content:content!.zh!;const body=await(await pub.get(new URL(url).pathname.slice(1)))!.text();assert.match(body,/<img src="https:\/\/download\.studiofimel\.com\/images\/.+\.svg" width="40" height="40">/);assert.ok(!body.includes('fimel-asset:'));
+});
 test('native R2 part verification rejects corrupted retries and cleans staging objects without touching verified files',async()=>{
   const w=await add('native-part-check');w.versions=[{id:'v1',label:'1.0',date:'2026-10-15',gameVersions:[],status:'draft',changelog:{zh:'checksum verification'},files:[]}];
   const current=await state();current.data.library.works=current.data.library.works.map(x=>x.id===w.id?w:x);assert.equal((await req('library','PUT',current.data.library,{'If-Match':current.etag})).status,200);

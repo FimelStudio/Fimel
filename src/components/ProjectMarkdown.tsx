@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import Markdown, { defaultUrlTransform } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { remarkImages } from '../content/remark-images';
+import { MarkdownImage } from './MarkdownImage';
 import { Link, useInRouterContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { assetUrl } from '../content/projects';
@@ -60,13 +62,13 @@ export function ProjectMarkdownBody({ content, fileUrl, resolveAsset }: {
   content: string; fileUrl: URL; resolveAsset?: (id: string) => string | undefined;
 }) {
   const inRouter = useInRouterContext();
-  return <div className="project-markdown"><Markdown remarkPlugins={[remarkGfm]} skipHtml
+  return <div className="project-markdown"><Markdown remarkPlugins={[remarkGfm, remarkImages]} skipHtml
     urlTransform={(url, key) => url.startsWith('fimel-asset:') ? key === 'src' ? resolveAsset?.(url.slice('fimel-asset:'.length)) ?? '' : '' : defaultUrlTransform(url)} components={{
     p: ({ node, children }) => {
       // Standard Markdown: adjacent image lines (no blank line) form one
       // image-only paragraph. Mixed text or linked images stay normal prose.
       const imageOnly = node?.children.length && node.children.every((child) =>
-        child.type === 'element' && child.tagName === 'img' || child.type === 'text' && !child.value.trim());
+        child.type === 'element' && child.tagName === 'img' && !child.properties.width && !child.properties.height || child.type === 'text' && !child.value.trim());
       if (imageOnly) {
         const images: ProjectGalleryImage[] = [];
         for (const child of node!.children) {
@@ -88,7 +90,7 @@ export function ProjectMarkdownBody({ content, fileUrl, resolveAsset }: {
       const external = resolved ? new URL(resolved).origin !== window.location.origin : false;
       return <a href={resolved} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined} download={resolved && /\.(jar|zip)(?:\?|$)/i.test(resolved) && !external ? true : undefined}>{children}</a>;
     },
-    img: ({ src, alt }) => <img src={resolveContentUrl(typeof src === 'string' ? src : undefined, fileUrl, true)} alt={alt ?? ''} loading="lazy" decoding="async" />,
+    img: ({ src, alt, title, width, height }) => <MarkdownImage src={resolveContentUrl(typeof src === 'string' ? src : undefined, fileUrl, true)} alt={alt} title={title} width={width} height={height}/>,
     table: ({ children }) => <div className="markdown-table-scroll"><table>{children}</table></div>,
   }}>{content}</Markdown></div>;
 }

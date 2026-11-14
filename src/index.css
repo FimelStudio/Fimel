@@ -206,6 +206,9 @@
 .project-markdown th, .project-markdown td { padding: .8rem 1rem; border-bottom: 1px solid var(--color-line); text-align: left; vertical-align: top; }
 .project-markdown th { font-weight: 650; color: var(--color-content); background: var(--color-surface); }
 .project-markdown tbody tr:nth-child(2n) { background: var(--color-surface); }
+.project-markdown :is(td, th) img { width: 88px; max-width: 100%; max-height: 160px; height: auto; object-fit: contain; margin: 0 auto; }
+.project-markdown :is(td, th) img[width] { max-width: none; }
+.project-markdown tr:has(img) :is(td, th) { vertical-align: middle; }
 
 /* Image-only Markdown paragraphs become a native, swipeable media frame. */
 .project-gallery { width: 100%; min-width: 0; margin: 1.5rem 0; border: 1px solid var(--color-line); border-radius: 2px; overflow: hidden; background: var(--color-surface); }
