@@ -14,9 +14,10 @@ import { stable } from '../shared/revisions';
 import { api } from './api';
 import { TextChanges } from './TextChanges';
 import { previewReleases } from './preview-releases';
+import type { PublicationPhase } from './work-publication';
 
 type Published = { project: Project | null; markdown: Work['markdown'] | null; releases: DownloadRelease[]; unavailable?: string[] };
-export function PublicationPreview({ work, before, busy, onClose, onPublish }: { work: Work; before: Project | null; busy: boolean; onClose(): void; onPublish(): void }) {
+export function PublicationPreview({ work, before, busy, phase, publishError, onClose, onPublish }: { work: Work; before: Project | null; busy: boolean; phase?: PublicationPhase|null; publishError?: string; onClose(): void; onPublish(): void }) {
   const dialog = useRef<HTMLDialogElement>(null); const { i18n } = useTranslation();
   const [locale,setLocale]=useState<Locale>('zh'),[tab,setTab]=useState<ProjectTab>('description'),[device,setDevice]=useState('desktop'),[version,setVersion]=useState('draft');
   const [published,setPublished]=useState<Published|null>(null),[error,setError]=useState('');
@@ -45,7 +46,7 @@ export function PublicationPreview({ work, before, busy, onClose, onPublish }: {
   else if(previous?.featuredImage&&!work.project.featuredImage)changes.push('清除精选封图（沿用作品封面）');
   const bodyChanges=published?.markdown?(['description','changelog','versions'] as const).flatMap(key=>LOCALES.filter(l=>work.markdown[key][l]!==published.markdown?.[key][l]).map(l=>`${label[key]} · ${l}`)):[];
   const display=project?projectCopy(project,previewI18n.t.bind(previewI18n),locale):null;
-  return <dialog ref={dialog} className="publication-dialog modal visual-publication" onCancel={onClose} aria-labelledby="preview-title">
+  return <dialog ref={dialog} className="publication-dialog modal visual-publication" onCancel={event=>{if(busy)event.preventDefault();else onClose();}} aria-labelledby="preview-title">
     <h2 id="preview-title">发布预览</h2><p>检查当前已保存草稿。确认发布后才会替换官网内容；预览不会下载文件或修改线上数据。</p>
     <div className="button-row preview-controls"><button aria-pressed={!viewingPublished} onClick={()=>setVersion('draft')}>即将发布</button><button disabled={!previous||!published} aria-pressed={viewingPublished} onClick={()=>setVersion('published')}>当前官网</button><label>预览宽度<select value={device} onChange={e=>setDevice(e.target.value)}><option value="desktop">桌面</option><option value="mobile">手机 · 390 px</option></select></label><label>正文语言<select value={locale} onChange={e=>setLocale(e.target.value as Locale)}>{LOCALES.map(l=><option key={l} value={l}>{l}</option>)}</select></label></div>
     {error&&<p role="alert" className="error">{error}，无法核对旧正文；当前草稿预览仍可使用。</p>}
@@ -63,7 +64,11 @@ export function PublicationPreview({ work, before, busy, onClose, onPublish }: {
       </article>:<p>此作品尚未公开。</p>}
     </div></I18nextProvider>
     <details><summary>查看原始数据</summary><pre>{JSON.stringify({project:work.project,markdown:work.markdown,versions:work.versions.filter(v=>v.status==='released').map(v=>({label:v.label,files:v.files.map(f=>({name:f.name,size:f.size,sha256:f.sha256}))}))},null,2)}</pre></details>
-    <div className="button-row"><button autoFocus onClick={onClose} disabled={busy}>返回编辑</button><button className="primary" disabled={busy} onClick={onPublish}>{busy?'发布中…':'确认发布'}</button></div>
+    <div className="publication-actions">
+      {phase&&<p role="status">{phase==='checking'?'正在核对官网发布结果…':'正在发布已保存草稿。请保留页面；等待超过 90 秒将自动核对结果。'}</p>}
+      {publishError&&<p role="alert" className="error">{publishError}</p>}
+      <div className="button-row"><button autoFocus onClick={onClose} disabled={busy}>返回编辑</button><button className="primary" disabled={busy} onClick={onPublish}>{phase==='checking'?'核对结果中…':busy?'发布中…':'确认发布'}</button></div>
+    </div>
     <small>正文预览与官网共用 Markdown、图片轮播和下载组件。</small>
   </dialog>;
 }

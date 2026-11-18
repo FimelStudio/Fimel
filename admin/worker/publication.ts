@@ -66,18 +66,29 @@ async function publishAsset(work: Work, asset: Asset, priv: R2Bucket, pub: R2Buc
     if (featured && (!asset.publicUrl.startsWith(`${PUBLIC_ORIGIN}/images/${work.project.type}/${work.project.slug}/`) || existing.customMetadata?.assetId !== asset.id || existing.customMetadata.sha256 !== asset.sha256 || existing.httpMetadata?.contentType !== asset.mime || !asset.mime.startsWith('image/'))) throw new ApiError(422, '精选封图未完成验证或不属于当前作品。');
     return asset.publicUrl;
   }
-  const source = await priv.get(asset.privateKey);
-  if (!source || source.size !== asset.size || !source.customMetadata || source.customMetadata.workId !== work.id ||
-    source.customMetadata.assetId !== asset.id || source.customMetadata.sha256 !== asset.sha256 ||
-    source.customMetadata.versionId !== (versionId ?? '') || source.httpMetadata?.contentType !== asset.mime) throw new ApiError(422, '资源未完成验证或不属于此作品/版本。');
+  // A text-only republish needs metadata, never an unread private download stream.
+  // In particular, do not open every image/archive before checking its public copy.
+  const verified = await priv.head(asset.privateKey);
+  const validSource = (source: R2Object | null): source is R2Object => !!source && source.size === asset.size && source.customMetadata?.workId === work.id &&
+    source.customMetadata.assetId === asset.id && source.customMetadata.sha256 === asset.sha256 &&
+    source.customMetadata.versionId === (versionId ?? '') && source.httpMetadata?.contentType === asset.mime;
+  if (!validSource(verified)) throw new ApiError(422, '资源未完成验证或不属于此作品/版本。');
   const existing = await pub.head(key);
   if (existing) {
-    if (existing.customMetadata?.sha256 !== asset.sha256 || existing.size !== asset.size) throw new ApiError(409, '目标文件存在，禁止覆盖。');
+    if (existing.customMetadata?.sha256 !== asset.sha256 || existing.customMetadata.assetId !== asset.id || existing.size !== asset.size || existing.httpMetadata?.contentType !== asset.mime) throw new ApiError(409, '目标文件存在且验证信息不同，禁止覆盖。');
   } else {
-    const result = await pub.put(key, source.body, { sha256: asset.sha256, onlyIf: { etagDoesNotMatch: '*' },
-      httpMetadata: { contentType: asset.mime, cacheControl: 'public, max-age=31536000, immutable', ...(versionId ? { contentDisposition: `attachment; filename="${asset.name}"; filename*=UTF-8''${encodeURIComponent(asset.displayName??asset.name).replace(/['()*]/g,c=>'%'+c.charCodeAt(0).toString(16).toUpperCase())}` } : {}) },
-      customMetadata: { sha256: asset.sha256, assetId: asset.id } });
-    if (!result) throw new ApiError(409, '目标文件已存在，未覆盖。');
+    const source = await priv.get(asset.privateKey);
+    if (!source) throw new ApiError(422, '私有资源已不存在，请重新上传。');
+    try {
+      if (!validSource(source) || source.httpEtag !== verified.httpEtag) throw new ApiError(409, '资源在发布校验期间已改变，请重新核对。');
+      const result = await pub.put(key, source.body, { sha256: asset.sha256, onlyIf: { etagDoesNotMatch: '*' },
+        httpMetadata: { contentType: asset.mime, cacheControl: 'public, max-age=31536000, immutable', ...(versionId ? { contentDisposition: `attachment; filename="${asset.name}"; filename*=UTF-8''${encodeURIComponent(asset.displayName??asset.name).replace(/['()*]/g,c=>'%'+c.charCodeAt(0).toString(16).toUpperCase())}` } : {}) },
+        customMetadata: { sha256: asset.sha256, assetId: asset.id } });
+      if (!result) throw new ApiError(409, '目标文件已存在，未覆盖。');
+    } finally {
+      // R2 may reject a conditional write before consuming its source stream.
+      if (!source.body.locked) await source.body.cancel().catch(() => {});
+    }
   }
   return `${PUBLIC_ORIGIN}/${key}`;
 }

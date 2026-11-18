@@ -28,6 +28,8 @@ import { DownloadCorrection } from './DownloadCorrection';
 import { SiteEditor } from './SiteEditor';
 import { UploadPanel } from './UploadPanel';
 import { PublicationPreview } from './PublicationPreview';
+import { PublicationUnconfirmed, publishWork } from './work-publication';
+import type { PublicationPhase } from './work-publication';
 import i18n from '../../src/i18n';
 import { UploadSessions } from './UploadSessions';
 import { AuditPanel, AnalyticsPanel } from './Reports';
@@ -52,6 +54,7 @@ export function App() {
   const [docsDirty,setDocsDirty]=useState(false); const [docsBusy,setDocsBusy]=useState(false);
   const busy = working || correctionBusy || docsBusy;
   const [preview, setPreview] = useState(false); const [history, setHistory] = useState<{ key: string; time: string }[] | null>(null);
+  const [publicationPhase,setPublicationPhase]=useState<PublicationPhase|null>(null);
   const [username,setUsername]=useState<string|null>(null);
   const [actorId,setActorId]=useState<string|null>(null);
   const [siteDirty,setSiteDirty]=useState(false);
@@ -113,10 +116,27 @@ export function App() {
     setSelected(record.selected);void recovery.dismiss();setMessage('已恢复本机编辑。再次保存时会核对服务器内容，冲突不会自动覆盖。');
   }
   async function publish(action: 'publish' | 'unpublish') {
+    if (busy) return;
     if (!work || dirty) { setError('请先保存草稿，再发布或下架。'); return; }
-    setBusy(true); setError('');
-    try { await api(`${action}/${work.id}`, { method: 'POST', headers: { 'If-Match': etag, 'X-Public-ETag': publicEtag }, body: '{}' }); setPreview(false); await load(true); setMessage(action === 'publish' ? '发布成功，公开 manifest 已更新。' : '作品已下架，草稿与历史文件保留。'); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : '操作失败。'); } finally { setBusy(false); }
+    setBusy(true); setError(''); setMessage('');
+    try {
+      const result=await publishWork(work,action,etag,publicEtag,setPublicationPhase);
+      let concurrent=false;
+      if(result.snapshot){
+        const {data,etag:revision}=result.snapshot;
+        setPublished(data.public);setPublicEtag(data.publicEtag);setEtag(revision);
+        concurrent=!sameWork(work,data.library.works.find(w=>w.id===work.id));
+        // Keep the original editing base when another administrator changed it.
+        // The next save still uses three-way conflict detection, never that newer base.
+        if(!concurrent){setLibrary(data.library);setOriginal(JSON.stringify(data.library));}
+      }
+      setPreview(false);
+      setMessage(!result.current?'发布请求已完成，但官网随后有其他更新，请重新核对。':!result.snapshot?'服务器已确认操作成功，但暂时无法刷新状态，请稍后重新读取作品。':concurrent?'发布已确认。服务器草稿随后有更新，已保留本页内容，请导出或重新读取后核对。':action==='publish'?'发布成功，公开 manifest 已更新。':'作品已下架，草稿与历史文件保留。');
+    }
+    catch (cause) {
+      if(cause instanceof PublicationUnconfirmed&&cause.snapshot){setPublished(cause.snapshot.data.public);setPublicEtag(cause.snapshot.data.publicEtag);setEtag(cause.snapshot.etag);}
+      setError(cause instanceof Error ? cause.message : '操作失败。');
+    } finally { setBusy(false);setPublicationPhase(null); }
   }
   function create(copy?: Work) {
     if (loading || busy || uploading || !original) return;
@@ -167,7 +187,7 @@ export function App() {
         {filtered.length>20&&<div className="pagination"><button disabled={currentPage===1} onClick={()=>setPage(currentPage-1)}>上一页</button><span>{currentPage} / {Math.ceil(filtered.length/20)}</span><button disabled={currentPage>=Math.ceil(filtered.length/20)} onClick={()=>setPage(currentPage+1)}>下一页</button></div>}
       </>}
       {importPreview&&<ImportPreview plan={importPreview.plan} source={importPreview.source} onClose={()=>setImportPreview(null)} onApply={()=>{setLibrary(importPreview.plan.library);setSelected(null);setHistory(null);setReport(null);setError('');setMessage(`已合并 ${importPreview.plan.added.length} 个新作品到编辑区，请检查后保存草稿。`);setImportPreview(null);}}/>}
-      {preview&&work&&<PublicationPreview work={work} before={published?.projects.find(p=>p.slug===work.project.slug)??null} busy={busy} onClose={()=>setPreview(false)} onPublish={()=>void publish('publish')}/>}
+      {preview&&work&&<PublicationPreview work={work} before={published?.projects.find(p=>p.slug===work.project.slug)??null} busy={busy} phase={publicationPhase} publishError={error} onClose={()=>setPreview(false)} onPublish={()=>void publish('publish')}/>}
       {conflict&&<ConflictReview conflict={conflict} close={()=>setConflict(null)} resolve={(next,current)=>{setLibrary(prev=>({...prev,works:prev.works.map(w=>w.id===next.id?next:w)}));setOriginal(previous=>{const base=JSON.parse(previous) as Library;return JSON.stringify({...base,works:current?base.works.some(w=>w.id===current.id)?base.works.map(w=>w.id===current.id?current:w):[...base.works,current]:base.works.filter(w=>w.id!==next.id)});});setConflict(null);setError('');setMessage('冲突选择已应用到编辑区，请检查后保存草稿。');}}/>}
     </main></div><footer className="admin-footer">Fimel Studio · 内容工作台 <span>中文界面 · 三语作品内容</span></footer>
   </div>;
