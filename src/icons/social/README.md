@@ -1,6 +1,6 @@
 # Social brand icons
 
-QQ, Discord, X and GitHub SVGs are unmodified Simple Icons assets from v16.0.0,
+AFDIAN, QQ, Discord, X and GitHub SVGs are unmodified Simple Icons assets from v16.0.0,
 commit `28241d80f8422eaed317ef968ad1e40b6d0d9163`:
 
 https://github.com/simple-icons/simple-icons/tree/28241d80f8422eaed317ef968ad1e40b6d0d9163/icons
