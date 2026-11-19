@@ -26,17 +26,20 @@ import { workDownloadHistoryPage } from '../../src/lib/work-event-worker';
 export type AdminEnv = Env & ServerSecrets & AnalyticsSecrets;
 export async function handle(request: Request, env: AdminEnv, ctx: AccessContext): Promise<Response> {
   const requestId = crypto.randomUUID();
+  const started = Date.now();
+  const url = new URL(request.url);
+  const write = url.pathname.startsWith('/api/') && !['GET', 'HEAD', 'OPTIONS'].includes(request.method);
+  if (write) console.log(JSON.stringify({ operation: 'write-started', requestId, method: request.method, route: url.pathname.split('/').slice(0, 3).join('/') }));
   let response: Response;
   try {
     const email = await authenticate(request, env, ctx);
-    const url = new URL(request.url);
     protectWrite(request, env.ADMIN_ORIGIN);
     if (!url.pathname.startsWith('/api/')) {
       if (!['GET', 'HEAD'].includes(request.method)) throw new ApiError(405, '不支持此方法。');
       response = await env.ASSETS.fetch(request);
     } else response = await runAudited(request, env.PRIVATE, email, source => route(request, env, email, source));
   } catch (error) {
-    if (!(error instanceof ApiError)) console.error(JSON.stringify({ operation: 'request-failed', requestId }));
+    if (!(error instanceof ApiError)) console.error(JSON.stringify({ operation: 'request-failed', requestId, elapsedMs: Date.now() - started, category: error instanceof Error ? error.name : 'unknown' }));
     response = json({ error: error instanceof ApiError ? error.message : '存储服务暂时不可用，操作未确认成功。', requestId }, error instanceof ApiError ? error.status : 503);
   }
   const secured = new Response(response.body, response);
@@ -44,6 +47,8 @@ export async function handle(request: Request, env: AdminEnv, ctx: AccessContext
   secured.headers.set('Referrer-Policy', 'same-origin');
   secured.headers.set('X-Frame-Options', 'DENY');
   secured.headers.set('Cache-Control', 'no-store');
+  secured.headers.set('X-Fimel-Request-Id', requestId);
+  if (write) console.log(JSON.stringify({ operation: 'write-finished', requestId, status: response.status, elapsedMs: Date.now() - started }));
   // Keep the stricter SVG policy as well as the normal Admin policy.
   secured.headers.append('Content-Security-Policy', ADMIN_CSP);
   return secured;
@@ -56,7 +61,7 @@ async function route(request: Request, env: AdminEnv, email: string, source?:Aud
   if (path[0] === 'work-downloads' && path.length === 1) return workDownloadHistoryPage(request, env.PUBLIC);
   if(path[0]==='site'&&(path.length===1||path.length===2&&path[1]==='publish'))return siteRoute(request,env.PRIVATE,env.PUBLIC,path.length===2,source?.recordSiteChange);
   if (path[0] === 'published' && path.length === 2 && method === 'GET' && /^[a-zA-Z0-9-]{1,80}$/.test(path[1])) return publishedPreview(path[1],env.PRIVATE,env.PUBLIC);
-  if (path[0] === 'works' && path.length === 2 && method === 'PUT' && /^[a-zA-Z0-9-]{1,80}$/.test(path[1])) return saveWork(request, env.PRIVATE, env.PUBLIC, path[1],source?.recordWorkChange);
+  if (path[0] === 'works' && path.length === 2 && method === 'PUT' && /^[a-zA-Z0-9-]{1,80}$/.test(path[1])) return saveWork(request, env.PRIVATE, env.PUBLIC, path[1],source?.recordWorkChange,source?.library);
   if (path[0] === 'import-source' && path.length === 1 && method === 'GET') {
     const response = await env.ASSETS.fetch(new Request(new URL('/migration/library.json',request.url)));
     if (!response.ok) throw new ApiError(503,'现有作品导入文件尚未构建，请联系维护者。');

@@ -1,17 +1,23 @@
 import type { Work } from '../shared/model';
 import { validateLibrary } from '../shared/validation';
-import { sameWork, mergeWork } from '../shared/revisions';
+import { sameWork, sameWorkContent, mergeWork } from '../shared/revisions';
 import { ApiError, json, putJson, readJson } from './http';
 import { backup, libraryState, publicState, LIBRARY_KEY } from './storage';
 
-export async function saveWork(request: Request, priv: R2Bucket, pub: R2Bucket, id: string,record?:(before:Work|null,after:Work)=>void) {
+export async function saveWork(request: Request, priv: R2Bucket, pub: R2Bucket, id: string,record?:(before:Work|null,after:Work)=>void, initial?: Awaited<ReturnType<typeof libraryState>>) {
   const input = await readJson(request,8_000_000) as { base?: Work | null; work?: Work };
   if (!input || !Object.hasOwn(input, 'base') || input.base !== null && validateLibrary({ schemaVersion: 1, works: [input.base] }).length ||
     !input.work || input.work.id !== id || input.base && input.base.id !== id) throw new ApiError(422, '作品保存请求无效，请重新加载后重试。');
   const errors = validateLibrary({ schemaVersion: 1, works: [input.work] }); if (errors.length) throw new ApiError(422, errors.join('\n'));
   const incoming = input.work;
   for (let attempt = 0; attempt < 4; attempt++) {
-    const state = await libraryState(priv); const current = state.value.works.find(w => w.id === id) ?? null;
+    const state = attempt === 0 && initial ? initial : await libraryState(priv); const current = state.value.works.find(w => w.id === id) ?? null;
+    // A retried response-lost save can already be present, including a new work
+    // whose original base was null. Do not create a new revision or backup.
+    if (current && sameWorkContent(current, incoming)) {
+      const published = await publicState(pub);
+      return json({ saved: true, library: state.value, public: published.value, publicEtag: published.etag }, 200, state.etag);
+    }
     let candidate = incoming;
     if (!sameWork(current, input.base)) {
       if (current && input.base) {

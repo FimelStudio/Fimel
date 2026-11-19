@@ -106,7 +106,7 @@ export function UploadPanel({ workId, versionId, kind, disabled, disabledHint, c
           done += chunk.size; setProgress(done / file.size);
         }
         setLabel(`${file.name} · R2 完整 SHA-256 验证中`);
-        const completed = await api<{ asset: Asset }>(`uploads/${saved.upload.id}/complete`, { method: 'POST', signal:abort.signal, body: JSON.stringify({ sha256: checked.sha256 }) });
+        const completed = await api<{ asset: Asset }>(`uploads/${saved.upload.id}/complete`, { method: 'POST', signal:abort.signal, body: JSON.stringify({ sha256: checked.sha256 }) }, 600_000);
         onUploadedRef.current(completed.data.asset); localStorage.removeItem(storageKey); setProgress(1);
         pending.current = files.slice(index + 1);
       }

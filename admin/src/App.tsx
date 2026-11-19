@@ -30,6 +30,8 @@ import { UploadPanel } from './UploadPanel';
 import { PublicationPreview } from './PublicationPreview';
 import { PublicationUnconfirmed, publishWork } from './work-publication';
 import type { PublicationPhase } from './work-publication';
+import { saveWorkDraft } from './work-save';
+import type { SavePhase } from './work-save';
 import i18n from '../../src/i18n';
 import { UploadSessions } from './UploadSessions';
 import { AuditPanel, AnalyticsPanel } from './Reports';
@@ -55,6 +57,7 @@ export function App() {
   const busy = working || correctionBusy || docsBusy;
   const [preview, setPreview] = useState(false); const [history, setHistory] = useState<{ key: string; time: string }[] | null>(null);
   const [publicationPhase,setPublicationPhase]=useState<PublicationPhase|null>(null);
+  const [savePhase,setSavePhase]=useState<SavePhase|null>(null);
   const [username,setUsername]=useState<string|null>(null);
   const [actorId,setActorId]=useState<string|null>(null);
   const [siteDirty,setSiteDirty]=useState(false);
@@ -98,14 +101,14 @@ export function App() {
       const targets=all||!work?edits:edits.filter(w=>w.id===work.id);
       const remaining=new Map(edits.map(w=>[w.id,w]));
       for(const target of targets){
-        const result=await api<Loaded>(`works/${target.id}`,{method:'PUT',body:JSON.stringify({base:base.works.find(w=>w.id===target.id)??null,work:target})});
+        const result=await saveWorkDraft(base.works.find(w=>w.id===target.id)??null,target,setSavePhase);
         remaining.delete(target.id);const server=result.data.library;
         setLibrary({...server,works:[...server.works.map(w=>remaining.get(w.id)??w),...Array.from(remaining.values()).filter(w=>!server.works.some(s=>s.id===w.id))]});
         setOriginal(JSON.stringify(server));setEtag(result.etag);setPublished(result.data.public);setPublicEtag(result.data.publicEtag);
       }
       setMessage(remaining.size?'当前作品已保存。另有未保存修改，可点击“保存全部修改”。':'草稿已保存到私有存储。官网尚未同步；需要更新官网时，请点击“发布预览”并确认发布。');return true;
     }
-    catch (cause) { if(cause instanceof RequestError&&cause.status===409&&cause.details&&typeof cause.details==='object'&&'conflict'in cause.details)setConflict(cause.details.conflict as WorkConflict);setError(cause instanceof Error ? cause.message : '保存失败。'); return false; } finally { saving.current=false;setBusy(false); }
+    catch (cause) { if(cause instanceof RequestError&&cause.status===409&&cause.details&&typeof cause.details==='object'&&'conflict'in cause.details)setConflict(cause.details.conflict as WorkConflict);setError(cause instanceof Error ? cause.message : '保存失败。'); return false; } finally { saving.current=false;setBusy(false);setSavePhase(null); }
   }
   function restoreRecovery(){
     const record=recovery.found;if(!record)return;
@@ -173,6 +176,7 @@ export function App() {
       {updateAvailable&&<div className="notice" role="status"><span>后台已有新版本。刷新后可使用最新修复，当前编辑不会被自动刷新。{siteDirty||docsDirty?'请先在当前编辑区保存草稿，再刷新。':''}</span><button disabled={busy||uploading||siteDirty||docsDirty} onClick={async()=>{if(!siteDirty&&!docsDirty&&(!dirty||await save(true)))requestAnimationFrame(()=>window.location.reload());}}>{dirty?'保存全部草稿并刷新':'刷新使用新版'}</button></div>}
       {recovery.found&&<div className="notice" role="status"><span>发现 {new Date(recovery.found.at).toLocaleString('zh-CN')} 的本机未保存编辑（{recovery.found.edits.length} 个作品）。</span><button disabled={loading||busy||uploading||dirty} onClick={restoreRecovery}>恢复编辑</button><button onClick={()=>downloadJson(recovery.found,'fimel-recovery.json')}>导出恢复记录</button><button disabled={busy||uploading} onClick={()=>{if(window.confirm('放弃此本机恢复记录？服务器草稿不变。'))void recovery.dismiss();}}>放弃恢复</button></div>}
       {recovery.error&&<p role="alert" className="error">{recovery.error}</p>}
+      {savePhase&&<div role="status" className="notice"><span>{savePhase==='checking'?'保存响应中断，正在核对服务器上的草稿（最多 15 秒），请保留当前页面。':'正在保存草稿（最多 30 秒），请保留当前页面；网络中断时会自动核对保存结果。'}</span><button onClick={()=>downloadJson(library,'fimel-unsaved.json')}>导出当前修改</button></div>}
       {libraryDirty&&recovery.savedAt&&<p className="hint">本机恢复记录：{new Date(recovery.savedAt).toLocaleTimeString('zh-CN')} · 仅保存在当前浏览器，保留 7 天；尚未保存到服务器。</p>}
       {libraryDirty&&report!=='site'&&report!=='docs'&&<button disabled={busy||uploading} onClick={()=>void save(true)}>保存全部修改</button>}
       {libraryDirty && report!=='site' && report!=='docs' && <div className="notice"><span>有未保存的更改</span><button disabled={busy||uploading} onClick={() => void save()}>保存草稿</button><button disabled={busy||uploading} onClick={() => { if(window.confirm('放弃未保存修改并重新加载？')) void load(); }}>放弃修改</button></div>}

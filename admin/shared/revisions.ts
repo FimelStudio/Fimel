@@ -6,6 +6,7 @@ export function stable(value: unknown): string {
   return JSON.stringify(sort(value));
 }
 export const sameWork = (a: Work | null | undefined, b: Work | null | undefined) => stable(a ?? null) === stable(b ?? null);
+export const sameWorkContent = (a: Work, b: Work) => sameWork({ ...a, updatedAt: '' }, { ...b, updatedAt: '' });
 export function publicationPayload(work: Work) {
   const referenced = referencedImages(work.markdown);
   return { project: work.project, order: work.order, markdown: work.markdown, coverId: work.coverId, ...(work.featuredCoverId ? { featuredCoverId: work.featuredCoverId } : {}),

@@ -9,12 +9,7 @@ export class PublicationUnconfirmed extends Error {
   constructor(message: string, readonly snapshot?: Snapshot) { super(message); }
 }
 
-async function boundedApi<T>(path: string, milliseconds: number, options: RequestInit = {}) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), milliseconds);
-  try { return await api<T>(path, { ...options, signal: controller.signal }); }
-  finally { clearTimeout(timer); }
-}
+const boundedApi = <T,>(path: string, milliseconds: number, options: RequestInit = {}) => api<T>(path, options, milliseconds);
 
 // Aborting the browser request does not prove the manifest write was cancelled.
 // Read the persisted fingerprint before reporting an ambiguous response as failure.

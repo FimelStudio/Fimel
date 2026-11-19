@@ -14,6 +14,18 @@ const request=(path:string,method='GET',body?:unknown,headers:Record<string,stri
 const state=async()=>{const r=await request('library');assert.equal(r.status,200);return await r.json() as {library:Library;public:PublicManifest;etag:string;publicEtag:string};};
 async function add(slug:string){const work=makeWork();work.project.slug=slug;work.project.title={zh:slug};work.markdown.description.zh='原始正文';const r=await request(`works/${work.id}`,'PUT',{base:null,work});assert.equal(r.status,200,await r.clone().text());return (await r.json()as{library:Library}).library.works.find(w=>w.id===work.id)!;}
 async function save(base:Work,work:Work){return request(`works/${work.id}`,'PUT',{base,work});}
+
+test('响应丢失后重复保存已创建作品返回成功，不重复备份或改写时间',async()=>{
+  const incoming=makeWork();incoming.project.slug='retry-created-work';incoming.project.title='重试创建作品';incoming.markdown.description.zh='重试仍保留的正文';
+  const first=await request(`works/${incoming.id}`,'PUT',{base:null,work:incoming});assert.equal(first.status,200);
+  const initial=await first.json() as {library:Library;etag:string};const stored=initial.library.works.find(w=>w.id===incoming.id)!;
+  const bucket=await mf.getR2Bucket('PRIVATE');const before=(await bucket.list({prefix:'backups/library/'})).objects.length;
+  const retry=await request(`works/${incoming.id}`,'PUT',{base:null,work:incoming});assert.equal(retry.status,200);
+  const result=await retry.json() as {library:Library;etag:string};assert.equal(result.etag,initial.etag);assert.deepEqual(result.library.works.find(w=>w.id===incoming.id),stored);
+  assert.equal((await bucket.list({prefix:'backups/library/'})).objects.length,before);
+  const changed={...incoming,markdown:{...incoming.markdown,description:{zh:'不同的正文不能当作相同重试'}}};
+  assert.equal((await request(`works/${incoming.id}`,'PUT',{base:null,work:changed})).status,409);
+});
 test('不同作品同时保存不会丢失修改，同一作品不重叠字段自动合并',async()=>{
   const a=await add('parallel-a'),b=await add('parallel-b');
   const writes=await Promise.all([save(a,{...a,project:{...a.project,title:'A 改名'}}),save(b,{...b,project:{...b.project,title:'B 改名'}})]);assert.deepEqual(writes.map(r=>r.status),[200,200]);
