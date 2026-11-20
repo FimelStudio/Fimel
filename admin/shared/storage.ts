@@ -3,7 +3,7 @@ export type StorageKind = 'temporary' | 'asset' | 'content' | 'history' | 'recei
 export type StoragePolicy = { enabled: boolean; assets: boolean; publicAssets: boolean; temporaryDays: number; privateDays: number; publicDays: number; historyDays: number };
 export const DEFAULT_STORAGE_POLICY: StoragePolicy = { enabled: false, assets: false, publicAssets: false, temporaryDays: 7, privateDays: 30, publicDays: 90, historyDays: 30 };
 export type StorageItem = { bucket: StorageBucket; key: string; etag: string; size: number; uploaded: string; kind: StorageKind; eligible: boolean; reason: string };
-export type StorageScan = { id: string; createdAt: string; status: 'inventory' | 'references' | 'ready'; bucket: StorageBucket; cursor?: string; items: StorageItem[]; refs: string[]; queue: string[]; read: number; revisions: Record<string, string>; policy: StoragePolicy; deleted: string[]; skipped: string[] };
+export type StorageScan = { id: string; createdAt: string; readyAt?:string; status: 'inventory' | 'references' | 'ready'; bucket: StorageBucket; cursor?: string; items: StorageItem[]; refs: string[]; queue: string[]; read: number; revisions: Record<string, string>; policy: StoragePolicy; deleted: string[]; skipped: string[] };
 export const storageId = (bucket: StorageBucket, key: string) => `${bucket}:${key}`;
 export function storageKind(bucket: StorageBucket, key: string): StorageKind {
   if (bucket === 'private' && key.startsWith('uploads/temporary/')) return 'temporary';

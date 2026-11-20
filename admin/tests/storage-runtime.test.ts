@@ -141,7 +141,7 @@ test('删除意图未落盘时不删除，部分删除失败有审计且清理�
 test('互斥门真实 CAS 阻止写入与删除交叉，异常也释放；未结束锁不超时强制解锁',async()=>{
   const response=await runtime.dispatchFetch('http://127.0.0.1/test/overlap',{headers:{Connection:'close'}});assert.deepEqual(await response.json(),{cleaner:409,writer:503});
   const a=asset();await put('private',a.privateKey!,'data');const result=await scan();await put('private','maintenance/write-gate.json',{writers:{old:'2000-01-01T00:00:00Z'}});assert.equal((await remove(result,['private:'+a.privateKey!])).status,409);
-  await put('private','maintenance/write-gate.json',{writers:{},cleaner:'held'});assert.equal((await request('scan','POST',{})).status,503);
+  await put('private','maintenance/write-gate.json',{writers:{},cleaner:'held'});assert.equal((await request('scan','POST',{})).status,200,'扫描只写年轻维护报告，不占用或清除业务锁');
   const library=await runtime.dispatchFetch('http://127.0.0.1/api/library',{method:'PUT',headers:{Origin:origin,'X-Fimel-CSRF':'1','Content-Type':'application/json','If-Match':'"empty"',Connection:'close'},body:JSON.stringify({schemaVersion:1,works:[]})});assert.equal(library.status,503);assert.ok(await (await bucket('private')).head(a.privateKey!));
 });
 test('自动任务分步持久化且默认仅临时文件；公开与私有孤立资源需要额外开启',async()=>{
@@ -162,4 +162,10 @@ test('上传完成后临时副本删除失败不会丢失校验文件或伪报�
   assert.ok(await (await bucket('private')).head(upload.key));assert.ok(await (await bucket('private')).head(first.asset.privateKey!));
   assert.equal((await (await (await bucket('private')).get(`uploads/sessions/${upload.id}.json`))!.json() as Upload).status,'complete');
   response=await call('/'+upload.id+'/complete',{sha256:digest});assert.equal(response.status,200);assert.deepEqual((await response.json() as {asset:Asset}).asset,first.asset);
+});
+test('三千多个对象扫描可分步完成，响应与持久化报告一致且不遗留业务写入锁',async()=>{
+  const store=await bucket('public');for(let start=0;start<3200;start+=40)await Promise.all(Array.from({length:40},(_,offset)=>store.put(`content/stress/${start+offset}.md`,'fixture')));
+  const result=await scan();assert.ok(result.items.length>=3200);assert.equal(result.status,'ready');
+  const persisted=await (await (await bucket('private')).get(`maintenance/scans/${result.id}.json`))!.json();assert.deepEqual(persisted,result);
+  assert.equal(await (await bucket('private')).get('maintenance/write-gate.json'),null,'纯扫描不会创建业务写入租约');
 });
