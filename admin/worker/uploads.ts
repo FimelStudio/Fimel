@@ -132,7 +132,8 @@ export async function uploadRoute(request: Request, bucket: R2Bucket, segments: 
     try {
       if (!await bucket.head(upload.key)) await multipart.complete(parts);
       const source = await bucket.get(upload.key);
-      if (!source || source.size !== upload.size) throw new ApiError(422, 'R2 对象大小不匹配。');
+      if (!source || source.size !== upload.size) { if(source&&!source.body.locked)await source.body.cancel().catch(()=>{});throw new ApiError(422, 'R2 对象大小不匹配。'); }
+      try {
       // SVG is bounded separately: inspect the complete XML before any verified object exists.
       let svg: ArrayBuffer | undefined;
       if (upload.mime === 'image/svg+xml') {
@@ -149,7 +150,12 @@ export async function uploadRoute(request: Request, bucket: R2Bucket, segments: 
       const asset: Asset = { id, name: upload.name, ...(upload.displayName?{displayName:upload.displayName}:{}), size: upload.size, mime: upload.mime, sha256: input.sha256, privateKey: verifiedKey };
       await putJson(bucket, sessionKey(id), { ...upload, status: 'complete', asset }, lock.httpEtag);
       await bucket.delete(`uploads/active/${id}.json`);
+      // Verified bytes and the completion receipt are durable before reclaiming
+      // the full temporary source. Failure here must not undo a verified upload.
+      try { await bucket.delete(upload.key); }
+      catch { console.warn(JSON.stringify({operation:'completed-source-cleanup-pending',uploadId:id})); }
       return json({ asset });
+      } finally { if(!source.body.locked)await source.body.cancel().catch(()=>{}); }
     } catch (error) {
       // Retain verifying state for retry; never report an unverified upload as complete.
       if (error instanceof ApiError) throw error;

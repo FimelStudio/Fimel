@@ -108,5 +108,6 @@ export async function auditFeed(request:Request,bucket:R2Bucket,env:ServerSecret
   keys.sort((a,b)=>b.uploaded.getTime()-a.uploaded.getTime());if(keys.length>200)truncated=true;
   const events:AuditFeed['events']=[];for(const object of keys.slice(0,200)){const value=await bucket.get(object.key);if(value)events.push(await value.json());}
   const actors:Record<string,string>={};for(const address of env.ADMIN_EMAILS?.split(',').map(x=>x.trim().toLowerCase()).filter(Boolean)??[]){const[user,domain]=address.split('@');actors[await actorKey(address)]=`${user.slice(0,3)}…@${domain}`;}
+  actors[await actorKey('automatic-storage-cleanup@system.invalid')]='自动清理';
   return{events,actors,currentActorId:await actorKey(email),truncated};
 }

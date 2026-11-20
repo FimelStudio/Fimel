@@ -125,6 +125,7 @@ test('native R2 part verification rejects corrupted retries and cleans staging o
   assert.equal((await req(`files/${s.id}`)).status,404);
   assert.equal((await req(`uploads/${s.id}/complete`,'POST',{sha256:'f'.repeat(64)})).status,409);
   assert.equal((await req(`uploads/${s.id}/complete`,'POST',{sha256:digest})).status,200);const confirmed=await req(`uploads/${s.id}`);const completed=(await confirmed.json()as{upload:Upload}).upload;
+  assert.equal(await bucket.head(s.key),null,'已验证并保存完成记录后清除完整临时副本');
   const download=await req(`files/${s.id}`);assert.equal(download.status,200);assert.deepEqual(Buffer.from(await download.arrayBuffer()),bytes);assert.match(download.headers.get('content-disposition')!,/^attachment/);
   const partial=await req(`files/${s.id}`,'GET',undefined,{Range:'bytes=0-3'});assert.equal(partial.status,206);assert.equal(partial.headers.get('content-range'),'bytes 0-3/32');assert.deepEqual(Buffer.from(await partial.arrayBuffer()),bytes.subarray(0,4));
   const suffix=await req(`files/${s.id}`,'GET',undefined,{Range:'bytes=-4'});assert.equal(suffix.status,206);assert.deepEqual(Buffer.from(await suffix.arrayBuffer()),bytes.subarray(28));assert.equal((await req(`files/${s.id}`,'GET',undefined,{Range:'bytes=0-1,3-4'})).status,416);

@@ -23,6 +23,8 @@ import { earliestReleaseDate } from '../../src/content/releases';
 import { downloadCorrectionRoute } from './download-corrections';
 import { docsRoute } from './docs';
 import { workDownloadHistoryPage } from '../../src/lib/work-event-worker';
+import { scheduledStorageCleanup, storageRoute } from './storage-cleanup';
+import { withStorageWriter } from './storage-gate';
 export type AdminEnv = Env & ServerSecrets & AnalyticsSecrets;
 export async function handle(request: Request, env: AdminEnv, ctx: AccessContext): Promise<Response> {
   const requestId = crypto.randomUUID();
@@ -37,7 +39,10 @@ export async function handle(request: Request, env: AdminEnv, ctx: AccessContext
     if (!url.pathname.startsWith('/api/')) {
       if (!['GET', 'HEAD'].includes(request.method)) throw new ApiError(405, '不支持此方法。');
       response = await env.ASSETS.fetch(request);
-    } else response = await runAudited(request, env.PRIVATE, email, source => route(request, env, email, source));
+    } else {
+      const run = () => runAudited(request, env.PRIVATE, email, source => route(request, env, email, source));
+      response = write && !url.pathname.startsWith('/api/storage/') && url.pathname!=='/api/storage' ? await withStorageWriter(env.PRIVATE,run) : await run();
+    }
   } catch (error) {
     if (!(error instanceof ApiError)) console.error(JSON.stringify({ operation: 'request-failed', requestId, elapsedMs: Date.now() - started, category: error instanceof Error ? error.name : 'unknown' }));
     response = json({ error: error instanceof ApiError ? error.message : '存储服务暂时不可用，操作未确认成功。', requestId }, error instanceof ApiError ? error.status : 503);
@@ -56,6 +61,7 @@ export async function handle(request: Request, env: AdminEnv, ctx: AccessContext
 async function route(request: Request, env: AdminEnv, email: string, source?:AuditedSource): Promise<Response> {
   const path = new URL(request.url).pathname.split('/').filter(Boolean).slice(1);
   const method = request.method;
+  if (path[0] === 'storage') return storageRoute(request,env,path.slice(1),email);
   if (path[0] === 'docs') return docsRoute(request, env, path.slice(1), email);
   if (path[0] === 'download-corrections' && path.length === 2 && /^[a-zA-Z0-9-]{1,80}$/.test(path[1])) return downloadCorrectionRoute(request, env.PRIVATE, env.PUBLIC, path[1], source?.recordDownloadCorrection, source?.downloadCorrectionInput);
   if (path[0] === 'work-downloads' && path.length === 1) return workDownloadHistoryPage(request, env.PUBLIC);
@@ -188,4 +194,4 @@ async function route(request: Request, env: AdminEnv, email: string, source?:Aud
   }
   throw new ApiError(404, '接口不存在。');
 }
-export default { fetch: handle };
+export default { fetch: handle, async scheduled(_controller: ScheduledController, env: AdminEnv) { await scheduledStorageCleanup(env); } };
