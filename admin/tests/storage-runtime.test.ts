@@ -6,7 +6,7 @@ import { makeWork } from '../shared/model';
 import type { Asset, Upload, Work } from '../shared/model';
 import { makeDoc } from '../shared/docs';
 import { DEFAULT_STORAGE_POLICY, storageId } from '../shared/storage';
-import type { StorageScan } from '../shared/storage';
+import type { StorageItem, StorageScan } from '../shared/storage';
 
 let runtime: Miniflare;
 const origin='http://127.0.0.1:5174';
@@ -46,9 +46,11 @@ beforeEach(async()=>{
 const bucket=(name:'private'|'public')=>runtime.getR2Bucket(name==='private'?'PRIVATE':'PUBLIC');
 async function put(name:'private'|'public',key:string,value:unknown){return (await bucket(name)).put(key,typeof value==='string'?value:JSON.stringify(value));}
 function request(path='',method='GET',body?:unknown,headers:Record<string,string>={}){return runtime.dispatchFetch(`http://127.0.0.1/api/storage${path?'/'+path:''}`,{method,headers:{Origin:origin,'X-Fimel-CSRF':'1','Content-Type':'application/json',Connection:'close',...headers},...(body===undefined?{}:{body:JSON.stringify(body)})});}
-async function scan(){let response=await request('scan','POST',{});assert.equal(response.status,200,await response.clone().text());let result=await response.json() as {scan:StorageScan;etag:string};for(let step=0;result.scan.status!=='ready'&&step<200;step++){response=await request('scan/'+result.scan.id,'POST',{}, {'If-Match':result.etag});assert.equal(response.status,200,await response.clone().text());result=await response.json() as typeof result;}assert.equal(result.scan.status,'ready');return result.scan;}
+async function scan(){let response=await request('scan','POST',{});assert.equal(response.status,200,await response.clone().text());let result=await response.json() as {scan:StorageScan;etag:string};for(let step=0;result.scan.status!=='ready'&&step<200;step++){response=await request('scan/'+result.scan.id,'POST',{}, {'If-Match':result.etag});assert.equal(response.status,200,await response.clone().text());result=await response.json() as typeof result;}assert.equal(result.scan.status,'ready');
+  for(let page=0;page<(result.scan.pageCount??0);page++){const response=await request(`items/${result.scan.id}/${page}`);assert.equal(response.status,200,await response.clone().text());result.scan.items.push(...await response.json() as StorageItem[]);}
+  result.scan.deleted=result.scan.items.filter(i=>i.outcome==='deleted').map(i=>storageId(i.bucket,i.key));result.scan.skipped=result.scan.items.filter(i=>i.outcome==='skipped').map(i=>storageId(i.bucket,i.key));return result.scan;}
 const find=(scan:StorageScan,key:string)=>scan.items.find(item=>item.key===key)!;
-const remove=(scan:StorageScan,keys:string[],headers:Record<string,string>={})=>request('delete','POST',{scanId:scan.id,keys,confirm:'永久删除'},headers);
+const remove=(scan:StorageScan,keys:string[],headers:Record<string,string>={})=>request('delete','POST',{scanId:scan.id,keys,pages:[...new Set(scan.items.filter(i=>keys.includes(storageId(i.bucket,i.key))).map(i=>i.page))],confirm:'永久删除'},headers);
 const scheduled=()=>runtime.dispatchFetch('http://127.0.0.1/test/scheduled',{headers:{Connection:'close'}});
 async function configure(extra:Record<string,unknown>){const state=await request();assert.equal(state.status,200);const response=await request('policy','PUT',{...DEFAULT_STORAGE_POLICY,...extra},{'If-Match':state.headers.get('etag')!});assert.equal(response.status,200,await response.clone().text());}
 async function saveWork(value:Work){await put('private','state/library.json',{schemaVersion:1,works:[value]});}
@@ -112,9 +114,11 @@ test('活动上传与未完成校验受保护；完成会话的临时副本可�
   for(const s of sessions.slice(1))for(const key of [s.key,`uploads/sessions/${s.id}.json`,`uploads/receipts/${s.id}/001.json`])assert.equal(find(result,key).eligible,false,key);
 });
 test('缺失、损坏或异常引用记录使扫描关闭删除能力',async()=>{
-  await (await bucket('private')).delete('state/library.json');assert.equal((await request('scan','POST',{})).status,503);
+  await (await bucket('private')).delete('state/library.json');
+  let broken=await (await request('scan','POST',{})).json() as {scan:StorageScan;etag:string};let failed:Awaited<ReturnType<typeof request>>;
+  for(let n=0;n<30;n++){failed=await request('scan/'+broken.scan.id,'POST',{}, {'If-Match':broken.etag});if(!failed.ok)break;broken=await failed.json() as typeof broken;}assert.equal(failed!.status,503);
   await put('private','state/library.json',{schemaVersion:1,works:[]});await put('private','backups/library/broken.json','broken JSON');
-  let r=await request('scan','POST',{}),data=await r.json() as {scan:StorageScan;etag:string};for(let n=0;n<8&&r.status===200;n++){r=await request('scan/'+data.scan.id,'POST',{}, {'If-Match':data.etag});if(r.ok)data=await r.json() as typeof data;}
+  let r=await request('scan','POST',{}),data=await r.json() as {scan:StorageScan;etag:string};for(let n=0;n<40&&r.status===200;n++){r=await request('scan/'+data.scan.id,'POST',{}, {'If-Match':data.etag});if(r.ok)data=await r.json() as typeof data;}
   assert.equal(r.status,503);assert.notEqual(data.scan.status,'ready');
 });
 test('删除要求确认及扫描范围，根目录变化或过期扫描拒绝删除',async()=>{
@@ -146,9 +150,9 @@ test('互斥门真实 CAS 阻止写入与删除交叉，异常也释放；未结
 });
 test('自动任务分步持久化且默认仅临时文件；公开与私有孤立资源需要额外开启',async()=>{
   const a=asset();await put('private',a.privateKey!,'private');await put('private','uploads/temporary/expired/file.zip','temporary');await put('public','content/orphan.md','public');await configure({enabled:true});
-  for(let n=0;n<6;n++)assert.equal((await scheduled()).status,200);
+  for(let n=0;n<30;n++)assert.equal((await scheduled()).status,200);
   assert.equal(await (await bucket('private')).head('uploads/temporary/expired/file.zip'),null);assert.ok(await (await bucket('private')).head(a.privateKey!));assert.ok(await (await bucket('public')).head('content/orphan.md'));
-  await configure({enabled:true,assets:true,publicAssets:true});await request('','GET',undefined,{'x-test-days':'368'});for(let n=0;n<7;n++)assert.equal((await scheduled()).status,200);
+  await configure({enabled:true,assets:true,publicAssets:true});await request('','GET',undefined,{'x-test-days':'368'});for(let n=0;n<30;n++)assert.equal((await scheduled()).status,200);
   assert.equal(await (await bucket('private')).head(a.privateKey!),null);assert.equal(await (await bucket('public')).head('content/orphan.md'),null);
 });
 test('上传完成后临时副本删除失败不会丢失校验文件或伪报上传失败，重试返回同一资源',async()=>{
@@ -164,8 +168,42 @@ test('上传完成后临时副本删除失败不会丢失校验文件或伪报�
   response=await call('/'+upload.id+'/complete',{sha256:digest});assert.equal(response.status,200);assert.deepEqual((await response.json() as {asset:Asset}).asset,first.asset);
 });
 test('三千多个对象扫描可分步完成，响应与持久化报告一致且不遗留业务写入锁',async()=>{
+  await put('private','backups/custom/links.json',{value:{urls:Array.from({length:1200},(_,n)=>`https://download.studiofimel.com/images/reference-scale/${n}/${'a'.repeat(70)}.png`)}});
   const store=await bucket('public');for(let start=0;start<3200;start+=40)await Promise.all(Array.from({length:40},(_,offset)=>store.put(`content/stress/${start+offset}.md`,'fixture')));
   const result=await scan();assert.ok(result.items.length>=3200);assert.equal(result.status,'ready');
-  const persisted=await (await (await bucket('private')).get(`maintenance/scans/${result.id}.json`))!.json();assert.deepEqual(persisted,result);
+  const stored=(await (await bucket('private')).get(`maintenance/scans/${result.id}.json`))!;
+  assert.ok(stored.size<300_000,'3200 对象与大量引用时，报告头不包含对象清单');
+  const persisted=await stored.json() as StorageScan;assert.deepEqual(persisted.items,[]);assert.equal(persisted.objectCount,result.items.length);assert.equal(persisted.format,2);
+  for(let page=0;page<result.pageCount!;page++){const stored=(await (await bucket('private')).get(`maintenance/pages/${result.id}/${String(page).padStart(6,'0')}.json`))!;assert.ok(stored.size<40_000);assert.ok((await stored.json() as StorageItem[]).length<=50);}
   assert.equal(await (await bucket('private')).get('maintenance/write-gate.json'),null,'纯扫描不会创建业务写入租约');
+});
+
+test('分页接口保留身份保护，扫描未完成或页码越界不返回报告',async()=>{
+  const started=await (await request('scan','POST',{})).json() as {scan:StorageScan};
+  assert.equal((await request(`items/${started.scan.id}/0`)).status,404);
+  assert.equal((await request(`items/${started.scan.id}/0`,'GET',undefined,{'x-local-test-anonymous':'1'})).status,401);
+  const result=await scan();assert.equal((await request(`items/${result.id}/${result.pageCount}`)).status,404);
+  assert.equal((await request(`items/${result.id}/-1`)).status,404);
+});
+
+test('分页落盘后进度写入失败，重试使用同一列举游标且不丢失对象',async()=>{
+  let r=await request('scan','POST',{}),state=await r.json() as {scan:StorageScan;etag:string};
+  while(state.scan.status==='roots'){r=await request('scan/'+state.scan.id,'POST',{}, {'If-Match':state.etag});assert.equal(r.status,200);state=await r.json() as typeof state;}
+  r=await request('scan/'+state.scan.id,'POST',{}, {'If-Match':state.etag,'x-test-failure':'scan-save'});assert.equal(r.status,503);
+  const page=(await (await bucket('private')).get(`maintenance/pages/${state.scan.id}/000000.json`))!;const original=await page.json();
+  r=await request('scan/'+state.scan.id,'POST',{}, {'If-Match':state.etag});assert.equal(r.status,200,await r.clone().text());
+  const next=await r.json() as {scan:StorageScan};assert.equal(next.scan.pageCount,1);
+  assert.deepEqual(await (await (await bucket('private')).get(`maintenance/pages/${state.scan.id}/000000.json`))!.json(),original);
+});
+
+test('旧版报告不能续扫或用于删除，报告分页不把曾列举的孤立业务资源变成引用',async()=>{
+  const a=asset();await put('private',a.privateKey!,'orphan');
+  await put('private','maintenance/scans/old-plan.json',{id:'old-plan',status:'ready',createdAt:new Date().toISOString(),items:[{key:a.privateKey!}],refs:[],queue:[]});
+  const old=await (await bucket('private')).head('maintenance/scans/old-plan.json');
+  assert.equal((await request('scan/old-plan','POST',{}, {'If-Match':old!.httpEtag})).status,409);
+  const result=await scan();assert.equal(find(result,a.privateKey!).eligible,true);
+  await put('private','maintenance/pages/old-plan/000000.json',[]);
+  // A retained V2 header pins its own report pages, never the orphan listed there.
+  await put('private','maintenance/scans/old-plan.json',{id:'old-plan',format:2,items:[{key:a.privateKey!}]});
+  assert.equal(find(await scan(),a.privateKey!).eligible,true);
 });

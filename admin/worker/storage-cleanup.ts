@@ -23,11 +23,30 @@ const uuid = '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}';
 const managedAsset = new RegExp(`^(?:uploads/verified/${uuid}/|docs/uploads/[^/]+/${uuid}/|docs/images/[^/]+/${uuid}/|images/[^/]+/[^/]+/${uuid}/|works/[^/]+/[^/]+/[^/]+-${uuid}/)`);
 const bucket = (env: StorageEnv, name: StorageBucket) => name === 'private' ? env.PRIVATE : env.PUBLIC;
 const scanKey = (id: string) => `maintenance/scans/${id}.json`;
+const pageKey = (id:string, page:number) => `maintenance/pages/${id}/${String(page).padStart(6,'0')}.json`;
+const historyGroup = (item:StorageItem) => storageId(item.bucket,item.key.startsWith('snapshots/')&&!item.key.startsWith('snapshots/docs/')?'snapshots/works':item.key.split('/').slice(0,2).join('/'));
+function recentHistory(items:StorageItem[]) {
+  const groups=new Map<string,StorageItem[]>();
+  for(const item of items){const group=historyGroup(item),list=groups.get(group)??[];list.push(item);groups.set(group,list);}
+  return [...groups.values()].flatMap(items=>items.sort((a,b)=>b.uploaded.localeCompare(a.uploaded)||a.key.localeCompare(b.key)).slice(0,10));
+}
+function pinReport(scan:StorageScan,id:string){protect(scan,'private',scanKey(id));scan.refs.push(`prefix:private:maintenance/pages/${id}/`);}
+function summary(scan:StorageScan):StorageScan {
+  if(scan.format===2)return {...scan,refs:[],queue:[],recentHistory:[],revisions:{},referenceCount:scan.queue.length};
+  // Old unpaged reports remain readable, but cannot resume or authorize deletion.
+  return {...scan,objectCount:scan.items.length,totals:{private:{objects:scan.items.filter(i=>i.bucket==='private').length,bytes:scan.items.filter(i=>i.bucket==='private').reduce((n,i)=>n+i.size,0)},public:{objects:scan.items.filter(i=>i.bucket==='public').length,bytes:scan.items.filter(i=>i.bucket==='public').reduce((n,i)=>n+i.size,0)}},items:[],refs:[],queue:[]};
+}
+async function loadPage(env:StorageEnv,scan:StorageScan,page:number){
+  if(scan.format!==2||!Number.isInteger(page)||page<0||page>=(scan.pageCount??0))throw new ApiError(422,'扫描分页无效，请重新扫描。');
+  const stored=await record<StorageItem[]>(env.PRIVATE,pageKey(scan.id,page));
+  if(!stored||!Array.isArray(stored.value)||stored.value.length>50||stored.value.some(item=>item.page!==page))throw new ApiError(503,'扫描分页不完整，请重新扫描；未执行删除。');
+  return stored;
+}
 
-async function record<T>(store: R2Bucket, key: string): Promise<{ value: T; etag: string } | null> {
+async function record<T>(store: R2Bucket, key: string): Promise<{ value: T; etag: string; metadata?:Record<string,string> } | null> {
   const object = await store.get(key); if (!object) return null;
   if (object.size > 12_000_000) { await object.body.cancel(); throw new ApiError(503, '引用记录超过扫描上限，已停止清理。'); }
-  try { return { value: await object.json<T>(), etag: object.httpEtag }; }
+  try { return { value: await object.json<T>(), etag: object.httpEtag, metadata:object.customMetadata }; }
   catch { throw new ApiError(503, '引用或维护记录损坏，已停止清理。'); }
 }
 async function policy(env: StorageEnv) {
@@ -77,8 +96,10 @@ function protectAsset(scan: StorageScan, work: Work, asset: Asset, label?: strin
   if (asset.privateKey) protect(scan,'private',asset.privateKey);
   protect(scan,'public',`${label === undefined?'images':'works'}/${work.project.type}/${work.project.slug}/${label === undefined?asset.id:label+'-'+asset.id}/${asset.name}`);
 }
-async function roots(env: StorageEnv, scan: StorageScan) {
-  for (const [name,key] of ROOTS) {
+async function rootStep(env:StorageEnv,scan:StorageScan){
+  const index=scan.rootRead??0;
+  if(index<ROOTS.length){
+    const [name,key]=ROOTS[index];
     const stored = await record<unknown>(bucket(env,name),key); scan.revisions[storageId(name,key)] = stored?.etag ?? EMPTY_ETAG;
     if (stored) {
       if (!stored.value || typeof stored.value !== 'object') throw new ApiError(503,'当前目录格式异常，已停止清理。');
@@ -88,16 +109,17 @@ async function roots(env: StorageEnv, scan: StorageScan) {
       if(key==='state/site.json'&&siteContentErrors((stored.value as {site?:unknown}).site).length)throw new ApiError(503,'网站草稿格式无效，已停止清理。');
       references(scan,stored.value);
     }
+
+  }else{
+    if(scan.revisions['private:state/library.json']===EMPTY_ETAG||scan.revisions['public:data/works.json']===EMPTY_ETAG)throw new ApiError(503,'缺少当前作品库或公开目录，无法安全判断引用，已停止清理。');
+    const source=await env.ASSETS.fetch(new Request('https://storage.invalid/migration/library.json'));
+    if(!source.ok)throw new ApiError(503,'无法核对官网原始资源清单，已停止清理。');
+    const original=await source.json<Library>();if(!Array.isArray(original.works))throw new ApiError(503,'官网原始资源清单无效。');
+    references(scan,original);pinReport(scan,scan.id);
+    const automatic=await record<{id:string}>(env.PRIVATE,AUTO);if(automatic)pinReport(scan,automatic.value.id);
+    scan.status='inventory';
   }
-  if(scan.revisions['private:state/library.json']===EMPTY_ETAG||scan.revisions['public:data/works.json']===EMPTY_ETAG)throw new ApiError(503,'缺少当前作品库或公开目录，无法安全判断引用，已停止清理。');
-  // Original website assets can still be used by the static fallback catalogue.
-  const source = await env.ASSETS.fetch(new Request('https://storage.invalid/migration/library.json'));
-  if (!source.ok) throw new ApiError(503, '无法核对官网原始资源清单，已停止清理。');
-  const original = await source.json<Library>();
-  if (!Array.isArray(original.works)) throw new ApiError(503,'官网原始资源清单无效。');
-  references(scan,original);
-  protect(scan,'private',scanKey(scan.id));
-  const automatic=await record<{id:string}>(env.PRIVATE,AUTO);if(automatic)protect(scan,'private',scanKey(automatic.value.id));
+  scan.rootRead=index+1;
 }
 function historicalReferences(scan: StorageScan, key: string, value: unknown) {
   const wrapper=value as {value?:unknown};
@@ -113,20 +135,17 @@ function historicalReferences(scan: StorageScan, key: string, value: unknown) {
 }
 async function startScan(env: StorageEnv) {
   const settings = await policy(env);
-  const scan: StorageScan = { id: crypto.randomUUID(), createdAt: new Date(Date.now()).toISOString(), status: 'inventory', bucket: 'private', items: [], refs: [], queue: [], read: 0, revisions: {}, policy: settings.value, deleted: [], skipped: [] };
+  const scan: StorageScan = { id: crypto.randomUUID(), createdAt: new Date(Date.now()).toISOString(), status: 'roots', format:2, rootRead:0, pageCount:0, classifyPage:0, objectCount:0, recentHistory:[], candidatePages:[], totals:{private:{objects:0,bytes:0},public:{objects:0,bytes:0}}, bucket: 'private', items: [], refs: [], queue: [], read: 0, revisions: {}, policy: settings.value, deleted: [], skipped: [] };
   scan.revisions['policy'] = settings.etag;
-  await roots(env,scan);
   const saved = await putJson(env.PRIVATE,scanKey(scan.id),scan);
   const old = await env.PRIVATE.head(LATEST); await putJson(env.PRIVATE,LATEST,{ id: scan.id },old?.httpEtag??EMPTY_ETAG);
   return { scan, etag: saved.httpEtag };
 }
 function age(item: StorageItem, now: number) { return (now-Date.parse(item.uploaded))/DAY; }
-function classify(scan: StorageScan) {
-  const refs = new Set(scan.refs), prefixes=scan.refs.filter(ref=>ref.startsWith('prefix:')).map(ref=>ref.slice(7)), now = Date.now();
-  const history = new Map<string,StorageItem[]>();
-  for (const item of scan.items.filter(item=>item.kind==='history')) { const prefix=item.key.startsWith('snapshots/')&&!item.key.startsWith('snapshots/docs/')?'snapshots/works':item.key.split('/').slice(0,2).join('/');const group=storageId(item.bucket,prefix); const list=history.get(group)??[];list.push(item);history.set(group,list); }
-  const recent = new Set([...history.values()].flatMap(items=>items.sort((a,b)=>b.uploaded.localeCompare(a.uploaded)).slice(0,10)).map(item=>storageId(item.bucket,item.key)));
-  for (const item of scan.items) {
+function classify(scan: StorageScan,items:StorageItem[]) {
+  const refs=new Set(scan.refs),prefixes=scan.refs.filter(ref=>ref.startsWith('prefix:')).map(ref=>ref.slice(7)),now=Date.now();
+  const recent=new Set((scan.recentHistory??[]).map(item=>storageId(item.bucket,item.key)));
+  for (const item of items) {
     const id=storageId(item.bucket,item.key); item.eligible=false;
     const active=prefixes.some(prefix=>id.startsWith(prefix));
     if (refs.has(id) || active) { item.reason='被草稿、公开内容、素材库或历史记录引用';continue; }
@@ -140,16 +159,37 @@ function classify(scan: StorageScan) {
   }
 }
 async function stepScan(env: StorageEnv, scan: StorageScan) {
-  if (scan.status==='inventory') {
-    const listed = await bucket(env,scan.bucket).list({ cursor: scan.cursor, limit: 50 });
-    for (const item of listed.objects) {
-      scan.items.push({ bucket: scan.bucket,key:item.key,etag:item.httpEtag,size:item.size,uploaded:item.uploaded.toISOString(),kind:storageKind(scan.bucket,item.key),eligible:false,reason:'扫描中' });
+  if(scan.format!==2)throw new ApiError(409,'旧版报告需要重新扫描；文件未被删除。');
+  if(scan.status==='roots'){await rootStep(env,scan);}
+  else if (scan.status==='inventory') {
+    const page=scan.pageCount??0;
+    const cached=await record<StorageItem[]>(env.PRIVATE,pageKey(scan.id,page));
+    let items:StorageItem[],cursor:string|undefined;
+    if(cached){
+      if(cached.metadata?.bucket!==scan.bucket||cached.metadata?.start!==(scan.cursor??'')||!Array.isArray(cached.value))throw new ApiError(409,'分页游标不一致，请重新扫描。');
+      items=cached.value;cursor=cached.metadata.cursor||undefined;
+    }else{
+      const listed=await bucket(env,scan.bucket).list({cursor:scan.cursor,limit:50});cursor=listed.truncated?listed.cursor:undefined;
+      items=listed.objects.map(item=>({bucket:scan.bucket,key:item.key,etag:item.httpEtag,size:item.size,uploaded:item.uploaded.toISOString(),kind:storageKind(scan.bucket,item.key),eligible:false,reason:'扫描中',page}));
+      if(items.length){
+        const saved=await env.PRIVATE.put(pageKey(scan.id,page),JSON.stringify(items),{onlyIf:{etagDoesNotMatch:'*'},customMetadata:{bucket:scan.bucket,start:scan.cursor??'',cursor:cursor??''},httpMetadata:{contentType:'application/json',cacheControl:'no-store'}});
+        if(!saved)throw new ApiError(409,'其他窗口已保存此页，请重新读取进度。');
+      }
+    }
+    for(const item of items){
+      if(scan.revisions['private:state/docs.json']===EMPTY_ETAG&&item.bucket==='private'&&item.key.startsWith('docs/uploads/'))throw new ApiError(503,'存在文档图片但缺少文档草稿库，已停止清理。');
       const history=/^(backups\/|snapshots\/|data\/snapshots\/|data\/docs-snapshots\/)/.test(item.key)&&item.key.endsWith('.json');
       const session=scan.bucket==='private'&&/^uploads\/sessions\/[^/]+\.json$/.test(item.key);
-      const id=storageId(scan.bucket,item.key); if ((history||session)&&!scan.queue.includes(id)) scan.queue.push(id);
+      const report=scan.bucket==='private'&&/^maintenance\/scans\/[^/]+\.json$/.test(item.key);
+      const id=storageId(scan.bucket,item.key);if((history||session||report)&&!scan.queue.includes(id))scan.queue.push(id);
     }
-    if(scan.items.length>20_000)throw new ApiError(503,'对象超过 20000 个扫描上限，未删除文件，请联系维护者分桶核查。');
-    if(listed.truncated)scan.cursor=listed.cursor;
+    if((scan.objectCount??0)+items.length>20_000)throw new ApiError(503,'对象超过 20000 个扫描上限，未删除文件。');
+    if(items.length){
+      scan.pageCount=page+1;scan.objectCount=(scan.objectCount??0)+items.length;
+      const total=scan.totals![scan.bucket];total.objects+=items.length;total.bytes+=items.reduce((n,item)=>n+item.size,0);
+      scan.recentHistory=recentHistory([...(scan.recentHistory??[]),...items.filter(item=>item.kind==='history')]);
+    }
+    if(cursor)scan.cursor=cursor;
     else if(scan.bucket==='private'){scan.bucket='public';delete scan.cursor;}
     else{scan.status='references';delete scan.cursor;}
   } else if (scan.status==='references') {
@@ -169,12 +209,23 @@ async function stepScan(env: StorageEnv, scan: StorageScan) {
         const live=session.status==='verifying'||session.status==='uploading'&&Date.parse(session.expiresAt)>Date.now();
         if(live){scan.refs.push(`prefix:private:uploads/temporary/${session.id}/`,`prefix:private:uploads/receipts/${session.id}/`);protect(scan,'private',key);protect(scan,'private',`uploads/active/${session.id}.json`);protect(scan,'private',`uploads/verified/${session.id}/${session.name}`);}
         if(session.status==='complete'&&Date.now()-object.uploaded.getTime()<scan.policy.privateDays*DAY){references(scan,session.asset);protect(scan,'private',key);}
+      } else if(key.startsWith('maintenance/scans/')){
+        // A retained report pins its pages, never the business resources it listed.
+        const report=await object.json<{id:string;format?:number}>();
+        if(!report?.id||key!==scanKey(report.id))throw new ApiError(503,'历史扫描报告无效，已停止清理。');
+        if(report.format===2)scan.refs.push(`prefix:private:maintenance/pages/${report.id}/`);
       } else { historicalReferences(scan,key,await object.json()); }
     }
-    if(scan.read===scan.queue.length){
-      if(scan.revisions['private:state/docs.json']===EMPTY_ETAG&&scan.items.some(item=>item.bucket==='private'&&item.key.startsWith('docs/uploads/')))throw new ApiError(503,'存在文档图片但缺少文档草稿库，已停止清理。');
-      scan.status='ready';scan.readyAt=new Date(Date.now()).toISOString();classify(scan);
+    if(scan.read===scan.queue.length)scan.status='classification';
+  }else if(scan.status==='classification'){
+    const page=scan.classifyPage??0;
+    if(page<(scan.pageCount??0)){
+      const stored=await loadPage(env,scan,page);classify(scan,stored.value);
+      await putJson(env.PRIVATE,pageKey(scan.id,page),stored.value,stored.etag);
+      if(stored.value.some(item=>item.eligible)&&!scan.candidatePages!.includes(page))scan.candidatePages!.push(page);
+      scan.classifyPage=page+1;
     }
+    if(scan.classifyPage===scan.pageCount){scan.status='ready';scan.readyAt=new Date(Date.now()).toISOString();}
   }
   return scan.status==='ready';
 }
@@ -182,51 +233,55 @@ async function saveScan(env:StorageEnv,scan:StorageScan,etag:string){
   const encoded=JSON.stringify(scan);
   const object=await env.PRIVATE.put(scanKey(scan.id),encoded,{onlyIf:{etagMatches:etag.replaceAll('"','')},httpMetadata:{contentType:'application/json; charset=utf-8',cacheControl:'no-store'}});
   if(!object)throw new ApiError(409,'扫描报告已被其他窗口推进，请重新读取进度。');
-  // Reuse the exact stored JSON instead of serializing the growing report twice.
-  return new Response('{"scan":'+encoded+',"etag":'+JSON.stringify(object.httpEtag)+'}',{headers:{'Content-Type':'application/json','Cache-Control':'no-store',ETag:object.httpEtag}});
+  return json({scan:summary(scan)},200,object.httpEtag);
 }
 async function unchanged(env: StorageEnv, scan: StorageScan) {
   for(const [name,key] of ROOTS)if(((await bucket(env,name).head(key))?.httpEtag??EMPTY_ETAG)!==scan.revisions[storageId(name,key)])throw new ApiError(409,'作品、文档或公开目录已改变，请重新扫描后再清理。');
   if((await policy(env)).etag!==scan.revisions.policy)throw new ApiError(409,'清理策略已改变，请重新扫描。');
   if(Date.now()-Date.parse(scan.readyAt??scan.createdAt)>DAY)throw new ApiError(409,'扫描结果已超过 24 小时，请重新扫描。');
 }
-async function cleanup(env: StorageEnv, id: string, selected: string[], actor: string) {
+async function cleanup(env: StorageEnv, id: string, selected: string[], pages:number[], actor: string) {
   return withStorageCleaner(env.PRIVATE,async()=>{
-    const saved=await record<StorageScan>(env.PRIVATE,scanKey(id));if(!saved||saved.value.status!=='ready')throw new ApiError(409,'请先完成扫描预览。');
+    const saved=await record<StorageScan>(env.PRIVATE,scanKey(id));if(!saved||saved.value.status!=='ready'||saved.value.format!==2)throw new ApiError(409,'请先完成新版扫描预览。');
     const scan=saved.value;await unchanged(env,scan);
-    for(const pointer of [LATEST,AUTO]){const active=await record<{id:string}>(env.PRIVATE,pointer);if(active)protect(scan,'private',scanKey(active.value.id));}
-    for(const item of scan.items)item.kind=storageKind(item.bucket,item.key);
-    classify(scan);
-    const wanted=new Set(selected);if(wanted.size!==selected.length||wanted.size>20)throw new ApiError(422,'每次最多清理 20 个不同对象。');
-    const items=scan.items.filter(item=>wanted.has(storageId(item.bucket,item.key)));
+    for(const pointer of [LATEST,AUTO]){const active=await record<{id:string}>(env.PRIVATE,pointer);if(active)pinReport(scan,active.value.id);}
+    const wanted=new Set(selected);if(wanted.size!==selected.length||wanted.size>20||new Set(pages).size!==pages.length||pages.length>20)throw new ApiError(422,'每次最多清理 20 个不同对象。');
+    const loaded=await Promise.all(pages.map(async page=>({page,...await loadPage(env,scan,page)})));
+    const items=loaded.flatMap(page=>page.value).filter(item=>wanted.has(storageId(item.bucket,item.key)));
+    for(const item of items)item.kind=storageKind(item.bucket,item.key);
+    classify(scan,items);
     if(items.length!==wanted.size||items.some(item=>!item.eligible))throw new ApiError(422,'选择中包含受保护或不属于本次扫描的文件。');
-    // Persist deletion intent before touching objects. Unknown outcomes remain
-    // visible; a repeated step checks object existence instead of double counting.
     const eventId=crypto.randomUUID(),time=new Date().toISOString(),eventKey=`audit/${time.slice(0,10)}/${time.replaceAll(':','-')}-${eventId}.json`;
     const event={schemaVersion:2,id:eventId,actorId:actor,operation:'cleanup-storage',time,status:'prepared',changes:[{workId:'storage',slug:'storage',title:'R2 存储清理',action:'removed',fields:items.map(item=>({name:item.bucket+' / '+item.key,before:item.size+' 字节',after:'请求删除；以最终结果为准'}))}],objects:items.map(({bucket,key,size})=>({bucket,key,size}))};
     const intent=await putJson(env.PRIVATE,eventKey,event);
     let bytes=0,removed=0;const removedKeys:string[]=[],skippedKeys:string[]=[];
+    const persist=async()=>{for(const page of loaded){const object=await putJson(env.PRIVATE,pageKey(id,page.page),page.value,page.etag);page.etag=object.httpEtag;}};
     try{
       for(const item of items){
-        const key=storageId(item.bucket,item.key);if(scan.deleted.includes(key)||scan.skipped.includes(key))continue;
+        const key=storageId(item.bucket,item.key);if(item.outcome)continue;
         const current=await bucket(env,item.bucket).head(item.key);
-        if(!current){scan.skipped.push(key);skippedKeys.push(key);continue;}
-        if(current.httpEtag!==item.etag||current.size!==item.size||current.uploaded.toISOString()!==item.uploaded){scan.skipped.push(key);skippedKeys.push(key);continue;}
-        // R2 delete has no ETag precondition; all Admin business writes are
-        // excluded by the gate, and out-of-band R2 writers must remain paused.
-        await bucket(env,item.bucket).delete(item.key);scan.deleted.push(key);removedKeys.push(key);bytes+=item.size;removed++;
+        if(!current||current.httpEtag!==item.etag||current.size!==item.size||current.uploaded.toISOString()!==item.uploaded){item.outcome='skipped';skippedKeys.push(key);continue;}
+        // All Admin business writes are excluded by the gate. External R2 writers
+        // must remain paused because delete has no ETag precondition.
+        await bucket(env,item.bucket).delete(item.key);item.outcome='deleted';removedKeys.push(key);bytes+=item.size;removed++;
       }
-      await putJson(env.PRIVATE,scanKey(id),scan,saved.etag);
+      await persist();
       await putJson(env.PRIVATE,eventKey,{...event,status:'success',httpStatus:200,finishedAt:new Date().toISOString(),removed,bytes,removedKeys,skippedKeys},intent.httpEtag);
-      return {removed,bytes,scan};
-    }catch(error){await putJson(env.PRIVATE,eventKey,{...event,status:'failed',httpStatus:503,finishedAt:new Date().toISOString(),removed,bytes,removedKeys,skippedKeys},intent.httpEtag).catch(()=>{});throw error;}
+      return {removed,bytes,scan:{...summary(scan),deleted:removedKeys,skipped:skippedKeys}};
+    }catch(error){await persist().catch(()=>{});await putJson(env.PRIVATE,eventKey,{...event,status:'failed',httpStatus:503,finishedAt:new Date().toISOString(),removed,bytes,removedKeys,skippedKeys},intent.httpEtag).catch(()=>{});throw error;}
   });
 }
 export async function storageRoute(request: Request, env: StorageEnv, path: string[], email: string) {
   if(path.length===0&&request.method==='GET'){
     const settings=await policy(env),latest=await record<{id:string}>(env.PRIVATE,LATEST),saved=latest?await record<StorageScan>(env.PRIVATE,scanKey(latest.value.id)):null;
     const gate=await record<{writers:Record<string,string>;cleaner?:string}>(env.PRIVATE,'maintenance/write-gate.json');
-    return json({policy:settings.value,scan:saved?.value??null,scanEtag:saved?.etag??'',gate:gate?.value??{writers:{}},automatic:(await record(env.PRIVATE,AUTO))?.value??null},200,settings.etag);
+    return json({policy:settings.value,scan:saved?summary(saved.value):null,scanEtag:saved?.etag??'',gate:gate?.value??{writers:{}},automatic:(await record(env.PRIVATE,AUTO))?.value??null},200,settings.etag);
+  }
+  if(path[0]==='items'&&path.length===3&&idPattern.test(path[1])&&/^\d{1,5}$/.test(path[2])&&request.method==='GET'){
+    const saved=await record<StorageScan>(env.PRIVATE,scanKey(path[1]));
+    if(!saved||saved.value.status!=='ready'||saved.value.format!==2||Number(path[2])>=(saved.value.pageCount??0))throw new ApiError(404,'扫描分页不可用，请完成扫描后重新读取。');
+    const page=await env.PRIVATE.get(pageKey(path[1],Number(path[2])));if(!page)throw new ApiError(503,'扫描分页缺失，请重新扫描。');
+    return new Response(page.body,{headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
   }
   if(path[0]==='policy'&&path.length===1&&request.method==='PUT'){
     const settings=await policy(env);expectMatch(request,settings.etag);const next=await readJson(request,4096);if(storagePolicyErrors(next))throw new ApiError(422,'清理策略不合法；不能缩短最低保留期。');
@@ -241,9 +296,9 @@ export async function storageRoute(request: Request, env: StorageEnv, path: stri
     await stepScan(env,stored.value);return saveScan(env,stored.value,stored.etag);
   }
   if(path[0]==='delete'&&path.length===1&&request.method==='POST'){
-    const input=await readJson(request,16_384) as {scanId?:string;keys?:string[];confirm?:string};
-    if(!idPattern.test(input?.scanId??'')||!Array.isArray(input.keys)||!input.keys.length||input.keys.length>20||input.keys.some(key=>typeof key!=='string')||input.confirm!=='永久删除')throw new ApiError(422,'请核对删除清单并输入“永久删除”，每批 1 至 20 个对象。');
-    return json(await cleanup(env,input.scanId!,input.keys,await actorKey(email)));
+    const input=await readJson(request,16_384) as {scanId?:string;keys?:string[];pages?:number[];confirm?:string};
+    if(!idPattern.test(input?.scanId??'')||!Array.isArray(input.keys)||!input.keys.length||input.keys.length>20||input.keys.some(key=>typeof key!=='string')||!Array.isArray(input.pages)||input.pages.length>20||input.pages.some(page=>!Number.isInteger(page))||input.confirm!=='永久删除')throw new ApiError(422,'请核对删除清单并输入“永久删除”，每批 1 至 20 个对象。');
+    return json(await cleanup(env,input.scanId!,input.keys,input.pages!,await actorKey(email)));
   }
   throw new ApiError(404,'存储管理接口不存在。');
 }
@@ -255,14 +310,18 @@ export async function scheduledStorageCleanup(env: StorageEnv) {
   if(previous?.value.finished&&previous.value.finishedAt&&Date.now()-Date.parse(previous.value.finishedAt)<DAY)return;
   const saved=previous&&!previous.value.finished?await record<StorageScan>(env.PRIVATE,scanKey(previous.value.id)):null;
   if(!saved){const started=await startScan(env);await putJson(env.PRIVATE,AUTO,{id:started.scan.id},previous?.etag??EMPTY_ETAG);return;}
+  if(saved.value.format!==2){await putJson(env.PRIVATE,AUTO,{id:saved.value.id,finished:true},previous!.etag);return;}
   if(saved.value.status!=='ready'){
     await stepScan(env,saved.value);await putJson(env.PRIVATE,scanKey(saved.value.id),saved.value,saved.etag);return;
   }
   const scan=saved.value;
-  const candidates=scan.items.filter(item=>item.eligible&&!scan.deleted.includes(storageId(item.bucket,item.key))&&!scan.skipped.includes(storageId(item.bucket,item.key))&&(item.kind==='temporary'||item.kind==='history'||item.kind==='receipt'||settings.value.assets&&(item.bucket==='private'||settings.value.publicAssets)));
-  if(!candidates.length){await putJson(env.PRIVATE,AUTO,{id:scan.id,finished:true,finishedAt:new Date(Date.now()).toISOString()},previous!.etag);return;}
+  const cursor=(previous!.value as {page?:number}).page??0,page=scan.candidatePages?.[cursor];
+  if(page===undefined){await putJson(env.PRIVATE,AUTO,{id:scan.id,finished:true,finishedAt:new Date(Date.now()).toISOString()},previous!.etag);return;}
+  const loaded=await loadPage(env,scan,page);
+  const candidates=loaded.value.filter(item=>item.eligible&&!item.outcome&&(item.kind==='temporary'||item.kind==='history'||item.kind==='receipt'||settings.value.assets&&(item.bucket==='private'||settings.value.publicAssets)));
+  if(!candidates.length){await putJson(env.PRIVATE,AUTO,{id:scan.id,page:cursor+1},previous!.etag);return;}
   let bytes=0;const selected=candidates.filter(item=>{if(bytes+item.size>2*1024**3)return false;bytes+=item.size;return true;}).slice(0,20);
   if(!selected.length)return;
-  try{await cleanup(env,scan.id,selected.map(item=>storageId(item.bucket,item.key)),await actorKey('automatic-storage-cleanup@system.invalid'));}
+  try{await cleanup(env,scan.id,selected.map(item=>storageId(item.bucket,item.key)),[page],await actorKey('automatic-storage-cleanup@system.invalid'));}
   catch(error){if(error instanceof ApiError&&error.status===409&&/目录已改变|策略已改变|24 小时/.test(error.message))await putJson(env.PRIVATE,AUTO,{id:scan.id,finished:true,reason:error.message},previous!.etag);else throw error;}
 }
