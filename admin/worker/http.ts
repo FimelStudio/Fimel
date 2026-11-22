@@ -1,6 +1,6 @@
 export class ApiError extends Error {
   status: number;
-  constructor(status: number, message: string) { super(message); this.status = status; }
+  constructor(status: number, message: string, public details?: Record<string, unknown>) { super(message); this.status = status; }
 }
 export function json(value: unknown, status = 200, etag?: string): Response {
   // CDN compression may weaken/remove HTTP ETag. Keep the opaque storage revision in JSON.

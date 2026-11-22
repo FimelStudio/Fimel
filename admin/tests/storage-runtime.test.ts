@@ -46,7 +46,7 @@ beforeEach(async()=>{
 const bucket=(name:'private'|'public')=>runtime.getR2Bucket(name==='private'?'PRIVATE':'PUBLIC');
 async function put(name:'private'|'public',key:string,value:unknown){return (await bucket(name)).put(key,typeof value==='string'?value:JSON.stringify(value));}
 function request(path='',method='GET',body?:unknown,headers:Record<string,string>={}){return runtime.dispatchFetch(`http://127.0.0.1/api/storage${path?'/'+path:''}`,{method,headers:{Origin:origin,'X-Fimel-CSRF':'1','Content-Type':'application/json',Connection:'close',...headers},...(body===undefined?{}:{body:JSON.stringify(body)})});}
-async function scan(){let response=await request('scan','POST',{});assert.equal(response.status,200,await response.clone().text());let result=await response.json() as {scan:StorageScan;etag:string};for(let step=0;result.scan.status!=='ready'&&step<200;step++){response=await request('scan/'+result.scan.id,'POST',{}, {'If-Match':result.etag});assert.equal(response.status,200,await response.clone().text());result=await response.json() as typeof result;}assert.equal(result.scan.status,'ready');
+async function scan(){let response=await request('scan','POST',{restart:true});assert.equal(response.status,200,await response.clone().text());let result=await response.json() as {scan:StorageScan;etag:string};for(let step=0;result.scan.status!=='ready'&&step<200;step++){response=await request('scan/'+result.scan.id,'POST',{}, {'If-Match':result.etag});assert.equal(response.status,200,await response.clone().text());result=await response.json() as typeof result;}assert.equal(result.scan.status,'ready');
   for(let page=0;page<(result.scan.pageCount??0);page++){const response=await request(`items/${result.scan.id}/${page}`);assert.equal(response.status,200,await response.clone().text());result.scan.items.push(...await response.json() as StorageItem[]);}
   result.scan.deleted=result.scan.items.filter(i=>i.outcome==='deleted').map(i=>storageId(i.bucket,i.key));result.scan.skipped=result.scan.items.filter(i=>i.outcome==='skipped').map(i=>storageId(i.bucket,i.key));return result.scan;}
 const find=(scan:StorageScan,key:string)=>scan.items.find(item=>item.key===key)!;
@@ -206,4 +206,49 @@ test('旧版报告不能续扫或用于删除，报告分页不把曾列举的�
   // A retained V2 header pins its own report pages, never the orphan listed there.
   await put('private','maintenance/scans/old-plan.json',{id:'old-plan',format:2,items:[{key:a.privateKey!}]});
   assert.equal(find(await scan(),a.privateKey!).eligible,true);
+});
+
+test('正文中的失效相对 Markdown 链接记录警告，正常图片与已存在正文仍完整核对',async()=>{
+  const w=work();w.project.content.description='https://download.studiofimel.com/content/source.md';await put('public','data/works.json',{...manifest,projects:[w.project]});
+  await put('public','content/source.md','[规则](rules/README.md)\n![封图](../images/existing.png)');await put('public','images/existing.png','image');
+  const result=await scan();assert.equal(result.status,'ready');assert.deepEqual(result.warnings?.map(w=>w.key),['content/rules/README.md']);
+  assert.equal(find(result,'images/existing.png').eligible,false);assert.equal(find(result,'content/source.md').eligible,false);
+});
+
+test('扫描时确实存在的引用文件途中消失，停止扫描且不能当成失效链接跳过',async()=>{
+  const w=work();w.project.content.description='https://download.studiofimel.com/content/source.md';await put('public','data/works.json',{...manifest,projects:[w.project]});await put('public','content/source.md','body');
+  let r=await request('scan','POST',{restart:true}),value=await r.json() as {scan:StorageScan;etag:string};
+  while(value.scan.status!=='references'){r=await request('scan/'+value.scan.id,'POST',{}, {'If-Match':value.etag});assert.equal(r.status,200);value=await r.json() as typeof value;}
+  await (await bucket('public')).delete('content/source.md');r=await request('scan/'+value.scan.id,'POST',{}, {'If-Match':value.etag});
+  assert.equal(r.status,409);const failed=await r.json() as {retryable:boolean;error:string};assert.equal(failed.retryable,false);assert.match(failed.error,/引用记录消失/);
+});
+
+test('旧进度重复提交和并发推进安全跟随最新版本，不重复累计对象',async()=>{
+  const first=await (await request('scan','POST',{})).json() as {scan:StorageScan;etag:string};
+  const replies=await Promise.all([0,1].map(()=>request('scan/'+first.scan.id,'POST',{}, {'If-Match':first.etag})));
+  for(const reply of replies){assert.ok(reply.status===200||reply.status===409);if(reply.status===409)assert.equal((await reply.json() as {kind:string}).kind,'scan-conflict');}
+  const current=await (await request()).json() as {scan:StorageScan;scanEtag:string};
+  const replay=await request('scan/'+first.scan.id,'POST',{}, {'If-Match':first.etag});assert.equal(replay.status,200);
+  const saved=await replay.json() as {scan:StorageScan;etag:string};assert.equal(saved.etag,current.scanEtag);assert.equal(saved.scan.rootRead,current.scan.rootRead);
+});
+
+test('同一任务的新建请求复用进度，明确重扫后旧窗口跟随新任务',async()=>{
+  const one=await (await request('scan','POST',{})).json() as {scan:StorageScan;etag:string};
+  const same=await (await request('scan','POST',{})).json() as typeof one;assert.equal(one.scan.id,same.scan.id);
+  const next=await (await request('scan','POST',{restart:true})).json() as typeof one;assert.notEqual(one.scan.id,next.scan.id);
+  const follow=await request('scan/'+one.scan.id,'POST',{}, {'If-Match':one.etag});assert.equal(follow.status,200);assert.equal((await follow.json() as typeof one).scan.id,next.scan.id);
+});
+
+test('巨型维护报告仅保护其分页，不解析正文也不阻止完整扫描',async()=>{
+  await put('private','maintenance/scans/old-huge.json','x'.repeat(8_500_000));
+  const a=asset();await put('private',a.privateKey!,'orphan');
+  const result=await scan();assert.equal(result.status,'ready');assert.equal(find(result,a.privateKey!).eligible,true);
+  assert.equal(find(result,'maintenance/scans/old-huge.json').eligible,false);
+});
+
+test('损坏的公开目录明确禁止重试，不伪装为临时网络故障',async()=>{
+  await put('public','data/works.json',{broken:true});
+  let reply=await request('scan','POST',{restart:true}),value=await reply.json() as {scan:StorageScan;etag:string};
+  for(let step=0;step<8;step++){reply=await request('scan/'+value.scan.id,'POST',{}, {'If-Match':value.etag});if(!reply.ok)break;value=await reply.json() as typeof value;}
+  assert.equal(reply.status,503);const error=await reply.json() as {kind:string;retryable:boolean};assert.equal(error.kind,'scan-reference-invalid');assert.equal(error.retryable,false);
 });
