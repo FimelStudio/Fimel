@@ -25,7 +25,7 @@ before(async()=>{
       let deletes=0;
       const privateBucket=new Proxy(env.PRIVATE,{get(bucket,key){
         if(key==='delete')return async(name)=>{if(failure==='delete-second'&&++deletes===2||failure==='temp-delete'&&name.startsWith('uploads/temporary/'))throw Error('injected deletion failure');return bucket.delete(name);};
-        if(key==='put')return async(name,value,options)=>{if(failure==='audit-intent'&&name.startsWith('audit/')||failure==='scan-save'&&name.startsWith('maintenance/scans/')&&options?.onlyIf?.etagMatches)throw Error('injected persistence failure');return bucket.put(name,value,options);};
+        if(key==='put')return async(name,value,options)=>{if(failure==='audit-intent'&&name.startsWith('audit/')||failure==='audit-finish'&&name.startsWith('audit/')&&options?.onlyIf?.etagMatches||failure==='scan-save'&&name.startsWith('maintenance/scans/')&&options?.onlyIf?.etagMatches)throw Error('injected persistence failure');return bucket.put(name,value,options);};
         const value=Reflect.get(bucket,key);return typeof value==='function'?value.bind(bucket):value;
       }});
       const assets={async fetch(){return Response.json({schemaVersion:1,works:[]});}};
@@ -251,4 +251,87 @@ test('损坏的公开目录明确禁止重试，不伪装为临时网络故障',
   let reply=await request('scan','POST',{restart:true}),value=await reply.json() as {scan:StorageScan;etag:string};
   for(let step=0;step<8;step++){reply=await request('scan/'+value.scan.id,'POST',{}, {'If-Match':value.etag});if(!reply.ok)break;value=await reply.json() as typeof value;}
   assert.equal(reply.status,503);const error=await reply.json() as {kind:string;retryable:boolean};assert.equal(error.kind,'scan-reference-invalid');assert.equal(error.retryable,false);
+});
+
+type GateState={gate:import('../shared/storage-gate').StorageGate;gateEtag:string};
+const gateState=async()=>await (await request()).json() as GateState;
+async function recovery(action:'prepare'|'complete'|'cancel',headers:Record<string,string>={}) {
+  const state=await gateState();return request('recovery','POST',{action,confirm:'恢复维护锁',...(state.gate.recovery?{id:state.gate.recovery.id}:{})},{'If-Match':state.gateEtag,...headers});
+}
+const ageGate=async()=>put('private','maintenance/write-gate.json',{writers:{[id()]:'2020-01-01T00:00:00.000Z'}});
+const advanceRecoveryClock=()=>request('','GET',undefined,{'x-test-days':String(366+61/86400)});
+
+test('遗留写入锁只能人工恢复；要求确认、版本条件与完整隔离等待',async()=>{
+  await ageGate();const original=await gateState();
+  assert.equal((await request('recovery','POST',{action:'prepare',confirm:'恢复维护锁'})).status,428);
+  assert.equal((await request('recovery','POST',{action:'prepare'},{'If-Match':original.gateEtag})).status,422);
+  assert.equal((await recovery('prepare',{'If-Match':'"stale"'})).status,409);
+  const started=await recovery('prepare');assert.equal(started.status,200,await started.clone().text());
+  const isolated=await gateState();assert.deepEqual(isolated.gate.writers,original.gate.writers);assert.ok(isolated.gate.recovery);assert.equal(isolated.gate.cleaner,isolated.gate.recovery.id);
+  assert.equal((await recovery('complete')).status,409);
+  const writer=await runtime.dispatchFetch('http://127.0.0.1/api/works/'+id(),{method:'PUT',headers:{Origin:origin,'X-Fimel-CSRF':'1','Content-Type':'application/json'},body:'{}'});assert.equal(writer.status,503);
+  await advanceRecoveryClock();const done=await recovery('complete');assert.equal(done.status,200,await done.clone().text());
+  const cleared=await gateState();assert.deepEqual(cleared.gate.writers,{});assert.equal(cleared.gate.cleaner,undefined);assert.ok(cleared.gate.recovered);
+  assert.equal((await audits()).filter(event=>event.operation==='recover-storage-lock'&&event.status==='success').length,1);
+  assert.equal((await recovery('complete')).status,409);
+});
+
+test('正在写入及未知清理锁不能按时间自动解除，不能用恢复接口绕过',async()=>{
+  const fresh=new Date(Date.now()+366*86400000).toISOString();
+  await put('private','maintenance/write-gate.json',{writers:{[id()]:fresh}});
+  assert.equal((await recovery('prepare')).status,409);
+  await put('private','maintenance/write-gate.json',{writers:{[id()]:'2020-01-01T00:00:00Z'},cleaner:id()});
+  assert.equal((await recovery('prepare')).status,409);
+  assert.ok((await gateState()).gate.cleaner);
+});
+
+test('隔离期间目录变化或旧写入完成会拒绝恢复，取消只解除隔离并保留写入记录',async()=>{
+  await ageGate();assert.equal((await recovery('prepare')).status,200);await advanceRecoveryClock();
+  await put('private','state/library.json',{schemaVersion:1,works:[work()]});
+  assert.equal((await recovery('complete')).status,409);assert.ok((await gateState()).gate.cleaner);
+  const beforeCancel=await gateState();assert.equal((await recovery('cancel')).status,200);
+  assert.deepEqual((await gateState()).gate.writers,beforeCancel.gate.writers);assert.equal((await gateState()).gate.cleaner,undefined);
+  assert.equal((await recovery('prepare')).status,200);await request('','GET',undefined,{'x-test-days':String(366+122/86400)});
+  const changed=await gateState();await put('private','maintenance/write-gate.json',{...changed.gate,writers:{}});
+  assert.equal((await recovery('complete')).status,409);assert.equal((await recovery('cancel')).status,200);
+  assert.deepEqual((await gateState()).gate.writers,{});
+});
+
+test('恢复只改维护记录与审计，不删除文件；旧报告失效，重新扫描后才可清理',async()=>{
+  const key='uploads/temporary/old/remaining.zip';await put('private',key,'keep');const old=await scan();
+  await ageGate();assert.equal((await recovery('prepare')).status,200);await advanceRecoveryClock();assert.equal((await recovery('complete')).status,200);
+  const blocked=await remove(old,['private:'+key]);assert.equal(blocked.status,409);assert.match(await blocked.text(),/重新扫描/);
+  assert.ok(await (await bucket('private')).head(key));assert.deepEqual(await (await (await bucket('private')).get('state/library.json'))!.json(),{schemaVersion:1,works:[]});
+  const updated=await scan();const deleted=await remove(updated,['private:'+key]);assert.equal(deleted.status,200,await deleted.clone().text());
+  assert.equal(await (await bucket('private')).head(key),null);assert.ok((await gateState()).gate.recovered);
+});
+
+test('恢复审计写入失败不会先解除维护锁，完成回执可核对响应丢失结果',async()=>{
+  await ageGate();const original=await gateState();
+  assert.equal((await recovery('prepare',{'x-test-failure':'audit-intent'})).status,503);assert.deepEqual((await gateState()).gate,original.gate);
+  assert.equal((await recovery('prepare')).status,200);await advanceRecoveryClock();
+  assert.equal((await recovery('complete',{'x-test-failure':'audit-finish'})).status,503);
+  const after=await gateState();assert.deepEqual(after.gate.writers,{});assert.equal(after.gate.cleaner,undefined);assert.ok(after.gate.recovered?.auditKey);
+  assert.equal((await recovery('complete')).status,409);
+});
+
+test('并发恢复只能创建一个隔离，刷新后可继续或取消；超时不自动解锁',async()=>{
+  await ageGate();const current=await gateState();const responses=await Promise.all([1,2].map(()=>request('recovery','POST',{action:'prepare',confirm:'恢复维护锁'},{'If-Match':current.gateEtag})));
+  assert.deepEqual(responses.map(value=>value.status).sort(),[200,409]);
+  await request('','GET',undefined,{'x-test-days':String(367)});
+  assert.equal((await recovery('complete')).status,409);assert.ok((await gateState()).gate.cleaner);
+  assert.equal((await recovery('cancel')).status,200);assert.equal(Object.keys((await gateState()).gate.writers).length,1);
+});
+
+test('恢复接口继承身份和 CSRF 校验，维护记录损坏时拒绝继续',async()=>{
+  await ageGate();assert.equal((await recovery('prepare',{'x-local-test-anonymous':'1'})).status,401);
+  assert.equal((await recovery('prepare',{'X-Fimel-CSRF':''})).status,403);
+  await put('private','maintenance/write-gate.json','not json');assert.equal((await request()).status,503);
+});
+
+test('自动任务遇到恢复前的旧报告会结束该轮，下轮重新扫描而非反复删除',async()=>{
+  await configure({enabled:true});const key='uploads/temporary/old/auto.zip';await put('private',key,'keep');const old=await scan();
+  await put('private','maintenance/automatic.json',{id:old.id});await ageGate();assert.equal((await recovery('prepare')).status,200);await advanceRecoveryClock();assert.equal((await recovery('complete')).status,200);
+  assert.equal((await scheduled()).status,200);const store=await bucket('private');const stopped=await (await store.get('maintenance/automatic.json'))!.json() as {finished:boolean;reason:string};assert.equal(stopped.finished,true);assert.match(stopped.reason,/维护锁已恢复/);assert.ok(await store.head(key));
+  assert.equal((await scheduled()).status,200);const restarted=await (await store.get('maintenance/automatic.json'))!.json() as {id:string};assert.notEqual(restarted.id,old.id);assert.ok(await store.head(key));
 });

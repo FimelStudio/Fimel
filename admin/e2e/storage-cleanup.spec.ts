@@ -10,11 +10,12 @@ let orphan:string,protectedKey:string;
 const origin='http://127.0.0.1:5174';
 const dir='.artifacts/storage-cleanup-20261120';
 test.beforeAll(async()=>{
-  const bundled=await build({stdin:{contents:`import local from './admin/worker/local';const now=Date.now;Date.now=()=>now()+366*86400000;export default {fetch(request,env,ctx){return local.fetch(request,{...env,ASSETS:{fetch:async()=>Response.json({schemaVersion:1,works:[]})}},ctx);}};`,resolveDir:process.cwd()},bundle:true,write:false,format:'esm',platform:'browser'});
+  const bundled=await build({stdin:{contents:`import local from './admin/worker/local';const now=Date.now;let seconds=0;Date.now=()=>now()+366*86400000+seconds*1000;export default {fetch(request,env,ctx){const url=new URL(request.url);if(url.pathname==='/test/clock'){seconds=Number(url.searchParams.get('seconds')??0);return new Response('ok');}return local.fetch(request,{...env,ASSETS:{fetch:async()=>Response.json({schemaVersion:1,works:[]})}},ctx);}};`,resolveDir:process.cwd()},bundle:true,write:false,format:'esm',platform:'browser'});
   runtime=new Miniflare(convertV4MiniflareOptions({modules:true,script:bundled.outputFiles[0].text,compatibilityDate:'2026-10-12',r2Buckets:['PRIVATE','PUBLIC'],bindings:{ADMIN_ORIGIN:origin,ACCESS_AUD:'local-test',ACCESS_ISSUER:'https://local.invalid',ADMIN_EMAILS:'local-admin@example.invalid'}}));await runtime.ready;await mkdir(dir,{recursive:true});
 });
 test.afterAll(async()=>{await runtime?.dispose();});
 test.beforeEach(async({page})=>{
+  await runtime.dispatchFetch('http://127.0.0.1/test/clock?seconds=0');
   const priv=await runtime.getR2Bucket('PRIVATE'),pub=await runtime.getR2Bucket('PUBLIC');for(const store of [priv,pub]){const page=await store.list();if(page.objects.length)await store.delete(page.objects.map(value=>value.key));}
   const w=makeWork();w.project.slug='storage-test';w.project.title='存储测试';const assetId=crypto.randomUUID();protectedKey=`uploads/verified/${assetId}/cover.png`;w.gallery=[{id:assetId,name:'cover.png',size:4,mime:'image/png',sha256:'a'.repeat(64),privateKey:protectedKey}];
   orphan=`uploads/temporary/${crypto.randomUUID()}/unused.zip`;await priv.put('state/library.json',JSON.stringify({schemaVersion:1,works:[w]}));await pub.put('data/works.json',JSON.stringify({schemaVersion:2,publicationId:'test',projects:[],releases:{}}));await priv.put(orphan,'orphan');await priv.put(protectedKey,'image');
@@ -82,4 +83,34 @@ test('暂停时响应中断，刷新后从服务端最新进度继续',async({pa
   await expect(page.locator('.storage-manager .success')).toContainText('扫描已暂停');
   await page.reload();await page.getByRole('button',{name:'存储与清理',exact:true}).click();await page.getByRole('button',{name:'继续扫描',exact:true}).click();
   await expect(page.locator('.storage-manager .success')).toContainText('扫描完成');await expect(page.locator('.storage-table')).toContainText(orphan);
+});
+
+test('人工恢复遗留锁须确认并隔离等待，刷新后可完成，重扫前不能删除',async({page})=>{
+  await page.getByRole('button',{name:'开始扫描',exact:true}).click();await expect(page.locator('.storage-manager .success')).toContainText('扫描完成');
+  const priv=await runtime.getR2Bucket('PRIVATE');await priv.put('maintenance/write-gate.json',JSON.stringify({writers:{'old-writer':'2020-01-01T00:00:00Z'}}));
+  await page.getByRole('button',{name:'重新读取',exact:true}).click();await expect(page.getByRole('button',{name:'检查并恢复遗留锁',exact:true})).toBeEnabled();
+  await page.getByLabel('选择 '+orphan,{exact:true}).check();await expect(page.getByRole('button',{name:'清理选中（1）',exact:true})).toBeDisabled();
+  await page.getByRole('button',{name:'检查并恢复遗留锁',exact:true}).click();const prepare=page.getByRole('button',{name:'开始隔离核对',exact:true});await expect(prepare).toBeDisabled();
+  await page.getByLabel('维护恢复确认文字').fill('恢复维护锁');await expect(prepare).toBeDisabled();
+  await page.getByRole('checkbox',{name:'我已确认其他窗口与成员没有正在进行的上传、保存或发布，且已暂停外部 R2 写入'}).check();await prepare.click();
+  await expect(page.getByRole('heading',{name:'维护恢复已隔离新写入',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'核对并完成恢复',exact:true})).toBeDisabled();
+  await page.reload();await page.getByRole('button',{name:'存储与清理',exact:true}).click();await expect(page.getByRole('heading',{name:'维护恢复已隔离新写入'})).toBeVisible();
+  await runtime.dispatchFetch('http://127.0.0.1/test/clock?seconds=61');await page.getByRole('button',{name:'重新读取',exact:true}).click();
+  await expect(page.getByRole('button',{name:'核对并完成恢复',exact:true})).toBeEnabled();await page.getByRole('button',{name:'核对并完成恢复',exact:true}).click();
+  await expect(page.locator('.storage-manager .success')).toContainText('遗留维护锁已恢复');expect(await priv.head(orphan)).not.toBeNull();await expect(page.locator('.storage-manager')).toContainText('旧报告不能用于删除');
+  await page.getByLabel('选择 '+orphan,{exact:true}).check();await expect(page.getByRole('button',{name:'清理选中（1）',exact:true})).toBeDisabled();
+  await page.getByRole('button',{name:'重新扫描',exact:true}).click();await expect(page.locator('.storage-manager .success')).toContainText('扫描完成');
+  await page.getByLabel('选择 '+orphan,{exact:true}).check();await expect(page.getByRole('button',{name:'清理选中（1）',exact:true})).toBeEnabled();
+});
+
+test('恢复准备响应丢失后可重新读取并取消，原记录保留且未删除文件',async({page})=>{
+  const priv=await runtime.getR2Bucket('PRIVATE');await priv.put('maintenance/write-gate.json',JSON.stringify({writers:{'old-writer':'2020-01-01T00:00:00Z'}}));
+  await page.getByRole('button',{name:'重新读取',exact:true}).click();await page.getByRole('button',{name:'检查并恢复遗留锁',exact:true}).click();
+  await page.getByRole('checkbox',{name:'我已确认其他窗口与成员没有正在进行的上传、保存或发布，且已暂停外部 R2 写入'}).check();await page.getByLabel('维护恢复确认文字').fill('恢复维护锁');
+  await page.route('**/api/storage/recovery',async route=>{const req=route.request();await runtime.dispatchFetch('http://127.0.0.1/api/storage/recovery',{method:'POST',headers:{...req.headers(),origin,connection:'close'},body:req.postDataBuffer()!});await route.abort('failed');},{times:1});
+  await page.getByRole('button',{name:'开始隔离核对',exact:true}).click();await expect(page.locator('.storage-manager .error')).toContainText('重新读取核对');
+  await page.getByRole('button',{name:'重新读取',exact:true}).click();await expect(page.getByRole('button',{name:'取消恢复并解除隔离',exact:true})).toBeEnabled();
+  await page.getByRole('button',{name:'取消恢复并解除隔离',exact:true}).click();await expect(page.locator('.storage-manager .success')).toContainText('已取消恢复');
+  expect(await (await priv.get('maintenance/write-gate.json'))!.json()).toEqual({writers:{'old-writer':'2020-01-01T00:00:00Z'}});expect(await priv.head(orphan)).not.toBeNull();
+  await page.getByRole('button',{name:'管理员日志',exact:true}).click();await expect(page.locator('.audit-list article').filter({hasText:'恢复存储维护锁'}).locator('.badge')).toHaveText('已取消');
 });

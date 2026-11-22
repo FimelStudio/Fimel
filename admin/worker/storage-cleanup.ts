@@ -5,7 +5,8 @@ import { DEFAULT_STORAGE_POLICY, storageId, storageKind, storagePolicyErrors } f
 import type { StorageBucket, StorageItem, StoragePolicy, StorageScan } from '../shared/storage';
 import { ApiError, EMPTY_ETAG, expectMatch, json, putJson, readJson } from './http';
 import { actorKey } from './audit';
-import { withStorageCleaner } from './storage-gate';
+import { readStorageGate, withStorageCleaner } from './storage-gate';
+import { storageRecovery } from './storage-recovery';
 import { validateLibrary } from '../shared/validation';
 import { docsLibraryErrors } from '../shared/docs';
 import { docsMarkdownImages, parseDocsManifest } from '../../src/content/docs';
@@ -265,6 +266,8 @@ async function saveScan(env:StorageEnv,scan:StorageScan,etag:string){
   return json({scan:summary(scan)},200,object.httpEtag);
 }
 async function unchanged(env: StorageEnv, scan: StorageScan) {
+  const {gate}=await readStorageGate(env.PRIVATE);
+  if(gate.recovered&&Date.parse(scan.createdAt)<=Date.parse(gate.recovered.time))throw new ApiError(409,'维护锁已恢复，请重新扫描后再清理。');
   for(const [name,key] of ROOTS)if(((await bucket(env,name).head(key))?.httpEtag??EMPTY_ETAG)!==scan.revisions[storageId(name,key)])throw new ApiError(409,'作品、文档或公开目录已改变，请重新扫描后再清理。');
   if((await policy(env)).etag!==scan.revisions.policy)throw new ApiError(409,'清理策略已改变，请重新扫描。');
   if(Date.now()-Date.parse(scan.readyAt??scan.createdAt)>DAY)throw new ApiError(409,'扫描结果已超过 24 小时，请重新扫描。');
@@ -301,10 +304,11 @@ async function cleanup(env: StorageEnv, id: string, selected: string[], pages:nu
   });
 }
 export async function storageRoute(request: Request, env: StorageEnv, path: string[], email: string) {
+  if(path.length===1&&path[0]==='recovery'&&request.method==='POST')return storageRecovery(request,env,email);
   if(path.length===0&&request.method==='GET'){
     const settings=await policy(env),latest=await record<{id:string}>(env.PRIVATE,LATEST),saved=latest?await record<StorageScan>(env.PRIVATE,scanKey(latest.value.id)):null;
-    const gate=await record<{writers:Record<string,string>;cleaner?:string}>(env.PRIVATE,'maintenance/write-gate.json');
-    return json({policy:settings.value,scan:saved?summary(saved.value):null,scanEtag:saved?.etag??'',gate:gate?.value??{writers:{}},automatic:(await record(env.PRIVATE,AUTO))?.value??null},200,settings.etag);
+    const gate=await readStorageGate(env.PRIVATE);
+    return json({policy:settings.value,scan:saved?summary(saved.value):null,scanEtag:saved?.etag??'',gate:gate.gate,gateEtag:gate.etag,serverTime:Date.now(),automatic:(await record(env.PRIVATE,AUTO))?.value??null},200,settings.etag);
   }
   if(path[0]==='items'&&path.length===3&&idPattern.test(path[1])&&/^\d{1,5}$/.test(path[2])&&request.method==='GET'){
     const saved=await record<StorageScan>(env.PRIVATE,scanKey(path[1]));
@@ -372,5 +376,5 @@ export async function scheduledStorageCleanup(env: StorageEnv) {
   let bytes=0;const selected=candidates.filter(item=>{if(bytes+item.size>2*1024**3)return false;bytes+=item.size;return true;}).slice(0,20);
   if(!selected.length)return;
   try{await cleanup(env,scan.id,selected.map(item=>storageId(item.bucket,item.key)),[page],await actorKey('automatic-storage-cleanup@system.invalid'));}
-  catch(error){if(error instanceof ApiError&&error.status===409&&/目录已改变|策略已改变|24 小时/.test(error.message))await putJson(env.PRIVATE,AUTO,{id:scan.id,finished:true,reason:error.message},previous!.etag);else throw error;}
+  catch(error){if(error instanceof ApiError&&error.status===409&&/目录已改变|策略已改变|24 小时|维护锁已恢复/.test(error.message))await putJson(env.PRIVATE,AUTO,{id:scan.id,finished:true,reason:error.message},previous!.etag);else throw error;}
 }
