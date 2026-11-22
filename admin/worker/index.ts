@@ -41,7 +41,7 @@ export async function handle(request: Request, env: AdminEnv, ctx: AccessContext
       response = await env.ASSETS.fetch(request);
     } else {
       const run = () => runAudited(request, env.PRIVATE, email, source => route(request, env, email, source));
-      response = write && !url.pathname.startsWith('/api/storage/') && url.pathname!=='/api/storage' ? await withStorageWriter(env.PRIVATE,run) : await run();
+      response = write && !url.pathname.startsWith('/api/storage/') && url.pathname!=='/api/storage' ? await withStorageWriter(env.PRIVATE,run,requestId) : await run();
     }
   } catch (error) {
     if (!(error instanceof ApiError)) console.error(JSON.stringify({ operation: 'request-failed', requestId, elapsedMs: Date.now() - started, category: error instanceof Error ? error.name : 'unknown' }));
