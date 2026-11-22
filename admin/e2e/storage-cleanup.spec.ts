@@ -40,3 +40,46 @@ test('窄屏与浅色主题布局无全页横向溢出，扫描报告可导出',
   await page.evaluate(()=>{document.documentElement.classList.remove('dark');});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBe(true);
   const download=page.waitForEvent('download');await page.getByRole('button',{name:'导出扫描报告',exact:true}).click();expect((await download).suggestedFilename()).toMatch(/^fimel-storage-/);await page.screenshot({path:dir+'/storage-mobile-light.png',fullPage:true});
 });
+
+test('扫描步骤已提交但响应丢失，自动恢复进度并读完报告',async({page})=>{
+  let lost=false;
+  await page.route('**/api/storage/scan/*',async route=>{
+    if(lost)return route.fallback();lost=true;
+    const request=route.request(),url=new URL(request.url());
+    const response=await runtime.dispatchFetch('http://127.0.0.1'+url.pathname,{method:'POST',headers:{...request.headers(),origin,connection:'close'},body:request.postDataBuffer()!});
+    expect(response.status).toBe(200);await response.arrayBuffer();
+    await route.fulfill({status:503,contentType:'text/html',body:'temporarily unavailable'});
+  });
+  await page.getByRole('button',{name:'开始扫描',exact:true}).click();
+  await expect(page.locator('.storage-manager .success')).toContainText('扫描完成');
+  expect(lost).toBe(true);await expect(page.locator('.storage-manager .error')).toHaveCount(0);
+  await expect(page.locator('.storage-table')).toContainText(orphan);
+});
+
+test('不存在的规则链接显示警告，仍能完成引用校验',async({page})=>{
+  const w=makeWork();w.project.slug='warning-source';w.project.title='链接测试作品';w.project.content.description='https://download.studiofimel.com/content/readme.md';
+  const pub=await runtime.getR2Bucket('PUBLIC');await pub.put('data/works.json',JSON.stringify({schemaVersion:2,publicationId:'test',projects:[w.project],releases:{}}));await pub.put('content/readme.md','[规则](rules/README.md)');
+  await page.getByRole('button',{name:'开始扫描',exact:true}).click();await expect(page.locator('.storage-manager .success')).toContainText('扫描完成');
+  await expect(page.locator('summary').filter({hasText:'1 个失效正文链接'})).toBeVisible();
+  await page.locator('summary').filter({hasText:'失效正文链接'}).click();await expect(page.locator('.storage-manager')).toContainText('content/rules/README.md');
+});
+
+test('报告某一分页暂时断网不会丢掉完整扫描结果',async({page})=>{
+  let attempts=0;
+  await page.route('**/api/storage/items/*/0',async route=>{if(++attempts===1)return route.abort('failed');return route.fallback();});
+  await page.getByRole('button',{name:'开始扫描',exact:true}).click();await expect(page.locator('.storage-manager .success')).toContainText('扫描完成');
+  expect(attempts).toBe(2);await expect(page.locator('.storage-table')).toContainText(orphan);await expect(page.getByRole('button',{name:'导出扫描报告',exact:true})).toBeEnabled();
+});
+
+test('暂停时响应中断，刷新后从服务端最新进度继续',async({page})=>{
+  let release:()=>void=()=>{},committed:()=>void=()=>{};
+  const held=new Promise<void>(resolve=>{release=resolve;}),saved=new Promise<void>(resolve=>{committed=resolve;});let first=true;
+  await page.route('**/api/storage/scan/*',async route=>{
+    if(!first)return route.fallback();first=false;const req=route.request(),url=new URL(req.url());
+    const response=await runtime.dispatchFetch('http://127.0.0.1'+url.pathname,{method:'POST',headers:{...req.headers(),origin,connection:'close'},body:req.postDataBuffer()!});await response.arrayBuffer();committed();await held;await route.abort('failed');
+  });
+  await page.getByRole('button',{name:'开始扫描',exact:true}).click();await saved;await page.getByRole('button',{name:'暂停扫描',exact:true}).click();release();
+  await expect(page.locator('.storage-manager .success')).toContainText('扫描已暂停');
+  await page.reload();await page.getByRole('button',{name:'存储与清理',exact:true}).click();await page.getByRole('button',{name:'继续扫描',exact:true}).click();
+  await expect(page.locator('.storage-manager .success')).toContainText('扫描完成');await expect(page.locator('.storage-table')).toContainText(orphan);
+});

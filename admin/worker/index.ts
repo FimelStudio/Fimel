@@ -45,7 +45,7 @@ export async function handle(request: Request, env: AdminEnv, ctx: AccessContext
     }
   } catch (error) {
     if (!(error instanceof ApiError)) console.error(JSON.stringify({ operation: 'request-failed', requestId, elapsedMs: Date.now() - started, category: error instanceof Error ? error.name : 'unknown' }));
-    response = json({ error: error instanceof ApiError ? error.message : '存储服务暂时不可用，操作未确认成功。', requestId }, error instanceof ApiError ? error.status : 503);
+    response = json({ error: error instanceof ApiError ? error.message : '存储服务暂时不可用，操作未确认成功。', requestId, ...(error instanceof ApiError ? error.details : {}) }, error instanceof ApiError ? error.status : 503);
   }
   const secured = new Response(response.body, response);
   secured.headers.set('X-Content-Type-Options', 'nosniff');
