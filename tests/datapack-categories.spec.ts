@@ -36,7 +36,7 @@ test('Java maps and data packs share a consistent but separate catalogue contrac
 test('Java and data-pack filters preserve search, sort and browser return state', async ({ page }) => {
   await page.goto('/#/works?type=java');
   await expect(page.locator('.work-row')).toHaveCount(countFor('java'));
-  await expect(page.locator('.work-row[href="#/works/fimel-card"]')).toHaveCount(0);
+  await expect(page.locator('.work-row[href="/works/fimel-card"]')).toHaveCount(0);
   const categoryNav = page.getByRole('navigation', { name: '作品', exact: true });
   const dataPacks = categoryNav.getByRole('link', { name: /^数据包/ });
   await dataPacks.focus();
@@ -45,10 +45,10 @@ test('Java and data-pack filters preserve search, sort and browser return state'
   await expect(page.locator('.work-row')).toHaveCount(countFor('datapacks'));
   await page.getByRole('searchbox', { name: '搜索作品' }).fill('Fimel Card');
   await page.getByLabel('排序', { exact: true }).selectOption('updated');
-  await page.locator('.work-row[href="#/works/fimel-card"]').click();
+  await page.locator('.work-row[href="/works/fimel-card"]').click();
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Fimel Card');
   const back = page.getByRole('link', { name: '返回作品', exact: true });
-  await expect(back).toHaveAttribute('href', '#/works?type=datapacks&q=Fimel+Card&sort=updated');
+  await expect(back).toHaveAttribute('href', '/works?type=datapacks&q=Fimel+Card&sort=updated');
   await back.click();
   await expect(page.getByRole('searchbox', { name: '搜索作品' })).toHaveValue('Fimel Card');
   await expect(page.getByLabel('排序', { exact: true })).toHaveValue('updated');
@@ -90,7 +90,7 @@ test('unreleased Fimel Card has its own cover, repository and keyboard-accessibl
   // Version notes now live in the shared list's collapsed supplementary section.
   await page.getByRole('tabpanel').locator('details > summary').click();
   await expect(page.locator('.project-markdown')).toBeVisible();
-  await expect(page.getByRole('link', { name: '返回作品', exact: true })).toHaveAttribute('href', '#/works?type=datapacks');
+  await expect(page.getByRole('link', { name: '返回作品', exact: true })).toHaveAttribute('href', '/works?type=datapacks');
   await page.getByRole('tab', { name: '版本与下载', exact: true }).press('Home');
   await expect(page.getByRole('tab', { name: '概述', exact: true })).toBeFocused();
 });
@@ -117,7 +117,7 @@ for (const language of ['zh', 'en', 'ja'] as const) {
       await dataPacks.press('Enter');
       await expect(dataPacks).toHaveAttribute('aria-current', 'page');
       await expect(page.locator('.work-row')).toHaveCount(countFor('datapacks'));
-      await expect(page.locator('.work-row[href="#/works/fimel-card"]')).toContainText(messages.catalogue.types.datapacks);
+      await expect(page.locator('.work-row[href="/works/fimel-card"]')).toContainText(messages.catalogue.types.datapacks);
       const height = await dataPacks.evaluate(element => element.getBoundingClientRect().height);
       expect(height).toBeGreaterThanOrEqual(44);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
@@ -126,7 +126,7 @@ for (const language of ['zh', 'en', 'ja'] as const) {
       await java.press('Enter');
       await expect(java).toHaveAttribute('aria-current', 'page');
       await expect(page.locator('.work-row')).toHaveCount(countFor('java'));
-      await expect(page.locator('.work-row[href="#/works/fimel-card"]')).toHaveCount(0);
+      await expect(page.locator('.work-row[href="/works/fimel-card"]')).toHaveCount(0);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     }
     await page.goto('/#/works/fimel-card');

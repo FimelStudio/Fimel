@@ -64,17 +64,17 @@ for (const language of languages) {
     for (const [key, slug] of [['maps', 'island-escape-java'], ['mods', 'bingo-but-dont-do-it'], ['tools', 'minecraft-explorer']] as const) {
       const link = card(page, copy[language][key][1]);
       await expect(link).toContainText(copy[language][key][0]); await expect(link).toContainText(copy[language][key][2]);
-      await expect(link).toHaveAttribute('href', `#/works/${slug}`);
+      await expect(link).toHaveAttribute('href', `/works/${slug}`);
       const project = data.projects.find(project => project.slug === slug)!;
       await expect(link.locator('img')).toHaveAttribute('src', project.featuredImage || `/${project.image}`);
     }
     const maps = page.locator('[data-featured-group="maps"]');
     await expect(maps.locator('a')).toHaveCount(2);
-    await expect(maps.locator('a[href="#/works/island-escape-before-dawn"] img')).toHaveAttribute('src', featuredImage);
-    await expect(maps.locator('a[href="#/works/island-escape-java"]')).toBeAttached();
-    await expect(maps.locator('a[href="#/works/fimel-card"]')).toHaveCount(0);
-    await expect(page.locator('[data-featured-group="released"] a[href="#/works/minecraft-explorer"] img')).toHaveAttribute('src', featuredImage);
-    await expect(page.locator('[data-featured-group="released"] a[href="#/works/minecraft-obj-cubizer"] img')).toHaveAttribute('src', `/${data.projects.find(project => project.slug === 'minecraft-obj-cubizer')!.image}`);
+    await expect(maps.locator('a[href="/works/island-escape-before-dawn"] img')).toHaveAttribute('src', featuredImage);
+    await expect(maps.locator('a[href="/works/island-escape-java"]')).toBeAttached();
+    await expect(maps.locator('a[href="/works/fimel-card"]')).toHaveCount(0);
+    await expect(page.locator('[data-featured-group="released"] a[href="/works/minecraft-explorer"] img')).toHaveAttribute('src', featuredImage);
+    await expect(page.locator('[data-featured-group="released"] a[href="/works/minecraft-obj-cubizer"] img')).toHaveAttribute('src', `/${data.projects.find(project => project.slug === 'minecraft-obj-cubizer')!.image}`);
     for (const theme of ['light', 'dark']) {
       await page.evaluate(dark => document.documentElement.classList.toggle('dark', dark), theme === 'dark');
       for (const width of [1440, 390, 320]) { await page.setViewportSize({ width, height: 900 }); await overflow(page); }
@@ -94,7 +94,7 @@ test('未配置首页文案沿用原卡片，精选封图不改变作品目录�
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   const data = await fixture(page, 'zh', false);
   await expect(page.locator('#quick-entry h2')).toHaveText('地图、数据包、模组和创作工具');
-  for (const [title, href] of [['海岛逃生：黎明前夕', '#/works?type=bedrock'], ["Bingo But Don't Do It", '#/works?type=mods'], ['Minecraft OBJ Cubizer', '#/works?type=tools']]) await expect(card(page, title)).toHaveAttribute('href', href);
+  for (const [title, href] of [['海岛逃生：黎明前夕', '/works?type=bedrock'], ["Bingo But Don't Do It", '/works?type=mods'], ['Minecraft OBJ Cubizer', '/works?type=tools']]) await expect(card(page, title)).toHaveAttribute('href', href);
   const about = page.locator('#about');
   const studioImage = about.locator('[data-studio-visual] img');
   await studioImage.scrollIntoViewIfNeeded();
@@ -111,7 +111,7 @@ test('未配置首页文案沿用原卡片，精选封图不改变作品目录�
   await about.screenshot({ path: '.artifacts/home-refresh-review/about-desktop-static.png', style: sectionScreenshotStyle });
   const ordinary = data.projects.find(project => project.slug === 'minecraft-explorer')!;
   await page.goto('/#/works?type=tools');
-  const row = page.locator('.work-row[href="#/works/minecraft-explorer"]');
+  const row = page.locator('.work-row[href="/works/minecraft-explorer"]');
   await expect(row.locator('img')).toHaveAttribute('src', `/${ordinary.image}`);
   await row.click();
   const projectHeader = page.locator('header').filter({ has: page.getByRole('heading', { level: 1, name: 'Minecraft Explorer', exact: true }) });

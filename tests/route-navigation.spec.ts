@@ -31,7 +31,7 @@ test('returning to works during a stalled home import must not wait for home or 
     await nav.getByRole('link', { name: '主页', exact: true }).click();
     await expect.poll(() => requested).toBe(true);
     await nav.getByRole('link', { name: '作品', exact: true }).click();
-    await expect(page).toHaveURL(/#\/works$/);
+    await expect(page).toHaveURL(/\/works$/);
     await expect(page.locator('.work-row')).toHaveCount(projectCount, { timeout: 2500 });
     await expect(page.getByRole('searchbox', { name: '搜索作品' })).toBeVisible();
     await expect.poll(() => page.locator('#page-content-wrapper').evaluate(element => Number(getComputedStyle(element).opacity))).toBe(1);
@@ -49,7 +49,7 @@ test('rapid repeated navigation ends on the latest page with visible usable cont
   for (let round = 0; round < 4; round++) {
     await page.evaluate(async () => {
       const click = (href: string) => (document.querySelector(`header nav a[href="${href}"]`) as HTMLAnchorElement).click();
-      for (const href of ['#/', '#/studio', '#/works']) {
+      for (const href of ['/', '/studio', '/works']) {
         click(href);
         await new Promise(resolve => setTimeout(resolve, 40));
       }

@@ -40,9 +40,9 @@ test('Home features current tools and data packs using the catalogue, not legacy
   for (const [group, slugs] of Object.entries(HOME_FEATURED)) {
     const container = page.locator(`[data-featured-group="${group}"]`);
     await expect(container.locator('a')).toHaveCount(slugs.length);
-    for (const slug of slugs) await expect(container.locator(`a[href="#/works/${slug}"]`)).toBeAttached();
+    for (const slug of slugs) await expect(container.locator(`a[href="/works/${slug}"]`)).toBeAttached();
   }
-  const feature = page.locator('#works a[href="#/works/minecraft-explorer"]');
+  const feature = page.locator('#works a[href="/works/minecraft-explorer"]');
   await expect(feature).toContainText('Explorer catalogue title');
   await expect(feature).toContainText('Catalogue-only summary');
   await expect(feature.locator('img')).toHaveAttribute('src', `/${explorer.image}`);
