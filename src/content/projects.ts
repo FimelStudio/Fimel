@@ -1,5 +1,5 @@
 import type { TFunction } from 'i18next';
-import projectTags from './project-tags.json';
+import projectTags from './project-tags.json' with { type: 'json' };
 
 export type ProjectTag = keyof typeof projectTags;
 

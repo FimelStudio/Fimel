@@ -7,8 +7,17 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
+    "html_handling": "none",
     "not_found_handling": "single-page-application",
     "run_worker_first": [
+      "/",
+      "/index.html",
+      "/works",
+      "/works/*",
+      "/docs",
+      "/docs/*",
+      "/robots.txt",
+      "/sitemap.xml",
       "/api/work-events",
       "/api/work-downloads",
       "/mods/bingo-but-dont-do-it-1.21.11-v1.0.jar",
@@ -17,6 +26,7 @@
     ]
   },
   "r2_buckets": [{ "binding": "PUBLIC", "bucket_name": "fimel-downloads" }],
+  "observability": { "enabled": true, "head_sampling_rate": 0.1, "traces": { "enabled": true, "head_sampling_rate": 0.01 } },
   "ratelimits": [{ "name": "METRICS_LIMITER", "namespace_id": "11002", "simple": { "limit": 45, "period": 60 } }],
   "triggers": {
     "crons": [

@@ -1,5 +1,6 @@
 import type { R2Bucket, RateLimit } from '@cloudflare/workers-types';
 import { collectWorkEvent, publicWorkDownloads } from './lib/work-event-worker';
+import { isPublicPage, publicPage } from './lib/public-pages';
 interface StaticAssetsBinding {
   fetch(request: Request): Promise<Response>;
 }
@@ -94,6 +95,8 @@ export default {
     if (LEGACY_DOWNLOAD_PATHS.has(new URL(request.url).pathname)) {
       return serveLegacyDownload(request, env);
     }
+
+    if (isPublicPage(new URL(request.url).pathname)) return publicPage(request, env);
 
     return env.ASSETS.fetch(request);
   },

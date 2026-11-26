@@ -646,6 +646,8 @@ const resources = {
 
 const savedLanguage = (() => {
   try {
+    const explicit = new URLSearchParams(window.location.search).get('lang');
+    if (explicit && ['zh', 'en', 'ja'].includes(explicit)) return explicit;
     const value = localStorage.getItem('fimel_user_lang');
     return value && ['zh', 'en', 'ja'].includes(value) ? value : 'zh';
   } catch { return 'zh'; }

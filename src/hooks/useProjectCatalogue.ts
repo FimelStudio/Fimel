@@ -10,7 +10,8 @@ type CatalogueState = { status: 'idle' | 'loading' | 'ready' | 'error'; projects
 let snapshot: CatalogueState = { status: 'idle', projects: [] };
 const listeners = new Set<() => void>();
 // Enabled only after reviewed R2 migration. Existing deployments keep the local contract.
-const remoteUrl: string = import.meta.env.VITE_CATALOGUE_URL ?? '';
+const publicPageUrl = document.querySelector<HTMLMetaElement>('meta[name="fimel-public-data"]')?.content;
+const remoteUrl: string = import.meta.env.VITE_CATALOGUE_URL || publicPageUrl || '';
 let lastValidated = 0;
 let loading = false;
 let remoteSucceeded = false;
@@ -50,7 +51,7 @@ const loadCatalogue = async () => {
   } catch (error) {
     console.warn('Unable to load work catalogue:', error);
     // Never resurrect removed projects from the Git snapshot after any successful R2 read.
-    if (remoteUrl && !remoteSucceeded) {
+    if (remoteUrl && !remoteSucceeded && !publicPageUrl) {
       try {
         const fallback = await fetch(assetUrl('works/catalogue.json'), { signal: AbortSignal.timeout(10_000) });
         if (!fallback.ok) throw new Error('Fallback unavailable', { cause: error });

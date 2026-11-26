@@ -29,7 +29,7 @@ test('native IME preedit fuzhu stays intact and searches only after committing �
   await cdp.send('Input.insertText', { text: '辅助' });
   await expect(input).toHaveValue('辅助');
   await expect.poll(() => new URLSearchParams(page.url().split('?')[1]).get('q')).toBe('辅助');
-  await expect(page.locator('.work-row[href="#/works/minecraft-obj-cubizer"]')).toBeVisible();
+  await expect(page.locator('.work-row[href="/works/minecraft-obj-cubizer"]')).toBeVisible();
 });
 
 test('native IME backspace, cancellation and committed-text deletion do not duplicate text', async ({ page }) => {
@@ -42,7 +42,7 @@ test('native IME backspace, cancellation and committed-text deletion do not dupl
     await compose(cdp, text);
     await expect(input).toHaveValue(text);
   }
-  await expect(page).toHaveURL(/#\/works\?type=tools&sort=name$/);
+  await expect(page).toHaveURL(/\/works\?type=tools&sort=name$/);
   await compose(cdp, 'fuzhu');
   await cdp.send('Input.insertText', { text: '辅助' });
   await expect(input).toHaveValue('辅助');
@@ -50,7 +50,7 @@ test('native IME backspace, cancellation and committed-text deletion do not dupl
   await expect(input).toHaveValue('辅');
   await input.press('Backspace');
   await expect(input).toHaveValue('');
-  await expect(page).toHaveURL(/#\/works\?type=tools&sort=name$/);
+  await expect(page).toHaveURL(/\/works\?type=tools&sort=name$/);
 });
 
 test('clearing an active native composition cannot restore its pending text through URL navigation', async ({ page }) => {
@@ -62,7 +62,7 @@ test('clearing an active native composition cannot restore its pending text thro
   await expect(input).toHaveValue('fuzhu');
   await page.getByRole('button', { name: '清空搜索', exact: true }).click();
   await expect(input).toHaveValue('');
-  await expect(page).toHaveURL(/#\/works\?type=tools&sort=name$/);
+  await expect(page).toHaveURL(/\/works\?type=tools&sort=name$/);
   await expect(page.locator('.work-row')).toHaveCount(projects.filter((entry: { type: string }) => entry.type === 'tools').length);
 });
 

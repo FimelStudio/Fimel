@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import type { ReactNode } from 'react';
-import { HashRouter as Router, Navigate, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Navigate, Routes, Route } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Layout } from './Layout';
 
@@ -9,6 +9,7 @@ const Studio = lazy(() => import('./pages/Studio').then((module) => ({ default: 
 const Catalogue = lazy(() => import('./pages/Works/Catalogue').then((module) => ({ default: module.Catalogue })));
 const ProjectDetail = lazy(() => import('./pages/Works/ProjectDetail').then((module) => ({ default: module.ProjectDetail })));
 const Documentation = lazy(() => import('./pages/Documentation').then((module) => ({ default: module.Documentation })));
+const Router = import.meta.env.BASE_URL === '/' ? BrowserRouter : HashRouter;
 
 function RoutePage({ children }: { children: ReactNode }) {
   const { t } = useTranslation();

@@ -7,7 +7,7 @@ test('公开的网站文案、精选顺序和近期更新通过同一目录生�
   catalogue.site=site;catalogue.schemaVersion=2;catalogue.releases={};
   await page.addInitScript(()=>{sessionStorage.setItem('fimel_intro_seen','1');localStorage.setItem('fimel_user_lang','zh');});
   await page.route('**/works/catalogue.json',route=>route.fulfill({json:catalogue}));
-  await page.goto('/');await expect(page.locator('#recent-updates')).toContainText('工具更新记录');await expect(page.locator('#works a[href="#/works/es-atrium-showdown"]').first()).toBeVisible();
+  await page.goto('/');await expect(page.locator('#recent-updates')).toContainText('工具更新记录');await expect(page.locator('#works a[href="/works/es-atrium-showdown"]').first()).toBeVisible();
   await page.locator('#recent-updates').getByRole('link',{name:'工具更新记录'}).click();await expect(page.getByRole('heading',{name:'Minecraft Explorer',exact:true}).first()).toBeVisible();
   await page.goto('/#/studio');await expect(page.getByRole('heading',{name:'本地工作室标题',exact:true})).toBeVisible();await expect(page.getByRole('link',{name:'public-contact@example.invalid',exact:true})).toHaveAttribute('href','mailto:public-contact@example.invalid');await expect(page.getByText('123456789',{exact:true})).toBeVisible();
   await page.setViewportSize({width:320,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);

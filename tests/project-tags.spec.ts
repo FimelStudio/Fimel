@@ -32,20 +32,20 @@ test('every work uses explicit genre IDs, not feature translation keys', async (
 test('cards show actual gameplay and tool categories without feature snippets', async ({ page }) => {
   await page.goto('/#/works');
   await expect(page.locator('.work-row')).toHaveCount(projectCount);
-  await expect(page.locator('.work-row[href="#/works/island-escape-before-dawn"] li')).toHaveText([
+  await expect(page.locator('.work-row[href="/works/island-escape-before-dawn"] li')).toHaveText([
     '网易基岩版地图', 'PvP', '非对称竞技', '合作', '逃生',
   ]);
-  await expect(page.locator('.work-row[href="#/works/amethyst-salvation"] li')).toHaveText([
+  await expect(page.locator('.work-row[href="/works/amethyst-salvation"] li')).toHaveText([
     '网易基岩版地图', 'PvE', '角色扮演', '冒险',
   ]);
-  await expect(page.locator('.work-row[href="#/works/minecraft-obj-cubizer"] li')).toHaveText([
+  await expect(page.locator('.work-row[href="/works/minecraft-obj-cubizer"] li')).toHaveText([
     '插件与工具', '3D 建模', '格式转换', '创作辅助',
   ]);
-  await expect(page.locator('.work-row[href="#/works/power-on-2-snow-crisis"] li')).toHaveText(['网易基岩版地图']);
+  await expect(page.locator('.work-row[href="/works/power-on-2-snow-crisis"] li')).toHaveText(['网易基岩版地图']);
   expect(await page.locator('.work-row ul').allTextContents()).not.toEqual(expect.arrayContaining([
     expect.stringMatching(/五座信号塔|职业选择|装备升级|独立菜单|356 条词条/),
   ]));
-  await page.locator('.work-row[href="#/works/island-escape-before-dawn"]').click();
+  await page.locator('.work-row[href="/works/island-escape-before-dawn"]').click();
   await expect(page.locator('aside > ul li')).toHaveText(['PvP', '非对称竞技', '合作', '逃生']);
 });
 
@@ -83,12 +83,12 @@ test('genre labels switch language without maintaining duplicate project arrays'
   await expect(page.locator('.work-row')).toHaveCount(bedrockCount);
   await page.getByRole('button', { name: '切换语言' }).click();
   await page.getByRole('button', { name: 'English', exact: true }).click();
-  await expect(page.locator('.work-row[href="#/works/amethyst-salvation"] li')).toHaveText([
+  await expect(page.locator('.work-row[href="/works/amethyst-salvation"] li')).toHaveText([
     'NetEase Bedrock Maps', 'PvE', 'RPG', 'Adventure',
   ]);
   await page.getByRole('button', { name: 'Change language' }).click();
   await page.getByRole('button', { name: '日本語', exact: true }).click();
-  await expect(page.locator('.work-row[href="#/works/amethyst-salvation"] li')).toHaveText([
+  await expect(page.locator('.work-row[href="/works/amethyst-salvation"] li')).toHaveText([
     'NetEase 統合版マップ', 'PvE', 'ロールプレイ', 'アドベンチャー',
   ]);
 });
@@ -96,12 +96,13 @@ test('genre labels switch language without maintaining duplicate project arrays'
 test('home uses the official Bingo name and the same historical metrics as project details', async ({ page, request }) => {
   const catalogue = await (await request.get('/works/catalogue.json')).json();
   await page.goto('/');
-  const bingo = page.locator('#works a[href="#/works/bingo-but-dont-do-it"]');
+  const bingo = page.locator('#works a[href="/works/bingo-but-dont-do-it"]');
   await expect(bingo).toContainText('Bingo But Don\'t Do It');
-  await expect(bingo.locator('img')).toHaveAttribute('alt', 'Bingo But Don\'t Do It');
+  // The background image is decorative; the card's visible title names the link.
+  await expect(bingo.locator('img')).toHaveAttribute('alt', '');
   for (const slug of ['island-escape-before-dawn', 'amethyst-salvation', 'es-atrium-showdown']) {
     const project = catalogue.projects.find((entry: { slug: string }) => entry.slug === slug);
-    await expect(page.locator(`#works a[href="#/works/${slug}"]`)).toContainText(project.downloads.toLocaleString('en-US'));
+    await expect(page.locator(`#works a[href="/works/${slug}"]`)).toContainText(project.downloads.toLocaleString('en-US'));
   }
   await expect(page.locator('#works')).toContainText('商店数据为已收录的历史记录，请以平台最新信息为准。');
 });

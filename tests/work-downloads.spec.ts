@@ -35,7 +35,7 @@ test('完整历史读取后显示下载数，零值隐藏，列表和详情共�
   allowSecond();
   await expect(page.locator('.work-row .work-download-metric dd')).toHaveText(['1,234','暂无记录']);
   await expect(page.locator('.work-row .work-download-metric dt')).toHaveText(['下载数','下载数']);
-  await expect(page.locator('.work-row[href="#/works/zero-clicks"] .work-download-metric')).toHaveCount(0);
+  await expect(page.locator('.work-row[href="/works/zero-clicks"] .work-download-metric')).toHaveCount(0);
   await expect(page.locator('.work-download-metric[title]')).toHaveCount(0);
   await expect(page.locator('.work-download-metric p')).toHaveCount(0);
   await page.locator('.work-row').first().click();
@@ -46,7 +46,7 @@ test('完整历史读取后显示下载数，零值隐藏，列表和详情共�
   await expect(page.locator('aside')).not.toContainText('不代表完整下载人数');
   await expect(page.locator('aside')).not.toContainText('数据约每5分钟更新');
   await page.getByRole('link',{name:'返回作品',exact:true}).click();
-  await page.locator('.work-row[href="#/works/zero-clicks"]').click();
+  await page.locator('.work-row[href="/works/zero-clicks"]').click();
   await expect(page.getByRole('heading',{level:1,name:'zero-clicks',exact:true})).toBeVisible();
   await expect(page.locator('aside .work-download-metric')).toHaveCount(0);
   expect(requests).toBe(2);
@@ -55,8 +55,8 @@ test('完整历史读取后显示下载数，零值隐藏，列表和详情共�
 test('网易基岩版地图列表和详情只保留历史商店下载量，即使新接口非零也不显示新指标',async({page})=>{
   await setup(page);await page.route('**/api/work-downloads*',route=>route.fulfill({json:feed}));
   await page.goto('/#/works');
-  await expect(page.locator('.work-row[href="#/works/downloaded-work"] .work-download-metric dd')).toHaveText('1,234');
-  const row=page.locator('.work-row[href="#/works/bedrock-store"]');
+  await expect(page.locator('.work-row[href="/works/downloaded-work"] .work-download-metric dd')).toHaveText('1,234');
+  const row=page.locator('.work-row[href="/works/bedrock-store"]');
   await expect(row).toContainText('39,999 商店下载量');
   await expect(row.locator('.work-download-metric')).toHaveCount(0);
   await expect(row).not.toContainText('987,654');

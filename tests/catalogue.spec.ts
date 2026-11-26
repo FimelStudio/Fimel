@@ -40,7 +40,7 @@ test('four visible navigation links, category search, tabs and browser return', 
   await expect(page.locator('.project-markdown')).toContainText('2026-09-26');
   await page.getByRole('tab', { name: '版本与下载', exact: true }).click();
   await expect(page.locator('.project-markdown')).toContainText('Fabric Loader');
-  await expect(page.getByRole('link', { name: '返回作品', exact: true })).toHaveAttribute('href', '#/works?type=mods&q=Bingo');
+  await expect(page.getByRole('link', { name: '返回作品', exact: true })).toHaveAttribute('href', '/works?type=mods&q=Bingo');
   await page.reload();
   await expect(page.getByRole('tab', { name: '版本与下载', exact: true })).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('.project-markdown')).toContainText('Fabric Loader');
@@ -114,12 +114,12 @@ test('home entry links and contact deep links remain usable on mobile', async ({
   await expect(page.getByRole('navigation', { name: '主导航' }).getByRole('link')).toHaveCount(4);
   await expect(page.locator('#hero')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-  await page.locator('#hero a[href="#/"]').click();
+  await page.locator('#hero a[href="/"]').click();
   await expect(page.locator('#quick-entry')).toBeInViewport();
-  await page.locator('#quick-entry a[href="#/works?type=mods"]').click();
+  await page.locator('#quick-entry a[href="/works?type=mods"]').click();
   await expect(page.locator('.work-row')).toHaveCount(modCount);
   await page.goto('/#/contact');
-  await expect(page).toHaveURL(/#\/studio#contact$/);
+  await expect(page).toHaveURL(/\/studio#contact$/);
   await expect(page.locator('#contact')).toBeInViewport();
 });
 
@@ -142,7 +142,7 @@ test('mobile categories, project Markdown and merged contacts fit 320px', async 
 
 test('language and theme remain usable after refresh and legacy URLs redirect', async ({ page }) => {
   await page.goto('/#/works/mods');
-  await expect(page).toHaveURL(/#\/works\?type=mods$/);
+  await expect(page).toHaveURL(/\/works\?type=mods$/);
   await page.getByRole('button', { name: '切换语言' }).click();
   await page.getByRole('button', { name: '日本語' }).click();
   await expect(page.getByRole('searchbox', { name: '作品を検索' })).toBeVisible();
