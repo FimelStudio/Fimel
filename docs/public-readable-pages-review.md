@@ -1,6 +1,6 @@
 # 官网作品与文档直读验收
 
-日期：2026-11-26。开发分支：`feat/public-readable-pages-20261126`。
+日期：2026-11-26。开发提交：`e3cdf8a`；已合并并推送 `main`，合并提交：`eab242f`。
 
 ## 问题与结果
 
@@ -40,15 +40,25 @@ Markdown 禁止任意作者 HTML，仅重建安全图片属性；链接禁止危
 
 诊断证据在本地忽略目录 `.artifacts/public-readable-20261126/`；不提交凭据、诊断能力头或线上内容快照。
 
-## 待确认的上线范围
+## 已确认的上线范围
 
-合并并推送本分支，发布现有官网 Worker `fimel` 的代码和静态资源。现有 GitHub Pages 流程仍保留。无需部署 Admin，不代为保存、重发或删除作品／文档。
+用户确认后已合并并推送本分支，发布现有官网 Worker `fimel` 的代码和静态资源。现有 GitHub Pages 流程仍保留。没有部署 Admin，没有代为保存、重发或删除作品／文档。
 
 正式构建继续按现有规范设置 `VITE_CATALOGUE_URL=https://download.studiofimel.com/data/works.json`，保证从工作室等普通静态入口进入的浏览器也读取已发布目录。
 
 官网页面请求现在经过现有 Worker，并读取公开 R2 根目录；会增加 Worker 请求和 R2 读取次数。没有新增付费服务或资源绑定。启用 10% 日志和 1% 链路采样；应用异常仅记录公开页面类型，不记录正文、身份、会话或环境值。
 
-不修改 DNS、Access、凭据、桶绑定或存储数据。上线前保留现有 `fimel` 版本与部署记录，异常时回滚至该版本。此次尚未进行生产部署。
+没有修改 DNS、Access、凭据、桶绑定或存储数据。部署前后核对 PUBLIC、ASSETS、限流绑定、定时任务、自定义域名和 workers.dev 设置，均与原配置一致。
+
+## 生产发布验收
+
+- 官网 Worker：`fimel`；版本：`83223a0b-a74f-4ba0-a42d-ffb36ab3fb82`，已接收 100% 流量；部署：`ac9493db-dada-491d-8ad7-debc0307617b`。发布时间：2026-11-26 16:26（北京时间）。
+- 回滚基线：版本 `cad9a391-84d7-4035-846c-c8b342e91934`；部署 `0b287134-2db4-483d-990e-243e5fe6d774`。回滚只涉及代码与静态资源，不会恢复或覆盖 R2 内容。
+- 正式域名逐一读取当前 30 个作品、23 篇文档及目录／版本／语言入口，共 60 个页面，全部 HTTP 200，原始 HTML 直接包含正文；另核对站点地图、robots、未知作品 404、旧 JSON／Markdown 和旧下载 302。
+- 独立无界面浏览器验证真实界面接管、直接刷新、版本页、旧哈希链接、璀璨宝石文档、手机排版和关闭 JavaScript 的阅读；从 `/studio` 进入作品目录仍显示全部 30 个公开作品，未落回 Git 快照。无未捕获浏览器错误，验收拦截了 14 次统计写请求，避免污染访问数据。
+- 机器人 User-Agent `GPTBot` 的普通 HTTP 请求同样收到可读正文。当前内置联网工具对该域名仍返回不带具体原因的“not accessible”；不能据此声称所有 AI 已可访问，也未据此修改防护策略。
+- 合并提交对应的 [GitHub Pages 构建与部署](https://github.com/FimelStudio/Fimel/actions/runs/45782734567) 已成功。
+- 线上验收与回滚记录在本地忽略目录 `.artifacts/public-readable-20261126/production/` 和 `site-control-before.json`／`site-control-after.json`。
 
 本轮修复网页本身对无 JavaScript 阅读的兼容性。特定 AI 工具自己的联网限制或站点外的抓取策略仍需使用具体工具复核，不能仅凭其“无法访问”提示推断网站被 Cloudflare 封禁。
 
