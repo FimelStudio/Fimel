@@ -85,32 +85,48 @@ test('暂停时响应中断，刷新后从服务端最新进度继续',async({pa
   await expect(page.locator('.storage-manager .success')).toContainText('扫描完成');await expect(page.locator('.storage-table')).toContainText(orphan);
 });
 
-test('人工恢复遗留锁须确认并隔离等待，刷新后可完成，重扫前不能删除',async({page})=>{
-  await page.getByRole('button',{name:'开始扫描',exact:true}).click();await expect(page.locator('.storage-manager .success')).toContainText('扫描完成');
+test('遗留记录只确认一次便自动核对并重新扫描，无手动维护步骤也不自动删除',async({page})=>{
   const priv=await runtime.getR2Bucket('PRIVATE');await priv.put('maintenance/write-gate.json',JSON.stringify({writers:{'old-writer':'2020-01-01T00:00:00Z'}}));
-  await page.getByRole('button',{name:'重新读取',exact:true}).click();await expect(page.getByRole('button',{name:'检查并恢复遗留锁',exact:true})).toBeEnabled();
-  await page.getByLabel('选择 '+orphan,{exact:true}).check();await expect(page.getByRole('button',{name:'清理选中（1）',exact:true})).toBeDisabled();
-  await page.getByRole('button',{name:'检查并恢复遗留锁',exact:true}).click();const prepare=page.getByRole('button',{name:'开始隔离核对',exact:true});await expect(prepare).toBeDisabled();
-  await page.getByLabel('维护恢复确认文字').fill('恢复维护锁');await expect(prepare).toBeDisabled();
-  await page.getByRole('checkbox',{name:'我已确认其他窗口与成员没有正在进行的上传、保存或发布，且已暂停外部 R2 写入'}).check();await prepare.click();
-  await expect(page.getByRole('heading',{name:'维护恢复已隔离新写入',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'核对并完成恢复',exact:true})).toBeDisabled();
-  await page.reload();await page.getByRole('button',{name:'存储与清理',exact:true}).click();await expect(page.getByRole('heading',{name:'维护恢复已隔离新写入'})).toBeVisible();
-  await runtime.dispatchFetch('http://127.0.0.1/test/clock?seconds=61');await page.getByRole('button',{name:'重新读取',exact:true}).click();
-  await expect(page.getByRole('button',{name:'核对并完成恢复',exact:true})).toBeEnabled();await page.getByRole('button',{name:'核对并完成恢复',exact:true}).click();
-  await expect(page.locator('.storage-manager .success')).toContainText('遗留维护锁已恢复');expect(await priv.head(orphan)).not.toBeNull();await expect(page.locator('.storage-manager')).toContainText('旧报告不能用于删除');
-  await page.getByLabel('选择 '+orphan,{exact:true}).check();await expect(page.getByRole('button',{name:'清理选中（1）',exact:true})).toBeDisabled();
-  await page.getByRole('button',{name:'重新扫描',exact:true}).click();await expect(page.locator('.storage-manager .success')).toContainText('扫描完成');
+  await page.getByRole('button',{name:'重新读取',exact:true}).click();let dialogs=0;page.on('dialog',async dialog=>{if(dialog.type()==='confirm')dialogs++;await dialog.accept();});
+  await page.getByRole('button',{name:'检查并扫描',exact:true}).click();await expect(page.locator('.storage-manager .success')).toContainText('扫描完成');
+  expect(dialogs).toBe(1);await expect(page.getByLabel('维护恢复确认文字')).toHaveCount(0);await expect(page.getByRole('button',{name:'核对并完成恢复'})).toHaveCount(0);
+  const gate=await (await priv.get('maintenance/write-gate.json'))!.json() as {writers:object;cleaner?:string};expect(gate.writers).toEqual({});expect(gate.cleaner).toBeUndefined();expect(await priv.head(orphan)).not.toBeNull();expect(await priv.head(protectedKey)).not.toBeNull();
   await page.getByLabel('选择 '+orphan,{exact:true}).check();await expect(page.getByRole('button',{name:'清理选中（1）',exact:true})).toBeEnabled();
 });
 
-test('恢复准备响应丢失后可重新读取并取消，原记录保留且未删除文件',async({page})=>{
+test('遗留记录的单次确认可以取消，不会留下检查隔离或继续扫描',async({page})=>{
+  const priv=await runtime.getR2Bucket('PRIVATE');const gate={writers:{'old-writer':'2020-01-01T00:00:00Z'}};await priv.put('maintenance/write-gate.json',JSON.stringify(gate));
+  await page.getByRole('button',{name:'重新读取',exact:true}).click();page.once('dialog',dialog=>dialog.dismiss());await page.getByRole('button',{name:'检查并扫描',exact:true}).click();
+  await expect(page.locator('.storage-manager .success')).toContainText('检查已暂停');expect(await (await priv.get('maintenance/write-gate.json'))!.json()).toEqual(gate);expect(await priv.head('maintenance/latest-scan.json')).toBeNull();expect(await priv.head(orphan)).not.toBeNull();
+});
+
+test('准备响应丢失后自动核对并完成扫描，不重复询问或要求手动重扫',async({page})=>{
   const priv=await runtime.getR2Bucket('PRIVATE');await priv.put('maintenance/write-gate.json',JSON.stringify({writers:{'old-writer':'2020-01-01T00:00:00Z'}}));
-  await page.getByRole('button',{name:'重新读取',exact:true}).click();await page.getByRole('button',{name:'检查并恢复遗留锁',exact:true}).click();
-  await page.getByRole('checkbox',{name:'我已确认其他窗口与成员没有正在进行的上传、保存或发布，且已暂停外部 R2 写入'}).check();await page.getByLabel('维护恢复确认文字').fill('恢复维护锁');
+  await page.getByRole('button',{name:'重新读取',exact:true}).click();let dialogs=0;page.on('dialog',async dialog=>{if(dialog.type()==='confirm')dialogs++;await dialog.accept();});
   await page.route('**/api/storage/recovery',async route=>{const req=route.request();await runtime.dispatchFetch('http://127.0.0.1/api/storage/recovery',{method:'POST',headers:{...req.headers(),origin,connection:'close'},body:req.postDataBuffer()!});await route.abort('failed');},{times:1});
-  await page.getByRole('button',{name:'开始隔离核对',exact:true}).click();await expect(page.locator('.storage-manager .error')).toContainText('重新读取核对');
-  await page.getByRole('button',{name:'重新读取',exact:true}).click();await expect(page.getByRole('button',{name:'取消恢复并解除隔离',exact:true})).toBeEnabled();
-  await page.getByRole('button',{name:'取消恢复并解除隔离',exact:true}).click();await expect(page.locator('.storage-manager .success')).toContainText('已取消恢复');
-  expect(await (await priv.get('maintenance/write-gate.json'))!.json()).toEqual({writers:{'old-writer':'2020-01-01T00:00:00Z'}});expect(await priv.head(orphan)).not.toBeNull();
-  await page.getByRole('button',{name:'管理员日志',exact:true}).click();await expect(page.locator('.audit-list article').filter({hasText:'恢复存储维护锁'}).locator('.badge')).toHaveText('已取消');
+  await page.getByRole('button',{name:'检查并扫描',exact:true}).click();await expect(page.locator('.storage-manager .success')).toContainText('扫描完成');expect(dialogs).toBe(1);await expect(page.locator('.storage-manager .error')).toHaveCount(0);expect(await priv.head(orphan)).not.toBeNull();
+});
+
+test('检查中刷新页面自动接续原流程，不重复确认或留下隔离',async({page})=>{
+  const priv=await runtime.getR2Bucket('PRIVATE');await priv.put('maintenance/write-gate.json',JSON.stringify({writers:{'old-writer':'2020-01-01T00:00:00Z'}}));
+  await page.getByRole('button',{name:'重新读取',exact:true}).click();let dialogs=0;page.on('dialog',async dialog=>{if(dialog.type()==='confirm')dialogs++;await dialog.accept();});
+  let committed:()=>void=()=>{},release:()=>void=()=>{};const saved=new Promise<void>(resolve=>{committed=resolve;}),held=new Promise<void>(resolve=>{release=resolve;});
+  await page.route('**/api/storage/recovery',async route=>{const req=route.request();const response=await runtime.dispatchFetch('http://127.0.0.1/api/storage/recovery',{method:'POST',headers:{...req.headers(),origin,connection:'close'},body:req.postDataBuffer()!});await response.arrayBuffer();committed();await held;await route.abort('failed').catch(()=>{});},{times:1});
+  await page.getByRole('button',{name:'检查并扫描',exact:true}).click();await saved;await page.reload();release();await page.getByRole('button',{name:'存储与清理',exact:true}).click();
+  await expect(page.locator('.storage-manager .success')).toContainText('扫描完成');expect(dialogs).toBe(1);const gate=await (await priv.get('maintenance/write-gate.json'))!.json() as {writers:object;cleaner?:string};expect(gate.writers).toEqual({});expect(gate.cleaner).toBeUndefined();expect(await priv.head(orphan)).not.toBeNull();
+});
+
+test('正常保存尚未结束时自动等候，保存完成后自动扫描且不弹维护确认',async({page})=>{
+  const priv=await runtime.getR2Bucket('PRIVATE');await priv.put('maintenance/write-gate.json',JSON.stringify({writers:{fresh:new Date(Date.now()+366*86400000).toISOString()}}));
+  await page.getByRole('button',{name:'重新读取',exact:true}).click();let reads=0,dialogs=0;page.on('dialog',async dialog=>{dialogs++;await dialog.dismiss();});
+  await page.route('**/api/storage',async route=>{if(route.request().method()==='GET'&&++reads===3)await priv.put('maintenance/write-gate.json',JSON.stringify({writers:{}}));await route.fallback();});
+  await page.getByRole('button',{name:'检查并扫描',exact:true}).click();await expect(page.locator('.storage-manager .success')).toContainText('扫描完成');expect(dialogs).toBe(0);expect(await priv.head(orphan)).not.toBeNull();
+});
+
+test('清单持续断网时不导出空报告，恢复连接后重新读取即可使用完整清单',async({page})=>{
+  await page.route('**/api/storage/items/**',route=>route.abort('failed'));
+  await page.getByRole('button',{name:'开始扫描',exact:true}).click();await expect(page.locator('.storage-manager .error')).toBeVisible({timeout:15000});
+  await expect(page.getByRole('button',{name:'导出扫描报告',exact:true})).toBeDisabled();await expect(page.locator('.storage-manager')).toContainText('文件清单尚未读取完整');
+  await page.unroute('**/api/storage/items/**');await page.getByRole('button',{name:'重新读取',exact:true}).click();
+  await expect(page.getByRole('button',{name:'导出扫描报告',exact:true})).toBeEnabled();await expect(page.locator('.storage-table')).toContainText(orphan);
 });

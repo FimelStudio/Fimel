@@ -5,6 +5,8 @@ export type StorageRecovery = {
   writers: Record<string, string>;
   revisions: Record<string, string>;
   auditKey: string;
+  mode?: 'cleanup';
+  clientId?: string;
 };
 export type StorageGate = {
   writers: Record<string, string>;
@@ -14,6 +16,7 @@ export type StorageGate = {
 };
 export const RECOVERY_MIN_AGE = 24 * 60 * 60 * 1000;
 export const RECOVERY_WAIT = 60 * 1000;
+export const PREPARATION_MAX_AGE = 2 * 60 * 1000;
 export function recoverableWriters(gate: StorageGate, now: number) {
   const times = Object.values(gate.writers);
   return !gate.cleaner && times.length > 0 && times.every(time => now - Date.parse(time) >= RECOVERY_MIN_AGE);

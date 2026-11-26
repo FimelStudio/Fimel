@@ -1,6 +1,6 @@
 import type { StorageGate } from '../shared/storage-gate';
 import type { AuditEvent } from '../shared/audit';
-import { RECOVERY_WAIT, recoverableWriters } from '../shared/storage-gate';
+import { PREPARATION_MAX_AGE, RECOVERY_WAIT, recoverableWriters } from '../shared/storage-gate';
 import { actorKey } from './audit';
 import { ApiError, EMPTY_ETAG, expectMatch, json, putJson, readJson } from './http';
 import { changeStorageGate, readStorageGate } from './storage-gate';
@@ -16,8 +16,8 @@ function sameWriters(first: Record<string,string>, second: Record<string,string>
   return Object.keys(first).length===Object.keys(second).length && Object.entries(first).every(([id,time])=>second[id]===time);
 }
 export async function storageRecovery(request: Request, env: Env, email: string) {
-  const input = await readJson(request,1024) as {action?:string;confirm?:string;id?:string};
-  if (!input || typeof input!=='object' || Array.isArray(input) || Object.keys(input).some(key=>!['action','confirm','id'].includes(key)) || !['prepare','complete','cancel'].includes(input.action??'')) throw new ApiError(422,'维护恢复参数无效。');
+  const input = await readJson(request,1024) as {action?:string;confirm?:string;id?:string;mode?:'cleanup';clientId?:string};
+  if (!input || typeof input!=='object' || Array.isArray(input) || Object.keys(input).some(key=>!['action','confirm','id','mode','clientId'].includes(key)) || !['prepare','complete','cancel'].includes(input.action??'') || input.mode!==undefined&&input.mode!=='cleanup' || input.clientId!==undefined&&(typeof input.clientId!=='string'||!/^[a-f0-9-]{36}$/.test(input.clientId)) || input.mode==='cleanup'&&!input.clientId) throw new ApiError(422,'维护恢复参数无效。');
   if (input.action!=='cancel' && input.confirm!=='恢复维护锁') throw new ApiError(422,'请确认没有正在进行的上传、保存或发布，并输入“恢复维护锁”。');
   const current = await readStorageGate(env.PRIVATE);
   expectMatch(request,current.etag);
@@ -31,7 +31,7 @@ export async function storageRecovery(request: Request, env: Env, email: string)
     // Persist intent first. Any uncertain failure remains locked and can be read
     // again; the gate CAS arbitrates concurrent recovery and business writers.
     await putJson(env.PRIVATE,auditKey,event);
-    const result = await changeStorageGate(env.PRIVATE,gate=>({...gate,cleaner:id,recovery:{id,startedAt:time,readyAt:new Date(Date.now()+RECOVERY_WAIT).toISOString(),writers:{...gate.writers},revisions:snapshot,auditKey}}),current.etag);
+    const result = await changeStorageGate(env.PRIVATE,gate=>({...gate,cleaner:id,recovery:{id,startedAt:time,readyAt:new Date(Date.now()+(input.mode==='cleanup'?0:RECOVERY_WAIT)).toISOString(),writers:{...gate.writers},revisions:snapshot,auditKey,...(input.mode?{mode:input.mode,clientId:input.clientId}:{})}}),current.etag);
     return json({gate:result.gate,gateEtag:result.etag},200);
   }
   const recovery = current.gate.recovery;
@@ -44,10 +44,10 @@ export async function storageRecovery(request: Request, env: Env, email: string)
   const time = new Date(Date.now()).toISOString();
   if (input.action==='complete') {
     if (Date.now()<Date.parse(recovery.readyAt)) throw new ApiError(409,'正在隔离等待，请满 60 秒后重新读取并完成恢复。');
-    if (Date.now()-Date.parse(recovery.startedAt)>10*60*1000) throw new ApiError(409,'本次隔离已超过 10 分钟，请取消后重新开始核对。');
-    if (!sameWriters(current.gate.writers,recovery.writers)) throw new ApiError(409,'隔离期间有写入记录完成或变化，请取消恢复并重新核对。');
+    if (Date.now()-Date.parse(recovery.startedAt)>(recovery.mode==='cleanup'?PREPARATION_MAX_AGE:10*60*1000)) throw new ApiError(409,'本次核对已超时，请重新检查。',{kind:'storage-recovery-expired'});
+    if (!sameWriters(current.gate.writers,recovery.writers)) throw new ApiError(409,'核对期间仍有操作在结束，已停止恢复，请等待操作完成。',{kind:'storage-recovery-changed'});
     const latest = await revisions(env);
-    if (Object.keys(latest).some(key=>latest[key]!==recovery.revisions[key])) throw new ApiError(409,'隔离期间作品、文档或策略发生变化，请取消恢复并重新核对。');
+    if (Object.keys(latest).some(key=>latest[key]!==recovery.revisions[key])) throw new ApiError(409,'核对期间有内容发生变化，已停止恢复，请等待操作完成。',{kind:'storage-recovery-changed'});
     next = {writers:{},recovered:{id:recovery.id,time,auditKey:recovery.auditKey}};
   } else next = {...current.gate,cleaner:undefined,recovery:undefined};
   const result = await changeStorageGate(env.PRIVATE,()=>next,current.etag);

@@ -1,5 +1,8 @@
 import { ApiError, EMPTY_ETAG, putJson } from './http';
 import type { StorageGate } from '../shared/storage-gate';
+import { PREPARATION_MAX_AGE } from '../shared/storage-gate';
+import type { StorageRecovery } from '../shared/storage-gate';
+import type { AuditEvent } from '../shared/audit';
 
 const GATE_KEY = 'maintenance/write-gate.json';
 // No expiring writer leases: a terminated Worker must never silently make a
@@ -14,9 +17,10 @@ export async function readStorageGate(bucket: R2Bucket) {
   const validTime = (time: unknown): time is string => typeof time === 'string' && Number.isFinite(Date.parse(time));
   const validWriters = (writers: unknown): writers is Record<string, string> => !!writers && typeof writers === 'object' && !Array.isArray(writers) && Object.entries(writers).every(([id, time]) => validId(id) && validTime(time));
   const recovery = gate?.recovery, recovered = gate?.recovered;
+  if(recovery?.clientId!==undefined&&(typeof recovery.clientId!=='string'||!/^[a-f0-9-]{36}$/.test(recovery.clientId))||recovery?.mode==='cleanup'&&!recovery.clientId)throw new ApiError(503,'检查任务归属异常，已停止写入与清理。');
   if (!gate || !validWriters(gate.writers) || Object.keys(gate).some(key => !['writers','cleaner','recovery','recovered'].includes(key)) ||
     gate.cleaner !== undefined && !validId(gate.cleaner) ||
-    recovery !== undefined && (!recovery || !validId(recovery.id) || gate.cleaner !== recovery.id || !validTime(recovery.startedAt) || !validTime(recovery.readyAt) || Date.parse(recovery.readyAt)-Date.parse(recovery.startedAt)<60_000 || !validWriters(recovery.writers) || !recovery.revisions || typeof recovery.revisions !== 'object' || Array.isArray(recovery.revisions) || Object.values(recovery.revisions).some(value => typeof value !== 'string') || !/^audit\/[^/]+\/[^/]+\.json$/.test(recovery.auditKey)) ||
+    recovery !== undefined && (!recovery || !validId(recovery.id) || gate.cleaner !== recovery.id || recovery.mode!==undefined&&recovery.mode!=='cleanup' || !validTime(recovery.startedAt) || !validTime(recovery.readyAt) || Date.parse(recovery.readyAt)-Date.parse(recovery.startedAt)<(recovery.mode==='cleanup'?0:60_000) || !validWriters(recovery.writers) || !recovery.revisions || typeof recovery.revisions !== 'object' || Array.isArray(recovery.revisions) || Object.values(recovery.revisions).some(value => typeof value !== 'string') || !/^audit\/[^/]+\/[^/]+\.json$/.test(recovery.auditKey)) ||
     recovered !== undefined && (!recovered || !validId(recovered.id) || !validTime(recovered.time) || !/^audit\/[^/]+\/[^/]+\.json$/.test(recovered.auditKey))) throw new ApiError(503, '存储维护锁异常，已停止写入与清理。');
   return { gate, etag: object?.httpEtag ?? EMPTY_ETAG };
 }
@@ -32,13 +36,27 @@ export async function changeStorageGate(bucket: R2Bucket, update: (gate: Storage
 }
 export async function withStorageWriter<T>(bucket: R2Bucket, operation: () => Promise<T>, requestId?: string): Promise<T> {
   const id = crypto.randomUUID();
+  let abandoned: StorageRecovery | undefined;
   await changeStorageGate(bucket, gate => {
-    if (gate.cleaner) throw new ApiError(503, '存储正在清理，请稍后重试；当前修改已保留。');
+    // Expiry only cancels our own interrupted preparation barrier. It never
+    // clears a business writer or an unknown cleaner, or authorizes deletion.
+    abandoned=gate.recovery?.mode==='cleanup'&&Date.now()-Date.parse(gate.recovery.startedAt)>PREPARATION_MAX_AGE?gate.recovery:undefined;
+    if (gate.cleaner&&!abandoned) throw new ApiError(503, '存储正在核对或清理，请稍后重试；当前修改已保留。');
     if (Object.keys(gate.writers).length >= 64) throw new ApiError(503, '存储写入过多，当前修改已保留，请稍后重试。');
-    return { ...gate, writers: { ...gate.writers, [id]: new Date().toISOString() } };
+    return { ...gate,...(abandoned?{cleaner:undefined,recovery:undefined}:{}), writers: { ...gate.writers, [id]: new Date().toISOString() } };
   });
   console.log(JSON.stringify({operation:'storage-writer-acquired',leaseId:id,requestId}));
-  try { return await operation(); }
+  try {
+    if(abandoned){
+      console.log(JSON.stringify({operation:'storage-preparation-abandoned',recoveryId:abandoned.id,requestId}));
+      try{
+        const stored=await bucket.get(abandoned.auditKey);
+        if(stored&&stored.size<=65_536){const event=await stored.json<AuditEvent>();if(event.id===abandoned.id&&event.operation==='recover-storage-lock')await putJson(bucket,abandoned.auditKey,{...event,status:'cancelled',finishedAt:new Date(Date.now()).toISOString(),reason:'检查中断超时；已解除检查隔离，原写入记录保留'},stored.httpEtag);}
+        else if(stored)await stored.body.cancel();
+      }catch{console.warn(JSON.stringify({operation:'storage-preparation-audit-pending',recoveryId:abandoned.id,requestId}));}
+    }
+    return await operation();
+  }
   finally { await changeStorageGate(bucket, gate => { const writers = { ...gate.writers }; delete writers[id]; return { ...gate, writers }; }); console.log(JSON.stringify({operation:'storage-writer-released',leaseId:id,requestId})); }
 }
 export async function withStorageCleaner<T>(bucket: R2Bucket, operation: () => Promise<T>): Promise<T> {
