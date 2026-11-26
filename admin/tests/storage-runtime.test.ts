@@ -32,6 +32,7 @@ before(async()=>{
       const bindings={...env,PRIVATE:privateBucket,ASSETS:assets};
       const path=new URL(request.url).pathname;
       if(path==='/test/scheduled'){try{await scheduledStorageCleanup(bindings);return new Response('ok');}catch{return new Response('failed',{status:503});}}
+      if(path==='/test/writer')return withStorageWriter(env.PRIVATE,async()=>Response.json({written:true}));
       if(path==='/test/overlap'){let results={};await withStorageWriter(env.PRIVATE,async()=>{try{await withStorageCleaner(env.PRIVATE,async()=>{});}catch(error){results.cleaner=error.status;}});await withStorageCleaner(env.PRIVATE,async()=>{try{await withStorageWriter(env.PRIVATE,async()=>{});}catch(error){results.writer=error.status;}});try{await withStorageCleaner(env.PRIVATE,async()=>{throw Error('test');});}catch{}return Response.json(results);}
       return local.fetch(request,bindings,ctx);
     }};`,resolveDir:process.cwd()},bundle:true,write:false,format:'esm',platform:'browser'});
@@ -334,4 +335,29 @@ test('自动任务遇到恢复前的旧报告会结束该轮，下轮重新扫�
   await put('private','maintenance/automatic.json',{id:old.id});await ageGate();assert.equal((await recovery('prepare')).status,200);await advanceRecoveryClock();assert.equal((await recovery('complete')).status,200);
   assert.equal((await scheduled()).status,200);const store=await bucket('private');const stopped=await (await store.get('maintenance/automatic.json'))!.json() as {finished:boolean;reason:string};assert.equal(stopped.finished,true);assert.match(stopped.reason,/维护锁已恢复/);assert.ok(await store.head(key));
   assert.equal((await scheduled()).status,200);const restarted=await (await store.get('maintenance/automatic.json'))!.json() as {id:string};assert.notEqual(restarted.id,old.id);assert.ok(await store.head(key));
+});
+
+async function prepareCleanup(){const state=await gateState();return request('recovery','POST',{action:'prepare',confirm:'恢复维护锁',mode:'cleanup',clientId:id()},{'If-Match':state.gateEtag});}
+test('一体化检查无需固定等待，仍需确认、版本条件和目录复核，且不会删除文件',async()=>{
+  await ageGate();const key='uploads/temporary/flow/test.zip';await put('private',key,'keep');
+  const prepared=await prepareCleanup();assert.equal(prepared.status,200,await prepared.clone().text());const before=await gateState();assert.equal(before.gate.recovery?.mode,'cleanup');
+  assert.equal((await recovery('complete')).status,200);assert.deepEqual((await gateState()).gate.writers,{});assert.ok(await (await bucket('private')).head(key));
+  await ageGate();assert.equal((await prepareCleanup()).status,200);await put('public','data/works.json',{...manifest,publicationId:'changed'});
+  const conflict=await recovery('complete');assert.equal(conflict.status,409);assert.equal((await conflict.json() as {kind:string}).kind,'storage-recovery-changed');assert.equal(Object.keys((await gateState()).gate.writers).length,1);
+});
+test('中断的检查隔离超时后保存可以继续，原业务写入记录不会被自动清除',async()=>{
+  await ageGate();const original=(await gateState()).gate.writers;assert.equal((await prepareCleanup()).status,200);
+  const isolated=await gateState();const writer=()=>runtime.dispatchFetch('http://127.0.0.1/test/writer');
+  await request('','GET',undefined,{'x-test-days':String(366+121/86400)});
+  assert.equal((await recovery('complete')).status,409);
+  // This real writer wrapper can acquire and release its own lease after
+  // cancelling an expired preparation, without dropping any legacy writer.
+  const reply=await writer();assert.equal(reply.status,200,await reply.clone().text());assert.equal((await reply.json() as {written:boolean}).written,true);
+  const after=await gateState();assert.deepEqual(after.gate.writers,original);assert.equal(after.gate.cleaner,undefined);assert.equal(after.gate.recovery,undefined);
+  const audit=await (await (await bucket('private')).get(isolated.gate.recovery!.auditKey))!.json() as {status:string};assert.equal(audit.status,'cancelled');
+});
+test('一体化检查不能用缺失归属、活跃写入或错误确认创建隔离',async()=>{
+  await ageGate();const current=await gateState();assert.equal((await request('recovery','POST',{action:'prepare',confirm:'恢复维护锁',mode:'cleanup'},{'If-Match':current.gateEtag})).status,422);
+  assert.equal((await request('recovery','POST',{action:'prepare',mode:'cleanup',clientId:id()},{'If-Match':current.gateEtag})).status,422);
+  await put('private','maintenance/write-gate.json',{writers:{fresh:new Date(Date.now()+366*86400000).toISOString()}});assert.equal((await prepareCleanup()).status,409);
 });
